@@ -363,6 +363,23 @@ export type {
   Ediff1dOptions,
 } from './setops.js';
 
+// Histogram functions (Phase 24)
+export {
+  bincount,
+  digitize,
+  histogram_bin_edges,
+  histogram,
+  histogram2d,
+  histogramdd,
+  HistogramError,
+} from './histogram.js';
+export type {
+  BinMethod,
+  HistogramResult,
+  Histogram2DResult,
+  HistogramDDResult,
+} from './histogram.js';
+
 // I/O operations (Phase 9)
 export {
   // NPY format
