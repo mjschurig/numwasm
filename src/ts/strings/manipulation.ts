@@ -433,7 +433,7 @@ export function rpartition(a: NDArray | string[], sep: string): NDArray {
  * @param encoding - Character encoding (default 'utf-8')
  * @returns Array of Uint8Arrays
  */
-export function encode(a: NDArray | string[], encoding: string = 'utf-8'): Uint8Array[] {
+export function encode(a: NDArray | string[], _encoding: string = 'utf-8'): Uint8Array[] {
   const arr = Array.isArray(a) ? NDArray.fromStringArray(a) : a;
 
   if (!arr.isStringArray) {

@@ -181,9 +181,10 @@ export async function loadtxt(
   let arr: NDArray;
   if (data[0].length === 1) {
     // Single column - create 1D array
-    arr = await NDArray.fromArray(data.map(row => row[0]), dtype);
+    const flatData = data.map(row => row[0]);
+    arr = await NDArray.fromArray(flatData, [flatData.length], { dtype });
   } else {
-    arr = await NDArray.fromArray(data, dtype);
+    arr = await NDArray.fromArray(data, undefined, { dtype });
   }
 
   // Handle ndmin
@@ -335,25 +336,21 @@ export async function genfromtxt(
     ? allLines.slice(0, -skip_footer)
     : allLines;
 
-  // Handle names
-  let columnNames: string[] | null = null;
+  // Handle names - skip first line if it contains column names
   let dataStart = skip_header;
 
   if (names === true) {
-    // Use first non-comment line as names
+    // Use first non-comment line as names, skip it for data
     for (let i = skip_header; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line && !line.startsWith(comments || '')) {
-        columnNames = delimiter
-          ? line.split(delimiter).map(s => s.trim())
-          : line.split(/\s+/);
+        // Column names found, data starts on next line
         dataStart = i + 1;
         break;
       }
     }
-  } else if (Array.isArray(names)) {
-    columnNames = names;
   }
+  // Note: if names is an array, column names are provided externally (not from file)
 
   // Parse data with missing value handling
   const missingSet = new Set(missing_values);
@@ -405,7 +402,7 @@ export async function genfromtxt(
     throw new Error('No data found in file');
   }
 
-  return NDArray.fromArray(data, dtype);
+  return NDArray.fromArray(data, undefined, { dtype });
 }
 
 /**
@@ -450,13 +447,13 @@ export async function fromregex(
   if (numGroups === 0) {
     // No groups, use full match
     const data = matches.map(m => parseFloat(m[0]));
-    return NDArray.fromArray(data, dtype);
+    return NDArray.fromArray(data, [data.length], { dtype });
   }
 
   if (numGroups === 1) {
     // Single group, return 1D array
     const data = matches.map(m => parseFloat(m[1]));
-    return NDArray.fromArray(data, dtype);
+    return NDArray.fromArray(data, [data.length], { dtype });
   }
 
   // Multiple groups, return 2D array
@@ -468,7 +465,7 @@ export async function fromregex(
     return row;
   });
 
-  return NDArray.fromArray(data, dtype);
+  return NDArray.fromArray(data, undefined, { dtype });
 }
 
 /**

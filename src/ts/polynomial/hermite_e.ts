@@ -7,7 +7,7 @@
  * Recurrence: He_{n+1}(x) = x*He_n(x) - n*He_{n-1}(x)
  */
 
-import { ABCPolyBase, maxpower, companionEigenvalues } from './_polybase.js';
+import { ABCPolyBase, companionEigenvalues } from './_polybase.js';
 import { PolyError, trimseq, polymul as polyMul, polydiv as polyDiv } from './polyutils.js';
 
 /**

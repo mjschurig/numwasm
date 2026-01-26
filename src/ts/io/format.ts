@@ -189,7 +189,7 @@ export function parseHeader(data: Uint8Array): { header: NpyHeader; dataOffset: 
   }
 
   const major = data[6];
-  const minor = data[7];
+  // data[7] is minor version, currently unused
 
   // Read header length
   const view = new DataView(data.buffer, data.byteOffset);

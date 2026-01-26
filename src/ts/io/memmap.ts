@@ -10,7 +10,7 @@
 
 import { NDArray } from '../NDArray.js';
 import { DType, DTYPE_SIZES } from '../types.js';
-import { isNode, parseHeader, createHeader, dtypeToDescr } from './format.js';
+import { isNode } from './format.js';
 
 /**
  * Memory mapping modes.
@@ -92,7 +92,7 @@ export class Memmap extends NDArray {
       mode = 'w+',
       offset = 0,
       shape = [],
-      order = 'C',
+      order: _order = 'C',
     } = options;
 
     if (shape.length === 0) {
@@ -144,7 +144,7 @@ export class Memmap extends NDArray {
       mode = 'r',
       offset = 0,
       shape,
-      order = 'C',
+      order: _order = 'C',
     } = options;
 
     let buffer: ArrayBuffer;
@@ -280,11 +280,11 @@ export class Memmap extends NDArray {
   /**
    * Override set to track modifications.
    */
-  set(...args: (number | number[])[]): void {
+  set(value: number, ...indices: number[]): void {
     if (this._mode === 'r') {
       throw new Error('Cannot modify read-only memmap');
     }
-    super.set(...args);
+    super.set(value, ...indices);
     this._dirty = true;
   }
 

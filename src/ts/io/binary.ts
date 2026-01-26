@@ -93,7 +93,7 @@ export async function fromfile(
   const numItems = count === -1 ? maxItems : Math.min(count, maxItems);
 
   if (numItems === 0) {
-    return NDArray.zeros([0], dtype);
+    return NDArray.zeros([0], { dtype });
   }
 
   // Create typed array from buffer
@@ -146,7 +146,7 @@ async function fromfileText(
 
   const data = parts.slice(0, numItems).map(s => parseFloat(s.trim()));
 
-  return NDArray.fromArray(data, dtype);
+  return NDArray.fromArray(data, [data.length], { dtype });
 }
 
 /**
@@ -190,7 +190,7 @@ export async function frombuffer(
     baseOffset = 0;
   } else {
     // ArrayBufferView (TypedArray, DataView)
-    arrayBuffer = buffer.buffer;
+    arrayBuffer = buffer.buffer as ArrayBuffer;
     baseOffset = buffer.byteOffset;
   }
 
@@ -206,7 +206,7 @@ export async function frombuffer(
   const numItems = count === -1 ? maxItems : Math.min(count, maxItems);
 
   if (numItems === 0) {
-    return NDArray.zeros([0], dtype);
+    return NDArray.zeros([0], { dtype });
   }
 
   // Create typed array view

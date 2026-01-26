@@ -7,7 +7,7 @@
  * Recurrence: (n+1)*P_{n+1}(x) = (2n+1)*x*P_n(x) - n*P_{n-1}(x)
  */
 
-import { ABCPolyBase, maxpower, companionEigenvalues } from './_polybase.js';
+import { ABCPolyBase, companionEigenvalues } from './_polybase.js';
 import { PolyError, trimseq, polymul as polyMul, polydiv as polyDiv } from './polyutils.js';
 
 /**

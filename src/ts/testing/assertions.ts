@@ -211,7 +211,7 @@ export function assert_allclose(
   atol: number = 0,
   equal_nan: boolean = true,
   err_msg: string = '',
-  verbose: boolean = true
+  _verbose: boolean = true
 ): void {
   const arr1 = toNDArray(actual);
   const arr2 = toNDArray(desired);

@@ -5,7 +5,7 @@
  * p(x) = c[0] + c[1]*x + c[2]*x^2 + ... + c[n]*x^n
  */
 
-import { ABCPolyBase, maxpower, companionEigenvalues } from './_polybase.js';
+import { ABCPolyBase, companionEigenvalues } from './_polybase.js';
 import {
   PolyError,
   trimseq,

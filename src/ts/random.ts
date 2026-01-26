@@ -619,7 +619,7 @@ export class Generator {
     low: number,
     high?: number | null,
     size?: SizeType,
-    dtype: DType = DType.Int64,
+    _dtype: DType = DType.Int64,
     endpoint: boolean = false
   ): NDArray | number {
     this.ensureNotDisposed();

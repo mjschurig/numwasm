@@ -310,7 +310,7 @@ function formatFloatSmart(value: number, precision: number): string {
 export function formatFloatPositional(
   value: number,
   precision: number = 8,
-  unique: boolean = true,
+  _unique: boolean = true,
   fractional: boolean = true,
   trim: 'k' | '.' | '0' | '-' = 'k',
   sign: boolean = false,
@@ -360,7 +360,7 @@ export function formatFloatPositional(
 export function formatFloatScientific(
   value: number,
   precision: number = 8,
-  unique: boolean = true,
+  _unique: boolean = true,
   trim: 'k' | '.' | '0' | '-' = 'k',
   sign: boolean = false,
   padLeft: number = 0,

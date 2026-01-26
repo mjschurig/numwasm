@@ -7,7 +7,7 @@
  */
 
 import { NDArray } from '../NDArray.js';
-import { DType, DTYPE_SIZES } from '../types.js';
+import { DType } from '../types.js';
 import {
   createHeader,
   parseHeader,
@@ -61,7 +61,7 @@ export interface LoadOptions {
 export async function save(
   file: string | FileSystemFileHandle | null,
   arr: NDArray,
-  options: SaveOptions = {}
+  _options: SaveOptions = {}
 ): Promise<ArrayBuffer | void> {
   // Ensure array is contiguous for efficient writing
   const contiguous = arr.flags.c_contiguous ? arr : arr.copy();
@@ -143,7 +143,7 @@ export async function save(
  */
 export async function load(
   file: string | File | ArrayBuffer | URL,
-  options: LoadOptions = {}
+  _options: LoadOptions = {}
 ): Promise<NDArray> {
   const data = await readFileData(file);
   const bytes = new Uint8Array(data);
@@ -171,7 +171,7 @@ export async function load(
 
   // Handle 0-d arrays (scalars)
   if (header.shape.length === 0) {
-    const arr = await NDArray.zeros([], dtype);
+    const arr = await NDArray.zeros([1], { dtype });
     arr.setFlat(0, typedArray[0] as number);
     return arr;
   }

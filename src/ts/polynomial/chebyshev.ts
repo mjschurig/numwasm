@@ -8,7 +8,7 @@
  * interpolation and approximation on [-1, 1].
  */
 
-import { ABCPolyBase, maxpower, companionEigenvalues } from './_polybase.js';
+import { ABCPolyBase, companionEigenvalues } from './_polybase.js';
 import { PolyError, trimseq, polymul as polyMul, polydiv as polyDiv } from './polyutils.js';
 
 /**
@@ -403,20 +403,8 @@ export function poly2cheb(pol: number[]): number[] {
   if (n === 0) return [0];
   if (n === 1) return [pol[0]];
 
-  // Use the conversion based on expressing power basis in Chebyshev
-  // x^n = sum_k a_{nk} T_k
+  // Build up the result by adding each x^j term converted to Chebyshev basis
   const result = new Array(n).fill(0);
-
-  for (let j = 0; j < n; j++) {
-    // Get T_j expressed in power basis, then solve for contribution
-    const tk = _powerToChebCoefs(j);
-    for (let k = 0; k <= j; k++) {
-      // This is the inverse transformation
-      // We need to find c such that sum_k c_k T_k = sum_j p_j x^j
-    }
-  }
-
-  // Simpler approach: build up the result by adding each x^j term
   for (let j = 0; j < n; j++) {
     // x^j in Chebyshev basis
     const xjCheb = _powerToCheb(j);
@@ -693,9 +681,3 @@ function _powerToCheb(j: number): number[] {
   return result;
 }
 
-/**
- * Get coefficient of x^j in T_k(x).
- */
-function _powerToChebCoefs(k: number): number[] {
-  return _chebToPowerCoefs(k);
-}

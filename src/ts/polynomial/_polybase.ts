@@ -11,7 +11,6 @@ import { DType } from '../types.js';
 import { lstsq, eigvals } from '../linalg.js';
 import {
   PolyError,
-  trimseq,
   trimcoef,
   mapparms,
   mapdomain,
@@ -67,21 +66,21 @@ export abstract class ABCPolyBase {
   /**
    * Add two coefficient arrays in this basis.
    */
-  protected static _add(c1: number[], c2: number[]): number[] {
+  protected static _add(_c1: number[], _c2: number[]): number[] {
     throw new Error('Must be implemented by subclass');
   }
 
   /**
    * Subtract two coefficient arrays in this basis.
    */
-  protected static _sub(c1: number[], c2: number[]): number[] {
+  protected static _sub(_c1: number[], _c2: number[]): number[] {
     throw new Error('Must be implemented by subclass');
   }
 
   /**
    * Multiply two coefficient arrays in this basis.
    */
-  protected static _mul(c1: number[], c2: number[]): number[] {
+  protected static _mul(_c1: number[], _c2: number[]): number[] {
     throw new Error('Must be implemented by subclass');
   }
 
@@ -89,21 +88,21 @@ export abstract class ABCPolyBase {
    * Divide two coefficient arrays in this basis.
    * @returns [quotient, remainder]
    */
-  protected static _div(c1: number[], c2: number[]): [number[], number[]] {
+  protected static _div(_c1: number[], _c2: number[]): [number[], number[]] {
     throw new Error('Must be implemented by subclass');
   }
 
   /**
    * Raise coefficient array to integer power.
    */
-  protected static _pow(c: number[], n: number, maxpow: number): number[] {
+  protected static _pow(_c: number[], _n: number, _maxpow: number): number[] {
     throw new Error('Must be implemented by subclass');
   }
 
   /**
    * Evaluate polynomial at x.
    */
-  protected static _val(x: number | number[], c: number[]): number | number[] {
+  protected static _val(_x: number | number[], _c: number[]): number | number[] {
     throw new Error('Must be implemented by subclass');
   }
 
@@ -113,7 +112,7 @@ export abstract class ABCPolyBase {
    * @param m - Number of derivatives to take
    * @param scl - Scale factor for the derivative
    */
-  protected static _der(c: number[], m: number, scl: number): number[] {
+  protected static _der(_c: number[], _m: number, _scl: number): number[] {
     throw new Error('Must be implemented by subclass');
   }
 
@@ -126,11 +125,11 @@ export abstract class ABCPolyBase {
    * @param scl - Scale factor for the integral
    */
   protected static _int(
-    c: number[],
-    m: number,
-    k: number[],
-    lbnd: number,
-    scl: number
+    _c: number[],
+    _m: number,
+    _k: number[],
+    _lbnd: number,
+    _scl: number
   ): number[] {
     throw new Error('Must be implemented by subclass');
   }
@@ -139,28 +138,28 @@ export abstract class ABCPolyBase {
    * Find roots of polynomial from its coefficients.
    * Default implementation uses companion matrix eigenvalues.
    */
-  protected static async _roots(c: number[]): Promise<number[]> {
+  protected static async _roots(_c: number[]): Promise<number[]> {
     throw new Error('Must be implemented by subclass');
   }
 
   /**
    * Generate Vandermonde matrix for given x values and degree.
    */
-  protected static _vander(x: number[], deg: number): number[][] {
+  protected static _vander(_x: number[], _deg: number): number[][] {
     throw new Error('Must be implemented by subclass');
   }
 
   /**
    * Generate companion matrix for root finding.
    */
-  protected static _companion(c: number[]): number[][] {
+  protected static _companion(_c: number[]): number[][] {
     throw new Error('Must be implemented by subclass');
   }
 
   /**
    * Construct polynomial coefficients from roots.
    */
-  protected static _fromroots(roots: number[]): number[] {
+  protected static _fromroots(_roots: number[]): number[] {
     throw new Error('Must be implemented by subclass');
   }
 

@@ -121,9 +121,10 @@ export class NDArray {
   private _stringShape: number[] | null = null;
 
   /**
-   * Private constructor - use static factory methods instead.
+   * Protected constructor - use static factory methods instead.
+   * Protected to allow extension by Memmap class.
    */
-  private constructor(ptr: number, module: WasmModule) {
+  protected constructor(ptr: number, module: WasmModule) {
     this._ptr = ptr;
     this._module = module;
   }
