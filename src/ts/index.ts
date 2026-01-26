@@ -135,7 +135,29 @@ export {
   argmax,
   argmin,
   searchsorted,
+  // Cumulative operations (Phase 22)
+  cumsum,
+  cumprod,
+  nancumsum,
+  nancumprod,
 } from './statistics.js';
+
+// NaN-handling functions (Phase 23)
+export {
+  nansum,
+  nanprod,
+  nanmin,
+  nanmax,
+  nanargmin,
+  nanargmax,
+  nanmean,
+  nanvar,
+  nanstd,
+  nanmedian,
+  nanquantile,
+  nanpercentile,
+  nan_to_num,
+} from './nanfunctions.js';
 
 // Manipulation functions (Phase 5)
 export {

@@ -528,6 +528,12 @@ export interface WasmModule {
     ddof: number
   ): number;
 
+  // Cumulative operations (Phase 22)
+  _ndarray_cumsum_axis(ptr: number, axis: number, dtype: number): number;
+  _ndarray_cumprod_axis(ptr: number, axis: number, dtype: number): number;
+  _ndarray_nancumsum_axis(ptr: number, axis: number, dtype: number): number;
+  _ndarray_nancumprod_axis(ptr: number, axis: number, dtype: number): number;
+
   // Set operations (Phase 8)
   _ndarray_unique(
     ptr: number,

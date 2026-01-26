@@ -22,4 +22,10 @@ NDArray* ndarray_nanmean(NDArray* arr, int32_t axis, bool keepdims, DType dtype)
 NDArray* ndarray_nanvar(NDArray* arr, int32_t axis, bool keepdims, DType dtype, int32_t ddof);
 NDArray* ndarray_nanstd(NDArray* arr, int32_t axis, bool keepdims, DType dtype, int32_t ddof);
 
+/* Cumulative operations (Phase 22) */
+NDArray* ndarray_cumsum_axis(NDArray* arr, int32_t axis, DType dtype);
+NDArray* ndarray_cumprod_axis(NDArray* arr, int32_t axis, DType dtype);
+NDArray* ndarray_nancumsum_axis(NDArray* arr, int32_t axis, DType dtype);
+NDArray* ndarray_nancumprod_axis(NDArray* arr, int32_t axis, DType dtype);
+
 #endif /* NUMJS_STATISTICS_H */

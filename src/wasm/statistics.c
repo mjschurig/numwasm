@@ -451,3 +451,197 @@ EXPORT NDArray* ndarray_nanstd(NDArray* arr, int32_t axis, bool keepdims,
     (void)arr; (void)axis; (void)keepdims; (void)dtype; (void)ddof;
     return NULL;  /* TODO */
 }
+
+/* ============ Cumulative Operations (Phase 22) ============ */
+
+EXPORT NDArray* ndarray_cumsum_axis(NDArray* arr, int32_t axis, DType dtype) {
+    if (!arr || !arr->data) return NULL;
+    DType out_dtype = get_reduction_dtype(arr->dtype, dtype);
+
+    /* axis = -2147483648 means flatten and cumsum */
+    if (axis == -2147483648) {
+        int32_t shape[1] = { (int32_t)arr->size };
+        NDArray* result = ndarray_create(1, shape, out_dtype);
+        if (!result) return NULL;
+
+        double sum = 0.0;
+        for (size_t i = 0; i < arr->size; i++) {
+            sum += ndarray_get_flat(arr, i);
+            ndarray_set_flat(result, i, sum);
+        }
+        return result;
+    }
+
+    /* Normalize negative axis */
+    if (axis < 0) axis += arr->ndim;
+    if (axis < 0 || axis >= arr->ndim) return NULL;
+
+    /* Output has same shape as input */
+    NDArray* result = ndarray_create(arr->ndim, arr->shape, out_dtype);
+    if (!result) return NULL;
+
+    /* Compute cumsum along axis using outer/inner pattern */
+    int32_t axis_size = arr->shape[axis];
+    size_t outer = 1, inner = 1;
+    for (int i = 0; i < axis; i++) outer *= arr->shape[i];
+    for (int i = axis + 1; i < arr->ndim; i++) inner *= arr->shape[i];
+
+    for (size_t o = 0; o < outer; o++) {
+        for (size_t n = 0; n < inner; n++) {
+            double sum = 0.0;
+            for (int32_t i = 0; i < axis_size; i++) {
+                size_t idx = o * axis_size * inner + i * inner + n;
+                sum += ndarray_get_flat(arr, idx);
+                ndarray_set_flat(result, idx, sum);
+            }
+        }
+    }
+    return result;
+}
+
+EXPORT NDArray* ndarray_cumprod_axis(NDArray* arr, int32_t axis, DType dtype) {
+    if (!arr || !arr->data) return NULL;
+    DType out_dtype = get_reduction_dtype(arr->dtype, dtype);
+
+    /* axis = -2147483648 means flatten and cumprod */
+    if (axis == -2147483648) {
+        int32_t shape[1] = { (int32_t)arr->size };
+        NDArray* result = ndarray_create(1, shape, out_dtype);
+        if (!result) return NULL;
+
+        double prod = 1.0;
+        for (size_t i = 0; i < arr->size; i++) {
+            prod *= ndarray_get_flat(arr, i);
+            ndarray_set_flat(result, i, prod);
+        }
+        return result;
+    }
+
+    /* Normalize negative axis */
+    if (axis < 0) axis += arr->ndim;
+    if (axis < 0 || axis >= arr->ndim) return NULL;
+
+    /* Output has same shape as input */
+    NDArray* result = ndarray_create(arr->ndim, arr->shape, out_dtype);
+    if (!result) return NULL;
+
+    /* Compute cumprod along axis using outer/inner pattern */
+    int32_t axis_size = arr->shape[axis];
+    size_t outer = 1, inner = 1;
+    for (int i = 0; i < axis; i++) outer *= arr->shape[i];
+    for (int i = axis + 1; i < arr->ndim; i++) inner *= arr->shape[i];
+
+    for (size_t o = 0; o < outer; o++) {
+        for (size_t n = 0; n < inner; n++) {
+            double prod = 1.0;
+            for (int32_t i = 0; i < axis_size; i++) {
+                size_t idx = o * axis_size * inner + i * inner + n;
+                prod *= ndarray_get_flat(arr, idx);
+                ndarray_set_flat(result, idx, prod);
+            }
+        }
+    }
+    return result;
+}
+
+EXPORT NDArray* ndarray_nancumsum_axis(NDArray* arr, int32_t axis, DType dtype) {
+    if (!arr || !arr->data) return NULL;
+    DType out_dtype = get_reduction_dtype(arr->dtype, dtype);
+
+    /* axis = -2147483648 means flatten and nancumsum */
+    if (axis == -2147483648) {
+        int32_t shape[1] = { (int32_t)arr->size };
+        NDArray* result = ndarray_create(1, shape, out_dtype);
+        if (!result) return NULL;
+
+        double sum = 0.0;
+        for (size_t i = 0; i < arr->size; i++) {
+            double val = ndarray_get_flat(arr, i);
+            if (!isnan(val)) {
+                sum += val;
+            }
+            ndarray_set_flat(result, i, sum);
+        }
+        return result;
+    }
+
+    /* Normalize negative axis */
+    if (axis < 0) axis += arr->ndim;
+    if (axis < 0 || axis >= arr->ndim) return NULL;
+
+    /* Output has same shape as input */
+    NDArray* result = ndarray_create(arr->ndim, arr->shape, out_dtype);
+    if (!result) return NULL;
+
+    /* Compute nancumsum along axis using outer/inner pattern */
+    int32_t axis_size = arr->shape[axis];
+    size_t outer = 1, inner = 1;
+    for (int i = 0; i < axis; i++) outer *= arr->shape[i];
+    for (int i = axis + 1; i < arr->ndim; i++) inner *= arr->shape[i];
+
+    for (size_t o = 0; o < outer; o++) {
+        for (size_t n = 0; n < inner; n++) {
+            double sum = 0.0;
+            for (int32_t i = 0; i < axis_size; i++) {
+                size_t idx = o * axis_size * inner + i * inner + n;
+                double val = ndarray_get_flat(arr, idx);
+                if (!isnan(val)) {
+                    sum += val;
+                }
+                ndarray_set_flat(result, idx, sum);
+            }
+        }
+    }
+    return result;
+}
+
+EXPORT NDArray* ndarray_nancumprod_axis(NDArray* arr, int32_t axis, DType dtype) {
+    if (!arr || !arr->data) return NULL;
+    DType out_dtype = get_reduction_dtype(arr->dtype, dtype);
+
+    /* axis = -2147483648 means flatten and nancumprod */
+    if (axis == -2147483648) {
+        int32_t shape[1] = { (int32_t)arr->size };
+        NDArray* result = ndarray_create(1, shape, out_dtype);
+        if (!result) return NULL;
+
+        double prod = 1.0;
+        for (size_t i = 0; i < arr->size; i++) {
+            double val = ndarray_get_flat(arr, i);
+            if (!isnan(val)) {
+                prod *= val;
+            }
+            ndarray_set_flat(result, i, prod);
+        }
+        return result;
+    }
+
+    /* Normalize negative axis */
+    if (axis < 0) axis += arr->ndim;
+    if (axis < 0 || axis >= arr->ndim) return NULL;
+
+    /* Output has same shape as input */
+    NDArray* result = ndarray_create(arr->ndim, arr->shape, out_dtype);
+    if (!result) return NULL;
+
+    /* Compute nancumprod along axis using outer/inner pattern */
+    int32_t axis_size = arr->shape[axis];
+    size_t outer = 1, inner = 1;
+    for (int i = 0; i < axis; i++) outer *= arr->shape[i];
+    for (int i = axis + 1; i < arr->ndim; i++) inner *= arr->shape[i];
+
+    for (size_t o = 0; o < outer; o++) {
+        for (size_t n = 0; n < inner; n++) {
+            double prod = 1.0;
+            for (int32_t i = 0; i < axis_size; i++) {
+                size_t idx = o * axis_size * inner + i * inner + n;
+                double val = ndarray_get_flat(arr, idx);
+                if (!isnan(val)) {
+                    prod *= val;
+                }
+                ndarray_set_flat(result, idx, prod);
+            }
+        }
+    }
+    return result;
+}

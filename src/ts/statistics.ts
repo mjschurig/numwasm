@@ -382,3 +382,133 @@ export async function searchsorted(
   }
   return result;
 }
+
+/**
+ * Return the cumulative sum of the elements along a given axis.
+ *
+ * @param a - Input array
+ * @param axis - Axis along which to compute cumsum. null = flatten first
+ * @param dtype - Type of output array (default: promotes integers to float64)
+ * @returns Cumulative sum array with same shape as input (or 1D if axis=null)
+ *
+ * @example
+ * ```typescript
+ * const arr = await NDArray.fromArray([1, 2, 3, 4]);
+ * const cs = await cumsum(arr);  // [1, 3, 6, 10]
+ *
+ * const arr2d = await NDArray.fromArray([[1, 2], [3, 4]]);
+ * const cs0 = await cumsum(arr2d, 0);  // [[1, 2], [4, 6]]
+ * const cs1 = await cumsum(arr2d, 1);  // [[1, 3], [3, 7]]
+ * ```
+ */
+export async function cumsum(
+  a: NDArray,
+  axis: number | null = null,
+  dtype?: DType
+): Promise<NDArray> {
+  const axisVal = axis === null ? -2147483648 : axis;
+  const resultPtr = a._wasmModule._ndarray_cumsum_axis(
+    a._wasmPtr,
+    axisVal,
+    dtype ?? -1
+  );
+  if (resultPtr === 0) throw new Error('cumsum failed');
+  return NDArray._fromPtr(resultPtr, a._wasmModule);
+}
+
+/**
+ * Return the cumulative product of elements along a given axis.
+ *
+ * @param a - Input array
+ * @param axis - Axis along which to compute cumprod. null = flatten first
+ * @param dtype - Type of output array (default: promotes integers to float64)
+ * @returns Cumulative product array with same shape as input (or 1D if axis=null)
+ *
+ * @example
+ * ```typescript
+ * const arr = await NDArray.fromArray([1, 2, 3, 4]);
+ * const cp = await cumprod(arr);  // [1, 2, 6, 24]
+ *
+ * const arr2d = await NDArray.fromArray([[1, 2], [3, 4]]);
+ * const cp0 = await cumprod(arr2d, 0);  // [[1, 2], [3, 8]]
+ * const cp1 = await cumprod(arr2d, 1);  // [[1, 2], [3, 12]]
+ * ```
+ */
+export async function cumprod(
+  a: NDArray,
+  axis: number | null = null,
+  dtype?: DType
+): Promise<NDArray> {
+  const axisVal = axis === null ? -2147483648 : axis;
+  const resultPtr = a._wasmModule._ndarray_cumprod_axis(
+    a._wasmPtr,
+    axisVal,
+    dtype ?? -1
+  );
+  if (resultPtr === 0) throw new Error('cumprod failed');
+  return NDArray._fromPtr(resultPtr, a._wasmModule);
+}
+
+/**
+ * Return the cumulative sum of array elements treating NaNs as zero.
+ *
+ * The cumulative sum does not change when NaNs are encountered and
+ * leading NaNs are replaced by zeros.
+ *
+ * @param a - Input array
+ * @param axis - Axis along which to compute. null = flatten first
+ * @param dtype - Type of output array
+ * @returns Cumulative sum with NaN treated as zero
+ *
+ * @example
+ * ```typescript
+ * const arr = await NDArray.fromArray([1, NaN, 3, 4]);
+ * const ncs = await nancumsum(arr);  // [1, 1, 4, 8]
+ * ```
+ */
+export async function nancumsum(
+  a: NDArray,
+  axis: number | null = null,
+  dtype?: DType
+): Promise<NDArray> {
+  const axisVal = axis === null ? -2147483648 : axis;
+  const resultPtr = a._wasmModule._ndarray_nancumsum_axis(
+    a._wasmPtr,
+    axisVal,
+    dtype ?? -1
+  );
+  if (resultPtr === 0) throw new Error('nancumsum failed');
+  return NDArray._fromPtr(resultPtr, a._wasmModule);
+}
+
+/**
+ * Return the cumulative product of array elements treating NaNs as one.
+ *
+ * The cumulative product does not change when NaNs are encountered and
+ * leading NaNs are replaced by ones.
+ *
+ * @param a - Input array
+ * @param axis - Axis along which to compute. null = flatten first
+ * @param dtype - Type of output array
+ * @returns Cumulative product with NaN treated as one
+ *
+ * @example
+ * ```typescript
+ * const arr = await NDArray.fromArray([1, NaN, 3, 4]);
+ * const ncp = await nancumprod(arr);  // [1, 1, 3, 12]
+ * ```
+ */
+export async function nancumprod(
+  a: NDArray,
+  axis: number | null = null,
+  dtype?: DType
+): Promise<NDArray> {
+  const axisVal = axis === null ? -2147483648 : axis;
+  const resultPtr = a._wasmModule._ndarray_nancumprod_axis(
+    a._wasmPtr,
+    axisVal,
+    dtype ?? -1
+  );
+  if (resultPtr === 0) throw new Error('nancumprod failed');
+  return NDArray._fromPtr(resultPtr, a._wasmModule);
+}
