@@ -37,6 +37,12 @@ jobs:
       - name: Build library
         run: pnpm run build:lib
 
+      - name: Set version from tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "Publishing version: $VERSION"
+          npm version $VERSION --no-git-tag-version --allow-same-version
+
       - name: Publish to npm
         run: pnpm publish --no-git-checks --access public
         env:
