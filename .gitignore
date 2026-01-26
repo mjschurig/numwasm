@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+*.wasm
+*.js.map
+
+# Test fixtures (generated)
+tests/fixtures/*.json
+
+# Benchmark outputs (generated)
+benchmark/results/*.json
+benchmark/index.html
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Vitest
+.vitest/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.eggs/
+
+# Environment
+.env
+.env.local
+
+.pnpm-store

@@ -1,0 +1,259 @@
+#!/bin/bash
+#
+# Build NumJS WebAssembly module using Emscripten
+#
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+SRC_DIR="$PROJECT_DIR/src/wasm"
+OUT_DIR="$PROJECT_DIR/dist/wasm"
+
+echo "NumJS WASM Build"
+echo "================"
+echo "Source: $SRC_DIR"
+echo "Output: $OUT_DIR"
+echo ""
+
+# Create output directory
+mkdir -p "$OUT_DIR"
+
+# Check for Emscripten
+if ! command -v emcc &> /dev/null; then
+    echo "Error: emcc (Emscripten) not found in PATH"
+    echo "Please install Emscripten or rebuild the devcontainer"
+    exit 1
+fi
+
+echo "Using Emscripten: $(emcc --version | head -1)"
+echo ""
+
+# Compile C to WebAssembly
+echo "Compiling C sources to WebAssembly..."
+emcc \
+    "$SRC_DIR/ndarray.c" \
+    "$SRC_DIR/dtype.c" \
+    "$SRC_DIR/pairwise_sum.c" \
+    "$SRC_DIR/broadcast.c" \
+    "$SRC_DIR/indexing.c" \
+    "$SRC_DIR/logic.c" \
+    "$SRC_DIR/manipulation.c" \
+    "$SRC_DIR/ufunc.c" \
+    "$SRC_DIR/ufunc_unary.c" \
+    "$SRC_DIR/ufunc_binary.c" \
+    "$SRC_DIR/sorting.c" \
+    "$SRC_DIR/searching.c" \
+    "$SRC_DIR/statistics.c" \
+    "$SRC_DIR/setops.c" \
+    -o "$OUT_DIR/numjs.cjs" \
+    -s WASM=1 \
+    -s MODULARIZE=1 \
+    -s EXPORT_NAME="createNumJSModule" \
+    -s EXPORTED_FUNCTIONS='[
+        "_ndarray_create",
+        "_ndarray_from_data",
+        "_ndarray_empty",
+        "_ndarray_full",
+        "_ndarray_scalar",
+        "_ndarray_free",
+        "_ndarray_copy",
+        "_ndarray_astype",
+        "_ndarray_sum",
+        "_ndarray_fill",
+        "_ndarray_flat_index",
+        "_ndarray_check_bounds",
+        "_ndarray_get_item",
+        "_ndarray_set_item",
+        "_ndarray_get_flat",
+        "_ndarray_set_flat",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex",
+        "_ndarray_get_ndim",
+        "_ndarray_get_shape",
+        "_ndarray_get_strides",
+        "_ndarray_get_data",
+        "_ndarray_get_size",
+        "_ndarray_get_dtype",
+        "_ndarray_get_flags",
+        "_ndarray_get_base",
+        "_ndarray_is_c_contiguous",
+        "_ndarray_is_f_contiguous",
+        "_ndarray_view",
+        "_ndarray_view_with_offset",
+        "_ndarray_reshape",
+        "_ndarray_transpose",
+        "_ndarray_ravel",
+        "_ndarray_flatten",
+        "_ndarray_squeeze",
+        "_ndarray_expand_dims",
+        "_ndarray_swapaxes",
+        "_ndarray_slice",
+        "_ndarray_get_subarray",
+        "_ndarray_view_dtype",
+        "_ndarray_ascontiguousarray",
+        "_ndarray_asfortranarray",
+        "_broadcast_shapes",
+        "_broadcast_shapes_multi",
+        "_broadcast_strides",
+        "_ndarray_broadcast_to",
+        "_shapes_are_broadcastable",
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal",
+        "_dtype_size",
+        "_dtype_is_integer",
+        "_dtype_is_floating",
+        "_dtype_is_complex",
+        "_dtype_is_signed",
+        "_dtype_is_bool",
+        "_dtype_promote",
+        "_dtype_can_cast",
+        "_ndarray_isfinite",
+        "_ndarray_isinf",
+        "_ndarray_isnan",
+        "_ndarray_isneginf",
+        "_ndarray_isposinf",
+        "_ndarray_iscomplex_elem",
+        "_ndarray_isreal_elem",
+        "_ndarray_all",
+        "_ndarray_all_axis",
+        "_ndarray_any",
+        "_ndarray_any_axis",
+        "_ndarray_isclose",
+        "_ndarray_allclose",
+        "_ndarray_array_equal",
+        "_ndarray_array_equiv",
+        "_ndarray_concatenate",
+        "_ufunc_negative",
+        "_ufunc_positive",
+        "_ufunc_absolute",
+        "_ufunc_abs",
+        "_ufunc_sign",
+        "_ufunc_sqrt",
+        "_ufunc_square",
+        "_ufunc_cbrt",
+        "_ufunc_reciprocal",
+        "_ufunc_exp",
+        "_ufunc_exp2",
+        "_ufunc_expm1",
+        "_ufunc_log",
+        "_ufunc_log2",
+        "_ufunc_log10",
+        "_ufunc_log1p",
+        "_ufunc_sin",
+        "_ufunc_cos",
+        "_ufunc_tan",
+        "_ufunc_arcsin",
+        "_ufunc_arccos",
+        "_ufunc_arctan",
+        "_ufunc_sinh",
+        "_ufunc_cosh",
+        "_ufunc_tanh",
+        "_ufunc_arcsinh",
+        "_ufunc_arccosh",
+        "_ufunc_arctanh",
+        "_ufunc_floor",
+        "_ufunc_ceil",
+        "_ufunc_trunc",
+        "_ufunc_rint",
+        "_ufunc_round",
+        "_ufunc_degrees",
+        "_ufunc_radians",
+        "_ufunc_rad2deg",
+        "_ufunc_deg2rad",
+        "_ufunc_logical_not",
+        "_ufunc_invert",
+        "_ufunc_bitwise_not",
+        "_ufunc_add",
+        "_ufunc_subtract",
+        "_ufunc_multiply",
+        "_ufunc_divide",
+        "_ufunc_true_divide",
+        "_ufunc_floor_divide",
+        "_ufunc_remainder",
+        "_ufunc_mod",
+        "_ufunc_fmod",
+        "_ufunc_power",
+        "_ufunc_equal",
+        "_ufunc_not_equal",
+        "_ufunc_less",
+        "_ufunc_less_equal",
+        "_ufunc_greater",
+        "_ufunc_greater_equal",
+        "_ufunc_maximum",
+        "_ufunc_minimum",
+        "_ufunc_fmax",
+        "_ufunc_fmin",
+        "_ufunc_logical_and",
+        "_ufunc_logical_or",
+        "_ufunc_logical_xor",
+        "_ufunc_bitwise_and",
+        "_ufunc_bitwise_or",
+        "_ufunc_bitwise_xor",
+        "_ufunc_left_shift",
+        "_ufunc_right_shift",
+        "_ufunc_arctan2",
+        "_ufunc_hypot",
+        "_ufunc_copysign",
+        "_ufunc_signbit",
+        "_ufunc_logaddexp",
+        "_ufunc_logaddexp2",
+        "_ndarray_sort",
+        "_ndarray_sort_copy",
+        "_ndarray_argsort",
+        "_ndarray_partition",
+        "_ndarray_argpartition",
+        "_ndarray_argmax",
+        "_ndarray_argmin",
+        "_ndarray_searchsorted",
+        "_ndarray_sum_axis",
+        "_ndarray_mean_axis",
+        "_ndarray_var_axis",
+        "_ndarray_std_axis",
+        "_ndarray_min_axis",
+        "_ndarray_max_axis",
+        "_ndarray_median",
+        "_ndarray_percentile",
+        "_ndarray_quantile",
+        "_ndarray_nansum",
+        "_ndarray_nanmean",
+        "_ndarray_nanvar",
+        "_ndarray_nanstd",
+        "_ndarray_unique",
+        "_ndarray_unique_values",
+        "_unique_result_free",
+        "_ndarray_union1d",
+        "_ndarray_intersect1d",
+        "_ndarray_setdiff1d",
+        "_ndarray_setxor1d",
+        "_ndarray_isin",
+        "_ndarray_in1d",
+        "_wasm_malloc",
+        "_wasm_free",
+        "_malloc",
+        "_free"
+    ]' \
+    -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "getValue", "setValue", "HEAPF64", "HEAPF32", "HEAP32", "HEAP16", "HEAP8", "HEAPU32", "HEAPU16", "HEAPU8"]' \
+    -s ALLOW_MEMORY_GROWTH=1 \
+    -s INITIAL_MEMORY=16777216 \
+    -s STACK_SIZE=1048576 \
+    -O2
+
+echo ""
+echo "Build complete!"
+echo "  Module:  $OUT_DIR/numjs.cjs"
+echo "  WASM:    $OUT_DIR/numjs.wasm"
+
+# Show file sizes
+echo ""
+echo "File sizes:"
+ls -lh "$OUT_DIR/numjs.cjs" "$OUT_DIR/numjs.wasm" 2>/dev/null || true

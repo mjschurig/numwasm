@@ -1,0 +1,65 @@
+{
+  "name": "numjs-wasm",
+  "version": "0.1.0",
+  "description": "NumPy-inspired array operations in TypeScript/WebAssembly",
+  "type": "module",
+  "main": "./dist/numjs.cjs",
+  "module": "./dist/numjs.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/numjs.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/numjs.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build:wasm": "./scripts/build-wasm.sh",
+    "build:lib": "vite build",
+    "build": "npm run build:wasm && npm run build:lib",
+    "dev": "vite build --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:compare": "npm run generate-fixtures && vitest run tests/ts/comparison.test.ts",
+    "generate-fixtures": "python3 tests/python/generate_test_cases.py",
+    "benchmark:numpy": "python3 benchmark/python/benchmark_sum.py",
+    "benchmark:numjs": "node dist/benchmark/ts/benchmark_sum.js",
+    "benchmark:report": "node dist/benchmark/report/generate_report.js",
+    "benchmark": "npm run benchmark:numpy && npm run build && npm run build:benchmark && npm run benchmark:numjs && npm run benchmark:report",
+    "build:benchmark": "tsc -p benchmark/tsconfig.json",
+    "clean": "rm -rf dist/",
+    "lint": "eslint src tests --ext .ts",
+    "format": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.3.0",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^1.2.0"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "numpy",
+    "ndarray",
+    "wasm",
+    "webassembly",
+    "array",
+    "scientific-computing",
+    "typescript"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "sideEffects": false
+}

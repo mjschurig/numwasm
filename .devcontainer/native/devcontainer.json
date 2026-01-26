@@ -1,5 +1,5 @@
 {
-  "name": "Dev Container Template",
+  "name": "NumJS",
   "image": "mcr.microsoft.com/devcontainers/typescript-node",
   "remoteUser": "node",
   "workspaceFolder": "/workspace",
@@ -9,7 +9,8 @@
       "extensions": [
         "anthropic.claude-code",
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "ms-python.python"
       ],
       "settings": {
         "editor.formatOnSave": true,
@@ -20,33 +21,17 @@
   },
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    /*
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": "true",
-      "upgradePackages": "true"
-    },*/
-    "ghcr.io/devcontainers/features/git:1": {}
-    /*
-    "ghcr.io/joedmck/devcontainer-features/wrangler:1": {
-      "version": "latest"
-    }*/
-   },
-  /* Install additional packages
-  "postCreateCommand": "echo 'Post-create command executed!'",
-  */
-  /* Set environment variables 
-  "containerEnv": {
-    "MY_VAR": "var"
-  },*/
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/ebaskoro/devcontainer-features/emscripten:1": {}
+  },
+  "postCreateCommand": "pip install numpy && pnpm install",
   "mounts": [
-    // change user "node" if needed, e.g. "vscode" for ubuntu-based images
-    // mount Claude credentials
     "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind,consistency=cached",
     "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind,consistency=cached",
-    // mount GitHub CLI config
     "source=${localEnv:HOME}/.config/gh,target=/home/node/.config/gh,type=bind",
-    // mount Git config
     "source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,type=bind,readonly"
-
   ]
 }

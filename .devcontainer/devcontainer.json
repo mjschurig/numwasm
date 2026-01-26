@@ -1,5 +1,5 @@
 {
-  "name": "Dev Container Template",
+  "name": "NumJS Named Volume",
   "image": "mcr.microsoft.com/devcontainers/typescript-node",
   "remoteUser": "node",
   "workspaceFolder": "/workspace",
@@ -30,7 +30,7 @@
     "ghcr.io/joedmck/devcontainer-features/wrangler:1": {
       "version": "latest"
     }*/
-   },
+  },
   /* Install additional packages
   "postCreateCommand": "echo 'Post-create command executed!'",
   */
@@ -47,6 +47,5 @@
     "source=${localEnv:HOME}/.config/gh,target=/home/node/.config/gh,type=bind",
     // mount Git config
     "source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,type=bind,readonly"
-
   ]
 }
