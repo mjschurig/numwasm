@@ -12,6 +12,8 @@ tests/fixtures/*.json
 # Benchmark intermediate results (final benchmarks.json is tracked)
 benchmark/results/numpy/
 benchmark/results/numjs/
+benchmark/results/numjs_results.json
+benchmark/results/numpy_results.json
 
 # IDE
 .idea/
