@@ -47,6 +47,7 @@
     "dev:docs": "pnpm run docs && cd docs-site && pnpm run dev",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:browser": "playwright test --config=tests/browser/playwright.config.ts",
     "test:compare": "npm run generate-fixtures && vitest run tests/ts/comparison.test.ts",
     "generate-fixtures": "python3 tests/python/generate_test_cases.py",
     "benchmark:numpy": "python3 benchmark/python/run_all.py",

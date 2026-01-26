@@ -2,56 +2,12 @@
 <html>
 <head>
   <title>NumJS Browser Test</title>
-  <style>
-    body { font-family: monospace; padding: 20px; }
-    .success { color: green; }
-    .error { color: red; }
-    pre { background: #f4f4f4; padding: 10px; }
-  </style>
+  <meta charset="utf-8">
 </head>
 <body>
-  <h1>NumJS Browser Test</h1>
+  <h1>NumJS Browser Test Page</h1>
+  <p>This page is used by Playwright for end-to-end browser testing.</p>
+  <p>The tests dynamically import and test the NumJS library.</p>
   <div id="output"></div>
-
-  <script type="module">
-    const output = document.getElementById('output');
-
-    function log(msg, isError = false) {
-      const p = document.createElement('pre');
-      p.className = isError ? 'error' : 'success';
-      p.textContent = msg;
-      output.appendChild(p);
-      console.log(msg);
-    }
-
-    try {
-      log('Loading numjs module...');
-      const { loadWasmModule, zeros, ones, isWasmLoaded, configureWasm } = await import('/dist/numjs.mjs');
-
-      log('isWasmLoaded before: ' + isWasmLoaded());
-
-      log('Loading WASM module...');
-      await loadWasmModule();
-
-      log('isWasmLoaded after: ' + isWasmLoaded());
-
-      log('Creating zeros array [3, 3]...');
-      const arr = await zeros([3, 3]);
-      log('Shape: ' + JSON.stringify(arr.shape));
-      log('Sum: ' + arr.sum());
-      arr.dispose();
-
-      log('Creating ones array [2, 4]...');
-      const arr2 = await ones([2, 4]);
-      log('Shape: ' + JSON.stringify(arr2.shape));
-      log('Sum: ' + arr2.sum());
-      arr2.dispose();
-
-      log('\n=== All tests passed! Browser support works! ===');
-    } catch (e) {
-      log('ERROR: ' + e.message, true);
-      log('Stack: ' + e.stack, true);
-    }
-  </script>
 </body>
 </html>
