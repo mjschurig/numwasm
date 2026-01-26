@@ -172,9 +172,10 @@ static void binary_strided_loop(NDArray* in1, NDArray* in2, NDArray* output,
 
     /* Check for contiguous fast path (same shape, no broadcasting) */
     if (ufunc_binary_contiguous(in1, in2) && ndarray_is_c_contiguous(output)) {
-        size_t elem_size = dtype_size(in1->dtype);
+        size_t elem_size1 = dtype_size(in1->dtype);
+        size_t elem_size2 = dtype_size(in2->dtype);
         loop((const char*)in1->data, (const char*)in2->data,
-             (char*)output->data, n, elem_size, elem_size, out_elem_size);
+             (char*)output->data, n, elem_size1, elem_size2, out_elem_size);
         return;
     }
 

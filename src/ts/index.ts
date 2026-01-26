@@ -315,6 +315,18 @@ export {
   signbit,
   logaddexp,
   logaddexp2,
+  // Phase 26: Miscellaneous Ufuncs
+  frexp,
+  ldexp,
+  nextafter,
+  spacing,
+  modf,
+  gcd,
+  lcm,
+  sinc,
+  heaviside,
+  divmod,
+  bitwise_count,
 } from './ufunc.js';
 
 // Functional programming (Level 10)
@@ -542,15 +554,22 @@ export {
 } from './fft.js';
 export type { FFTNorm } from './fft.js';
 
-// Random module (Phase 15)
+// Random module (Phase 15 + Phase 27 BitGenerators)
 export {
   // Classes
   Generator,
   PCG64,
   SeedSequence,
   BitGenerator,
+  // Phase 27: Additional BitGenerators
+  MT19937,
+  Philox,
+  SFC64,
   // Factory function
   default_rng,
+  // BitGenerator registry
+  getBitGenerator,
+  listBitGenerators,
   // Module-level functions
   seed,
   random,
@@ -559,7 +578,7 @@ export {
   // Initialization
   initRandom,
 } from './random.js';
-export type { SizeType, PCG64State } from './random.js';
+export type { SizeType, PCG64State, MT19937State, PhiloxState, SFC64State } from './random.js';
 
 
 // String operations (Phase 16a)

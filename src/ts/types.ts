@@ -442,6 +442,22 @@ export interface WasmModule {
   _ufunc_logaddexp(ptr1: number, ptr2: number): number;
   _ufunc_logaddexp2(ptr1: number, ptr2: number): number;
 
+  // Phase 26: Miscellaneous Ufuncs
+  _ufunc_frexp(ptr: number): number;
+  _ufunc_ldexp(ptr1: number, ptr2: number): number;
+  _ufunc_nextafter(ptr1: number, ptr2: number): number;
+  _ufunc_spacing(ptr: number): number;
+  _ufunc_modf(ptr: number): number;
+  _ufunc_gcd(ptr1: number, ptr2: number): number;
+  _ufunc_lcm(ptr1: number, ptr2: number): number;
+  _ufunc_sinc(ptr: number): number;
+  _ufunc_heaviside(ptr1: number, ptr2: number): number;
+  _ufunc_divmod(ptr1: number, ptr2: number): number;
+  _ufunc_bitwise_count(ptr: number): number;
+  _ufunc_tuple_result_free(ptr: number): void;
+  _ufunc_tuple_get_first(ptr: number): number;
+  _ufunc_tuple_get_second(ptr: number): number;
+
   // Sorting functions (Phase 6)
   _ndarray_sort(ptr: number, axis: number, kind: number): number;
   _ndarray_sort_copy(ptr: number, axis: number, kind: number): number;
@@ -684,6 +700,84 @@ export interface WasmModule {
   ): number;
   _pcg64_fill_uint64(state: number, out: number, count: number): void;
   _pcg64_fill_double(state: number, out: number, count: number): void;
+
+  // MT19937 BitGenerator
+  _mt19937_create(): number;
+  _mt19937_free(state: number): void;
+  _mt19937_seed(state: number, seed: number): void;
+  _mt19937_seed_array(state: number, init_key: number, key_length: number): void;
+  _mt19937_next32(state: number): number;
+  _mt19937_next64(state: number): bigint;
+  _mt19937_next64_parts(state: number, high_out: number): number;
+  _mt19937_next_double(state: number): number;
+  _mt19937_get_state(
+    state: number,
+    key_out: number,
+    pos_out: number,
+    has_uint32_out: number,
+    uinteger_out: number
+  ): void;
+  _mt19937_set_state(
+    state: number,
+    key_in: number,
+    pos: number,
+    has_uint32: number,
+    uinteger: number
+  ): void;
+  _mt19937_init_bitgen(bitgen: number, state: number): void;
+  _mt19937_fill_uint32(state: number, out: number, count: number): void;
+  _mt19937_fill_uint64(state: number, out: number, count: number): void;
+  _mt19937_fill_double(state: number, out: number, count: number): void;
+
+  // Philox BitGenerator
+  _philox_create(): number;
+  _philox_free(state: number): void;
+  _philox_seed(state: number, key0: bigint, key1: bigint): void;
+  _philox_seed_parts(state: number, parts: number): void;
+  _philox_set_counter(state: number, counter: number, key: number): void;
+  _philox_next64(state: number): bigint;
+  _philox_next32(state: number): number;
+  _philox_next64_parts(state: number, high_out: number): number;
+  _philox_next_double(state: number): number;
+  _philox_jump(state: number): void;
+  _philox_advance(state: number, step: number): void;
+  _philox_advance64(state: number, step: number): void;
+  _philox_get_state(
+    state: number,
+    ctr_out: number,
+    key_out: number,
+    buffer_pos_out: number,
+    buffer_out: number,
+    has_uint32_out: number,
+    uinteger_out: number
+  ): void;
+  _philox_set_state(
+    state: number,
+    ctr_in: number,
+    key_in: number,
+    buffer_pos: number,
+    buffer_in: number,
+    has_uint32: number,
+    uinteger: number
+  ): void;
+  _philox_init_bitgen(bitgen: number, state: number): void;
+  _philox_fill_uint64(state: number, out: number, count: number): void;
+  _philox_fill_double(state: number, out: number, count: number): void;
+
+  // SFC64 BitGenerator
+  _sfc64_create(): number;
+  _sfc64_free(state: number): void;
+  _sfc64_seed(state: number, seed: number): void;
+  _sfc64_seed_parts(state: number, parts: number): void;
+  _sfc64_next64(state: number): bigint;
+  _sfc64_next32(state: number): number;
+  _sfc64_next64_parts(state: number, high_out: number): number;
+  _sfc64_next_double(state: number): number;
+  _sfc64_get_state(state: number, out: number): void;
+  _sfc64_set_state(state: number, input: number): void;
+  _sfc64_init_bitgen(bitgen: number, state: number): void;
+  _sfc64_fill_uint64(state: number, out: number, count: number): void;
+  _sfc64_fill_double(state: number, out: number, count: number): void;
 
   // SeedSequence
   _seed_seq_init(
