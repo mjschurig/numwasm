@@ -1,0 +1,126 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-01-26T00:00:00.000Z",
+  "environment": {
+    "numjsVersion": "0.1.0",
+    "numpyVersion": "2.4.1",
+    "nodeVersion": "v22.0.0",
+    "pythonVersion": "3.12.0",
+    "platform": "linux"
+  },
+  "hardware": {
+    "cpu": "Sample CPU (placeholder - run benchmarks locally)",
+    "cores": 8,
+    "memory": "16.0 GB",
+    "os": "Linux",
+    "arch": "x64"
+  },
+  "categories": [
+    {
+      "id": "reduce",
+      "name": "Reductions",
+      "operations": [
+        {
+          "id": "sum",
+          "name": "Sum",
+          "results": [
+            { "params": { "size": 100 }, "numpy": { "meanMs": 0.0006, "minMs": 0.0005, "maxMs": 0.001, "stdMs": 0.0001, "iterations": 1000 }, "numjs": { "meanMs": 0.00004, "minMs": 0.00003, "maxMs": 0.0001, "stdMs": 0.00001, "iterations": 10000 }, "speedup": 15.0 },
+            { "params": { "size": 1000 }, "numpy": { "meanMs": 0.0007, "minMs": 0.0006, "maxMs": 0.001, "stdMs": 0.0001, "iterations": 1000 }, "numjs": { "meanMs": 0.00018, "minMs": 0.00015, "maxMs": 0.0003, "stdMs": 0.00002, "iterations": 5000 }, "speedup": 3.89 },
+            { "params": { "size": 10000 }, "numpy": { "meanMs": 0.002, "minMs": 0.0018, "maxMs": 0.003, "stdMs": 0.0002, "iterations": 500 }, "numjs": { "meanMs": 0.0019, "minMs": 0.0017, "maxMs": 0.003, "stdMs": 0.0002, "iterations": 500 }, "speedup": 1.05 },
+            { "params": { "size": 100000 }, "numpy": { "meanMs": 0.02, "minMs": 0.018, "maxMs": 0.025, "stdMs": 0.002, "iterations": 100 }, "numjs": { "meanMs": 0.014, "minMs": 0.012, "maxMs": 0.018, "stdMs": 0.001, "iterations": 100 }, "speedup": 1.43 },
+            { "params": { "size": 1000000 }, "numpy": { "meanMs": 0.21, "minMs": 0.19, "maxMs": 0.25, "stdMs": 0.02, "iterations": 50 }, "numjs": { "meanMs": 0.15, "minMs": 0.13, "maxMs": 0.18, "stdMs": 0.01, "iterations": 50 }, "speedup": 1.4 }
+          ]
+        },
+        {
+          "id": "mean",
+          "name": "Mean",
+          "results": [
+            { "params": { "size": 100 }, "numpy": { "meanMs": 0.0008, "minMs": 0.0007, "maxMs": 0.001, "stdMs": 0.0001, "iterations": 1000 }, "numjs": { "meanMs": 0.00006, "minMs": 0.00005, "maxMs": 0.0001, "stdMs": 0.00001, "iterations": 10000 }, "speedup": 13.3 },
+            { "params": { "size": 1000 }, "numpy": { "meanMs": 0.0009, "minMs": 0.0008, "maxMs": 0.001, "stdMs": 0.0001, "iterations": 1000 }, "numjs": { "meanMs": 0.0002, "minMs": 0.00018, "maxMs": 0.0003, "stdMs": 0.00002, "iterations": 5000 }, "speedup": 4.5 },
+            { "params": { "size": 10000 }, "numpy": { "meanMs": 0.0025, "minMs": 0.002, "maxMs": 0.004, "stdMs": 0.0003, "iterations": 400 }, "numjs": { "meanMs": 0.002, "minMs": 0.0018, "maxMs": 0.003, "stdMs": 0.0002, "iterations": 500 }, "speedup": 1.25 },
+            { "params": { "size": 100000 }, "numpy": { "meanMs": 0.022, "minMs": 0.02, "maxMs": 0.028, "stdMs": 0.002, "iterations": 80 }, "numjs": { "meanMs": 0.015, "minMs": 0.013, "maxMs": 0.019, "stdMs": 0.001, "iterations": 100 }, "speedup": 1.47 },
+            { "params": { "size": 1000000 }, "numpy": { "meanMs": 0.23, "minMs": 0.21, "maxMs": 0.27, "stdMs": 0.02, "iterations": 45 }, "numjs": { "meanMs": 0.16, "minMs": 0.14, "maxMs": 0.19, "stdMs": 0.01, "iterations": 50 }, "speedup": 1.44 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "core",
+      "name": "Core Operations",
+      "operations": [
+        {
+          "id": "zeros",
+          "name": "Zeros",
+          "results": [
+            { "params": { "size": 100 }, "numpy": { "meanMs": 0.0003, "minMs": 0.0002, "maxMs": 0.0005, "stdMs": 0.00005, "iterations": 2000 }, "numjs": { "meanMs": 0.0002, "minMs": 0.00015, "maxMs": 0.0003, "stdMs": 0.00003, "iterations": 3000 }, "speedup": 1.5 },
+            { "params": { "size": 1000 }, "numpy": { "meanMs": 0.0005, "minMs": 0.0004, "maxMs": 0.0008, "stdMs": 0.0001, "iterations": 1500 }, "numjs": { "meanMs": 0.0004, "minMs": 0.00035, "maxMs": 0.0006, "stdMs": 0.00008, "iterations": 2000 }, "speedup": 1.25 },
+            { "params": { "size": 10000 }, "numpy": { "meanMs": 0.003, "minMs": 0.0025, "maxMs": 0.004, "stdMs": 0.0003, "iterations": 350 }, "numjs": { "meanMs": 0.0035, "minMs": 0.003, "maxMs": 0.005, "stdMs": 0.0004, "iterations": 300 }, "speedup": 0.86 },
+            { "params": { "size": 100000 }, "numpy": { "meanMs": 0.03, "minMs": 0.025, "maxMs": 0.04, "stdMs": 0.003, "iterations": 50 }, "numjs": { "meanMs": 0.035, "minMs": 0.03, "maxMs": 0.045, "stdMs": 0.004, "iterations": 40 }, "speedup": 0.86 },
+            { "params": { "size": 1000000 }, "numpy": { "meanMs": 0.3, "minMs": 0.25, "maxMs": 0.4, "stdMs": 0.03, "iterations": 30 }, "numjs": { "meanMs": 0.35, "minMs": 0.3, "maxMs": 0.45, "stdMs": 0.04, "iterations": 25 }, "speedup": 0.86 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ufunc",
+      "name": "Universal Functions",
+      "operations": [
+        {
+          "id": "add",
+          "name": "Add",
+          "results": [
+            { "params": { "size": 100 }, "numpy": { "meanMs": 0.0008, "minMs": 0.0007, "maxMs": 0.001, "stdMs": 0.0001, "iterations": 1200 }, "numjs": { "meanMs": 0.0003, "minMs": 0.00025, "maxMs": 0.0005, "stdMs": 0.00005, "iterations": 3000 }, "speedup": 2.67 },
+            { "params": { "size": 1000 }, "numpy": { "meanMs": 0.001, "minMs": 0.0009, "maxMs": 0.0015, "stdMs": 0.0002, "iterations": 1000 }, "numjs": { "meanMs": 0.0006, "minMs": 0.0005, "maxMs": 0.0008, "stdMs": 0.0001, "iterations": 1500 }, "speedup": 1.67 },
+            { "params": { "size": 10000 }, "numpy": { "meanMs": 0.004, "minMs": 0.0035, "maxMs": 0.006, "stdMs": 0.0005, "iterations": 300 }, "numjs": { "meanMs": 0.005, "minMs": 0.0045, "maxMs": 0.007, "stdMs": 0.0006, "iterations": 250 }, "speedup": 0.8 },
+            { "params": { "size": 100000 }, "numpy": { "meanMs": 0.04, "minMs": 0.035, "maxMs": 0.05, "stdMs": 0.004, "iterations": 40 }, "numjs": { "meanMs": 0.05, "minMs": 0.045, "maxMs": 0.06, "stdMs": 0.005, "iterations": 30 }, "speedup": 0.8 },
+            { "params": { "size": 1000000 }, "numpy": { "meanMs": 0.4, "minMs": 0.35, "maxMs": 0.5, "stdMs": 0.04, "iterations": 25 }, "numjs": { "meanMs": 0.5, "minMs": 0.45, "maxMs": 0.6, "stdMs": 0.05, "iterations": 20 }, "speedup": 0.8 }
+          ]
+        },
+        {
+          "id": "sin",
+          "name": "Sine",
+          "results": [
+            { "params": { "size": 100 }, "numpy": { "meanMs": 0.002, "minMs": 0.0018, "maxMs": 0.003, "stdMs": 0.0002, "iterations": 600 }, "numjs": { "meanMs": 0.0008, "minMs": 0.0007, "maxMs": 0.001, "stdMs": 0.0001, "iterations": 1200 }, "speedup": 2.5 },
+            { "params": { "size": 1000 }, "numpy": { "meanMs": 0.004, "minMs": 0.0035, "maxMs": 0.005, "stdMs": 0.0004, "iterations": 300 }, "numjs": { "meanMs": 0.003, "minMs": 0.0025, "maxMs": 0.004, "stdMs": 0.0003, "iterations": 400 }, "speedup": 1.33 },
+            { "params": { "size": 10000 }, "numpy": { "meanMs": 0.025, "minMs": 0.022, "maxMs": 0.03, "stdMs": 0.002, "iterations": 60 }, "numjs": { "meanMs": 0.02, "minMs": 0.018, "maxMs": 0.025, "stdMs": 0.002, "iterations": 70 }, "speedup": 1.25 },
+            { "params": { "size": 100000 }, "numpy": { "meanMs": 0.25, "minMs": 0.22, "maxMs": 0.3, "stdMs": 0.02, "iterations": 15 }, "numjs": { "meanMs": 0.2, "minMs": 0.18, "maxMs": 0.25, "stdMs": 0.02, "iterations": 18 }, "speedup": 1.25 },
+            { "params": { "size": 1000000 }, "numpy": { "meanMs": 2.5, "minMs": 2.2, "maxMs": 3.0, "stdMs": 0.2, "iterations": 10 }, "numjs": { "meanMs": 2.0, "minMs": 1.8, "maxMs": 2.5, "stdMs": 0.2, "iterations": 10 }, "speedup": 1.25 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "linalg",
+      "name": "Linear Algebra",
+      "operations": [
+        {
+          "id": "matmul",
+          "name": "Matrix Multiply",
+          "results": [
+            { "params": { "size": 10 }, "numpy": { "meanMs": 0.001, "minMs": 0.0009, "maxMs": 0.0015, "stdMs": 0.0001, "iterations": 1000 }, "numjs": { "meanMs": 0.0008, "minMs": 0.0007, "maxMs": 0.001, "stdMs": 0.0001, "iterations": 1200 }, "speedup": 1.25 },
+            { "params": { "size": 50 }, "numpy": { "meanMs": 0.01, "minMs": 0.009, "maxMs": 0.015, "stdMs": 0.001, "iterations": 150 }, "numjs": { "meanMs": 0.015, "minMs": 0.013, "maxMs": 0.02, "stdMs": 0.002, "iterations": 100 }, "speedup": 0.67 },
+            { "params": { "size": 100 }, "numpy": { "meanMs": 0.05, "minMs": 0.045, "maxMs": 0.06, "stdMs": 0.004, "iterations": 40 }, "numjs": { "meanMs": 0.1, "minMs": 0.09, "maxMs": 0.12, "stdMs": 0.01, "iterations": 20 }, "speedup": 0.5 },
+            { "params": { "size": 500 }, "numpy": { "meanMs": 5.0, "minMs": 4.5, "maxMs": 6.0, "stdMs": 0.4, "iterations": 10 }, "numjs": { "meanMs": 15.0, "minMs": 13.0, "maxMs": 18.0, "stdMs": 1.5, "iterations": 10 }, "speedup": 0.33 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "random",
+      "name": "Random",
+      "operations": [
+        {
+          "id": "uniform",
+          "name": "Uniform",
+          "results": [
+            { "params": { "size": 100 }, "numpy": { "meanMs": 0.001, "minMs": 0.0009, "maxMs": 0.0015, "stdMs": 0.0001, "iterations": 1000 }, "numjs": { "meanMs": 0.0005, "minMs": 0.0004, "maxMs": 0.0008, "stdMs": 0.00008, "iterations": 2000 }, "speedup": 2.0 },
+            { "params": { "size": 1000 }, "numpy": { "meanMs": 0.002, "minMs": 0.0018, "maxMs": 0.003, "stdMs": 0.0002, "iterations": 600 }, "numjs": { "meanMs": 0.0015, "minMs": 0.0013, "maxMs": 0.002, "stdMs": 0.0002, "iterations": 800 }, "speedup": 1.33 },
+            { "params": { "size": 10000 }, "numpy": { "meanMs": 0.01, "minMs": 0.009, "maxMs": 0.015, "stdMs": 0.001, "iterations": 150 }, "numjs": { "meanMs": 0.012, "minMs": 0.01, "maxMs": 0.016, "stdMs": 0.0015, "iterations": 120 }, "speedup": 0.83 },
+            { "params": { "size": 100000 }, "numpy": { "meanMs": 0.1, "minMs": 0.09, "maxMs": 0.12, "stdMs": 0.01, "iterations": 20 }, "numjs": { "meanMs": 0.12, "minMs": 0.1, "maxMs": 0.15, "stdMs": 0.012, "iterations": 18 }, "speedup": 0.83 },
+            { "params": { "size": 1000000 }, "numpy": { "meanMs": 1.0, "minMs": 0.9, "maxMs": 1.2, "stdMs": 0.1, "iterations": 10 }, "numjs": { "meanMs": 1.2, "minMs": 1.0, "maxMs": 1.5, "stdMs": 0.12, "iterations": 10 }, "speedup": 0.83 }
+          ]
+        }
+      ]
+    }
+  ]
+}

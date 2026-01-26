@@ -17,6 +17,7 @@
     "react-aria-components": "^1.14.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.28.0",
+    "recharts": "^3.7.0",
     "three": "^0.182.0"
   },
   "devDependencies": {

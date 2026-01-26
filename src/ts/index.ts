@@ -58,7 +58,13 @@ export {
 export { FlatIterator, nditer, ndenumerate, ndindex } from './iterators.js';
 
 // WASM module management
-export { loadWasmModule, isWasmLoaded, getWasmModule } from './wasm-loader.js';
+export {
+  loadWasmModule,
+  isWasmLoaded,
+  getWasmModule,
+  configureWasm,
+} from './wasm-loader.js';
+export type { WasmLoadConfig } from './wasm-loader.js';
 
 // Array creation functions
 export {

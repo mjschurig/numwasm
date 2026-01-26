@@ -8,6 +8,20 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "browser": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/numjs.mjs"
+      },
+      "node": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/numjs.mjs"
+        },
+        "require": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/numjs.cjs"
+        }
+      },
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/numjs.mjs"
@@ -16,7 +30,14 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/numjs.cjs"
       }
-    }
+    },
+    "./wasm/numjs.wasm": "./dist/wasm/numjs.wasm"
+  },
+  "browser": {
+    "module": false,
+    "path": false,
+    "url": false,
+    "fs": false
   },
   "scripts": {
     "build:wasm": "./scripts/build-wasm.sh",
@@ -28,10 +49,10 @@
     "test:watch": "vitest",
     "test:compare": "npm run generate-fixtures && vitest run tests/ts/comparison.test.ts",
     "generate-fixtures": "python3 tests/python/generate_test_cases.py",
-    "benchmark:numpy": "python3 benchmark/python/benchmark_sum.py",
-    "benchmark:numjs": "node dist/benchmark/ts/benchmark_sum.js",
-    "benchmark:report": "node dist/benchmark/report/generate_report.js",
-    "benchmark": "npm run benchmark:numpy && npm run build && npm run build:benchmark && npm run benchmark:numjs && npm run benchmark:report",
+    "benchmark:numpy": "python3 benchmark/python/run_all.py",
+    "benchmark:numjs": "node dist/benchmark/ts/run-all.js",
+    "benchmark:combine": "node dist/benchmark/scripts/combine-results.js",
+    "benchmark": "npm run build && npm run build:benchmark && npm run benchmark:numpy && npm run benchmark:numjs && npm run benchmark:combine",
     "build:benchmark": "tsc -p benchmark/tsconfig.json",
     "clean": "rm -rf dist/",
     "lint": "eslint src tests --ext .ts",
@@ -39,6 +60,7 @@
     "docs": "typedoc"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.0",
     "@types/node": "^20.10.0",
     "eslint": "^8.56.0",
     "prettier": "^3.2.0",

@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import Home from "./pages/Home";
 import Demo from "./pages/Demo";
 import Docs from "./pages/Docs";
+import Benchmarks from "./pages/Benchmarks";
 import { Background } from "./components/background";
 
 // GitHub icon from Simple Icons (https://simpleicons.org)
@@ -60,6 +61,9 @@ function Navigation() {
           <NavLink to="/docs" className={navLinkClass}>
             Docs
           </NavLink>
+          <NavLink to="/benchmarks" className={navLinkClass}>
+            Benchmarks
+          </NavLink>
           <Link
             href="https://github.com/mjschurig/numwasm"
             target="_blank"
@@ -110,6 +114,13 @@ function Navigation() {
           >
             Docs
           </NavLink>
+          <NavLink
+            to="/benchmarks"
+            className={mobileNavLinkClass}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Benchmarks
+          </NavLink>
           <Link
             href="https://github.com/mjschurig/numwasm"
             target="_blank"
@@ -128,7 +139,7 @@ function Navigation() {
 export default function App() {
   return (
     <div className="relative min-h-screen flex flex-col">
-      <div className="fixed inset-0 z-0">
+      <div className="fixed inset-0 z-0 overflow-hidden">
         <Background />
       </div>
       <div className="relative z-10 flex flex-col min-h-screen">
@@ -138,6 +149,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/demo" element={<Demo />} />
             <Route path="/docs/*" element={<Docs />} />
+            <Route path="/benchmarks/*" element={<Benchmarks />} />
           </Routes>
         </div>
       </div>

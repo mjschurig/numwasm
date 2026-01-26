@@ -321,17 +321,17 @@ Unary Math
 │   └── ✅ floor(x), ceil(x), trunc(x)
 ├── Floating Point
 │   ├── ✅ signbit(x), copysign(x1, x2)
-│   ├── ❌ frexp(x), ldexp(x1, x2)
-│   ├── ❌ nextafter(x1, x2), spacing(x)
-│   └── ❌ nan_to_num(x, nan, posinf, neginf)
+│   ├── ✅ frexp(x), ldexp(x1, x2)
+│   ├── ✅ nextafter(x1, x2), spacing(x)
+│   └── ✅ nan_to_num(x, nan, posinf, neginf)
 ├── Special
 │   ├── ✅ i0(x) → Bessel (in window.ts)
-│   ├── ❌ sinc(x)
-│   └── ❌ heaviside(x1, x2)
+│   ├── ✅ sinc(x)
+│   └── ✅ heaviside(x1, x2)
 └── Predicates
     ├── ✅ isnan(x), isinf(x), isfinite(x)
     ├── ✅ isneginf(x), isposinf(x)
-    └── ❌ isnat(x)
+    └── ❌ isnat(x) (datetime-specific)
 ```
 
 ### 4.3 Math Ufuncs - Binary ✅ COMPLETE
@@ -343,7 +343,7 @@ Binary Math
 │   ├── ✅ true_divide(x1, x2), floor_divide(x1, x2)
 │   ├── ✅ power(x1, x2), float_power(x1, x2)
 │   ├── ✅ mod(x1, x2), remainder(x1, x2), fmod(x1, x2)
-│   └── ❌ divmod(x1, x2), modf(x)
+│   └── ✅ divmod(x1, x2), modf(x)
 ├── Comparison
 │   ├── ✅ greater(x1, x2), greater_equal(x1, x2)
 │   ├── ✅ less(x1, x2), less_equal(x1, x2)
@@ -359,13 +359,13 @@ Binary Math
 │   ├── ✅ bitwise_and(x1, x2), bitwise_or(x1, x2)
 │   ├── ✅ bitwise_xor(x1, x2), invert(x)
 │   ├── ✅ left_shift(x1, x2), right_shift(x1, x2)
-│   └── ❌ bitwise_count(x)
+│   └── ✅ bitwise_count(x)
 ├── Trigonometric
 │   ├── ✅ arctan2(x1, x2)
 │   └── ✅ hypot(x1, x2)
 └── Rational
-    ├── ❌ gcd(x1, x2)
-    └── ❌ lcm(x1, x2)
+    ├── ✅ gcd(x1, x2)
+    └── ✅ lcm(x1, x2)
 ```
 
 ### 4.4 Reductions (with axis support) ✅ COMPLETE
@@ -373,21 +373,21 @@ Binary Math
 Reductions
 ├── ✅ sum(arr, axis, dtype, keepdims) - uses pairwise summation for accuracy
 ├── ✅ prod(arr, axis, dtype, keepdims)
-├── ❌ nansum(arr, axis, ...), nanprod(arr, axis, ...)
-├── ❌ cumsum(arr, axis, dtype, out), cumprod(arr, axis, dtype, out)
-├── ❌ nancumsum(arr, ...), nancumprod(arr, ...)
+├── ✅ nansum(arr, axis, ...), nanprod(arr, axis, ...)
+├── ✅ cumsum(arr, axis, dtype, out), cumprod(arr, axis, dtype, out)
+├── ✅ nancumsum(arr, ...), nancumprod(arr, ...)
 ├── ✅ diff(arr, n, axis, prepend, append) → ediff1d
 ├── ✅ ediff1d(arr, to_end, to_begin)
 ├── ❌ gradient(f, *varargs, axis, edge_order)
-├── ❌ cross(a, b, axisa, axisb, axisc, axis)
+├── ✅ cross(a, b, axisa, axisb, axisc, axis)
 ├── ❌ trapezoid(y, x, dx, axis)
 └── Aggregations
     ├── ✅ min(arr, axis, keepdims), max(arr, axis, keepdims)
     ├── ✅ amin(arr, ...), amax(arr, ...)
-    ├── ❌ nanmin(arr, ...), nanmax(arr, ...)
+    ├── ✅ nanmin(arr, ...), nanmax(arr, ...)
     ├── ❌ ptp(arr, axis) → peak to peak
     ├── ✅ argmin(arr, axis, keepdims), argmax(arr, axis, keepdims)
-    ├── ❌ nanargmin(arr, ...), nanargmax(arr, ...)
+    ├── ✅ nanargmin(arr, ...), nanargmax(arr, ...)
     ├── ✅ all(arr, axis, keepdims), any(arr, axis, keepdims)
     └── ✅ countNonzero(arr, axis)
 ```
@@ -503,26 +503,26 @@ Statistics
 │   ├── ❌ average(arr, axis, weights, returned, keepdims)
 │   ├── ✅ std(arr, axis, dtype, ddof, keepdims)
 │   ├── ✅ var(arr, axis, dtype, ddof, keepdims)
-│   ├── ❌ nanmean(...), nanstd(...), nanvar(...)
+│   ├── ✅ nanmean(...), nanstd(...), nanvar(...)
 │   └── ✅ median(arr, axis, keepdims)
-│       ❌ nanmedian(...)
+│       ✅ nanmedian(...)
 ├── Order Statistics
 │   ├── ✅ amin(arr, ...), amax(arr, ...)
 │   ├── ❌ ptp(arr, axis, out, keepdims)
 │   ├── ❌ percentile(arr, q, axis, out, ...)
 │   ├── ❌ quantile(arr, q, axis, out, ...)
-│   └── ❌ nanpercentile(...), nanquantile(...)
+│   └── ✅ nanpercentile(...), nanquantile(...)
 ├── Correlating
 │   ├── ✅ corrcoef(x, y, ...) - via ma module
 │   ├── ❌ correlate(a, v, mode)
 │   └── ✅ cov(m, y, ...) - via ma module
 └── Histograms
-    ├── ❌ histogram(a, bins, range, density, weights)
-    ├── ❌ histogram2d(x, y, bins, range, density, weights)
-    ├── ❌ histogramdd(sample, bins, range, density, weights)
-    ├── ❌ histogram_bin_edges(a, bins, range, weights)
-    ├── ❌ bincount(x, weights, minlength)
-    └── ❌ digitize(x, bins, right)
+    ├── ✅ histogram(a, bins, range, density, weights)
+    ├── ✅ histogram2d(x, y, bins, range, density, weights)
+    ├── ✅ histogramdd(sample, bins, range, density, weights)
+    ├── ✅ histogram_bin_edges(a, bins, range, weights)
+    ├── ✅ bincount(x, weights, minlength)
+    └── ✅ digitize(x, bins, right)
 ```
 
 ---
@@ -683,12 +683,12 @@ numpy.linalg
 │   ├── ✅ inner(a, b)
 │   ├── ✅ outer(a, b, out)
 │   ├── ✅ matmul(x1, x2, out)
-│   ├── ❌ tensordot(a, b, axes)
-│   ├── ❌ einsum(subscripts, *operands, out, ...)
-│   ├── ❌ einsum_path(subscripts, *operands, optimize)
-│   ├── ❌ kron(a, b)
-│   ├── ❌ cross(a, b, axisa, axisb, axisc, axis)
-│   └── ❌ multi_dot(arrays, out)
+│   ├── ✅ tensordot(a, b, axes)
+│   ├── ✅ einsum(subscripts, *operands, out, ...)
+│   ├── ✅ einsum_path(subscripts, *operands, optimize)
+│   ├── ✅ kron(a, b)
+│   ├── ✅ cross(a, b, axisa, axisb, axisc, axis)
+│   └── ✅ multi_dot(arrays, out)
 ├── Decompositions
 │   ├── ✅ cholesky(a)
 │   ├── ✅ qr(a, mode)
@@ -701,8 +701,8 @@ numpy.linalg
 │   └── ✅ eigvalsh(a, UPLO)
 ├── Norms & Numbers
 │   ├── ✅ norm(x, ord, axis, keepdims)
-│   ├── ❌ matrix_norm(x, ord, keepdims)
-│   ├── ❌ vector_norm(x, ord, axis, keepdims)
+│   ├── ✅ matrix_norm(x, ord, keepdims)
+│   ├── ✅ vector_norm(x, ord, axis, keepdims)
 │   ├── ✅ cond(x, p)
 │   ├── ✅ det(a)
 │   ├── ✅ slogdet(a)
@@ -710,15 +710,15 @@ numpy.linalg
 │   └── ✅ trace(a, offset, axis1, axis2, dtype, out)
 ├── Solving & Inverting
 │   ├── ✅ solve(a, b)
-│   ├── ❌ tensorsolve(a, b, axes)
+│   ├── ✅ tensorsolve(a, b, axes)
 │   ├── ✅ lstsq(a, b, rcond)
 │   ├── ✅ inv(a)
 │   ├── ✅ pinv(a, rcond, hermitian, rtol)
-│   └── ❌ tensorinv(a, ind)
+│   └── ✅ tensorinv(a, ind)
 ├── Matrix Operations
 │   ├── ✅ matrix_power(a, n)
 │   ├── ✅ diagonal(a, offset, axis1, axis2)
-│   └── ❌ matrix_transpose(x)
+│   └── ❌ matrix_transpose(x) (use transpose instead)
 └── Exception
     └── ✅ LinAlgError
 ```
@@ -796,9 +796,9 @@ numpy.random
 │       └── ✅ bytes(length)
 ├── BitGenerator Infrastructure
 │   ├── ✅ PCG64 (default)
-│   ├── ❌ MT19937
-│   ├── ❌ Philox
-│   └── ❌ SFC64
+│   ├── ✅ MT19937 (Mersenne Twister)
+│   ├── ✅ Philox (counter-based)
+│   └── ✅ SFC64 (Small Fast Chaotic)
 ├── SeedSequence
 │   └── ✅ SeedSequence(entropy, spawn_key, pool_size)
 └── Legacy Functions
@@ -988,38 +988,40 @@ numpy.testing
 ## Remaining Work (Lower Priority)
 
 ```
+RECENTLY COMPLETED (Phases 25-27):
+├── ✅ Phase 25: Advanced Linear Algebra
+│   ├── ✅ multi_dot(arrays, out)
+│   ├── ✅ tensorsolve, tensorinv
+│   └── ✅ matrix_norm, vector_norm
+├── ✅ Phase 26: Miscellaneous Ufuncs
+│   ├── ✅ divmod, modf, frexp, ldexp
+│   ├── ✅ nextafter, spacing, nan_to_num
+│   ├── ✅ sinc, heaviside
+│   └── ✅ gcd, lcm, bitwise_count
+├── ✅ Phase 27: BitGenerators
+│   ├── ✅ MT19937
+│   ├── ✅ Philox
+│   └── ✅ SFC64
+└── ✅ histogram_bin_edges (in Phase 24)
+
 NOT YET IMPLEMENTED:
-├── Cumulative Operations
-│   ├── ❌ cumsum(arr, axis, dtype, out)
-│   ├── ❌ cumprod(arr, axis, dtype, out)
-│   ├── ❌ nancumsum(arr, axis, ...)
-│   └── ❌ nancumprod(arr, axis, ...)
-├── NaN-handling Functions
-│   ├── ❌ nansum, nanprod
-│   ├── ❌ nanmean, nanstd, nanvar
-│   ├── ❌ nanmin, nanmax
-│   ├── ❌ nanargmin, nanargmax
-│   ├── ❌ nanmedian
-│   └── ❌ nanpercentile, nanquantile
-├── Histogram Functions
-│   ├── ❌ histogram, histogram2d, histogramdd
-│   ├── ❌ histogram_bin_edges
-│   ├── ❌ bincount
-│   └── ❌ digitize
-├── Advanced Linear Algebra
-│   ├── ❌ tensordot, einsum, einsum_path
-│   ├── ❌ kron, cross, multi_dot
-│   ├── ❌ tensorsolve, tensorinv
-│   └── ❌ matrix_norm, vector_norm
-├── Miscellaneous Ufuncs
-│   ├── ❌ divmod, modf, frexp, ldexp
-│   ├── ❌ nextafter, spacing, nan_to_num
-│   ├── ❌ sinc, heaviside, isnat
-│   ├── ❌ gcd, lcm, bitwise_count
+├── Phase 28: Complex Number Accessors (see docs/plans/phase-28-complex-accessors.md)
+│   ├── ❌ real, imag, conj, conjugate, angle
+│   └── ❌ (Complex dtypes supported, but accessor functions missing)
+├── Phase 29: Advanced Sorting (see docs/plans/phase-29-advanced-sorting.md)
+│   └── ❌ lexsort, sort_complex, msort
+├── Phase 30: Index Generation (see docs/plans/phase-30-index-generation.md)
+│   ├── ❌ ogrid, mgrid
+│   └── ❌ mask_indices
+├── Phase 31: Statistics (see docs/plans/phase-31-statistics.md)
+│   ├── ❌ average(arr, axis, weights, ...)
+│   ├── ❌ ptp(arr, axis, ...)
+│   ├── ❌ percentile, quantile (standalone)
+│   ├── ❌ gradient, trapezoid
 │   └── ❌ correlate (signal processing)
-└── Index Generation
-    ├── ❌ ogrid, mgrid
-    └── ❌ mask_indices
+└── Other
+    ├── ❌ isnat (datetime-specific, low priority)
+    └── ❌ matrix_transpose (alias for transpose)
 ```
 
 ---
@@ -1084,15 +1086,18 @@ NOT YET IMPLEMENTED:
 ## Implementation Priority Summary
 
 ```
-COMPLETE (Phases 1-21):
+COMPLETE (Phases 1-27):
 ✅ Extended DTypes + Type Promotion
 ✅ Element Access (get/set)
 ✅ Iterators
 ✅ Views + reshape/transpose
 ✅ Slicing (basic + advanced)
 ✅ Broadcasting
-✅ Ufunc Infrastructure (WASM-accelerated, 90+ functions)
+✅ Ufunc Infrastructure (WASM-accelerated, 100+ functions)
 ✅ Reductions with axis (sum, mean, std, var, min, max)
+✅ Cumulative operations (cumsum, cumprod, nancumsum, nancumprod)
+✅ NaN-handling functions (nansum, nanmean, nanstd, nanvar, nanmin, nanmax, nanargmin, nanargmax, nanmedian, nanpercentile, nanquantile, nan_to_num)
+✅ Histogram functions (histogram, histogram2d, histogramdd, histogram_bin_edges, bincount, digitize)
 ✅ Array manipulation (concat, stack, split, flip, roll, tile, pad)
 ✅ Sorting & Searching (sort, argsort, partition, searchsorted)
 ✅ Statistics (mean, std, var, median, cov, corrcoef)
@@ -1102,21 +1107,21 @@ COMPLETE (Phases 1-21):
 ✅ Functional programming (vectorize, apply_along_axis)
 ✅ Window functions (blackman, hanning, kaiser, etc.)
 ✅ Constants & Type info
-✅ numpy.linalg (matmul, solve, inv, eig, svd, qr, cholesky, etc.)
+✅ numpy.linalg (matmul, solve, inv, eig, svd, qr, cholesky, tensordot, einsum, kron, cross, multi_dot, tensorsolve, tensorinv, matrix_norm, vector_norm, etc.)
 ✅ numpy.fft (fft, ifft, fft2, fftn, fftfreq, fftshift, etc.)
-✅ numpy.random (Generator, PCG64, 30+ distributions)
+✅ numpy.random (Generator, PCG64, MT19937, Philox, SFC64, 30+ distributions)
 ✅ numpy.polynomial (Polynomial, Chebyshev, Legendre, Hermite, Laguerre)
 ✅ numpy.ma (MaskedArray, cov, corrcoef, masked operations)
 ✅ numpy.strings (40+ string operations)
 ✅ numpy.rec (Record arrays)
 ✅ numpy.testing (Assertion utilities)
+✅ Misc ufuncs (divmod, modf, frexp, ldexp, sinc, heaviside, gcd, lcm, bitwise_count, nextafter, spacing)
 
-REMAINING (Lower Priority):
-❌ Cumulative operations (cumsum, cumprod)
-❌ NaN-handling functions (nansum, nanmean, etc.)
-❌ Histogram functions
-❌ Advanced linalg (tensordot, einsum, kron)
-❌ Additional BitGenerators (MT19937, Philox, SFC64)
+REMAINING (Lower Priority - See docs/plans/ for implementation details):
+❌ Phase 28: Complex accessors (real, imag, conj, angle)
+❌ Phase 29: Advanced sorting (lexsort, sort_complex, msort)
+❌ Phase 30: Index generation (ogrid, mgrid, mask_indices)
+❌ Phase 31: Statistics (average, ptp, percentile/quantile standalone, gradient, trapezoid, correlate)
 ```
 
 ---

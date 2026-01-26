@@ -1,5 +1,5 @@
 {
-  "name": "NumJS Named Volume",
+  "name": "NumWASM Named Volume",
   "image": "mcr.microsoft.com/devcontainers/typescript-node",
   "remoteUser": "node",
   "workspaceFolder": "/workspace",

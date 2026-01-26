@@ -986,9 +986,22 @@ export interface WasmModule {
 }
 
 /**
+ * Options for initializing the WASM module
+ */
+export interface WasmModuleOptions {
+  /**
+   * Custom function to locate files (like the .wasm binary).
+   * Used primarily in browser environments to specify custom WASM URLs.
+   */
+  locateFile?: (path: string, scriptDirectory: string) => string;
+}
+
+/**
  * Factory function type for the WASM module
  */
-export type WasmModuleFactory = () => Promise<WasmModule>;
+export type WasmModuleFactory = (
+  options?: WasmModuleOptions
+) => Promise<WasmModule>;
 
 /* ============ Structured DType Support (numpy.rec) ============ */
 

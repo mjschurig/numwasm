@@ -2,7 +2,7 @@
  * WASM Module Loader
  *
  * Handles loading and initialization of the NumJS WebAssembly module.
- * Works in Node.js environments (browser support planned).
+ * Works in both Node.js and browser environments.
  */
 
 import type { WasmModule, WasmModuleFactory } from './types.js';
@@ -11,12 +11,56 @@ let wasmModule: WasmModule | null = null;
 let modulePromise: Promise<WasmModule> | null = null;
 
 /**
+ * Configuration options for WASM module loading
+ */
+export interface WasmLoadConfig {
+  /**
+   * URL or path to the numjs.wasm file.
+   * - In Node.js: defaults to auto-detected path relative to module
+   * - In browser: auto-detected via import.meta.url, or can be explicitly set
+   */
+  wasmUrl?: string;
+}
+
+let wasmConfig: WasmLoadConfig = {};
+
+/**
+ * Configure WASM loading before initialization.
+ * Must be called before loadWasmModule() for custom URLs.
+ *
+ * @example
+ * // Browser with custom WASM location
+ * configureWasm({ wasmUrl: '/static/wasm/numjs.wasm' });
+ * await loadWasmModule();
+ *
+ * @example
+ * // CDN usage
+ * configureWasm({ wasmUrl: 'https://cdn.example.com/numjs/numjs.wasm' });
+ * await loadWasmModule();
+ */
+export function configureWasm(config: WasmLoadConfig): void {
+  if (wasmModule || modulePromise) {
+    throw new Error('Cannot configure WASM after module has started loading');
+  }
+  wasmConfig = { ...config };
+}
+
+/**
  * Detect if we're running in Node.js
  */
 const isNode =
   typeof process !== 'undefined' &&
   process.versions != null &&
   process.versions.node != null;
+
+/**
+ * Detect if we're running in a browser or web worker
+ */
+const isBrowser =
+  typeof window !== 'undefined' ||
+  (typeof self !== 'undefined' &&
+    typeof (self as unknown as { importScripts?: unknown }).importScripts ===
+      'function');
 
 /**
  * Get the directory path of this module in Node.js.
@@ -65,7 +109,65 @@ async function loadWasmGlue(wasmPath: string): Promise<WasmModuleFactory> {
     return require(wasmPath);
   }
 
-  throw new Error('Unable to load WASM module: no suitable require function available');
+  throw new Error(
+    'Unable to load WASM module: no suitable require function available'
+  );
+}
+
+/**
+ * Load the WASM module in Node.js environment.
+ */
+async function loadWasmNode(): Promise<WasmModule> {
+  const nodePath = await import('path');
+  const moduleDir = await getModuleDir();
+  const wasmPath = nodePath.join(moduleDir, 'wasm', 'numjs.cjs');
+
+  const createModule = await loadWasmGlue(wasmPath);
+
+  // Initialize the module (this loads the .wasm file)
+  return await createModule();
+}
+
+/**
+ * Load the WASM module in browser environment.
+ */
+async function loadWasmBrowser(): Promise<WasmModule> {
+  // Determine base URL from import.meta.url
+  let baseUrl: string;
+  if (import.meta && import.meta.url) {
+    baseUrl = new URL('.', import.meta.url).href;
+  } else {
+    // Fallback to current location
+    baseUrl = typeof location !== 'undefined' ? location.href : '/';
+  }
+
+  // Determine WASM URL
+  const wasmUrl = wasmConfig.wasmUrl || new URL('wasm/numjs.wasm', baseUrl).href;
+
+  // Determine glue code URL
+  const glueUrl = new URL('wasm/numjs.mjs', baseUrl).href;
+
+  // Dynamically import the ESM glue code from the resolved URL
+  // We use dynamic import with the full URL to load from dist at runtime
+  const glueModule = await import(/* @vite-ignore */ glueUrl);
+  const createModule: WasmModuleFactory =
+    glueModule.default || glueModule.createNumJSModule;
+
+  if (!createModule) {
+    throw new Error('Failed to load WASM glue code: no factory function found');
+  }
+
+  // Create the module with custom locateFile to resolve the WASM URL
+  const module = await createModule({
+    locateFile: (path: string) => {
+      if (path.endsWith('.wasm')) {
+        return wasmUrl;
+      }
+      return path;
+    },
+  });
+
+  return module;
 }
 
 /**
@@ -75,6 +177,16 @@ async function loadWasmGlue(wasmPath: string): Promise<WasmModuleFactory> {
  * the same module instance. The module is loaded lazily on first call.
  *
  * @returns Promise that resolves to the loaded WASM module
+ *
+ * @example
+ * // Basic usage (works in both Node.js and browser)
+ * await loadWasmModule();
+ * const arr = await zeros([3, 3]);
+ *
+ * @example
+ * // Browser with custom WASM location
+ * configureWasm({ wasmUrl: '/static/numjs.wasm' });
+ * await loadWasmModule();
  */
 export async function loadWasmModule(): Promise<WasmModule> {
   // Return cached module if already loaded
@@ -90,20 +202,15 @@ export async function loadWasmModule(): Promise<WasmModule> {
   // Start loading the module
   modulePromise = (async () => {
     try {
-      if (!isNode) {
+      if (isNode) {
+        wasmModule = await loadWasmNode();
+      } else if (isBrowser) {
+        wasmModule = await loadWasmBrowser();
+      } else {
         throw new Error(
-          'Browser environment not yet supported. NumJS currently only works in Node.js.'
+          'Unknown environment: neither Node.js nor browser detected'
         );
       }
-
-      const nodePath = await import('path');
-      const moduleDir = await getModuleDir();
-      const wasmPath = nodePath.join(moduleDir, 'wasm', 'numjs.cjs');
-
-      const createModule = await loadWasmGlue(wasmPath);
-
-      // Initialize the module (this loads the .wasm file)
-      wasmModule = await createModule();
 
       return wasmModule;
     } catch (error) {
@@ -149,4 +256,5 @@ export function isWasmLoaded(): boolean {
 export function resetWasmModule(): void {
   wasmModule = null;
   modulePromise = null;
+  wasmConfig = {};
 }

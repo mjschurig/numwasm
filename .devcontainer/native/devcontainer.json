@@ -1,5 +1,5 @@
 {
-  "name": "NumJS",
+  "name": "NumWASM (native fs)",
   "image": "mcr.microsoft.com/devcontainers/typescript-node",
   "remoteUser": "node",
   "workspaceFolder": "/workspace",

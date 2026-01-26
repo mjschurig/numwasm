@@ -9,9 +9,9 @@ dist/
 # Test fixtures (generated)
 tests/fixtures/*.json
 
-# Benchmark outputs (generated)
-benchmark/results/*.json
-benchmark/index.html
+# Benchmark intermediate results (final benchmarks.json is tracked)
+benchmark/results/numpy/
+benchmark/results/numjs/
 
 # IDE
 .idea/
@@ -46,3 +46,4 @@ __pycache__/
 .env.local
 
 .pnpm-store
+numpy/

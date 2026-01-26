@@ -26,7 +26,7 @@ export default defineConfig({
         assetFileNames: 'wasm/[name][extname]',
       },
     },
-    target: 'node18',
+    target: ['es2020', 'node18'],
     minify: false, // Keep readable for debugging
     sourcemap: true,
   },
