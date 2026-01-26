@@ -32,6 +32,10 @@ npm-debug.log*
 
 # Vitest
 .vitest/
+test-results/
+
+# Playwright
+playwright-report/
 
 # Python
 __pycache__/
