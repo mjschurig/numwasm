@@ -37,65 +37,22 @@ Implementation should follow the original NumPy code as closely as possible to e
 │   │   │
 │   │   └── src/                        # ⭐ C/Cython implementations
 │   │       ├── multiarray/             # Core array (150+ .c files)
-│   │       │   ├── arrayobject.c       # ndarray object implementation
-│   │       │   ├── methods.c           # Array methods
-│   │       │   ├── mapping.c           # Indexing/slicing
-│   │       │   ├── item_selection.c    # Item access
-│   │       │   ├── shape.c             # Shape operations
-│   │       │   ├── conversion_utils.c  # Type conversion
-│   │       │   ├── dtype_transfer.c    # dtype handling
-│   │       │   ├── descriptor.c        # dtype descriptors
-│   │       │   ├── iterator.c          # Iterator implementation
-│   │       │   ├── nditer_*.c          # N-dimensional iteration
-│   │       │   └── sorting/            # Sort algorithms
-│   │       │
 │   │       ├── umath/                  # Universal math functions
-│   │       │   ├── umathmodule.c       # Module init
-│   │       │   ├── ufunc_object.c      # Ufunc object
-│   │       │   └── reduction.c         # Reduction operations
-│   │       │
 │   │       ├── common/                 # Common utilities
 │   │       ├── npymath/                # Math library
 │   │       ├── npysort/                # Sorting algorithms
 │   │       └── _simd/                  # SIMD optimizations
 │   │
 │   ├── lib/                            # Library functions (~50+ files)
-│   │   ├── _arraypad_impl.py           # Array padding
-│   │   ├── _arraysetops_impl.py        # Set operations
-│   │   ├── _nanfunctions_impl.py       # NaN handling
-│   │   ├── _histograms_impl.py         # Histograms
-│   │   └── _index_tricks_impl.py       # Indexing tricks
-│   │
 │   ├── linalg/                         # Linear algebra
-│   │   ├── _linalg.py                  # Main interface
-│   │   └── lapack_lite/                # LAPACK routines
-│   │
 │   ├── fft/                            # Fast Fourier Transforms
-│   │   ├── _pocketfft.py               # FFT interface
-│   │   └── pocketfft/                  # FFT implementation
-│   │
 │   ├── random/                         # Random number generation
-│   │   ├── _generator.pyx              # Generator class (~200KB)
-│   │   ├── _pcg64.pyx                  # PCG64 generator
-│   │   └── src/                        # C implementations
-│   │
 │   ├── polynomial/                     # Polynomial operations
 │   ├── ma/                             # Masked arrays
+│   ├── strings/                        # String operations
+│   ├── rec/                            # Record arrays
 │   └── testing/                        # Testing utilities
 ```
-
-### Key Files to Reference
-
-| Component | NumPy Reference File |
-|-----------|---------------------|
-| ndarray core | `numpy/_core/src/multiarray/arrayobject.c` |
-| dtype system | `numpy/_core/src/multiarray/descriptor.c` |
-| Indexing/slicing | `numpy/_core/src/multiarray/mapping.c` |
-| Shape operations | `numpy/_core/src/multiarray/shape.c` |
-| Ufunc infrastructure | `numpy/_core/src/umath/ufunc_object.c` |
-| Reductions | `numpy/_core/src/umath/reduction.c` |
-| Type promotion | `numpy/_core/numerictypes.py` |
-| Array creation | `numpy/_core/fromnumeric.py` |
 
 ---
 
@@ -128,26 +85,31 @@ LEVEL 2: VIEWS & BROADCASTING
 └── ✅ Index Generation (indices, ix_, diag_indices, tril/triu_indices, argwhere)
 
 LEVEL 3: UNIVERSAL FUNCTIONS
-├── ❌ Ufunc Infrastructure
-├── ❌ Unary Ufuncs (neg, abs, sqrt, exp, log, trig, rounding, predicates)
-├── ❌ Binary Ufuncs (arithmetic, comparison, logical, bitwise)
-└── 🔶 Reductions with Axis (sum only, without axis support)
+├── ✅ Ufunc Infrastructure (WASM-accelerated)
+├── ✅ Unary Ufuncs (neg, abs, sqrt, exp, log, trig, rounding, predicates)
+├── ✅ Binary Ufuncs (arithmetic, comparison, logical, bitwise)
+└── ✅ Reductions with Axis (sum, mean, std, var, min, max, argmin, argmax)
 
 LEVEL 4: MANIPULATION & STATISTICS
-├── ❌ Array Manipulation (concat, stack, split, flip, roll, tile)
-├── 🔶 Sorting & Searching (argsort 1D only, argmax/argmin partial)
-├── ❌ Statistics (median, percentile, histogram, corrcoef)
-└── ❌ Set Operations (unique, intersect1d, union1d)
+├── ✅ Array Manipulation (concat, stack, split, flip, roll, tile, pad)
+├── ✅ Sorting & Searching (sort, argsort, partition, argpartition, searchsorted)
+├── ✅ Statistics (mean, std, var, median)
+└── ✅ Set Operations (unique, intersect1d, union1d, setdiff1d, setxor1d, isin)
 
 LEVEL 5: HIGHER-LEVEL MODULES
-├── ❌ numpy.linalg (dot, matmul, solve, inv, eig, svd)
-├── ❌ numpy.fft (fft, ifft, fft2, fftn, fftfreq)
-└── ❌ numpy.random (Generator, PCG64, distributions)
+├── ✅ numpy.linalg (dot, matmul, solve, inv, eig, svd, qr, cholesky)
+├── ✅ numpy.fft (fft, ifft, fft2, fftn, fftfreq, fftshift)
+├── ✅ numpy.random (Generator, PCG64, 30+ distributions)
+├── ✅ numpy.polynomial (Polynomial, Chebyshev, Legendre, Hermite, Laguerre)
+├── ✅ numpy.ma (MaskedArray, masked operations, cov, corrcoef)
+├── ✅ numpy.strings (40+ string operations)
+├── ✅ numpy.rec (Record arrays)
+└── ✅ numpy.testing (Assertion utilities)
 ```
 
 ---
 
-## Phase 1: Foundation Enhancement
+## Phase 1: Foundation Enhancement ✅ COMPLETE
 
 ### 1.1 Extended DType System ✅ COMPLETE
 ```
@@ -206,7 +168,7 @@ Creation Functions
 
 ---
 
-## Phase 2: Iteration & Shape Manipulation
+## Phase 2: Iteration & Shape Manipulation ✅ COMPLETE
 
 ### 2.1 Iterator Infrastructure ✅ COMPLETE
 ```
@@ -243,7 +205,7 @@ Shape Manipulation
 
 ---
 
-## Phase 3: Views, Slicing & Broadcasting
+## Phase 3: Views, Slicing & Broadcasting ✅ COMPLETE
 
 ### 3.1 View System ✅ COMPLETE
 ```
@@ -266,9 +228,9 @@ Indexing
 │   ├── ✅ arr.slice([start:stop:step])
 │   ├── ✅ arr.slice([..., i]) (ellipsis)
 │   └── ✅ newaxis support (expand dims)
-├── ❌ Advanced Indexing (not yet WASM-accelerated)
-│   ├── ❌ arr[int_array] → fancy indexing
-│   └── ❌ arr[bool_array] → boolean masking
+├── ✅ Advanced Indexing
+│   ├── ✅ take(arr, indices, axis) → fancy indexing equivalent
+│   └── ✅ compress/extract → boolean masking equivalent
 ├── ✅ Index Functions
 │   ├── ✅ take(arr, indices, axis)
 │   ├── ✅ take_along_axis(arr, indices, axis)
@@ -313,126 +275,129 @@ Broadcasting
 
 ---
 
-## Phase 4: Universal Functions (Ufuncs) ❌ NOT STARTED
+## Phase 4: Universal Functions (Ufuncs) ✅ COMPLETE
 
-### 4.1 Ufunc Infrastructure ❌
+### 4.1 Ufunc Infrastructure ✅ COMPLETE
 ```
 Ufunc System
-├── ❌ Ufunc class
-│   ├── ❌ __call__(inputs, out, where, casting, dtype)
-│   ├── ❌ reduce(arr, axis, dtype, out, keepdims, initial)
-│   ├── ❌ accumulate(arr, axis, dtype, out)
-│   ├── ❌ reduceat(arr, indices, axis, dtype, out)
-│   ├── ❌ outer(a, b, out)
-│   └── ❌ at(arr, indices, b)
-├── ❌ Inner loop dispatch (by dtype)
-├── ❌ Output allocation
-└── ❌ Broadcasting integration
+├── ✅ WASM-accelerated unary operations
+├── ✅ WASM-accelerated binary operations
+├── ✅ Broadcasting integration
+├── ✅ Output allocation
+├── ✅ Inner loop dispatch (by dtype)
+└── 🔶 Advanced Ufunc Methods
+    ├── ❌ accumulate(arr, axis, dtype, out)
+    ├── ❌ reduceat(arr, indices, axis, dtype, out)
+    ├── ❌ outer(a, b, out)
+    └── ❌ at(arr, indices, b)
 ```
 
-### 4.2 Math Ufuncs - Unary ❌
+**Implementation:** `src/ts/ufunc.ts`, `src/wasm/ufunc_unary.c`, `src/wasm/ufunc_binary.c`
+
+### 4.2 Math Ufuncs - Unary ✅ COMPLETE (90+ functions)
 ```
 Unary Math
 ├── Arithmetic
-│   ├── ❌ negative(x), positive(x)
-│   ├── ❌ absolute(x), fabs(x)
-│   ├── ❌ sign(x)
-│   ├── ❌ sqrt(x), square(x), cbrt(x)
-│   └── ❌ reciprocal(x)
+│   ├── ✅ negative(x), positive(x)
+│   ├── ✅ absolute(x), abs(x)
+│   ├── ✅ sign(x)
+│   ├── ✅ sqrt(x), square(x), cbrt(x)
+│   └── ✅ reciprocal(x)
 ├── Exponents & Logarithms
-│   ├── ❌ exp(x), exp2(x), expm1(x)
-│   ├── ❌ log(x), log2(x), log10(x), log1p(x)
-│   └── ❌ logaddexp(x1, x2), logaddexp2(x1, x2)
+│   ├── ✅ exp(x), exp2(x), expm1(x)
+│   ├── ✅ log(x), log2(x), log10(x), log1p(x)
+│   └── ✅ logaddexp(x1, x2), logaddexp2(x1, x2)
 ├── Trigonometric
-│   ├── ❌ sin(x), cos(x), tan(x)
-│   ├── ❌ arcsin(x), arccos(x), arctan(x)
-│   ├── ❌ degrees(x), radians(x)
-│   └── ❌ deg2rad(x), rad2deg(x)
+│   ├── ✅ sin(x), cos(x), tan(x)
+│   ├── ✅ arcsin(x), arccos(x), arctan(x)
+│   ├── ✅ degrees(x), radians(x)
+│   └── ✅ deg2rad(x), rad2deg(x)
 ├── Hyperbolic
-│   ├── ❌ sinh(x), cosh(x), tanh(x)
-│   └── ❌ arcsinh(x), arccosh(x), arctanh(x)
+│   ├── ✅ sinh(x), cosh(x), tanh(x)
+│   └── ✅ arcsinh(x), arccosh(x), arctanh(x)
 ├── Rounding
-│   ├── ❌ round(x, decimals), around(x, decimals)
-│   ├── ❌ rint(x), fix(x)
-│   └── ❌ floor(x), ceil(x), trunc(x)
+│   ├── ✅ round(x, decimals), around(x, decimals)
+│   ├── ✅ rint(x), fix(x)
+│   └── ✅ floor(x), ceil(x), trunc(x)
 ├── Floating Point
-│   ├── ❌ signbit(x), copysign(x1, x2)
+│   ├── ✅ signbit(x), copysign(x1, x2)
 │   ├── ❌ frexp(x), ldexp(x1, x2)
 │   ├── ❌ nextafter(x1, x2), spacing(x)
 │   └── ❌ nan_to_num(x, nan, posinf, neginf)
 ├── Special
-│   ├── ❌ i0(x) → Bessel
+│   ├── ✅ i0(x) → Bessel (in window.ts)
 │   ├── ❌ sinc(x)
 │   └── ❌ heaviside(x1, x2)
 └── Predicates
-    ├── ❌ isnan(x), isinf(x), isfinite(x)
-    ├── ❌ isneginf(x), isposinf(x)
+    ├── ✅ isnan(x), isinf(x), isfinite(x)
+    ├── ✅ isneginf(x), isposinf(x)
     └── ❌ isnat(x)
 ```
 
-### 4.3 Math Ufuncs - Binary ❌
+### 4.3 Math Ufuncs - Binary ✅ COMPLETE
 ```
 Binary Math
 ├── Arithmetic
-│   ├── ❌ add(x1, x2), subtract(x1, x2)
-│   ├── ❌ multiply(x1, x2), divide(x1, x2)
-│   ├── ❌ true_divide(x1, x2), floor_divide(x1, x2)
-│   ├── ❌ power(x1, x2), float_power(x1, x2)
-│   ├── ❌ mod(x1, x2), remainder(x1, x2), fmod(x1, x2)
+│   ├── ✅ add(x1, x2), subtract(x1, x2)
+│   ├── ✅ multiply(x1, x2), divide(x1, x2)
+│   ├── ✅ true_divide(x1, x2), floor_divide(x1, x2)
+│   ├── ✅ power(x1, x2), float_power(x1, x2)
+│   ├── ✅ mod(x1, x2), remainder(x1, x2), fmod(x1, x2)
 │   └── ❌ divmod(x1, x2), modf(x)
 ├── Comparison
-│   ├── ❌ greater(x1, x2), greater_equal(x1, x2)
-│   ├── ❌ less(x1, x2), less_equal(x1, x2)
-│   ├── ❌ equal(x1, x2), not_equal(x1, x2)
-│   └── ❌ maximum(x1, x2), minimum(x1, x2)
-│       fmax(x1, x2), fmin(x1, x2)
+│   ├── ✅ greater(x1, x2), greater_equal(x1, x2)
+│   ├── ✅ less(x1, x2), less_equal(x1, x2)
+│   ├── ✅ equal(x1, x2), not_equal(x1, x2)
+│   └── ✅ maximum(x1, x2), minimum(x1, x2)
+│       ✅ fmax(x1, x2), fmin(x1, x2)
 ├── Logical
-│   ├── ❌ logical_and(x1, x2)
-│   ├── ❌ logical_or(x1, x2)
-│   ├── ❌ logical_xor(x1, x2)
-│   └── ❌ logical_not(x)
+│   ├── ✅ logical_and(x1, x2)
+│   ├── ✅ logical_or(x1, x2)
+│   ├── ✅ logical_xor(x1, x2)
+│   └── ✅ logical_not(x)
 ├── Bitwise
-│   ├── ❌ bitwise_and(x1, x2), bitwise_or(x1, x2)
-│   ├── ❌ bitwise_xor(x1, x2), invert(x)
-│   ├── ❌ left_shift(x1, x2), right_shift(x1, x2)
+│   ├── ✅ bitwise_and(x1, x2), bitwise_or(x1, x2)
+│   ├── ✅ bitwise_xor(x1, x2), invert(x)
+│   ├── ✅ left_shift(x1, x2), right_shift(x1, x2)
 │   └── ❌ bitwise_count(x)
 ├── Trigonometric
-│   ├── ❌ arctan2(x1, x2)
-│   └── ❌ hypot(x1, x2)
+│   ├── ✅ arctan2(x1, x2)
+│   └── ✅ hypot(x1, x2)
 └── Rational
     ├── ❌ gcd(x1, x2)
     └── ❌ lcm(x1, x2)
 ```
 
-### 4.4 Reductions (with axis support) 🔶 PARTIAL
+### 4.4 Reductions (with axis support) ✅ COMPLETE
 ```
 Reductions
-├── 🔶 sum(arr) - implemented WITHOUT axis support, uses pairwise summation
-├── ❌ prod(arr, axis, dtype, out, keepdims, initial)
+├── ✅ sum(arr, axis, dtype, keepdims) - uses pairwise summation for accuracy
+├── ✅ prod(arr, axis, dtype, keepdims)
 ├── ❌ nansum(arr, axis, ...), nanprod(arr, axis, ...)
 ├── ❌ cumsum(arr, axis, dtype, out), cumprod(arr, axis, dtype, out)
 ├── ❌ nancumsum(arr, ...), nancumprod(arr, ...)
-├── ❌ diff(arr, n, axis, prepend, append)
-├── ❌ ediff1d(arr, to_end, to_begin)
+├── ✅ diff(arr, n, axis, prepend, append) → ediff1d
+├── ✅ ediff1d(arr, to_end, to_begin)
 ├── ❌ gradient(f, *varargs, axis, edge_order)
 ├── ❌ cross(a, b, axisa, axisb, axisc, axis)
 ├── ❌ trapezoid(y, x, dx, axis)
 └── Aggregations
-    ├── ❌ min(arr, axis, ...), max(arr, axis, ...)
-    ├── ❌ amin(arr, ...), amax(arr, ...)
+    ├── ✅ min(arr, axis, keepdims), max(arr, axis, keepdims)
+    ├── ✅ amin(arr, ...), amax(arr, ...)
     ├── ❌ nanmin(arr, ...), nanmax(arr, ...)
     ├── ❌ ptp(arr, axis) → peak to peak
-    ├── 🔶 argmin(arr), argmax(arr) - TypeScript only, limited axis support
+    ├── ✅ argmin(arr, axis, keepdims), argmax(arr, axis, keepdims)
     ├── ❌ nanargmin(arr, ...), nanargmax(arr, ...)
-    ├── ❌ all(arr, axis), any(arr, axis)
+    ├── ✅ all(arr, axis, keepdims), any(arr, axis, keepdims)
     └── ✅ countNonzero(arr, axis)
 ```
 
-**Existing Implementation:** `src/wasm/pairwise_sum.c` (accurate summation algorithm)
+**Implementation:** `src/ts/statistics.ts`, `src/wasm/statistics.c`, `src/wasm/pairwise_sum.c`
 
-### 4.5 Complex Numbers ❌
+### 4.5 Complex Numbers 🔶 PARTIAL
 ```
 Complex
+├── 🔶 Complex64, Complex128 dtypes supported
 ├── ❌ real(x), imag(x)
 ├── ❌ conj(x), conjugate(x)
 └── ❌ angle(z, deg)
@@ -440,113 +405,117 @@ Complex
 
 ---
 
-## Phase 5: Array Manipulation ❌ NOT STARTED
+## Phase 5: Array Manipulation ✅ COMPLETE
 
-### 5.1 Joining Arrays ❌
+### 5.1 Joining Arrays ✅ COMPLETE
 ```
 Joining
-├── ❌ concatenate(arrays, axis, out, dtype, casting)
-├── ❌ stack(arrays, axis, out, dtype, casting)
-├── ❌ vstack(tup), row_stack(tup)
-├── ❌ hstack(tup)
-├── ❌ dstack(tup)
-├── ❌ column_stack(tup)
-├── ❌ block(arrays)
-└── ❌ append(arr, values, axis)
+├── ✅ concatenate(arrays, axis, out, dtype, casting)
+├── ✅ stack(arrays, axis, out, dtype, casting)
+├── ✅ vstack(tup), row_stack(tup)
+├── ✅ hstack(tup)
+├── ✅ dstack(tup)
+├── ✅ column_stack(tup)
+├── ✅ block(arrays)
+└── ✅ append(arr, values, axis)
 ```
 
-### 5.2 Splitting Arrays ❌
+**Implementation:** `src/ts/manipulation.ts`, `src/wasm/manipulation.c`
+
+### 5.2 Splitting Arrays ✅ COMPLETE
 ```
 Splitting
-├── ❌ split(arr, indices_or_sections, axis)
-├── ❌ array_split(arr, indices_or_sections, axis)
-├── ❌ vsplit(arr, indices_or_sections)
-├── ❌ hsplit(arr, indices_or_sections)
-├── ❌ dsplit(arr, indices_or_sections)
-└── ❌ unstack(x, axis)
+├── ✅ split(arr, indices_or_sections, axis)
+├── ✅ array_split(arr, indices_or_sections, axis)
+├── ✅ vsplit(arr, indices_or_sections)
+├── ✅ hsplit(arr, indices_or_sections)
+├── ✅ dsplit(arr, indices_or_sections)
+└── ✅ unstack(x, axis)
 ```
 
-### 5.3 Tiling & Repeating ❌
+### 5.3 Tiling & Repeating ✅ COMPLETE
 ```
 Tiling
-├── ❌ tile(arr, reps)
-├── ❌ repeat(arr, repeats, axis)
-└── ❌ pad(arr, pad_width, mode, ...)
+├── ✅ tile(arr, reps)
+├── ✅ repeat(arr, repeats, axis)
+└── ✅ pad(arr, pad_width, mode, constant_values)
 ```
 
-### 5.4 Rearranging ❌
+### 5.4 Rearranging ✅ COMPLETE
 ```
 Rearranging
-├── ❌ flip(arr, axis)
-├── ❌ fliplr(arr), flipud(arr)
-├── ❌ roll(arr, shift, axis)
-├── ❌ rot90(arr, k, axes)
-├── ❌ resize(arr, new_shape)
-├── ❌ trim_zeros(filt, trim)
-├── ❌ insert(arr, obj, values, axis)
-└── ❌ delete(arr, obj, axis)
+├── ✅ flip(arr, axis)
+├── ✅ fliplr(arr), flipud(arr)
+├── ✅ roll(arr, shift, axis)
+├── ✅ rot90(arr, k, axes)
+├── ✅ resize(arr, new_shape)
+├── ✅ trim_zeros(filt, trim)
+├── ✅ insert(arr, obj, values, axis)
+└── ✅ deleteArr(arr, obj, axis)
 ```
 
-### 5.5 Copying 🔶 PARTIAL
+### 5.5 Copying ✅ COMPLETE
 ```
 Copying
 ├── ✅ copy(a)
-├── ❌ copyto(dst, src, casting, where)
-└── ❌ asarray(a, dtype, order, ...)
+├── ✅ copyto(dst, src, where)
+└── ✅ asarray(a, dtype)
 ```
 
 ---
 
-## Phase 6: Sorting, Searching & Statistics 🔶 PARTIAL
+## Phase 6: Sorting, Searching & Statistics ✅ COMPLETE
 
-### 6.1 Sorting 🔶 PARTIAL
+### 6.1 Sorting ✅ COMPLETE
 ```
 Sorting
-├── ❌ sort(arr, axis, kind, order)
-├── 🔶 argsort(arr) - TypeScript only, 1D arrays only
+├── ✅ sort(arr, axis, kind) - supports quicksort, mergesort, heapsort
+├── ✅ argsort(arr, axis, kind)
 ├── ❌ lexsort(keys, axis)
 ├── ❌ sort_complex(arr)
-├── ❌ partition(arr, kth, axis, kind, order)
-├── ❌ argpartition(arr, kth, axis, kind, order)
+├── ✅ partition(arr, kth, axis)
+├── ✅ argpartition(arr, kth, axis)
 └── ❌ msort(arr) → sort along first axis
 ```
 
-### 6.2 Searching 🔶 PARTIAL
+**Implementation:** `src/ts/sorting.ts`, `src/wasm/sorting.c`
+
+### 6.2 Searching ✅ COMPLETE
 ```
 Searching
-├── 🔶 argmax(arr) - TypeScript only, limited axis support
-├── 🔶 argmin(arr) - TypeScript only, limited axis support
+├── ✅ argmax(arr, axis, keepdims)
+├── ✅ argmin(arr, axis, keepdims)
 ├── ❌ nanargmax(arr, axis, out, keepdims)
 ├── ❌ nanargmin(arr, axis, out, keepdims)
 ├── ✅ nonzero(arr)
 ├── ✅ flatnonzero(arr)
-├── ❌ argwhere(arr)
+├── ✅ argwhere(arr)
 ├── ✅ where(condition, x, y)
-├── ❌ searchsorted(a, v, side, sorter)
+├── ✅ searchsorted(a, v, side, sorter)
 └── ✅ extract(condition, arr)
 ```
 
-### 6.3 Statistics ❌ NOT STARTED
+### 6.3 Statistics ✅ COMPLETE
 ```
 Statistics
 ├── Averages & Variances
-│   ├── ❌ mean(arr, axis, dtype, out, keepdims)
+│   ├── ✅ mean(arr, axis, dtype, keepdims)
 │   ├── ❌ average(arr, axis, weights, returned, keepdims)
-│   ├── ❌ std(arr, axis, dtype, out, ddof, keepdims)
-│   ├── ❌ var(arr, axis, dtype, out, ddof, keepdims)
+│   ├── ✅ std(arr, axis, dtype, ddof, keepdims)
+│   ├── ✅ var(arr, axis, dtype, ddof, keepdims)
 │   ├── ❌ nanmean(...), nanstd(...), nanvar(...)
-│   └── ❌ median(arr, axis, out, overwrite_input, keepdims)
-│       nanmedian(...)
+│   └── ✅ median(arr, axis, keepdims)
+│       ❌ nanmedian(...)
 ├── Order Statistics
-│   ├── ❌ amin(arr, ...), amax(arr, ...)
+│   ├── ✅ amin(arr, ...), amax(arr, ...)
 │   ├── ❌ ptp(arr, axis, out, keepdims)
 │   ├── ❌ percentile(arr, q, axis, out, ...)
 │   ├── ❌ quantile(arr, q, axis, out, ...)
 │   └── ❌ nanpercentile(...), nanquantile(...)
 ├── Correlating
-│   ├── ❌ corrcoef(x, y, rowvar, bias, ddof, dtype)
+│   ├── ✅ corrcoef(x, y, ...) - via ma module
 │   ├── ❌ correlate(a, v, mode)
-│   └── ❌ cov(m, y, rowvar, bias, ddof, fweights, aweights, dtype)
+│   └── ✅ cov(m, y, ...) - via ma module
 └── Histograms
     ├── ❌ histogram(a, bins, range, density, weights)
     ├── ❌ histogram2d(x, y, bins, range, density, weights)
@@ -558,136 +527,162 @@ Statistics
 
 ---
 
-## Phase 7: Logic & Comparison ❌ NOT STARTED
+## Phase 7: Logic & Comparison ✅ COMPLETE
 
-### 7.1 Truth Testing ❌
+### 7.1 Truth Testing ✅ COMPLETE
 ```
 Truth Testing
-├── ❌ all(a, axis, out, keepdims, where)
-├── ❌ any(a, axis, out, keepdims, where)
-├── ❌ allclose(a, b, rtol, atol, equal_nan)
-├── ❌ isclose(a, b, rtol, atol, equal_nan)
-├── ❌ array_equal(a1, a2, equal_nan)
-└── ❌ array_equiv(a1, a2)
+├── ✅ all(a, axis, out, keepdims)
+├── ✅ any(a, axis, out, keepdims)
+├── ✅ allclose(a, b, rtol, atol, equal_nan)
+├── ✅ isclose(a, b, rtol, atol, equal_nan)
+├── ✅ array_equal(a1, a2, equal_nan)
+└── ✅ array_equiv(a1, a2)
 ```
 
-### 7.2 Array Contents ❌
+**Implementation:** `src/ts/logic.ts`, `src/wasm/logic.c`
+
+### 7.2 Array Contents ✅ COMPLETE
 ```
 Array Contents
-├── ❌ isfinite(x), isinf(x), isnan(x)
+├── ✅ isfinite(x), isinf(x), isnan(x)
 ├── ❌ isnat(x)
-├── ❌ isneginf(x), isposinf(x)
-├── ❌ iscomplex(x), iscomplexobj(x)
-├── ❌ isreal(x), isrealobj(x)
-├── ❌ isfortran(a)
-└── ❌ isscalar(element)
+├── ✅ isneginf(x), isposinf(x)
+├── ✅ iscomplex(x), iscomplexobj(x)
+├── ✅ isreal(x), isrealobj(x)
+├── ✅ isfortran(a)
+└── ✅ isscalar(element)
 ```
 
 ---
 
-## Phase 8: Set Operations ❌ NOT STARTED
+## Phase 8: Set Operations ✅ COMPLETE
 
 ```
 Set Operations
-├── ❌ unique(ar, return_index, return_inverse, return_counts, axis, equal_nan)
-├── ❌ unique_all(x), unique_counts(x)
-├── ❌ unique_inverse(x), unique_values(x)
-├── ❌ in1d(ar1, ar2, assume_unique, invert, kind)
-├── ❌ isin(element, test_elements, assume_unique, invert, kind)
-├── ❌ intersect1d(ar1, ar2, assume_unique, return_indices)
-├── ❌ setdiff1d(ar1, ar2, assume_unique)
-├── ❌ setxor1d(ar1, ar2, assume_unique)
-└── ❌ union1d(ar1, ar2)
+├── ✅ unique(ar, return_index, return_inverse, return_counts, axis, equal_nan)
+├── ✅ unique_all(x), unique_counts(x)
+├── ✅ unique_inverse(x), unique_values(x)
+├── ✅ in1d(ar1, ar2, assume_unique, invert, kind)
+├── ✅ isin(element, test_elements, assume_unique, invert, kind)
+├── ✅ intersect1d(ar1, ar2, assume_unique, return_indices)
+├── ✅ setdiff1d(ar1, ar2, assume_unique)
+├── ✅ setxor1d(ar1, ar2, assume_unique)
+└── ✅ union1d(ar1, ar2)
 ```
+
+**Implementation:** `src/ts/setops.ts`, `src/wasm/setops.c`
 
 ---
 
-## Phase 9: I/O Operations ❌ NOT STARTED
+## Phase 9: I/O Operations ✅ COMPLETE
 
 ```
 Input/Output
 ├── Binary Files
-│   ├── ❌ save(file, arr, allow_pickle, fix_imports)
-│   ├── ❌ load(file, mmap_mode, allow_pickle, fix_imports, encoding)
+│   ├── ✅ save(file, arr) - NPY format
+│   ├── ✅ load(file) - NPY format
 │   ├── ❌ savez(file, *args, **kwds)
 │   └── ❌ savez_compressed(file, *args, **kwds)
 ├── Text Files
-│   ├── ❌ loadtxt(fname, dtype, comments, delimiter, ...)
-│   ├── ❌ savetxt(fname, X, fmt, delimiter, newline, ...)
-│   ├── ❌ genfromtxt(fname, dtype, comments, delimiter, ...)
-│   └── ❌ fromregex(file, regexp, dtype, encoding)
+│   ├── ✅ loadtxt(fname, dtype, delimiter, skiprows, ...)
+│   ├── ✅ savetxt(fname, X, fmt, delimiter, newline, ...)
+│   ├── ✅ genfromtxt(fname, dtype, delimiter, skip_header, ...)
+│   └── ✅ fromregex(file, regexp, dtype)
 ├── Raw Binary
-│   ├── ❌ fromfile(file, dtype, count, sep, offset, like)
-│   └── ❌ tofile(fid, sep, format)
+│   ├── ✅ fromfile(file, dtype, count, offset)
+│   └── ✅ frombuffer(buffer, dtype, count, offset)
 ├── String Formatting
-│   ├── ❌ array2string(a, max_line_width, precision, ...)
-│   ├── ❌ array_repr(arr, max_line_width, precision, ...)
-│   ├── ❌ array_str(a, max_line_width, precision, ...)
-│   ├── ❌ format_float_positional(x, precision, ...)
-│   └── ❌ format_float_scientific(x, precision, ...)
+│   ├── ✅ array2string(a, max_line_width, precision, ...)
+│   ├── ✅ array_repr(arr, max_line_width, precision, ...)
+│   ├── ✅ array_str(a, max_line_width, precision, ...)
+│   ├── ✅ format_float_positional(x, precision, ...)
+│   └── ✅ format_float_scientific(x, precision, ...)
 ├── Memory Mapping
-│   └── ❌ memmap(filename, dtype, mode, offset, shape, order)
+│   └── ✅ memmap(filename, dtype, mode, offset, shape, order) - Memmap class
 ├── Print Options
-│   ├── ❌ set_printoptions(precision, threshold, edgeitems, ...)
-│   ├── ❌ get_printoptions()
-│   └── ❌ printoptions(*args, **kwargs)
+│   ├── ✅ set_printoptions(precision, threshold, edgeitems, ...)
+│   ├── ✅ get_printoptions()
+│   └── ✅ printoptions(*args, **kwargs) → withPrintoptions
 └── Base Conversion
-    ├── ❌ binary_repr(num, width)
-    └── ❌ base_repr(number, base, padding)
+    ├── ✅ binary_repr(num, width)
+    └── ✅ base_repr(number, base, padding)
 ```
+
+**Implementation:** `src/ts/io/` (10+ files)
 
 ---
 
-## Phase 10: Functional Programming ❌ NOT STARTED
+## Phase 10: Functional Programming ✅ COMPLETE
 
 ```
 Functional
-├── ❌ apply_along_axis(func1d, axis, arr, *args, **kwargs)
-├── ❌ apply_over_axes(func, a, axes)
-├── ❌ vectorize(pyfunc, otypes, doc, excluded, cache, signature)
-├── ❌ frompyfunc(func, nin, nout, identity)
-└── ❌ piecewise(x, condlist, funclist, *args, **kw)
+├── ✅ apply_along_axis(func1d, axis, arr, *args, **kwargs)
+├── ✅ apply_over_axes(func, a, axes)
+├── ✅ vectorize(pyfunc, otypes, doc, excluded, cache, signature)
+├── ✅ frompyfunc(func, nin, nout, identity)
+└── ✅ piecewise(x, condlist, funclist, *args, **kw)
 ```
+
+**Implementation:** `src/ts/functional.ts`
 
 ---
 
-## Phase 11: Window Functions ❌ NOT STARTED
+## Phase 11: Window Functions ✅ COMPLETE
 
 ```
 Window Functions
-├── ❌ bartlett(M)
-├── ❌ blackman(M)
-├── ❌ hamming(M)
-├── ❌ hanning(M)
-└── ❌ kaiser(M, beta)
+├── ✅ bartlett(M)
+├── ✅ blackman(M)
+├── ✅ hamming(M)
+├── ✅ hanning(M)
+├── ✅ kaiser(M, beta)
+└── ✅ i0(x) - Modified Bessel function
 ```
+
+**Implementation:** `src/ts/window.ts`
 
 ---
 
-## Phase 12: Constants ❌ NOT STARTED
+## Phase 12: Constants ✅ COMPLETE
 
 ```
 Constants
-├── ❌ e → 2.71828...
-├── ❌ euler_gamma → 0.57721...
-├── ❌ inf → positive infinity
-├── ❌ nan → Not a Number
-├── ❌ newaxis → None (for indexing)
-└── ❌ pi → 3.14159...
+├── ✅ e → 2.71828...
+├── ✅ euler_gamma → 0.57721...
+├── ✅ inf, PINF, NINF → infinity values
+├── ✅ nan, NAN → Not a Number
+├── ✅ PZERO, NZERO → signed zeros
+├── ✅ newaxis → for indexing
+└── ✅ pi → 3.14159...
 ```
+
+**Implementation:** `src/ts/constants.ts`
 
 ---
 
-## Phase 13: numpy.linalg ❌ NOT STARTED
+## Phase 13: Type Information ✅ COMPLETE
+
+```
+Type Information
+├── ✅ finfo(dtype) → FloatInfo (eps, max, min, bits, etc.)
+└── ✅ iinfo(dtype) → IntInfo (min, max)
+```
+
+**Implementation:** `src/ts/typeinfo.ts`
+
+---
+
+## Phase 14: numpy.linalg ✅ COMPLETE
 
 ```
 numpy.linalg
 ├── Matrix Products
-│   ├── ❌ dot(a, b, out)
-│   ├── ❌ vdot(a, b)
-│   ├── ❌ inner(a, b)
-│   ├── ❌ outer(a, b, out)
-│   ├── ❌ matmul(x1, x2, out) / @ operator
+│   ├── ✅ dot(a, b, out)
+│   ├── ✅ vdot(a, b)
+│   ├── ✅ inner(a, b)
+│   ├── ✅ outer(a, b, out)
+│   ├── ✅ matmul(x1, x2, out)
 │   ├── ❌ tensordot(a, b, axes)
 │   ├── ❌ einsum(subscripts, *operands, out, ...)
 │   ├── ❌ einsum_path(subscripts, *operands, optimize)
@@ -695,186 +690,454 @@ numpy.linalg
 │   ├── ❌ cross(a, b, axisa, axisb, axisc, axis)
 │   └── ❌ multi_dot(arrays, out)
 ├── Decompositions
-│   ├── ❌ cholesky(a)
-│   ├── ❌ qr(a, mode)
-│   ├── ❌ svd(a, full_matrices, compute_uv, hermitian)
-│   └── ❌ svdvals(x)
+│   ├── ✅ cholesky(a)
+│   ├── ✅ qr(a, mode)
+│   ├── ✅ svd(a, full_matrices, compute_uv, hermitian)
+│   └── ✅ svdvals(x)
 ├── Eigenvalues
-│   ├── ❌ eig(a)
-│   ├── ❌ eigh(a, UPLO)
-│   ├── ❌ eigvals(a)
-│   └── ❌ eigvalsh(a, UPLO)
+│   ├── ✅ eig(a)
+│   ├── ✅ eigh(a, UPLO)
+│   ├── ✅ eigvals(a)
+│   └── ✅ eigvalsh(a, UPLO)
 ├── Norms & Numbers
-│   ├── ❌ norm(x, ord, axis, keepdims)
+│   ├── ✅ norm(x, ord, axis, keepdims)
 │   ├── ❌ matrix_norm(x, ord, keepdims)
 │   ├── ❌ vector_norm(x, ord, axis, keepdims)
-│   ├── ❌ cond(x, p)
-│   ├── ❌ det(a)
-│   ├── ❌ slogdet(a)
-│   ├── ❌ matrix_rank(A, tol, hermitian, rtol)
-│   └── ❌ trace(a, offset, axis1, axis2, dtype, out)
+│   ├── ✅ cond(x, p)
+│   ├── ✅ det(a)
+│   ├── ✅ slogdet(a)
+│   ├── ✅ matrix_rank(A, tol, hermitian, rtol)
+│   └── ✅ trace(a, offset, axis1, axis2, dtype, out)
 ├── Solving & Inverting
-│   ├── ❌ solve(a, b)
+│   ├── ✅ solve(a, b)
 │   ├── ❌ tensorsolve(a, b, axes)
-│   ├── ❌ lstsq(a, b, rcond)
-│   ├── ❌ inv(a)
-│   ├── ❌ pinv(a, rcond, hermitian, rtol)
+│   ├── ✅ lstsq(a, b, rcond)
+│   ├── ✅ inv(a)
+│   ├── ✅ pinv(a, rcond, hermitian, rtol)
 │   └── ❌ tensorinv(a, ind)
 ├── Matrix Operations
-│   ├── ❌ matrix_power(a, n)
+│   ├── ✅ matrix_power(a, n)
 │   ├── ✅ diagonal(a, offset, axis1, axis2)
 │   └── ❌ matrix_transpose(x)
 └── Exception
-    └── ❌ LinAlgError
+    └── ✅ LinAlgError
 ```
+
+**Implementation:** `src/ts/linalg.ts`, `src/wasm/linalg.c`, `src/wasm/blas.c`, `src/wasm/lapack.c`
 
 ---
 
-## Phase 14: numpy.fft ❌ NOT STARTED
+## Phase 15: numpy.fft ✅ COMPLETE
 
 ```
 numpy.fft
 ├── Standard FFTs
-│   ├── ❌ fft(a, n, axis, norm, out)
-│   ├── ❌ ifft(a, n, axis, norm, out)
-│   ├── ❌ fft2(a, s, axes, norm, out)
-│   ├── ❌ ifft2(a, s, axes, norm, out)
-│   ├── ❌ fftn(a, s, axes, norm, out)
-│   └── ❌ ifftn(a, s, axes, norm, out)
+│   ├── ✅ fft(a, n, axis, norm, out)
+│   ├── ✅ ifft(a, n, axis, norm, out)
+│   ├── ✅ fft2(a, s, axes, norm, out)
+│   ├── ✅ ifft2(a, s, axes, norm, out)
+│   ├── ✅ fftn(a, s, axes, norm, out)
+│   └── ✅ ifftn(a, s, axes, norm, out)
 ├── Real FFTs
-│   ├── ❌ rfft(a, n, axis, norm, out)
-│   ├── ❌ irfft(a, n, axis, norm, out)
-│   ├── ❌ rfft2(a, s, axes, norm, out)
-│   ├── ❌ irfft2(a, s, axes, norm, out)
-│   ├── ❌ rfftn(a, s, axes, norm, out)
-│   └── ❌ irfftn(a, s, axes, norm, out)
+│   ├── ✅ rfft(a, n, axis, norm, out)
+│   ├── ✅ irfft(a, n, axis, norm, out)
+│   ├── ✅ rfft2(a, s, axes, norm, out)
+│   ├── ✅ irfft2(a, s, axes, norm, out)
+│   ├── ✅ rfftn(a, s, axes, norm, out)
+│   └── ✅ irfftn(a, s, axes, norm, out)
 ├── Hermitian FFTs
-│   ├── ❌ hfft(a, n, axis, norm, out)
-│   └── ❌ ihfft(a, n, axis, norm, out)
+│   ├── ✅ hfft(a, n, axis, norm, out)
+│   └── ✅ ihfft(a, n, axis, norm, out)
 └── Helper Functions
-    ├── ❌ fftfreq(n, d, device)
-    ├── ❌ rfftfreq(n, d, device)
-    ├── ❌ fftshift(x, axes)
-    └── ❌ ifftshift(x, axes)
+    ├── ✅ fftfreq(n, d, device)
+    ├── ✅ rfftfreq(n, d, device)
+    ├── ✅ fftshift(x, axes)
+    └── ✅ ifftshift(x, axes)
 ```
+
+**Implementation:** `src/ts/fft.ts`, `src/wasm/fft.c`
 
 ---
 
-## Phase 15: numpy.random ❌ NOT STARTED
+## Phase 16: numpy.random ✅ COMPLETE
 
 ```
 numpy.random
 ├── Generator Class
-│   ├── ❌ default_rng(seed) → Generator
+│   ├── ✅ default_rng(seed) → Generator
 │   └── Generator Methods
-│       ├── ❌ random(size, dtype, out)
-│       ├── ❌ integers(low, high, size, dtype, endpoint)
-│       ├── ❌ uniform(low, high, size)
-│       ├── ❌ normal(loc, scale, size)
-│       ├── ❌ standard_normal(size, dtype, out)
-│       ├── ❌ exponential(scale, size)
-│       ├── ❌ poisson(lam, size)
-│       ├── ❌ binomial(n, p, size)
-│       ├── ❌ beta(a, b, size)
-│       ├── ❌ gamma(shape, scale, size)
-│       ├── ❌ chisquare(df, size)
-│       ├── ❌ choice(a, size, replace, p, axis, shuffle)
-│       ├── ❌ shuffle(x, axis)
-│       ├── ❌ permutation(x, axis)
-│       └── ... (many more distributions)
+│       ├── ✅ random(size, dtype, out)
+│       ├── ✅ integers(low, high, size, dtype, endpoint)
+│       ├── ✅ uniform(low, high, size)
+│       ├── ✅ normal(loc, scale, size)
+│       ├── ✅ standard_normal(size, dtype, out)
+│       ├── ✅ exponential(scale, size)
+│       ├── ✅ standard_exponential(size, method)
+│       ├── ✅ poisson(lam, size)
+│       ├── ✅ binomial(n, p, size)
+│       ├── ✅ negative_binomial(n, p, size)
+│       ├── ✅ geometric(p, size)
+│       ├── ✅ hypergeometric(ngood, nbad, nsample, size)
+│       ├── ✅ beta(a, b, size)
+│       ├── ✅ gamma(shape, scale, size)
+│       ├── ✅ standard_gamma(shape, size)
+│       ├── ✅ chisquare(df, size)
+│       ├── ✅ f(dfnum, dfden, size)
+│       ├── ✅ standard_t(df, size)
+│       ├── ✅ standard_cauchy(size)
+│       ├── ✅ pareto(a, size)
+│       ├── ✅ weibull(a, size)
+│       ├── ✅ laplace(loc, scale, size)
+│       ├── ✅ lognormal(mean, sigma, size)
+│       ├── ✅ rayleigh(scale, size)
+│       ├── ✅ choice(a, size, replace, p, axis, shuffle) - async
+│       ├── ✅ shuffle(x, axis) - async
+│       ├── ✅ permutation(x, axis) - async
+│       └── ✅ bytes(length)
 ├── BitGenerator Infrastructure
-│   ├── ❌ PCG64 (default)
+│   ├── ✅ PCG64 (default)
 │   ├── ❌ MT19937
 │   ├── ❌ Philox
 │   └── ❌ SFC64
 ├── SeedSequence
-│   └── ❌ SeedSequence(entropy, spawn_key, pool_size)
-└── Legacy (RandomState)
-    └── ❌ Backward compatibility functions
+│   └── ✅ SeedSequence(entropy, spawn_key, pool_size)
+└── Legacy Functions
+    ├── ✅ seed(seed)
+    ├── ✅ random()
+    ├── ✅ randn()
+    ├── ✅ randint(low, high, size)
+    └── ✅ initRandom()
 ```
 
----
-
-## Phase 16: Additional Modules ❌ NOT STARTED
-
-### numpy.strings (2.0+) ❌
-### numpy.polynomial ❌
-### numpy.ma (Masked Arrays) ❌
-### numpy.rec (Record Arrays) ❌
-### numpy.testing ❌
+**Implementation:** `src/ts/random.ts`, `src/wasm/random/`
 
 ---
 
-## Phase 17: Error Handling & Configuration ❌ NOT STARTED
+## Phase 17: numpy.polynomial ✅ COMPLETE
 
-### Error Handling ❌
-### Exceptions ❌
+```
+numpy.polynomial
+├── ✅ Polynomial Class (Power Series)
+│   ├── ✅ polyval, polyval2d, polyval3d
+│   ├── ✅ polyvander, polyvander2d, polyvander3d
+│   ├── ✅ polyder, polyint
+│   ├── ✅ polyfit
+│   ├── ✅ polyroots, polycompanion
+│   ├── ✅ polyfromroots
+│   └── ✅ polyadd, polysub, polymul, polydiv, polypow
+├── ✅ Chebyshev Class
+│   ├── ✅ chebval, chebvander
+│   ├── ✅ chebder, chebint
+│   ├── ✅ chebfit, chebinterpolate
+│   ├── ✅ chebroots, chebcompanion
+│   └── ✅ chebadd, chebsub, chebmul, chebdiv, chebpow
+├── ✅ Legendre Class
+│   ├── ✅ legval, legvander
+│   ├── ✅ legder, legint
+│   ├── ✅ legfit, legroots
+│   └── ✅ legadd, legsub, legmul, legdiv, legpow
+├── ✅ Hermite Class (Physicist's)
+│   ├── ✅ hermval, hermvander
+│   ├── ✅ hermder, hermint
+│   ├── ✅ hermfit, hermroots
+│   └── ✅ hermadd, hermsub, hermmul, hermdiv, hermpow
+├── ✅ HermiteE Class (Probabilist's)
+│   ├── ✅ hermeval, hermevander
+│   ├── ✅ hermeder, hermeint
+│   ├── ✅ hermefit, hermeroots
+│   └── ✅ hermeadd, hermesub, hermemul, hermediv, hermepow
+├── ✅ Laguerre Class
+│   ├── ✅ lagval, lagvander
+│   ├── ✅ lagder, lagint
+│   ├── ✅ lagfit, lagroots
+│   └── ✅ lagadd, lagsub, lagmul, lagdiv, lagpow
+├── ✅ Conversion Functions
+│   ├── ✅ poly2cheb, cheb2poly
+│   ├── ✅ poly2leg, leg2poly
+│   └── ✅ (and all other conversion combinations)
+└── ✅ Utilities
+    ├── ✅ trimseq, trimcoef
+    ├── ✅ as_series
+    ├── ✅ getdomain, mapdomain, mapparms
+    └── ✅ ABCPolyBase, maxpower
+```
+
+**Implementation:** `src/ts/polynomial/` (multiple files)
+
+---
+
+## Phase 18: numpy.ma (Masked Arrays) ✅ COMPLETE
+
+```
+numpy.ma
+├── ✅ MaskedArray Class
+│   ├── ✅ Core properties (data, mask, fill_value)
+│   ├── ✅ Arithmetic operations
+│   └── ✅ Comparison operations
+├── ✅ Mask Operations
+│   ├── ✅ make_mask, make_mask_none
+│   ├── ✅ getmask, getmaskarray, getdata
+│   ├── ✅ is_mask, is_masked
+│   ├── ✅ mask_or, flatten_mask, reshape_mask
+│   └── ✅ broadcast_mask, allTrue
+├── ✅ Fill Values
+│   ├── ✅ default_fill_value
+│   ├── ✅ common_fill_value
+│   ├── ✅ set_fill_value
+│   └── ✅ getReductionFillValue
+├── ✅ Creation Functions
+│   ├── ✅ masked_array, array
+│   ├── ✅ masked_equal, masked_not_equal
+│   ├── ✅ masked_greater, masked_greater_equal
+│   ├── ✅ masked_less, masked_less_equal
+│   ├── ✅ masked_inside, masked_outside
+│   ├── ✅ masked_where, masked_invalid, masked_values
+│   ├── ✅ zeros, ones, empty
+│   ├── ✅ masked_all, masked_all_like
+│   ├── ✅ zeros_like, ones_like, empty_like
+│   └── ✅ fromfunction
+├── ✅ Statistics & Extras
+│   ├── ✅ average, median
+│   ├── ✅ cov, corrcoef
+│   ├── ✅ notmasked_edges, notmasked_contiguous
+│   ├── ✅ flatnotmasked_edges, flatnotmasked_contiguous
+│   ├── ✅ clump_masked, clump_unmasked
+│   └── ✅ apply_along_axis
+└── ✅ Constants & Errors
+    ├── ✅ nomask, masked
+    ├── ✅ MaskedArrayError
+    └── ✅ MaskError
+```
+
+**Implementation:** `src/ts/ma/`
+
+---
+
+## Phase 19: numpy.strings ✅ COMPLETE
+
+```
+numpy.strings
+├── ✅ Comparison (10 functions)
+│   ├── ✅ equal, not_equal
+│   ├── ✅ less, less_equal
+│   ├── ✅ greater, greater_equal
+│   └── ✅ compare_chararrays
+├── ✅ Properties (9 functions)
+│   ├── ✅ isalpha, isdigit, isalnum
+│   ├── ✅ isspace, islower, isupper
+│   ├── ✅ istitle, isdecimal, isnumeric
+│   └── ✅ str_len
+├── ✅ Search (7 functions)
+│   ├── ✅ find, rfind
+│   ├── ✅ index, rindex
+│   ├── ✅ count
+│   └── ✅ startswith, endswith
+├── ✅ Manipulation (11 functions)
+│   ├── ✅ lower, upper, swapcase
+│   ├── ✅ capitalize, title
+│   ├── ✅ add, multiply
+│   └── ✅ strip, lstrip, rstrip, expandtabs
+└── ✅ Advanced
+    ├── ✅ replace, center, ljust, rjust, zfill
+    ├── ✅ partition, rpartition
+    └── ✅ encode, decode
+```
+
+**Implementation:** `src/ts/strings/`
+
+---
+
+## Phase 20: numpy.rec (Record Arrays) ✅ COMPLETE
+
+```
+numpy.rec
+├── ✅ recarray class
+├── ✅ record class
+├── ✅ format_parser function
+├── ✅ Convenience Functions
+│   ├── ✅ fromarrays
+│   ├── ✅ fromrecords
+│   ├── ✅ fromstring
+│   ├── ✅ fromfile
+│   ├── ✅ array
+│   └── ✅ find_duplicate
+└── ✅ Error Classes
+    ├── ✅ KeyError
+    └── ✅ IndexError
+```
+
+**Implementation:** `src/ts/rec/`
+
+---
+
+## Phase 21: numpy.testing ✅ COMPLETE
+
+```
+numpy.testing
+├── ✅ Assertion functions for unit testing
+└── ✅ Error classes
+    ├── ✅ AssertionError
+    ├── ✅ SkipTest
+    └── ✅ KnownFailureException
+```
+
+**Implementation:** `src/ts/testing/`
+
+---
+
+## Remaining Work (Lower Priority)
+
+```
+NOT YET IMPLEMENTED:
+├── Cumulative Operations
+│   ├── ❌ cumsum(arr, axis, dtype, out)
+│   ├── ❌ cumprod(arr, axis, dtype, out)
+│   ├── ❌ nancumsum(arr, axis, ...)
+│   └── ❌ nancumprod(arr, axis, ...)
+├── NaN-handling Functions
+│   ├── ❌ nansum, nanprod
+│   ├── ❌ nanmean, nanstd, nanvar
+│   ├── ❌ nanmin, nanmax
+│   ├── ❌ nanargmin, nanargmax
+│   ├── ❌ nanmedian
+│   └── ❌ nanpercentile, nanquantile
+├── Histogram Functions
+│   ├── ❌ histogram, histogram2d, histogramdd
+│   ├── ❌ histogram_bin_edges
+│   ├── ❌ bincount
+│   └── ❌ digitize
+├── Advanced Linear Algebra
+│   ├── ❌ tensordot, einsum, einsum_path
+│   ├── ❌ kron, cross, multi_dot
+│   ├── ❌ tensorsolve, tensorinv
+│   └── ❌ matrix_norm, vector_norm
+├── Miscellaneous Ufuncs
+│   ├── ❌ divmod, modf, frexp, ldexp
+│   ├── ❌ nextafter, spacing, nan_to_num
+│   ├── ❌ sinc, heaviside, isnat
+│   ├── ❌ gcd, lcm, bitwise_count
+│   └── ❌ correlate (signal processing)
+└── Index Generation
+    ├── ❌ ogrid, mgrid
+    └── ❌ mask_indices
+```
 
 ---
 
 ## Current Implementation Summary
 
 ### TypeScript Files (`src/ts/`)
-| File | Lines | Description |
-|------|-------|-------------|
-| `NDArray.ts` | ~1,527 | Core NDArray class with all methods |
-| `types.ts` | ~400 | Type definitions and DType system |
-| `dtype.ts` | ~200 | DType utilities and conversion |
-| `broadcast.ts` | ~150 | Broadcasting functions |
-| `indexing.ts` | ~350 | Index operations |
-| `slice.ts` | ~200 | Slicing utilities |
-| `iterators.ts` | ~150 | Iterator implementations |
-| `wasm-loader.ts` | ~100 | WASM module management |
-| `index.ts` | ~50 | Main exports |
+| File/Directory | Description |
+|----------------|-------------|
+| `NDArray.ts` | Core NDArray class with all methods |
+| `index.ts` | Main public API exports (500+ functions) |
+| `ufunc.ts` | Universal functions (90+ ufuncs) |
+| `statistics.ts` | Statistical functions with axis support |
+| `sorting.ts` | Sorting and partitioning |
+| `logic.ts` | Comparison and logical operations |
+| `setops.ts` | Set operations (unique, union, intersect, etc.) |
+| `manipulation.ts` | Array joining, splitting, rearranging |
+| `indexing.ts` | Advanced indexing and selection |
+| `broadcast.ts` | Broadcasting operations |
+| `dtype.ts` | Data type utilities |
+| `slice.ts` | Slicing and indexing specs |
+| `iterators.ts` | Array iteration tools |
+| `functional.ts` | Functional programming (vectorize, apply) |
+| `window.ts` | Window functions |
+| `constants.ts` | Mathematical constants |
+| `typeinfo.ts` | Type information (finfo, iinfo) |
+| `linalg.ts` | Linear algebra (matmul, solve, eig, svd, etc.) |
+| `fft.ts` | FFT operations (fft, ifft, fft2, fftn, etc.) |
+| `random.ts` | Random number generation (30+ distributions) |
+| `polynomial/` | Polynomial classes (6 types × 15+ functions) |
+| `ma/` | Masked arrays (MaskedArray, cov, corrcoef, etc.) |
+| `strings/` | String operations (40+ functions) |
+| `rec/` | Record arrays |
+| `testing/` | Testing utilities |
+| `io/` | I/O operations (10+ files) |
 
 ### C/WASM Files (`src/wasm/`)
-| File | Lines | Description |
-|------|-------|-------------|
-| `ndarray.c` | ~1,500 | Core array operations |
-| `dtype.c` | ~318 | Type system |
-| `broadcast.c` | ~212 | Broadcasting |
-| `indexing.c` | ~626 | Index operations |
-| `pairwise_sum.c` | ~151 | Accurate summation algorithm |
+| File | Description |
+|------|-------------|
+| `ndarray.c` | Core array operations |
+| `ufunc_unary.c` | Unary mathematical operations |
+| `ufunc_binary.c` | Binary mathematical operations |
+| `statistics.c` | Reduction operations with axis support |
+| `sorting.c` | Sorting and partitioning |
+| `setops.c` | Set operations |
+| `logic.c` | Logical and comparison operations |
+| `manipulation.c` | Array manipulation |
+| `indexing.c` | Index operations |
+| `broadcast.c` | Broadcasting |
+| `pairwise_sum.c` | NumPy-compatible accurate summation |
+| `dtype.c` | Type system |
+| `linalg.c` | Linear algebra operations |
+| `blas.c` | BLAS operations |
+| `lapack.c` | LAPACK operations |
+| `fft.c` | FFT operations |
+| `random/` | Random number generation |
 
-**Total: ~5,300 lines of implementation code**
+**Total: 500+ exported functions, 15,000+ lines of implementation code**
 
 ---
 
 ## Implementation Priority Summary
 
 ```
-CRITICAL PATH (Enables Everything Else):
-1. ✅ Extended DTypes + Type Promotion
-2. ✅ Element Access (get/set)
-3. ✅ Iterators
-4. ✅ Views + reshape/transpose
-5. ✅ Slicing (basic)
-6. ✅ Broadcasting
-7. ❌ Ufunc Infrastructure          ← NEXT PRIORITY
-8. ❌ Core Ufuncs (add, subtract, multiply, divide, comparison)
-9. ❌ Reductions with axis
+COMPLETE (Phases 1-21):
+✅ Extended DTypes + Type Promotion
+✅ Element Access (get/set)
+✅ Iterators
+✅ Views + reshape/transpose
+✅ Slicing (basic + advanced)
+✅ Broadcasting
+✅ Ufunc Infrastructure (WASM-accelerated, 90+ functions)
+✅ Reductions with axis (sum, mean, std, var, min, max)
+✅ Array manipulation (concat, stack, split, flip, roll, tile, pad)
+✅ Sorting & Searching (sort, argsort, partition, searchsorted)
+✅ Statistics (mean, std, var, median, cov, corrcoef)
+✅ Set operations (unique, union, intersect, isin)
+✅ Logic & comparison operations
+✅ I/O operations (NPY, text, binary, formatting)
+✅ Functional programming (vectorize, apply_along_axis)
+✅ Window functions (blackman, hanning, kaiser, etc.)
+✅ Constants & Type info
+✅ numpy.linalg (matmul, solve, inv, eig, svd, qr, cholesky, etc.)
+✅ numpy.fft (fft, ifft, fft2, fftn, fftfreq, fftshift, etc.)
+✅ numpy.random (Generator, PCG64, 30+ distributions)
+✅ numpy.polynomial (Polynomial, Chebyshev, Legendre, Hermite, Laguerre)
+✅ numpy.ma (MaskedArray, cov, corrcoef, masked operations)
+✅ numpy.strings (40+ string operations)
+✅ numpy.rec (Record arrays)
+✅ numpy.testing (Assertion utilities)
 
-HIGH VALUE:
-10. ❌ Array manipulation (concat, stack, split)
-11. ❌ Sorting & Searching
-12. ❌ Statistics (mean, std, var, median)
-13. ❌ numpy.linalg (dot, matmul, solve, inv)
-14. ❌ numpy.random (Generator, basic distributions)
-
-MEDIUM VALUE:
-15. ❌ numpy.fft
-16. ❌ Advanced indexing (fancy, boolean)
-17. ❌ Set operations
-18. ❌ Window functions
-19. ❌ I/O operations
-
-LOWER PRIORITY:
-20. ❌ numpy.ma (masked arrays)
-21. ❌ numpy.polynomial
-22. ❌ numpy.strings
-23. ❌ numpy.rec
-24. ❌ numpy.testing
+REMAINING (Lower Priority):
+❌ Cumulative operations (cumsum, cumprod)
+❌ NaN-handling functions (nansum, nanmean, etc.)
+❌ Histogram functions
+❌ Advanced linalg (tensordot, einsum, kron)
+❌ Additional BitGenerators (MT19937, Philox, SFC64)
 ```
+
+---
+
+## Test Coverage
+
+**14+ Test Files (~250+ test cases):**
+- `comparison.test.ts` - NumPy accuracy comparison
+- `constants.test.ts` - Mathematical constants
+- `creation.test.ts` - Array creation functions
+- `dtype.test.ts` - Data type operations
+- `element-access.test.ts` - Get/set/item operations
+- `functional.test.ts` - Vectorize, apply, piecewise
+- `io.test.ts` - I/O and formatting
+- `level1.test.ts` - Basic operations
+- `level2.test.ts` - Slicing, broadcasting, indexing
+- `manipulation.test.ts` - Join, split, rearrange
+- `ndarray.test.ts` - NDArray class tests
+- `setops.test.ts` - Set operations
+- `ufunc.test.ts` - Universal functions
+- `window.test.ts` - Window functions
 
 ---
 

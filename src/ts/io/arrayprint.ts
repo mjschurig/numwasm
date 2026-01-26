@@ -590,6 +590,7 @@ function dtypeName(dtype: DType): string {
     [DType.Float64]: 'float64',
     [DType.Complex64]: 'complex64',
     [DType.Complex128]: 'complex128',
+    [DType.String]: 'string',
   };
   return names[dtype] ?? 'unknown';
 }

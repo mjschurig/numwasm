@@ -116,6 +116,10 @@ export class NDArray {
   private readonly _module: WasmModule;
   private _disposed: boolean = false;
 
+  // String array storage (TypeScript-side, not WASM)
+  private _stringData: Map<number, string> | null = null;
+  private _stringShape: number[] | null = null;
+
   /**
    * Private constructor - use static factory methods instead.
    */
@@ -571,7 +575,7 @@ export class NDArray {
     options: NDArrayOptions = {}
   ): Promise<NDArray> {
     const linArr = await NDArray.linspace(start, stop, num, endpoint, options);
-    const data = linArr.toArray().map((x) => Math.pow(base, x));
+    const data = (linArr.toArray() as number[]).map((x) => Math.pow(base, x));
     linArr.dispose();
     return NDArray.fromArray(data, [num], options);
   }
@@ -611,7 +615,7 @@ export class NDArray {
       endpoint,
       options
     );
-    const data = linArr.toArray().map((x) => sign * Math.pow(10, x));
+    const data = (linArr.toArray() as number[]).map((x) => sign * Math.pow(10, x));
     linArr.dispose();
     return NDArray.fromArray(data, [num], options);
   }
@@ -816,7 +820,91 @@ export class NDArray {
     });
   }
 
+  /* ============ String Array Factory Methods ============ */
+
+  /**
+   * Create a string array from a JavaScript string array.
+   * This is a synchronous operation (no WASM involved).
+   *
+   * @param data - Array of strings or nested array of strings
+   * @param shape - Optional shape (defaults to inferred from data)
+   * @returns New NDArray with string dtype
+   *
+   * @example
+   * ```typescript
+   * const arr = NDArray.fromStringArray(['hello', 'world']);
+   * const matrix = NDArray.fromStringArray([['a', 'b'], ['c', 'd']]);
+   * ```
+   */
+  static fromStringArray(
+    data: string[] | string[][],
+    shape?: number[]
+  ): NDArray {
+    // Flatten nested arrays
+    const flat: string[] = Array.isArray(data[0])
+      ? (data as string[][]).flat()
+      : (data as string[]);
+
+    // Infer shape if not provided
+    let inferredShape: number[];
+    if (shape) {
+      inferredShape = shape;
+    } else if (Array.isArray(data[0])) {
+      // 2D array
+      inferredShape = [data.length, (data[0] as string[]).length];
+    } else {
+      // 1D array
+      inferredShape = [data.length];
+    }
+
+    const expectedSize = inferredShape.reduce((a, b) => a * b, 1);
+    if (flat.length !== expectedSize) {
+      throw new Error(
+        `Data length ${flat.length} does not match shape [${inferredShape.join(', ')}] (expected ${expectedSize} elements)`
+      );
+    }
+
+    // Create string array (ptr=0 indicates string-only storage)
+    const arr = new NDArray(0, null as unknown as WasmModule);
+    arr._stringData = new Map();
+    arr._stringShape = inferredShape;
+
+    for (let i = 0; i < flat.length; i++) {
+      arr._stringData.set(i, flat[i]);
+    }
+
+    return arr;
+  }
+
+  /**
+   * Create an empty string array with the given shape.
+   * All elements are initialized to empty strings.
+   *
+   * @param shape - Array dimensions
+   * @returns New NDArray with string dtype
+   */
+  static emptyString(shape: number[]): NDArray {
+    const size = shape.reduce((a, b) => a * b, 1);
+
+    const arr = new NDArray(0, null as unknown as WasmModule);
+    arr._stringData = new Map();
+    arr._stringShape = [...shape];
+
+    for (let i = 0; i < size; i++) {
+      arr._stringData.set(i, '');
+    }
+
+    return arr;
+  }
+
   /* ============ Properties ============ */
+
+  /**
+   * Check if this is a string array (stored in TypeScript, not WASM).
+   */
+  get isStringArray(): boolean {
+    return this._stringData !== null;
+  }
 
   /**
    * Get the shape of the array.
@@ -825,6 +913,12 @@ export class NDArray {
    */
   get shape(): number[] {
     this.ensureNotDisposed();
+
+    // String arrays use TypeScript storage
+    if (this._stringShape !== null) {
+      return [...this._stringShape];
+    }
+
     const ndim = this._module._ndarray_get_ndim(this._ptr);
     const shapePtr = this._module._ndarray_get_shape(this._ptr);
 
@@ -840,6 +934,12 @@ export class NDArray {
    */
   get ndim(): number {
     this.ensureNotDisposed();
+
+    // String arrays use TypeScript storage
+    if (this._stringShape !== null) {
+      return this._stringShape.length;
+    }
+
     return this._module._ndarray_get_ndim(this._ptr);
   }
 
@@ -848,6 +948,12 @@ export class NDArray {
    */
   get size(): number {
     this.ensureNotDisposed();
+
+    // String arrays use TypeScript storage
+    if (this._stringShape !== null) {
+      return this._stringShape.reduce((a, b) => a * b, 1);
+    }
+
     return this._module._ndarray_get_size(this._ptr);
   }
 
@@ -856,6 +962,12 @@ export class NDArray {
    */
   get dtype(): DType {
     this.ensureNotDisposed();
+
+    // String arrays use TypeScript storage
+    if (this._stringData !== null) {
+      return DType.String;
+    }
+
     return this._module._ndarray_get_dtype(this._ptr) as DType;
   }
 
@@ -1121,6 +1233,44 @@ export class NDArray {
     this._module._ndarray_set_flat(this._ptr, 0, value);
   }
 
+  /* ============ String Element Access ============ */
+
+  /**
+   * Get string element at flat index.
+   * Only valid for string arrays.
+   *
+   * @param index - Flat index into the array
+   * @returns String value at that index
+   */
+  getStringFlat(index: number): string {
+    this.ensureNotDisposed();
+    if (this._stringData === null) {
+      throw new Error('getStringFlat() only works for string arrays');
+    }
+    if (index < 0 || index >= this.size) {
+      throw new Error(`Flat index ${index} out of bounds for size ${this.size}`);
+    }
+    return this._stringData.get(index) ?? '';
+  }
+
+  /**
+   * Set string element at flat index.
+   * Only valid for string arrays.
+   *
+   * @param index - Flat index into the array
+   * @param value - String value to set
+   */
+  setStringFlat(index: number, value: string): void {
+    this.ensureNotDisposed();
+    if (this._stringData === null) {
+      throw new Error('setStringFlat() only works for string arrays');
+    }
+    if (index < 0 || index >= this.size) {
+      throw new Error(`Flat index ${index} out of bounds for size ${this.size}`);
+    }
+    this._stringData.set(index, value);
+  }
+
   /* ============ Operations ============ */
 
   /**
@@ -1149,10 +1299,20 @@ export class NDArray {
   /**
    * Get array data as a JavaScript array.
    *
-   * @returns Flat array of values
+   * @returns Flat array of values (numbers or strings)
    */
-  toArray(): number[] {
+  toArray(): number[] | string[] {
     this.ensureNotDisposed();
+
+    // String arrays return string[]
+    if (this._stringData !== null) {
+      const size = this.size;
+      const result: string[] = [];
+      for (let i = 0; i < size; i++) {
+        result.push(this._stringData.get(i) ?? '');
+      }
+      return result;
+    }
 
     const size = this.size;
     const result: number[] = [];
@@ -1178,7 +1338,11 @@ export class NDArray {
     | Uint8Array {
     this.ensureNotDisposed();
 
-    const data = this.toArray();
+    if (this.isStringArray) {
+      throw new Error('Cannot convert string array to TypedArray');
+    }
+
+    const data = this.toArray() as number[];
     const dtype = this.dtype;
 
     switch (dtype) {
@@ -1311,7 +1475,10 @@ export class NDArray {
   /**
    * Format a value using printf-style format string.
    */
-  private _formatValue(value: number, fmt: string): string {
+  private _formatValue(value: number | string, fmt: string): string {
+    if (typeof value === 'string') {
+      return value;
+    }
     const match = fmt.match(/^%([+\- 0#]*)(\d*)(?:\.(\d+))?([diouxXeEfFgGaAcs%])$/);
     if (!match) {
       return value.toString();
@@ -1784,6 +1951,15 @@ export class NDArray {
    */
   copy(): NDArray {
     this.ensureNotDisposed();
+
+    // String arrays use TypeScript copy
+    if (this._stringData !== null) {
+      const arr = new NDArray(0, null as unknown as WasmModule);
+      arr._stringData = new Map(this._stringData);
+      arr._stringShape = [...this._stringShape!];
+      return arr;
+    }
+
     const ptr = this._module._ndarray_copy(this._ptr);
     if (ptr === 0) {
       throw new Error('Failed to copy array');
@@ -1813,7 +1989,14 @@ export class NDArray {
    */
   dispose(): void {
     if (!this._disposed) {
-      this._module._ndarray_free(this._ptr);
+      // String arrays don't have WASM memory to free
+      if (this._stringData !== null) {
+        this._stringData.clear();
+        this._stringData = null;
+        this._stringShape = null;
+      } else if (this._ptr !== 0) {
+        this._module._ndarray_free(this._ptr);
+      }
       this._disposed = true;
     }
   }

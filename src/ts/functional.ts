@@ -140,7 +140,7 @@ export async function applyAlongAxis(
     } else {
       resultIsScalar = false;
       firstResultDtype = firstResult.dtype;
-      firstResultData = firstResult.toArray();
+      firstResultData = firstResult.toArray() as number[];
     }
     firstResult.dispose();
   }
@@ -166,7 +166,7 @@ export async function applyAlongAxis(
     if (typeof result === 'number') {
       resultData = [result];
     } else {
-      resultData = result.toArray();
+      resultData = result.toArray() as number[];
       result.dispose();
     }
 
@@ -877,7 +877,7 @@ export async function piecewise(
     const func = functions[i];
 
     // Check if any elements satisfy this condition
-    const condData = condition.toArray();
+    const condData = condition.toArray() as number[];
     const hasTrue = condData.some((v) => v !== 0);
 
     if (!hasTrue) {
@@ -963,7 +963,7 @@ function putWhereCondition(
   condData: number[],
   values: NDArray
 ): void {
-  const valData = values.toArray();
+  const valData = values.toArray() as number[];
   let valIdx = 0;
 
   for (let i = 0; i < arr.size; i++) {

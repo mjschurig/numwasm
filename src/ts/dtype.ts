@@ -243,6 +243,7 @@ const DTYPE_PRIORITY: Record<DType, number> = {
   [DType.Float64]: 11,
   [DType.Complex64]: 12,
   [DType.Complex128]: 13,
+  [DType.String]: -1, // String does not participate in numeric promotion
 };
 
 /**

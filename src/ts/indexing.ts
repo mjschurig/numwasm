@@ -388,7 +388,7 @@ export async function unravelIndex(
   shape: number[]
 ): Promise<number[][]> {
   const flatIndices =
-    indices instanceof NDArray ? indices.toArray() : indices;
+    indices instanceof NDArray ? (indices.toArray() as number[]) : indices;
 
   const result: number[][] = shape.map(() => []);
 
@@ -446,7 +446,7 @@ export async function meshgrid(
 ): Promise<NDArray[]> {
   const arrays = await Promise.all(
     xi.map(async (x) =>
-      x instanceof NDArray ? x.toArray() : x
+      x instanceof NDArray ? (x.toArray() as number[]) : x
     )
   );
 

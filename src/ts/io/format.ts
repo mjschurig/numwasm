@@ -86,6 +86,7 @@ export function dtypeToDescr(dtype: DType): string {
     [DType.Float64]: '<f8',
     [DType.Complex64]: '<c8',
     [DType.Complex128]: '<c16',
+    [DType.String]: '|U0', // Variable-length Unicode string
   };
   return descriptors[dtype] ?? '<f8';
 }

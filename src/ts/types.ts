@@ -31,6 +31,9 @@ export enum DType {
   // Complex types
   Complex64 = 12,
   Complex128 = 13,
+
+  // String type (stored in TypeScript, not WASM)
+  String = 14,
 }
 
 /**
@@ -51,6 +54,7 @@ export const DTYPE_SIZES: Record<DType, number> = {
   [DType.Float16]: 2,
   [DType.Complex64]: 8,
   [DType.Complex128]: 16,
+  [DType.String]: 0, // Variable length, stored in TypeScript Map
 };
 
 /**
@@ -71,6 +75,7 @@ export const DTYPE_NAMES: Record<DType, string> = {
   [DType.Float16]: 'float16',
   [DType.Complex64]: 'complex64',
   [DType.Complex128]: 'complex128',
+  [DType.String]: 'string',
 };
 
 /**
@@ -565,6 +570,306 @@ export interface WasmModule {
   _malloc(size: number): number;
   _free(ptr: number): void;
 
+  // Linear algebra functions (Phase 13)
+  _linalg_matmul(aPtr: number, bPtr: number): number;
+  _linalg_dot(aPtr: number, bPtr: number): number;
+  _linalg_solve(aPtr: number, bPtr: number): number;
+  _linalg_inv(aPtr: number): number;
+  _linalg_det(aPtr: number): number;
+  _linalg_cholesky(aPtr: number, upper: number): number;
+  _linalg_norm(aPtr: number, ord: number): number;
+
+  // QR decomposition
+  _linalg_qr(aPtr: number): number;
+  _linalg_qr_free(resultPtr: number): void;
+  _linalg_qr_get_q(resultPtr: number): number;
+  _linalg_qr_get_r(resultPtr: number): number;
+
+  // Eigenvalue decomposition
+  _linalg_eig(aPtr: number): number;
+  _linalg_eig_free(resultPtr: number): void;
+  _linalg_eig_get_values(resultPtr: number): number;
+  _linalg_eig_get_values_imag(resultPtr: number): number;
+  _linalg_eig_get_vectors(resultPtr: number): number;
+
+  // SVD decomposition
+  _linalg_svd(aPtr: number, fullMatrices: number): number;
+  _linalg_svd_free(resultPtr: number): void;
+  _linalg_svd_get_u(resultPtr: number): number;
+  _linalg_svd_get_s(resultPtr: number): number;
+  _linalg_svd_get_vh(resultPtr: number): number;
+
+  // FFT functions (Phase 14)
+  _fft_is_power_of_2(n: number): number;
+  _fft_next_power_of_2(n: number): number;
+  _fft_radix2(dataPtr: number, n: number, inverse: number): number;
+  _fft_bluestein(
+    dataPtr: number,
+    n: number,
+    inverse: number,
+    workPtr: number
+  ): number;
+  _fft_complex(
+    dataPtr: number,
+    n: number,
+    inverse: number,
+    workPtr: number
+  ): number;
+  _fft_rfft(
+    realInPtr: number,
+    outPtr: number,
+    n: number,
+    workPtr: number
+  ): number;
+  _fft_irfft(
+    complexInPtr: number,
+    outPtr: number,
+    n: number,
+    workPtr: number
+  ): number;
+  _ndarray_fft(
+    arrPtr: number,
+    n: number,
+    axis: number,
+    inverse: number
+  ): number;
+  _ndarray_rfft(arrPtr: number, n: number, axis: number): number;
+  _ndarray_irfft(arrPtr: number, n: number, axis: number): number;
+
+  // Random module functions (Phase 15)
+  // PCG64 BitGenerator
+  _pcg64_create(): number;
+  _pcg64_free(state: number): void;
+  _pcg64_seed(
+    state: number,
+    seed_high: number,
+    seed_low: number,
+    inc_high: number,
+    inc_low: number
+  ): void;
+  _pcg64_seed_parts(
+    state: number,
+    seed_hh: number,
+    seed_hl: number,
+    seed_lh: number,
+    seed_ll: number,
+    inc_hh: number,
+    inc_hl: number,
+    inc_lh: number,
+    inc_ll: number
+  ): void;
+  _pcg64_next64(state: number): number;
+  _pcg64_next64_parts(state: number, high_out: number): number;
+  _pcg64_next32(state: number): number;
+  _pcg64_next_double(state: number): number;
+  _pcg64_advance(
+    state: number,
+    delta_high: number,
+    delta_low: number
+  ): void;
+  _pcg64_get_state(state: number, out: number): void;
+  _pcg64_set_state(state: number, input: number): void;
+  _pcg64_init_bitgen(bitgen: number, state: number): void;
+  _pcg64_create_seeded(
+    seed_high: number,
+    seed_low: number,
+    inc_high: number,
+    inc_low: number
+  ): number;
+  _pcg64_fill_uint64(state: number, out: number, count: number): void;
+  _pcg64_fill_double(state: number, out: number, count: number): void;
+
+  // SeedSequence
+  _seed_seq_init(
+    seq: number,
+    entropy: number,
+    entropy_len: number,
+    spawn_key: number,
+    spawn_key_len: number,
+    pool_size: number
+  ): void;
+  _seed_seq_generate(seq: number, out: number, n_words: number): void;
+  _seed_seq_free(seq: number): void;
+  _seed_seq_generate_words(
+    entropy: number,
+    entropy_len: number,
+    spawn_key: number,
+    spawn_key_len: number,
+    pool_size: number,
+    out: number,
+    n_words: number
+  ): void;
+  _seed_seq_mix64(seed: number, out: number): void;
+  _seed_seq_from_time(
+    timestamp_low: number,
+    timestamp_high: number,
+    counter: number,
+    out: number,
+    n_words: number
+  ): void;
+
+  // Distribution functions - Uniform
+  _random_standard_uniform(bitgen: number): number;
+  _random_standard_uniform_f(bitgen: number): number;
+  _random_uniform_fill(bitgen: number, count: number, out: number): void;
+  _random_uniform_fill_f(bitgen: number, count: number, out: number): void;
+
+  // Distribution functions - Normal
+  _random_standard_normal(bitgen: number): number;
+  _random_standard_normal_f(bitgen: number): number;
+  _random_standard_normal_fill(
+    bitgen: number,
+    count: number,
+    out: number
+  ): void;
+  _random_standard_normal_fill_f(
+    bitgen: number,
+    count: number,
+    out: number
+  ): void;
+  _random_normal(bitgen: number, loc: number, scale: number): number;
+
+  // Distribution functions - Exponential
+  _random_standard_exponential(bitgen: number): number;
+  _random_standard_exponential_f(bitgen: number): number;
+  _random_standard_exponential_fill(
+    bitgen: number,
+    count: number,
+    out: number
+  ): void;
+  _random_standard_exponential_fill_f(
+    bitgen: number,
+    count: number,
+    out: number
+  ): void;
+  _random_standard_exponential_inv_fill(
+    bitgen: number,
+    count: number,
+    out: number
+  ): void;
+  _random_exponential(bitgen: number, scale: number): number;
+
+  // Distribution functions - Gamma
+  _random_standard_gamma(bitgen: number, shape: number): number;
+  _random_standard_gamma_f(bitgen: number, shape: number): number;
+  _random_standard_gamma_fill(
+    bitgen: number,
+    count: number,
+    shape: number,
+    out: number
+  ): void;
+  _random_gamma(bitgen: number, shape: number, scale: number): number;
+
+  // Distribution functions - Beta
+  _random_beta(bitgen: number, a: number, b: number): number;
+  _random_beta_fill(
+    bitgen: number,
+    count: number,
+    a: number,
+    b: number,
+    out: number
+  ): void;
+
+  // Distribution functions - Chi-square and F
+  _random_chisquare(bitgen: number, df: number): number;
+  _random_noncentral_chisquare(
+    bitgen: number,
+    df: number,
+    nonc: number
+  ): number;
+  _random_f(bitgen: number, dfnum: number, dfden: number): number;
+  _random_noncentral_f(
+    bitgen: number,
+    dfnum: number,
+    dfden: number,
+    nonc: number
+  ): number;
+
+  // Distribution functions - Student's t and Cauchy
+  _random_standard_t(bitgen: number, df: number): number;
+  _random_standard_cauchy(bitgen: number): number;
+
+  // Distribution functions - Other continuous
+  _random_pareto(bitgen: number, a: number): number;
+  _random_weibull(bitgen: number, a: number): number;
+  _random_power(bitgen: number, a: number): number;
+  _random_laplace(bitgen: number, loc: number, scale: number): number;
+  _random_gumbel(bitgen: number, loc: number, scale: number): number;
+  _random_logistic(bitgen: number, loc: number, scale: number): number;
+  _random_lognormal(bitgen: number, mean: number, sigma: number): number;
+  _random_rayleigh(bitgen: number, scale: number): number;
+  _random_wald(bitgen: number, mean: number, scale: number): number;
+  _random_triangular(
+    bitgen: number,
+    left: number,
+    mode: number,
+    right: number
+  ): number;
+  _random_vonmises(bitgen: number, mu: number, kappa: number): number;
+
+  // Distribution functions - Discrete
+  _random_binomial(bitgen: number, p: number, n: number): number;
+  _random_binomial32(bitgen: number, p: number, n: number): number;
+  _random_binomial_btpe(
+    bitgen: number,
+    binomial: number,
+    n: number,
+    p: number
+  ): number;
+  _random_binomial_inversion(bitgen: number, n: number, p: number): number;
+  _random_negative_binomial(bitgen: number, n: number, p: number): number;
+  _random_negative_binomial32(bitgen: number, n: number, p: number): number;
+  _random_poisson(bitgen: number, lam: number): number;
+  _random_poisson32(bitgen: number, lam: number): number;
+  _random_geometric(bitgen: number, p: number): number;
+  _random_geometric32(bitgen: number, p: number): number;
+  _random_hypergeometric(
+    bitgen: number,
+    ngood: number,
+    nbad: number,
+    nsample: number
+  ): number;
+  _random_hypergeometric32(
+    bitgen: number,
+    ngood: number,
+    nbad: number,
+    nsample: number
+  ): number;
+  _random_logseries(bitgen: number, p: number): number;
+  _random_logseries32(bitgen: number, p: number): number;
+  _random_zipf(bitgen: number, a: number): number;
+  _random_zipf32(bitgen: number, a: number): number;
+
+  // Distribution functions - Bounded integers
+  _random_bounded_uint64(
+    bitgen: number,
+    off: number,
+    rng: number,
+    mask: number
+  ): number;
+  _random_bounded_uint32(
+    bitgen: number,
+    off: number,
+    rng: number,
+    mask: number
+  ): number;
+  _random_integers(bitgen: number, low: number, high: number): number;
+  _random_integers32(bitgen: number, low: number, high: number): number;
+  _random_integers_fill(
+    bitgen: number,
+    count: number,
+    low: number,
+    high: number,
+    out: number
+  ): void;
+  _random_integers32_fill(
+    bitgen: number,
+    count: number,
+    low: number,
+    high: number,
+    out: number
+  ): void;
+
   // Emscripten runtime methods
   getValue(ptr: number, type: string): number;
   setValue(ptr: number, value: number, type: string): void;
@@ -584,3 +889,85 @@ export interface WasmModule {
  * Factory function type for the WASM module
  */
 export type WasmModuleFactory = () => Promise<WasmModule>;
+
+/* ============ Structured DType Support (numpy.rec) ============ */
+
+/**
+ * Descriptor for a single field in a structured dtype.
+ */
+export interface FieldDescriptor {
+  /** Field name (must be valid identifier) */
+  name: string;
+
+  /** Field data type (from DType enum) */
+  dtype: DType;
+
+  /** Byte offset from start of record (for binary I/O compatibility) */
+  offset: number;
+
+  /** Optional display title (alias for the field) */
+  title?: string | null;
+
+  /** Size in bytes - for strings this is character count * char_size */
+  itemsize: number;
+
+  /** For string fields: 'S' for ASCII (1 byte/char), 'U' for Unicode (4 bytes/char) */
+  charType?: 'S' | 'U';
+}
+
+/**
+ * Structured data type with named fields.
+ * Represents the dtype of a record array.
+ */
+export interface StructuredDType {
+  /** Ordered list of field names */
+  names: string[];
+
+  /** Map from field name to descriptor (includes titles as aliases) */
+  fields: Map<string, FieldDescriptor>;
+
+  /** Ordered list of field descriptors */
+  fieldList: FieldDescriptor[];
+
+  /** Total size of one record in bytes (for binary I/O) */
+  itemsize: number;
+
+  /** Alignment requirements (1 for packed, higher for C-aligned) */
+  alignment: number;
+
+  /** Whether fields are aligned for C struct compatibility */
+  isAligned: boolean;
+}
+
+/**
+ * Type guard for structured dtypes.
+ */
+export function isStructuredDType(dtype: unknown): dtype is StructuredDType {
+  return (
+    typeof dtype === 'object' &&
+    dtype !== null &&
+    'names' in dtype &&
+    'fields' in dtype &&
+    'fieldList' in dtype &&
+    'itemsize' in dtype &&
+    Array.isArray((dtype as StructuredDType).names) &&
+    (dtype as StructuredDType).fields instanceof Map
+  );
+}
+
+/**
+ * Get byte size for a given dtype.
+ */
+export function dtypeSize(dtype: DType): number {
+  return DTYPE_SIZES[dtype] ?? 0;
+}
+
+/**
+ * Get natural alignment for a dtype (for C struct compatibility).
+ * Most types align to their size, capped at 8 bytes.
+ */
+export function dtypeAlignment(dtype: DType): number {
+  const size = DTYPE_SIZES[dtype];
+  if (size === 0) return 1; // String type
+  return Math.min(size, 8);
+}

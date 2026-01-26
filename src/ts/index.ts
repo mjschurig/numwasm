@@ -424,3 +424,307 @@ export {
 
 // Type information classes (Phase 12)
 export { finfo, iinfo } from './typeinfo.js';
+
+// Linear algebra (Phase 13)
+export {
+  linalg,
+  LinAlgError,
+  matmul,
+  dot,
+  vdot,
+  inner,
+  outer,
+  cholesky,
+  qr,
+  svd,
+  svdvals,
+  eig,
+  eigvals,
+  eigh,
+  eigvalsh,
+  norm,
+  det,
+  slogdet,
+  matrix_rank,
+  trace,
+  cond,
+  solve,
+  lstsq,
+  inv,
+  pinv,
+  matrix_power,
+} from './linalg.js';
+export type {
+  EigResult,
+  SVDResult,
+  QRResult,
+  LstsqResult,
+  SlogdetResult,
+} from './linalg.js';
+
+// FFT (Phase 14)
+export {
+  // 1D transforms
+  fft,
+  ifft,
+  rfft,
+  irfft,
+  hfft,
+  ihfft,
+  // 2D transforms
+  fft2,
+  ifft2,
+  rfft2,
+  irfft2,
+  // N-D transforms
+  fftn,
+  ifftn,
+  rfftn,
+  irfftn,
+  // Helper functions
+  fftfreq,
+  rfftfreq,
+  fftshift,
+  ifftshift,
+  // Module object
+  fftModule,
+} from './fft.js';
+export type { FFTNorm } from './fft.js';
+
+// Random module (Phase 15)
+export {
+  // Classes
+  Generator,
+  PCG64,
+  SeedSequence,
+  BitGenerator,
+  // Factory function
+  default_rng,
+  // Module-level functions
+  seed,
+  random,
+  randn,
+  randint,
+  // Initialization
+  initRandom,
+} from './random.js';
+export type { SizeType, PCG64State } from './random.js';
+
+
+// String operations (Phase 16a)
+export {
+  // Error class
+  ValueError,
+  // Comparison functions
+  equal as strEqual,
+  not_equal as strNotEqual,
+  less as strLess,
+  less_equal as strLessEqual,
+  greater as strGreater,
+  greater_equal as strGreaterEqual,
+  compare_chararrays,
+  // Property testing
+  isalpha,
+  isdigit,
+  isalnum,
+  isspace,
+  islower,
+  isupper,
+  istitle,
+  isdecimal,
+  isnumeric,
+  str_len,
+  // Search functions
+  find as strFind,
+  rfind,
+  index as strIndex,
+  rindex,
+  count as strCount,
+  startswith,
+  endswith,
+  // Manipulation functions
+  lower,
+  upper,
+  swapcase,
+  capitalize as strCapitalize,
+  title as strTitle,
+  add as strAdd,
+  multiply as strMultiply,
+  strip,
+  lstrip,
+  rstrip,
+  expandtabs,
+  replace as strReplace,
+  center as strCenter,
+  ljust,
+  rjust,
+  zfill,
+  partition as strPartition,
+  rpartition,
+  encode,
+  decode,
+  // Namespace object
+  strings,
+} from './strings/index.js';
+
+// Polynomial module (Phase 16c)
+export {
+  // Utilities
+  PolyError,
+  PolyDomainWarning,
+  trimseq,
+  trimcoef,
+  as_series,
+  getdomain,
+  mapdomain,
+  mapparms,
+  // Base class
+  ABCPolyBase,
+  maxpower,
+  // Polynomial (power series)
+  Polynomial,
+  polyval,
+  polyval2d,
+  polyval3d,
+  polyvander,
+  polyvander2d,
+  polyder,
+  polyint,
+  polyfit,
+  polyroots,
+  polycompanion,
+  polyfromroots,
+  polyadd,
+  polysub,
+  polymul,
+  polydiv,
+  polypow,
+  // Chebyshev
+  Chebyshev,
+  chebval,
+  chebval2d,
+  chebvander,
+  chebder,
+  chebint,
+  chebfit,
+  chebroots,
+  chebcompanion,
+  chebfromroots,
+  chebinterpolate,
+  poly2cheb,
+  cheb2poly,
+  chebadd,
+  chebsub,
+  chebmul,
+  chebdiv,
+  chebpow,
+  // Legendre
+  Legendre,
+  legval,
+  legvander,
+  legder,
+  legint,
+  legfit,
+  legroots,
+  legcompanion,
+  legfromroots,
+  poly2leg,
+  leg2poly,
+  legadd,
+  legsub,
+  legmul,
+  legdiv,
+  legpow,
+  // Hermite (Physicist's)
+  Hermite,
+  hermval,
+  hermvander,
+  hermder,
+  hermint,
+  hermfit,
+  hermroots,
+  hermcompanion,
+  hermfromroots,
+  poly2herm,
+  herm2poly,
+  hermadd,
+  hermsub,
+  hermmul,
+  hermdiv,
+  hermpow,
+  // HermiteE (Probabilist's)
+  HermiteE,
+  hermeval,
+  hermevander,
+  hermeder,
+  hermeint,
+  hermefit,
+  hermeroots,
+  hermecompanion,
+  hermefromroots,
+  poly2herme,
+  herme2poly,
+  hermeadd,
+  hermesub,
+  hermemul,
+  hermediv,
+  hermepow,
+  // Laguerre
+  Laguerre,
+  lagval,
+  lagvander,
+  lagder,
+  lagint,
+  lagfit,
+  lagroots,
+  lagcompanion,
+  lagfromroots,
+  poly2lag,
+  lag2poly,
+  lagadd,
+  lagsub,
+  lagmul,
+  lagdiv,
+  lagpow,
+} from './polynomial/index.js';
+
+// Testing module (Phase 16e)
+export * as testing from './testing/index.js';
+export {
+  AssertionError,
+  SkipTest,
+  KnownFailureException,
+} from './testing/index.js';
+
+// Record arrays module (Phase 16b)
+export {
+  rec,
+  recarray,
+  record,
+  format_parser,
+  fromarrays as recFromarrays,
+  fromrecords as recFromrecords,
+  fromstring as recFromstring,
+  fromfile as recFromfile,
+  array as recArray,
+  find_duplicate,
+  KeyError,
+  IndexError as RecIndexError,
+} from './rec/index.js';
+export type {
+  RecArrayOptions,
+} from './rec/index.js';
+export type {
+  StructuredDType,
+  FieldDescriptor,
+} from './types.js';
+export {
+  isStructuredDType,
+  dtypeSize as structDtypeSize,
+  dtypeAlignment,
+} from './types.js';
+
+// Masked arrays module (Phase 16d)
+export { ma } from './ma/index.js';
+export { MaskedArray } from './ma/core.js';
+export type { MaskType, MaskedConstant, SliceInfo } from './ma/index.js';
