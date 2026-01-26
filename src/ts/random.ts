@@ -46,6 +46,49 @@ export interface PCG64State {
   uinteger: number;
 }
 
+/**
+ * State object for MT19937 generator.
+ */
+export interface MT19937State {
+  bit_generator: 'MT19937';
+  state: {
+    key: Uint32Array;
+    pos: number;
+  };
+  has_uint32: number;
+  uinteger: number;
+}
+
+/**
+ * State object for Philox generator.
+ */
+export interface PhiloxState {
+  bit_generator: 'Philox';
+  state: {
+    counter: BigUint64Array;
+    key: BigUint64Array;
+  };
+  buffer: BigUint64Array;
+  buffer_pos: number;
+  has_uint32: number;
+  uinteger: number;
+}
+
+/**
+ * State object for SFC64 generator.
+ */
+export interface SFC64State {
+  bit_generator: 'SFC64';
+  state: {
+    a: bigint;
+    b: bigint;
+    c: bigint;
+    w: bigint;
+  };
+  has_uint32: number;
+  uinteger: number;
+}
+
 /* ============ BitGenerator Base Class ============ */
 
 /**
@@ -464,6 +507,626 @@ export class PCG64 extends BitGenerator {
   }
 }
 
+/* ============ SFC64 BitGenerator ============ */
+
+/**
+ * SFC64 BitGenerator - Small Fast Chaotic 64-bit generator.
+ *
+ * Uses a 256-bit state (4 × 64-bit values). Fast with good statistical properties.
+ *
+ * @example
+ * ```typescript
+ * // Create with integer seed
+ * const sfc = new SFC64(12345);
+ *
+ * // Create with SeedSequence
+ * const ss = new SeedSequence([1, 2, 3]);
+ * const sfc2 = new SFC64(ss);
+ *
+ * // Generate values
+ * const u64 = sfc.next_uint64();
+ * const dbl = sfc.next_double();
+ * ```
+ */
+export class SFC64 extends BitGenerator {
+  private _seedSequence: SeedSequence | null = null;
+  private _disposed: boolean = false;
+
+  constructor(seed?: number | bigint | number[] | SeedSequence | null) {
+    super();
+
+    const wasm = getWasmModule();
+    this._wasmState = wasm._sfc64_create();
+
+    if (this._wasmState === 0) {
+      throw new Error('Failed to create SFC64 state: memory allocation failed');
+    }
+
+    if (seed instanceof SeedSequence) {
+      this._seedSequence = seed;
+    } else {
+      this._seedSequence = new SeedSequence(seed);
+    }
+
+    // Generate 8 uint32 values for 4 × 64-bit state values
+    const state = this._seedSequence.generateState(8, 'uint32') as Uint32Array;
+    this._initFromState(state);
+  }
+
+  private _initFromState(state: Uint32Array): void {
+    const wasm = getWasmModule();
+    // SFC64 needs 4 × 64-bit seed values
+    // state[0..7] represents 4 uint64 values as 8 uint32 parts
+    const partsPtr = wasm._malloc(8 * 4);
+    try {
+      for (let i = 0; i < 8; i++) {
+        wasm.HEAPU32[(partsPtr >> 2) + i] = state[i];
+      }
+      wasm._sfc64_seed_parts(this._wasmState, partsPtr);
+    } finally {
+      wasm._free(partsPtr);
+    }
+  }
+
+  private ensureNotDisposed(): void {
+    if (this._disposed) {
+      throw new Error('SFC64 has been disposed');
+    }
+  }
+
+  next_uint64(): bigint {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+
+    const highPtr = wasm._malloc(4);
+    try {
+      const low = wasm._sfc64_next64_parts(this._wasmState, highPtr);
+      const high = wasm.HEAPU32[highPtr >> 2];
+      return BigInt(low >>> 0) | (BigInt(high) << 32n);
+    } finally {
+      wasm._free(highPtr);
+    }
+  }
+
+  next_uint32(): number {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    return wasm._sfc64_next32(this._wasmState) >>> 0;
+  }
+
+  next_double(): number {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    return wasm._sfc64_next_double(this._wasmState);
+  }
+
+  getState(): SFC64State {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    const statePtr = wasm._malloc(6 * 8);
+
+    try {
+      wasm._sfc64_get_state(this._wasmState, statePtr);
+
+      // Read the state values (4 × 64-bit + has_uint32 + uinteger)
+      const readUint64 = (offset: number): bigint => {
+        const lo = wasm.HEAPU32[(statePtr >> 2) + offset * 2];
+        const hi = wasm.HEAPU32[(statePtr >> 2) + offset * 2 + 1];
+        return BigInt(lo >>> 0) | (BigInt(hi) << 32n);
+      };
+
+      return {
+        bit_generator: 'SFC64',
+        state: {
+          a: readUint64(0),
+          b: readUint64(1),
+          c: readUint64(2),
+          w: readUint64(3),
+        },
+        has_uint32: Number(readUint64(4)),
+        uinteger: Number(readUint64(5)),
+      };
+    } finally {
+      wasm._free(statePtr);
+    }
+  }
+
+  setState(state: object): void {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    const s = state as SFC64State;
+
+    const statePtr = wasm._malloc(6 * 8);
+    try {
+      const writeUint64 = (offset: number, val: bigint): void => {
+        wasm.HEAPU32[(statePtr >> 2) + offset * 2] = Number(val & 0xFFFFFFFFn);
+        wasm.HEAPU32[(statePtr >> 2) + offset * 2 + 1] = Number((val >> 32n) & 0xFFFFFFFFn);
+      };
+
+      writeUint64(0, s.state.a);
+      writeUint64(1, s.state.b);
+      writeUint64(2, s.state.c);
+      writeUint64(3, s.state.w);
+      writeUint64(4, BigInt(s.has_uint32));
+      writeUint64(5, BigInt(s.uinteger));
+
+      wasm._sfc64_set_state(this._wasmState, statePtr);
+    } finally {
+      wasm._free(statePtr);
+    }
+  }
+
+  spawn(nChildren: number): SFC64[] {
+    this.ensureNotDisposed();
+    if (!this._seedSequence) {
+      throw new Error('Cannot spawn from a BitGenerator without a SeedSequence');
+    }
+    const childSeqs = this._seedSequence.spawn(nChildren);
+    return childSeqs.map(seq => new SFC64(seq));
+  }
+
+  dispose(): void {
+    if (!this._disposed && this._wasmState !== 0) {
+      const wasm = getWasmModule();
+      wasm._sfc64_free(this._wasmState);
+      this._wasmState = 0;
+      this._disposed = true;
+    }
+  }
+}
+
+/* ============ MT19937 BitGenerator ============ */
+
+/**
+ * MT19937 BitGenerator - Classic Mersenne Twister.
+ *
+ * Uses a 624 × 32-bit state array. Period is 2^19937 - 1.
+ * While historically popular, PCG64 or SFC64 are recommended for new applications.
+ *
+ * @example
+ * ```typescript
+ * // Create with integer seed
+ * const mt = new MT19937(12345);
+ *
+ * // Create with SeedSequence
+ * const ss = new SeedSequence([1, 2, 3]);
+ * const mt2 = new MT19937(ss);
+ *
+ * // Generate values
+ * const u32 = mt.next_uint32();  // Native 32-bit output
+ * const dbl = mt.next_double();
+ * ```
+ */
+export class MT19937 extends BitGenerator {
+  private _seedSequence: SeedSequence | null = null;
+  private _disposed: boolean = false;
+
+  constructor(seed?: number | bigint | number[] | SeedSequence | null) {
+    super();
+
+    const wasm = getWasmModule();
+    this._wasmState = wasm._mt19937_create();
+
+    if (this._wasmState === 0) {
+      throw new Error('Failed to create MT19937 state: memory allocation failed');
+    }
+
+    if (seed instanceof SeedSequence) {
+      this._seedSequence = seed;
+    } else {
+      this._seedSequence = new SeedSequence(seed);
+    }
+
+    // Generate 624 uint32 values for the full state
+    const state = this._seedSequence.generateState(624, 'uint32') as Uint32Array;
+    this._initFromState(state);
+  }
+
+  private _initFromState(state: Uint32Array): void {
+    const wasm = getWasmModule();
+    // Use array seeding for SeedSequence-generated values
+    const statePtr = wasm._malloc(state.length * 4);
+    try {
+      for (let i = 0; i < state.length; i++) {
+        wasm.HEAPU32[(statePtr >> 2) + i] = state[i];
+      }
+      wasm._mt19937_seed_array(this._wasmState, statePtr, state.length);
+    } finally {
+      wasm._free(statePtr);
+    }
+  }
+
+  private ensureNotDisposed(): void {
+    if (this._disposed) {
+      throw new Error('MT19937 has been disposed');
+    }
+  }
+
+  next_uint64(): bigint {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+
+    const highPtr = wasm._malloc(4);
+    try {
+      const low = wasm._mt19937_next64_parts(this._wasmState, highPtr);
+      const high = wasm.HEAPU32[highPtr >> 2];
+      return BigInt(low >>> 0) | (BigInt(high) << 32n);
+    } finally {
+      wasm._free(highPtr);
+    }
+  }
+
+  next_uint32(): number {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    return wasm._mt19937_next32(this._wasmState) >>> 0;
+  }
+
+  next_double(): number {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    return wasm._mt19937_next_double(this._wasmState);
+  }
+
+  getState(): MT19937State {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+
+    const keyPtr = wasm._malloc(624 * 4);
+    const posPtr = wasm._malloc(4);
+    const hasUint32Ptr = wasm._malloc(4);
+    const uintegerPtr = wasm._malloc(4);
+
+    try {
+      wasm._mt19937_get_state(this._wasmState, keyPtr, posPtr, hasUint32Ptr, uintegerPtr);
+
+      const key = new Uint32Array(624);
+      for (let i = 0; i < 624; i++) {
+        key[i] = wasm.HEAPU32[(keyPtr >> 2) + i];
+      }
+
+      return {
+        bit_generator: 'MT19937',
+        state: {
+          key: key,
+          pos: wasm.HEAP32[posPtr >> 2],
+        },
+        has_uint32: wasm.HEAP32[hasUint32Ptr >> 2],
+        uinteger: wasm.HEAPU32[uintegerPtr >> 2],
+      };
+    } finally {
+      wasm._free(keyPtr);
+      wasm._free(posPtr);
+      wasm._free(hasUint32Ptr);
+      wasm._free(uintegerPtr);
+    }
+  }
+
+  setState(state: object): void {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    const s = state as MT19937State;
+
+    const keyPtr = wasm._malloc(624 * 4);
+    try {
+      for (let i = 0; i < 624; i++) {
+        wasm.HEAPU32[(keyPtr >> 2) + i] = s.state.key[i];
+      }
+      wasm._mt19937_set_state(this._wasmState, keyPtr, s.state.pos, s.has_uint32, s.uinteger);
+    } finally {
+      wasm._free(keyPtr);
+    }
+  }
+
+  spawn(nChildren: number): MT19937[] {
+    this.ensureNotDisposed();
+    if (!this._seedSequence) {
+      throw new Error('Cannot spawn from a BitGenerator without a SeedSequence');
+    }
+    const childSeqs = this._seedSequence.spawn(nChildren);
+    return childSeqs.map(seq => new MT19937(seq));
+  }
+
+  dispose(): void {
+    if (!this._disposed && this._wasmState !== 0) {
+      const wasm = getWasmModule();
+      wasm._mt19937_free(this._wasmState);
+      this._wasmState = 0;
+      this._disposed = true;
+    }
+  }
+}
+
+/* ============ Philox BitGenerator ============ */
+
+/**
+ * Philox BitGenerator - Counter-based RNG (Philox4x64-10).
+ *
+ * Uses a 4 × 64-bit counter and 2 × 64-bit key. Supports efficient jump and advance operations.
+ * Well-suited for parallel and GPU applications.
+ *
+ * @example
+ * ```typescript
+ * // Create with integer seed
+ * const philox = new Philox(12345);
+ *
+ * // Jump ahead by 2^128 draws
+ * philox.jump();
+ *
+ * // Advance by arbitrary number of steps
+ * philox.advance(1000000n);
+ *
+ * // Generate values
+ * const u64 = philox.next_uint64();
+ * const dbl = philox.next_double();
+ * ```
+ */
+export class Philox extends BitGenerator {
+  private _seedSequence: SeedSequence | null = null;
+  private _disposed: boolean = false;
+
+  constructor(seed?: number | bigint | number[] | SeedSequence | null) {
+    super();
+
+    const wasm = getWasmModule();
+    this._wasmState = wasm._philox_create();
+
+    if (this._wasmState === 0) {
+      throw new Error('Failed to create Philox state: memory allocation failed');
+    }
+
+    if (seed instanceof SeedSequence) {
+      this._seedSequence = seed;
+    } else {
+      this._seedSequence = new SeedSequence(seed);
+    }
+
+    // Generate 4 uint32 values for the 2 × 64-bit key
+    const state = this._seedSequence.generateState(4, 'uint32') as Uint32Array;
+    this._initFromState(state);
+  }
+
+  private _initFromState(state: Uint32Array): void {
+    const wasm = getWasmModule();
+    // Philox needs 2 × 64-bit key values
+    const partsPtr = wasm._malloc(4 * 4);
+    try {
+      for (let i = 0; i < 4; i++) {
+        wasm.HEAPU32[(partsPtr >> 2) + i] = state[i];
+      }
+      wasm._philox_seed_parts(this._wasmState, partsPtr);
+    } finally {
+      wasm._free(partsPtr);
+    }
+  }
+
+  private ensureNotDisposed(): void {
+    if (this._disposed) {
+      throw new Error('Philox has been disposed');
+    }
+  }
+
+  next_uint64(): bigint {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+
+    const highPtr = wasm._malloc(4);
+    try {
+      const low = wasm._philox_next64_parts(this._wasmState, highPtr);
+      const high = wasm.HEAPU32[highPtr >> 2];
+      return BigInt(low >>> 0) | (BigInt(high) << 32n);
+    } finally {
+      wasm._free(highPtr);
+    }
+  }
+
+  next_uint32(): number {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    return wasm._philox_next32(this._wasmState) >>> 0;
+  }
+
+  next_double(): number {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    return wasm._philox_next_double(this._wasmState);
+  }
+
+  /**
+   * Jump ahead by 2^128 draws.
+   *
+   * This is useful for creating independent streams without overlap.
+   */
+  jump(): this {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    wasm._philox_jump(this._wasmState);
+    return this;
+  }
+
+  /**
+   * Advance the generator by delta steps.
+   *
+   * @param delta - Number of steps to advance
+   */
+  advance(delta: bigint): this {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+
+    // Use the full 256-bit advance function (works for any delta size)
+    const stepPtr = wasm._malloc(4 * 8);
+    try {
+      // Write delta as 4 × 64-bit values (little-endian)
+      const mask64 = 0xFFFFFFFFFFFFFFFFn;
+      for (let i = 0; i < 4; i++) {
+        const val = (delta >> BigInt(i * 64)) & mask64;
+        wasm.HEAPU32[(stepPtr >> 2) + i * 2] = Number(val & 0xFFFFFFFFn);
+        wasm.HEAPU32[(stepPtr >> 2) + i * 2 + 1] = Number((val >> 32n) & 0xFFFFFFFFn);
+      }
+      wasm._philox_advance(this._wasmState, stepPtr);
+    } finally {
+      wasm._free(stepPtr);
+    }
+    return this;
+  }
+
+  /**
+   * Return a jumped copy of the generator.
+   *
+   * @param jumps - Number of jumps (each jump is 2^128 steps)
+   */
+  jumped(jumps: number = 1): Philox {
+    this.ensureNotDisposed();
+    const newGen = new Philox(this._seedSequence);
+    newGen.setState(this.getState());
+    for (let i = 0; i < jumps; i++) {
+      newGen.jump();
+    }
+    return newGen;
+  }
+
+  getState(): PhiloxState {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+
+    const ctrPtr = wasm._malloc(4 * 8);
+    const keyPtr = wasm._malloc(2 * 8);
+    const bufferPosPtr = wasm._malloc(4);
+    const bufferPtr = wasm._malloc(4 * 8);
+    const hasUint32Ptr = wasm._malloc(4);
+    const uintegerPtr = wasm._malloc(4);
+
+    try {
+      wasm._philox_get_state(
+        this._wasmState,
+        ctrPtr, keyPtr, bufferPosPtr, bufferPtr, hasUint32Ptr, uintegerPtr
+      );
+
+      const readUint64Array = (ptr: number, count: number): BigUint64Array => {
+        const result = new BigUint64Array(count);
+        for (let i = 0; i < count; i++) {
+          const lo = wasm.HEAPU32[(ptr >> 2) + i * 2];
+          const hi = wasm.HEAPU32[(ptr >> 2) + i * 2 + 1];
+          result[i] = BigInt(lo >>> 0) | (BigInt(hi) << 32n);
+        }
+        return result;
+      };
+
+      return {
+        bit_generator: 'Philox',
+        state: {
+          counter: readUint64Array(ctrPtr, 4),
+          key: readUint64Array(keyPtr, 2),
+        },
+        buffer: readUint64Array(bufferPtr, 4),
+        buffer_pos: wasm.HEAP32[bufferPosPtr >> 2],
+        has_uint32: wasm.HEAP32[hasUint32Ptr >> 2],
+        uinteger: wasm.HEAPU32[uintegerPtr >> 2],
+      };
+    } finally {
+      wasm._free(ctrPtr);
+      wasm._free(keyPtr);
+      wasm._free(bufferPosPtr);
+      wasm._free(bufferPtr);
+      wasm._free(hasUint32Ptr);
+      wasm._free(uintegerPtr);
+    }
+  }
+
+  setState(state: object): void {
+    this.ensureNotDisposed();
+    const wasm = getWasmModule();
+    const s = state as PhiloxState;
+
+    const ctrPtr = wasm._malloc(4 * 8);
+    const keyPtr = wasm._malloc(2 * 8);
+    const bufferPtr = wasm._malloc(4 * 8);
+
+    try {
+      const writeUint64Array = (ptr: number, arr: BigUint64Array): void => {
+        for (let i = 0; i < arr.length; i++) {
+          wasm.HEAPU32[(ptr >> 2) + i * 2] = Number(arr[i] & 0xFFFFFFFFn);
+          wasm.HEAPU32[(ptr >> 2) + i * 2 + 1] = Number((arr[i] >> 32n) & 0xFFFFFFFFn);
+        }
+      };
+
+      writeUint64Array(ctrPtr, s.state.counter);
+      writeUint64Array(keyPtr, s.state.key);
+      writeUint64Array(bufferPtr, s.buffer);
+
+      wasm._philox_set_state(
+        this._wasmState,
+        ctrPtr, keyPtr, s.buffer_pos, bufferPtr, s.has_uint32, s.uinteger
+      );
+    } finally {
+      wasm._free(ctrPtr);
+      wasm._free(keyPtr);
+      wasm._free(bufferPtr);
+    }
+  }
+
+  spawn(nChildren: number): Philox[] {
+    this.ensureNotDisposed();
+    if (!this._seedSequence) {
+      throw new Error('Cannot spawn from a BitGenerator without a SeedSequence');
+    }
+    const childSeqs = this._seedSequence.spawn(nChildren);
+    return childSeqs.map(seq => new Philox(seq));
+  }
+
+  dispose(): void {
+    if (!this._disposed && this._wasmState !== 0) {
+      const wasm = getWasmModule();
+      wasm._philox_free(this._wasmState);
+      this._wasmState = 0;
+      this._disposed = true;
+    }
+  }
+}
+
+/* ============ BitGenerator Registry ============ */
+
+/**
+ * Registry of available BitGenerator classes.
+ */
+const BIT_GENERATORS: Record<string, new (seed?: number | bigint | number[] | SeedSequence | null) => BitGenerator> = {
+  'PCG64': PCG64,
+  'MT19937': MT19937,
+  'PHILOX': Philox,
+  'SFC64': SFC64,
+};
+
+/**
+ * Get a BitGenerator class by name.
+ *
+ * @param name - Name of the BitGenerator (case-insensitive)
+ * @returns The BitGenerator constructor
+ *
+ * @example
+ * ```typescript
+ * const MT = getBitGenerator('mt19937');
+ * const mt = new MT(12345);
+ * ```
+ */
+export function getBitGenerator(name: string): new (seed?: number | bigint | number[] | SeedSequence | null) => BitGenerator {
+  const normalized = name.toUpperCase();
+  const cls = BIT_GENERATORS[normalized];
+  if (!cls) {
+    const available = Object.keys(BIT_GENERATORS).join(', ');
+    throw new Error(`Unknown BitGenerator: ${name}. Available: ${available}`);
+  }
+  return cls;
+}
+
+/**
+ * List available BitGenerator names.
+ *
+ * @returns Array of BitGenerator names
+ */
+export function listBitGenerators(): string[] {
+  return Object.keys(BIT_GENERATORS);
+}
+
 /* ============ Generator Class ============ */
 
 /**
@@ -505,7 +1168,20 @@ export class Generator {
     if (this._wasmBitgen === 0) {
       throw new Error('Failed to allocate bitgen_t');
     }
-    wasm._pcg64_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+
+    // Initialize based on the BitGenerator type
+    if (this._bitGenerator instanceof PCG64) {
+      wasm._pcg64_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+    } else if (this._bitGenerator instanceof SFC64) {
+      wasm._sfc64_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+    } else if (this._bitGenerator instanceof MT19937) {
+      wasm._mt19937_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+    } else if (this._bitGenerator instanceof Philox) {
+      wasm._philox_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+    } else {
+      // Fallback for custom BitGenerators - use PCG64 style (may not work correctly)
+      wasm._pcg64_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+    }
   }
 
   private ensureNotDisposed(): void {
@@ -1530,6 +2206,7 @@ export class Generator {
  * - BitGenerator: Use directly
  *
  * @param seed - Seed value or BitGenerator
+ * @param options - Options object with optional bitGenerator name
  * @returns A new Generator instance
  *
  * @example
@@ -1546,20 +2223,29 @@ export class Generator {
  * // Using existing BitGenerator
  * const pcg = new PCG64(12345);
  * const rng = default_rng(pcg);
+ *
+ * // Using a specific BitGenerator type
+ * const rng = default_rng(12345, { bitGenerator: 'MT19937' });
+ * const rng = default_rng(12345, { bitGenerator: 'Philox' });
+ * const rng = default_rng(12345, { bitGenerator: 'SFC64' });
  * ```
  */
 export function default_rng(
-  seed?: number | bigint | number[] | SeedSequence | BitGenerator | null
+  seed?: number | bigint | number[] | SeedSequence | BitGenerator | null,
+  options?: { bitGenerator?: string }
 ): Generator {
   if (seed instanceof BitGenerator) {
     return new Generator(seed);
   }
 
+  const bitGeneratorName = options?.bitGenerator ?? 'PCG64';
+  const BitGenClass = getBitGenerator(bitGeneratorName);
+
   if (seed instanceof SeedSequence) {
-    return new Generator(new PCG64(seed));
+    return new Generator(new BitGenClass(seed));
   }
 
-  return new Generator(new PCG64(seed));
+  return new Generator(new BitGenClass(seed));
 }
 
 /* ============ Convenience Functions ============ */
