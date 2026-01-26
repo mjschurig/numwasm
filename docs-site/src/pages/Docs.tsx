@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Button } from 'react-aria-components';
+import { Menu, X } from 'lucide-react';
 import { useApiDocs } from '../hooks/useApiDocs';
 import DocsSidebar from '../components/docs/DocsSidebar';
 import ModuleView from '../components/docs/ModuleView';
@@ -209,13 +212,14 @@ function ItemView({ item }: { item: DeclarationReflection }) {
 }
 
 export default function Docs() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { '*': itemName } = useParams();
   const { data, loading, error } = useApiDocs();
 
   if (loading) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)]">
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 sm:p-8">
           <div className="flex justify-center items-center min-h-[200px] text-gray-400">
             Loading documentation...
           </div>
@@ -227,8 +231,8 @@ export default function Docs() {
   if (error || !data) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)]">
-        <div className="flex-1 p-8">
-          <div className="text-red-400 p-8">
+        <div className="flex-1 p-4 sm:p-8">
+          <div className="text-red-400 p-4 sm:p-8">
             <h2 className="text-xl font-bold mb-2">Error Loading Documentation</h2>
             <p>{error || 'Failed to load API documentation'}</p>
             <p className="mt-4 text-gray-400">
@@ -247,8 +251,34 @@ export default function Docs() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)]">
-      <DocsSidebar data={data} />
-      <main className="flex-1 p-8 max-w-full overflow-x-hidden">
+      {/* Mobile sidebar toggle */}
+      <Button
+        onPress={() => setSidebarOpen(!sidebarOpen)}
+        className="lg:hidden fixed bottom-4 right-4 z-50 p-3 bg-primary text-white rounded-full shadow-lg cursor-pointer hover:bg-primary/90 transition-colors"
+        aria-label="Toggle sidebar"
+      >
+        {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </Button>
+
+      {/* Sidebar overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`
+          fixed lg:static inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
+        <DocsSidebar data={data} onItemClick={() => setSidebarOpen(false)} />
+      </div>
+
+      <main className="flex-1 p-4 sm:p-8 max-w-full overflow-x-hidden">
         {selectedItem ? (
           <ItemView item={selectedItem} />
         ) : (

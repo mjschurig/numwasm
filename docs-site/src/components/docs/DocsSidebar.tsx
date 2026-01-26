@@ -6,6 +6,7 @@ import { ReflectionKind } from '../../types/typedoc';
 
 interface DocsSidebarProps {
   data: ProjectReflection;
+  onItemClick?: () => void;
 }
 
 interface SidebarGroup {
@@ -13,7 +14,7 @@ interface SidebarGroup {
   items: DeclarationReflection[];
 }
 
-export default function DocsSidebar({ data }: DocsSidebarProps) {
+export default function DocsSidebar({ data, onItemClick }: DocsSidebarProps) {
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     Core: true,
@@ -94,7 +95,7 @@ export default function DocsSidebar({ data }: DocsSidebarProps) {
   };
 
   return (
-    <aside className="w-70 border-r border-gray-700 p-6 overflow-y-auto sticky top-16 h-[calc(100vh-4rem)] bg-gray-900/50 backdrop-blur-sm">
+    <aside className="w-72 lg:w-70 border-r border-gray-700 p-4 sm:p-6 overflow-y-auto h-screen lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] bg-gray-900/95 lg:bg-gray-900/50 backdrop-blur-sm">
       <SearchField value={search} onChange={setSearch} className="mb-4">
         <Input
           placeholder="Search..."
@@ -122,6 +123,7 @@ export default function DocsSidebar({ data }: DocsSidebarProps) {
                 <li key={item.id}>
                   <NavLink
                     to={`/docs/${item.name}`}
+                    onClick={onItemClick}
                     className={({ isActive }) =>
                       `block px-3 py-1.5 rounded text-sm no-underline transition-colors ${
                         isActive

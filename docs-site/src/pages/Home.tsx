@@ -6,30 +6,30 @@ export default function Home() {
 
   return (
     <main className="text-gray-100">
-      <section className="text-center py-20 px-8 max-w-3xl mx-auto relative">
+      <section className="text-center py-12 sm:py-20 px-4 sm:px-8 max-w-3xl mx-auto relative">
         <div className="hero-glow" />
-        <h1 className="text-6xl font-bold hero-text mb-6">numwasm</h1>
-        <p className="text-xl text-gray-400 mb-10 leading-relaxed">
+        <h1 className="text-4xl sm:text-6xl font-bold hero-text mb-4 sm:mb-6">numwasm</h1>
+        <p className="text-lg sm:text-xl text-gray-400 mb-8 sm:mb-10 leading-relaxed">
           NumPy-inspired n-dimensional array operations in TypeScript with WebAssembly acceleration.
           Full type safety, browser and Node.js support.
         </p>
-        <div className="flex gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
           <Button
             onPress={() => navigate('/demo')}
-            className="cta-button px-8 py-4 rounded-lg font-semibold text-primary hover:text-white pressed:scale-95 transition-all cursor-pointer"
+            className="cta-button px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-primary hover:text-white pressed:scale-95 transition-all cursor-pointer"
           >
             Try the Demo
           </Button>
           <Button
             onPress={() => navigate('/docs')}
-            className="px-8 py-4 bg-gray-800/50 text-gray-200 border border-gray-700 rounded-lg font-semibold hover:bg-gray-700/50 hover:border-gray-600 pressed:scale-95 transition-all cursor-pointer"
+            className="px-6 sm:px-8 py-3 sm:py-4 bg-gray-800/50 text-gray-200 border border-gray-700 rounded-lg font-semibold hover:bg-gray-700/50 hover:border-gray-600 pressed:scale-95 transition-all cursor-pointer"
           >
             View Documentation
           </Button>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-8 max-w-6xl mx-auto">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 p-4 sm:p-8 max-w-6xl mx-auto">
         <div className="p-6 bg-gray-800/30 border border-gray-700/50 rounded-xl text-center backdrop-blur-sm hover:border-primary/30 transition-colors">
           <h3 className="font-semibold text-primary mb-3">NumPy Compatible</h3>
           <p className="text-gray-400 text-sm">Familiar API following NumPy conventions. Easy migration for Python developers.</p>
@@ -48,9 +48,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="max-w-3xl mx-auto py-12 px-8">
-        <h2 className="text-2xl font-bold text-gray-100 mb-6">Quick Start</h2>
-        <pre className="bg-gray-800/50 border border-gray-700/50 p-6 rounded-lg overflow-x-auto backdrop-blur-sm">
+      <section className="max-w-3xl mx-auto py-8 sm:py-12 px-4 sm:px-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-100 mb-4 sm:mb-6">Quick Start</h2>
+        <pre className="bg-gray-800/50 border border-gray-700/50 p-4 sm:p-6 rounded-lg overflow-x-auto backdrop-blur-sm text-sm sm:text-base">
           <code className="text-gray-200">{`npm install numwasm
 
 import * as nw from 'numwasm';
