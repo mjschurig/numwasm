@@ -60,6 +60,26 @@ export { FlatIterator, nditer, ndenumerate, ndindex } from './iterators.js';
 // WASM module management
 export { loadWasmModule, isWasmLoaded, getWasmModule } from './wasm-loader.js';
 
+// Array creation functions
+export {
+  zeros,
+  ones,
+  empty,
+  full,
+  arange,
+  linspace,
+  logspace,
+  geomspace,
+  eye,
+  identity,
+  diag,
+  array,
+  zeros_like,
+  ones_like,
+  empty_like,
+  full_like,
+} from './creation.js';
+
 // Slice utilities (Level 2)
 export {
   Slice,
