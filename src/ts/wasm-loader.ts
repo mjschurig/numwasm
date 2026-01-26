@@ -129,63 +129,36 @@ async function loadWasmNode(): Promise<WasmModule> {
 }
 
 /**
- * Get the base URL for loading WASM assets in browser.
- * Uses a dynamic approach to avoid bundler transformation of import.meta.url.
+ * Get URLs for WASM assets in browser using import.meta.url.
+ * This pattern is recognized by bundlers (Vite, Webpack, etc.) and they
+ * will automatically handle copying and serving the WASM/JS files.
  */
-function getBrowserBaseUrl(): string {
-  // Try to get the URL of the current script
-  // This works because the script is loaded as an ES module
-  try {
-    // Use indirect eval to prevent bundler from transforming import.meta
-    // eslint-disable-next-line no-eval
-    const meta = eval('import.meta');
-    if (meta && meta.url) {
-      return new URL('.', meta.url).href;
-    }
-  } catch {
-    // import.meta not available
-  }
-
-  // Fallback: try to find the script URL from document
-  if (typeof document !== 'undefined') {
-    const scripts = document.querySelectorAll('script[type="module"]');
-    for (let i = 0; i < scripts.length; i++) {
-      const script = scripts[i];
-      const src = script.getAttribute('src');
-      if (src && src.includes('numjs')) {
-        return new URL('.', new URL(src, location.href)).href;
-      }
-    }
-  }
-
-  // Last resort: use the current page location
-  if (typeof location !== 'undefined') {
-    // Assume WASM files are at /dist/ relative to origin
-    return new URL('/dist/', location.origin).href;
-  }
-
-  throw new Error(
-    'Could not determine base URL for WASM files. Please use configureWasm({ wasmUrl: "..." })'
-  );
+function getBrowserAssetUrls(): { wasmUrl: string; glueUrl: string } {
+  // Use the standard new URL(..., import.meta.url) pattern
+  // Bundlers recognize this and handle asset resolution correctly
+  const wasmUrl = new URL('./wasm/numjs.wasm', import.meta.url).href;
+  const glueUrl = new URL('./wasm/numjs.mjs', import.meta.url).href;
+  return { wasmUrl, glueUrl };
 }
 
 /**
  * Load the WASM module in browser environment.
  */
 async function loadWasmBrowser(): Promise<WasmModule> {
-  // Use configured URL or auto-detect
-  let wasmUrl = wasmConfig.wasmUrl;
+  // Use configured URL or auto-detect using import.meta.url
+  let wasmUrl: string;
   let glueUrl: string;
 
-  if (wasmUrl) {
+  if (wasmConfig.wasmUrl) {
     // If wasmUrl is provided, derive glue URL from it
+    wasmUrl = wasmConfig.wasmUrl;
     const wasmUrlObj = new URL(wasmUrl);
     glueUrl = new URL('numjs.mjs', wasmUrlObj.href.replace(/numjs\.wasm$/, '')).href;
   } else {
-    // Auto-detect base URL
-    const baseUrl = getBrowserBaseUrl();
-    wasmUrl = new URL('wasm/numjs.wasm', baseUrl).href;
-    glueUrl = new URL('wasm/numjs.mjs', baseUrl).href;
+    // Use import.meta.url pattern - bundlers handle this correctly
+    const urls = getBrowserAssetUrls();
+    wasmUrl = urls.wasmUrl;
+    glueUrl = urls.glueUrl;
   }
 
   // Dynamically import the ESM glue code from the resolved URL
