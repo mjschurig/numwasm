@@ -492,6 +492,15 @@ export {
   inv,
   pinv,
   matrix_power,
+  // Phase 25: Advanced Linear Algebra
+  tensordot,
+  multi_dot,
+  kron,
+  cross,
+  tensorsolve,
+  tensorinv,
+  matrix_norm,
+  vector_norm,
 } from './linalg.js';
 export type {
   EigResult,
@@ -500,6 +509,9 @@ export type {
   LstsqResult,
   SlogdetResult,
 } from './linalg.js';
+
+// Einstein summation (Phase 25)
+export { einsum, einsum_path } from './einsum.js';
 
 // FFT (Phase 14)
 export {

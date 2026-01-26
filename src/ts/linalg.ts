@@ -875,6 +875,733 @@ export async function matrix_power(a: NDArray, n: number): Promise<NDArray> {
   return result;
 }
 
+/* ============ Phase 25: Advanced Linear Algebra ============ */
+
+/**
+ * Compute tensor dot product along specified axes.
+ *
+ * For tensors a and b, tensordot(a, b, axes) computes the sum of products
+ * over the specified axes.
+ *
+ * @param a - First tensor
+ * @param b - Second tensor
+ * @param axes - Axes to sum over:
+ *   - number N: last N axes of a with first N axes of b
+ *   - [axesA, axesB]: specific axes for each tensor
+ * @returns Tensor contraction result
+ *
+ * @example
+ * // Matrix multiplication
+ * const c = await tensordot(a, b, 1);
+ * // Same as: matmul(a, b)
+ *
+ * // Outer product
+ * const c = await tensordot(a, b, 0);
+ * // Shape: [...a.shape, ...b.shape]
+ */
+export async function tensordot(
+  a: NDArray,
+  b: NDArray,
+  axes: number | [number[], number[]] = 2
+): Promise<NDArray> {
+  // Parse axes specification
+  let axesA: number[];
+  let axesB: number[];
+
+  if (typeof axes === 'number') {
+    if (axes < 0) {
+      throw new LinAlgError('axes must be non-negative');
+    }
+    // Last N axes of a, first N axes of b
+    axesA = [];
+    axesB = [];
+    for (let i = 0; i < axes; i++) {
+      axesA.push(a.ndim - axes + i);
+      axesB.push(i);
+    }
+  } else {
+    [axesA, axesB] = axes;
+    if (axesA.length !== axesB.length) {
+      throw new LinAlgError('axes lists must have same length');
+    }
+  }
+
+  // Check for duplicate axes
+  if (new Set(axesA).size !== axesA.length) {
+    throw new LinAlgError('duplicate axes not allowed in tensordot');
+  }
+  if (new Set(axesB).size !== axesB.length) {
+    throw new LinAlgError('duplicate axes not allowed in tensordot');
+  }
+
+  // Normalize negative axes
+  axesA = axesA.map((ax) => (ax < 0 ? a.ndim + ax : ax));
+  axesB = axesB.map((ax) => (ax < 0 ? b.ndim + ax : ax));
+
+  // Validate axes are in bounds
+  for (const ax of axesA) {
+    if (ax < 0 || ax >= a.ndim) {
+      throw new LinAlgError(`axis ${ax} is out of bounds for array with ${a.ndim} dimensions`);
+    }
+  }
+  for (const ax of axesB) {
+    if (ax < 0 || ax >= b.ndim) {
+      throw new LinAlgError(`axis ${ax} is out of bounds for array with ${b.ndim} dimensions`);
+    }
+  }
+
+  // Validate axes match in size
+  for (let i = 0; i < axesA.length; i++) {
+    if (a.shape[axesA[i]] !== b.shape[axesB[i]]) {
+      throw new LinAlgError(
+        `shape mismatch for sum: ${a.shape[axesA[i]]} vs ${b.shape[axesB[i]]}`
+      );
+    }
+  }
+
+  // Compute non-contracted axes (free axes)
+  const freeA = a.shape.map((_, i) => i).filter((i) => !axesA.includes(i));
+  const freeB = b.shape.map((_, i) => i).filter((i) => !axesB.includes(i));
+
+  // Output shape from free axes
+  const oldShapeA = freeA.map((i) => a.shape[i]);
+  const oldShapeB = freeB.map((i) => b.shape[i]);
+
+  // Transpose a: free axes first, then contracted
+  const newAxesA = [...freeA, ...axesA];
+  const aT = a.transpose(newAxesA);
+
+  // Transpose b: contracted axes first, then free
+  const newAxesB = [...axesB, ...freeB];
+  const bT = b.transpose(newAxesB);
+
+  // Compute reshape dimensions
+  const N2 = axesA.reduce((p, i) => p * a.shape[i], 1);
+  const freeASize = oldShapeA.reduce((p, x) => p * x, 1);
+  const freeBSize = oldShapeB.reduce((p, x) => p * x, 1);
+
+  // Handle edge case of no free axes
+  const newShapeA: [number, number] = [freeASize || 1, N2 || 1];
+  const newShapeB: [number, number] = [N2 || 1, freeBSize || 1];
+
+  // Reshape to 2D
+  const aReshaped = aT.reshape(newShapeA);
+  const bReshaped = bT.reshape(newShapeB);
+
+  // Matrix multiply
+  const result = await dot(aReshaped, bReshaped);
+
+  // Reshape to final output shape
+  const finalShape = [...oldShapeA, ...oldShapeB];
+  if (finalShape.length === 0) {
+    // Scalar result
+    return result.reshape([]);
+  }
+  return result.reshape(finalShape);
+}
+
+/**
+ * Compute the dot product of two or more arrays in a single function call,
+ * while automatically selecting the fastest evaluation order.
+ *
+ * Uses dynamic programming to find the optimal parenthesization that
+ * minimizes the total number of scalar multiplications.
+ *
+ * @param arrays - List of arrays to multiply together
+ * @returns Product of all arrays
+ *
+ * @example
+ * // For arrays A (10x100), B (100x5), C (5x50)
+ * // multi_dot([A, B, C]) is much faster than A @ B @ C
+ * // because it computes (A @ B) @ C instead of A @ (B @ C)
+ */
+export async function multi_dot(arrays: NDArray[]): Promise<NDArray> {
+  const n = arrays.length;
+
+  if (n < 2) {
+    throw new LinAlgError('multi_dot requires at least 2 arrays');
+  }
+
+  if (n === 2) {
+    return dot(arrays[0], arrays[1]);
+  }
+
+  // Handle 1-D arrays: first as row vector, last as column vector
+  const workArrays = [...arrays];
+  let firstIs1D = false;
+  let lastIs1D = false;
+
+  if (workArrays[0].ndim === 1) {
+    firstIs1D = true;
+    workArrays[0] = workArrays[0].reshape([1, workArrays[0].shape[0]]);
+  }
+  if (workArrays[n - 1].ndim === 1) {
+    lastIs1D = true;
+    workArrays[n - 1] = workArrays[n - 1].reshape([workArrays[n - 1].shape[0], 1]);
+  }
+
+  // Validate all arrays are 2D
+  for (let i = 0; i < n; i++) {
+    if (workArrays[i].ndim !== 2) {
+      throw new LinAlgError(`multi_dot requires 1-D or 2-D arrays, got ${workArrays[i].ndim}-D at position ${i}`);
+    }
+  }
+
+  // Get dimensions for cost computation: p[i] = rows of matrix i, p[n] = cols of last matrix
+  const p: number[] = [];
+  p.push(workArrays[0].shape[0]);
+  for (let i = 0; i < n; i++) {
+    p.push(workArrays[i].shape[1]);
+  }
+
+  // Validate chain dimensions match
+  for (let i = 0; i < n - 1; i++) {
+    if (workArrays[i].shape[1] !== workArrays[i + 1].shape[0]) {
+      throw new LinAlgError(
+        `shapes (${workArrays[i].shape.join(',')}) and (${workArrays[i + 1].shape.join(',')}) not aligned`
+      );
+    }
+  }
+
+  // For n=3, use simple cost comparison
+  if (n === 3) {
+    const cost1 = p[0] * p[1] * p[2] + p[0] * p[2] * p[3]; // (AB)C
+    const cost2 = p[1] * p[2] * p[3] + p[0] * p[1] * p[3]; // A(BC)
+
+    let result: NDArray;
+    if (cost1 <= cost2) {
+      const ab = await dot(workArrays[0], workArrays[1]);
+      result = await dot(ab, workArrays[2]);
+    } else {
+      const bc = await dot(workArrays[1], workArrays[2]);
+      result = await dot(workArrays[0], bc);
+    }
+
+    // Reshape result if input was 1-D
+    if (firstIs1D && lastIs1D) {
+      return result.reshape([]);
+    } else if (firstIs1D) {
+      return result.reshape([result.shape[1]]);
+    } else if (lastIs1D) {
+      return result.reshape([result.shape[0]]);
+    }
+    return result;
+  }
+
+  // Dynamic programming for n > 3: Matrix Chain Multiplication
+  // m[i][j] = minimum cost to multiply matrices i..j
+  // s[i][j] = optimal split point
+  const m: number[][] = Array(n)
+    .fill(null)
+    .map(() => Array(n).fill(0));
+  const s: number[][] = Array(n)
+    .fill(null)
+    .map(() => Array(n).fill(0));
+
+  // Chain length from 2 to n
+  for (let len = 2; len <= n; len++) {
+    for (let i = 0; i <= n - len; i++) {
+      const j = i + len - 1;
+      m[i][j] = Infinity;
+
+      for (let k = i; k < j; k++) {
+        const cost = m[i][k] + m[k + 1][j] + p[i] * p[k + 1] * p[j + 1];
+        if (cost < m[i][j]) {
+          m[i][j] = cost;
+          s[i][j] = k;
+        }
+      }
+    }
+  }
+
+  // Execute multiplications in optimal order
+  async function executeChain(i: number, j: number): Promise<NDArray> {
+    if (i === j) {
+      return workArrays[i];
+    }
+    const k = s[i][j];
+    const left = await executeChain(i, k);
+    const right = await executeChain(k + 1, j);
+    return dot(left, right);
+  }
+
+  let result = await executeChain(0, n - 1);
+
+  // Reshape result if input was 1-D
+  if (firstIs1D && lastIs1D) {
+    return result.reshape([]);
+  } else if (firstIs1D) {
+    return result.reshape([result.shape[1]]);
+  } else if (lastIs1D) {
+    return result.reshape([result.shape[0]]);
+  }
+  return result;
+}
+
+/**
+ * Kronecker product of two arrays.
+ *
+ * Computes the Kronecker product, a composite array made of blocks of the
+ * second array scaled by the first.
+ *
+ * @param a - First array
+ * @param b - Second array
+ * @returns Kronecker product
+ *
+ * @example
+ * kron([1, 10, 100], [5, 6, 7])
+ * // [5, 6, 7, 50, 60, 70, 500, 600, 700]
+ *
+ * kron([[1, 2], [3, 4]], [[1, 0], [0, 1]])
+ * // [[1, 0, 2, 0],
+ * //  [0, 1, 0, 2],
+ * //  [3, 0, 4, 0],
+ * //  [0, 3, 0, 4]]
+ */
+export async function kron(a: NDArray, b: NDArray): Promise<NDArray> {
+  // Handle scalar case
+  if (a.ndim === 0 && b.ndim === 0) {
+    const val = (a.item() as number) * (b.item() as number);
+    return NDArray.fromArray([val]).then((arr) => arr.reshape([]));
+  }
+
+  // Ensure at least 1D
+  let aArr = a.ndim === 0 ? a.reshape([1]) : a;
+  let bArr = b.ndim === 0 ? b.reshape([1]) : b;
+
+  const nda = aArr.ndim;
+  const ndb = bArr.ndim;
+  const nd = Math.max(nda, ndb);
+
+  // Equalize dimensions by prepending 1s
+  if (nda < nd) {
+    const newShape = [...Array(nd - nda).fill(1), ...aArr.shape];
+    aArr = aArr.reshape(newShape);
+  }
+  if (ndb < nd) {
+    const newShape = [...Array(nd - ndb).fill(1), ...bArr.shape];
+    bArr = bArr.reshape(newShape);
+  }
+
+  // Build interleaved shape for expansion
+  // a goes to positions 0, 2, 4, ... with b dimensions as 1
+  // b goes to positions 1, 3, 5, ... with a dimensions as 1
+  const aExpandShape: number[] = [];
+  const bExpandShape: number[] = [];
+
+  for (let i = 0; i < nd; i++) {
+    aExpandShape.push(aArr.shape[i]);
+    aExpandShape.push(1);
+    bExpandShape.push(1);
+    bExpandShape.push(bArr.shape[i]);
+  }
+
+  const aExpanded = aArr.reshape(aExpandShape);
+  const bExpanded = bArr.reshape(bExpandShape);
+
+  // Multiply (broadcasting handles it) using ufunc_multiply
+  const module = getWasmModule();
+  const productPtr = module._ufunc_multiply(aExpanded._wasmPtr, bExpanded._wasmPtr);
+  if (productPtr === 0) {
+    throw new LinAlgError('kron multiply failed');
+  }
+  const product = NDArray._fromPtr(productPtr, module);
+
+  // Compute final shape by multiplying corresponding dimensions
+  const resultShape: number[] = [];
+  for (let i = 0; i < nd; i++) {
+    resultShape.push(aArr.shape[i] * bArr.shape[i]);
+  }
+
+  return product.reshape(resultShape);
+}
+
+/**
+ * Return the cross product of two (arrays of) vectors.
+ *
+ * The cross product of a and b in R^3 is a vector perpendicular to both
+ * a and b. The vectors are defined by the last axis by default.
+ *
+ * @param a - First vector(s)
+ * @param b - Second vector(s)
+ * @param axisa - Axis of a that defines the vector(s) (default: -1)
+ * @param axisb - Axis of b that defines the vector(s) (default: -1)
+ * @param axisc - Axis of c that contains the cross product vectors (default: -1)
+ * @param axis - If specified, overrides axisa, axisb, and axisc
+ * @returns Cross product vector(s)
+ *
+ * @example
+ * // 3D cross product
+ * cross([1, 0, 0], [0, 1, 0])  // [0, 0, 1]
+ *
+ * // Batch cross product
+ * cross([[1, 0, 0], [0, 1, 0]], [[0, 1, 0], [0, 0, 1]])
+ * // [[0, 0, 1], [1, 0, 0]]
+ */
+export async function cross(
+  a: NDArray,
+  b: NDArray,
+  axisa: number = -1,
+  axisb: number = -1,
+  axisc: number = -1,
+  axis: number | null = null
+): Promise<NDArray> {
+  // Override with axis if provided
+  if (axis !== null) {
+    axisa = axis;
+    axisb = axis;
+    axisc = axis;
+  }
+
+  // Normalize axes
+  axisa = axisa < 0 ? a.ndim + axisa : axisa;
+  axisb = axisb < 0 ? b.ndim + axisb : axisb;
+
+  // Get vector dimensions
+  const dimA = a.shape[axisa];
+  const dimB = b.shape[axisb];
+
+  // Validate dimensions
+  if (dimA !== 3 || dimB !== 3) {
+    throw new LinAlgError(
+      `cross product requires vectors of length 3, got ${dimA} and ${dimB}`
+    );
+  }
+
+  // Move vector axis to last position for easier computation
+  const aMoved = a.moveaxis(axisa, -1);
+  const bMoved = b.moveaxis(axisb, -1);
+
+  // For simple 1D vectors, compute directly
+  if (aMoved.ndim === 1 && bMoved.ndim === 1) {
+    const aData = await aMoved.toTypedArray();
+    const bData = await bMoved.toTypedArray();
+
+    const c0 = aData[1] * bData[2] - aData[2] * bData[1];
+    const c1 = aData[2] * bData[0] - aData[0] * bData[2];
+    const c2 = aData[0] * bData[1] - aData[1] * bData[0];
+
+    return NDArray.fromTypedArray(new Float64Array([c0, c1, c2]), [3], DType.Float64);
+  }
+
+  // For batched case, ensure shapes match
+  const batchShapeA = aMoved.shape.slice(0, -1);
+  const batchShapeB = bMoved.shape.slice(0, -1);
+
+  // Simple shape check (require exact match for now)
+  if (batchShapeA.length !== batchShapeB.length ||
+      !batchShapeA.every((s, i) => s === batchShapeB[i])) {
+    throw new LinAlgError('cross: batch shapes must match for batched cross product');
+  }
+
+  const batchShape = batchShapeA;
+  const batchSize = batchShape.reduce((p, v) => p * v, 1);
+
+  // Get typed arrays for computation
+  const aData = await aMoved.toTypedArray();
+  const bData = await bMoved.toTypedArray();
+
+  // Compute cross product: c = a × b
+  const resultData = new Float64Array(batchSize * 3);
+
+  for (let i = 0; i < batchSize; i++) {
+    const base = i * 3;
+    const a0 = aData[base];
+    const a1 = aData[base + 1];
+    const a2 = aData[base + 2];
+    const b0 = bData[base];
+    const b1 = bData[base + 1];
+    const b2 = bData[base + 2];
+
+    resultData[base] = a1 * b2 - a2 * b1;
+    resultData[base + 1] = a2 * b0 - a0 * b2;
+    resultData[base + 2] = a0 * b1 - a1 * b0;
+  }
+
+  // Create result array
+  const resultShape = [...batchShape, 3];
+  let result = await NDArray.fromTypedArray(resultData, resultShape, DType.Float64);
+
+  // Move result axis if needed
+  axisc = axisc < 0 ? result.ndim + axisc : axisc;
+  if (axisc !== result.ndim - 1) {
+    result = result.moveaxis(-1, axisc);
+  }
+
+  return result;
+}
+
+/**
+ * Solve the tensor equation a x = b for x.
+ *
+ * It is assumed that all indices of x are summed over in the product,
+ * together with the rightmost indices of a.
+ *
+ * @param a - Coefficient tensor
+ * @param b - Right-hand side tensor
+ * @param axes - Axes in a to reorder to the right, for the solve
+ * @returns Solution tensor x
+ *
+ * @example
+ * const a = (await NDArray.eye(4)).reshape([2, 2, 2, 2]);
+ * const b = (await NDArray.fromArray([1, 2, 3, 4])).reshape([2, 2]);
+ * const x = await tensorsolve(a, b);
+ * // tensordot(a, x, 2) ≈ b
+ */
+export async function tensorsolve(
+  a: NDArray,
+  b: NDArray,
+  axes: number[] | null = null
+): Promise<NDArray> {
+  let aWork = a;
+
+  // Reorder axes if specified
+  if (axes !== null) {
+    const allAxes = Array.from({ length: a.ndim }, (_, i) => i);
+    const remainingAxes = allAxes.filter((i) => !axes.includes(i));
+    const newOrder = [...remainingAxes, ...axes];
+    aWork = a.transpose(newOrder);
+  }
+
+  // The shape of x comes from the trailing dimensions of a
+  const Q = aWork.ndim;
+  const bNdim = b.ndim;
+
+  // x.ndim = Q - bNdim
+  const xShape = aWork.shape.slice(bNdim);
+  const N = xShape.reduce((p, x) => p * x, 1);
+  const M = b.size;
+
+  // Validate dimensions
+  if (N !== M) {
+    throw new LinAlgError(
+      `tensorsolve: incompatible dimensions. ` +
+        `Product of trailing ${Q - bNdim} dims of a (${N}) must equal b.size (${M})`
+    );
+  }
+
+  // Reshape to 2D system: a becomes (M, N), b becomes (M,)
+  const aMatrix = aWork.reshape([M, N]);
+  const bVector = b.ravel();
+
+  // Solve
+  const xVector = await solve(aMatrix, bVector);
+
+  // Reshape solution to tensor shape
+  return xVector.reshape(xShape);
+}
+
+/**
+ * Compute the 'inverse' of an N-dimensional array.
+ *
+ * The result is an inverse for a with respect to the tensordot operation
+ * tensordot(a, b, ind).
+ *
+ * @param a - Tensor to pseudo-invert
+ * @param ind - Number of first indices that are involved in the inverse sum
+ * @returns Tensor inverse
+ *
+ * @example
+ * const a = (await NDArray.eye(4)).reshape([2, 2, 2, 2]);
+ * const ainv = await tensorinv(a);
+ * // tensordot(ainv, a, ind=2) ≈ eye(4).reshape([2, 2, 2, 2])
+ */
+export async function tensorinv(a: NDArray, ind: number = 2): Promise<NDArray> {
+  if (ind <= 0) {
+    throw new LinAlgError('tensorinv: ind must be a positive integer');
+  }
+
+  const oldShape = a.shape;
+
+  // Compute products of dimensions
+  const prod1 = oldShape.slice(0, ind).reduce((p, x) => p * x, 1);
+  const prod2 = oldShape.slice(ind).reduce((p, x) => p * x, 1);
+
+  if (prod1 !== prod2) {
+    throw new LinAlgError(
+      `tensorinv: product of first ${ind} dimensions (${prod1}) ` +
+        `must equal product of remaining dimensions (${prod2})`
+    );
+  }
+
+  // Reshape to square 2D matrix
+  const aMatrix = a.reshape([prod1, prod2]);
+
+  // Compute inverse
+  const aInvMatrix = await inv(aMatrix);
+
+  // Reshape back: new shape is shape[ind:] + shape[:ind]
+  const newShape = [...oldShape.slice(ind), ...oldShape.slice(0, ind)];
+  return aInvMatrix.reshape(newShape);
+}
+
+/**
+ * Compute the matrix norm.
+ *
+ * @param x - Input matrix (..., M, N)
+ * @param ord - Order of the norm ('fro', 'nuc', 1, 2, -1, -2, Infinity, -Infinity)
+ * @param keepdims - If true, axes are left with size one
+ * @returns Matrix norm
+ *
+ * @example
+ * matrix_norm([[1, 2], [3, 4]])  // Frobenius norm
+ * matrix_norm([[1, 2], [3, 4]], 2)  // Spectral norm (largest singular value)
+ */
+export async function matrix_norm(
+  x: NDArray,
+  ord: number | 'fro' | 'nuc' = 'fro',
+  keepdims: boolean = false
+): Promise<NDArray | number> {
+  if (x.ndim < 2) {
+    throw new LinAlgError('matrix_norm requires at least 2-dimensional input');
+  }
+
+  // For 2D input, use existing norm function
+  if (x.ndim === 2) {
+    const result = await norm(x, ord);
+    if (keepdims) {
+      return (await NDArray.fromArray([[result]])) as NDArray;
+    }
+    return result;
+  }
+
+  // For N-D input, apply norm over last two axes
+  // This requires iterating over batch dimensions
+  const batchShape = x.shape.slice(0, -2);
+  const batchSize = batchShape.reduce((p, v) => p * v, 1);
+  const m = x.shape[x.ndim - 2];
+  const n = x.shape[x.ndim - 1];
+  const matrixSize = m * n;
+
+  const results: number[] = [];
+
+  // Flatten batch dimensions and get data
+  const xReshaped = x.reshape([batchSize, m, n]);
+  const xData = await xReshaped.toTypedArray();
+
+  for (let i = 0; i < batchSize; i++) {
+    // Extract matrix data at batch index i
+    const matrixData = xData.slice(i * matrixSize, (i + 1) * matrixSize);
+    const matrix = await NDArray.fromTypedArray(
+      matrixData instanceof Float64Array ? matrixData : new Float64Array(matrixData),
+      [m, n],
+      DType.Float64
+    );
+    const normValue = await norm(matrix, ord);
+    results.push(normValue as number);
+  }
+
+  if (keepdims) {
+    const resultShape = [...batchShape, 1, 1];
+    return NDArray.fromTypedArray(new Float64Array(results), resultShape, DType.Float64);
+  }
+
+  if (batchShape.length === 0) {
+    return results[0];
+  }
+  return NDArray.fromTypedArray(new Float64Array(results), batchShape, DType.Float64);
+}
+
+/**
+ * Compute the vector norm.
+ *
+ * @param x - Input array
+ * @param ord - Order of the norm (default: 2, Euclidean)
+ * @param axis - Axis along which to compute. null = flatten
+ * @param keepdims - If true, axes are left with size one
+ * @returns Vector norm
+ *
+ * @example
+ * vector_norm([3, 4])  // 5 (Euclidean)
+ * vector_norm([3, 4], 1)  // 7 (Manhattan)
+ * vector_norm([3, 4], Infinity)  // 4 (max)
+ */
+export async function vector_norm(
+  x: NDArray,
+  ord: number = 2,
+  axis: number | null = null,
+  keepdims: boolean = false
+): Promise<NDArray | number> {
+  // Flatten case
+  if (axis === null) {
+    const flat = x.ravel();
+    const data = await flat.toTypedArray();
+
+    let result: number;
+
+    if (ord === Infinity) {
+      result = Math.max(...Array.from(data).map(Math.abs));
+    } else if (ord === -Infinity) {
+      result = Math.min(...Array.from(data).map(Math.abs));
+    } else if (ord === 0) {
+      result = Array.from(data).filter((v) => v !== 0).length;
+    } else if (ord === 1) {
+      result = Array.from(data).reduce((sum, v) => sum + Math.abs(v), 0);
+    } else if (ord === 2) {
+      result = Math.sqrt(Array.from(data).reduce((sum, v) => sum + v * v, 0));
+    } else {
+      // General p-norm
+      const pSum = Array.from(data).reduce((sum, v) => sum + Math.pow(Math.abs(v), ord), 0);
+      result = Math.pow(pSum, 1 / ord);
+    }
+
+    if (keepdims) {
+      const keepShape = x.shape.map(() => 1);
+      return NDArray.fromTypedArray(new Float64Array([result]), keepShape, DType.Float64);
+    }
+    return result;
+  }
+
+  // Axis-specific case
+  const normalizedAxis = axis < 0 ? x.ndim + axis : axis;
+
+  if (normalizedAxis < 0 || normalizedAxis >= x.ndim) {
+    throw new LinAlgError(`axis ${axis} is out of bounds for array with ${x.ndim} dimensions`);
+  }
+
+  // Compute norm along axis
+  const resultShape = x.shape.filter((_, i) => i !== normalizedAxis);
+
+  // Move target axis to last position for easier iteration
+  const xMoved = x.moveaxis(normalizedAxis, -1);
+  const axisSize = x.shape[normalizedAxis];
+  const batchSize = x.size / axisSize;
+
+  const data = await xMoved.toTypedArray();
+  const results = new Float64Array(batchSize);
+
+  for (let i = 0; i < batchSize; i++) {
+    const start = i * axisSize;
+    const slice = data.slice(start, start + axisSize);
+
+    if (ord === Infinity) {
+      results[i] = Math.max(...Array.from(slice).map(Math.abs));
+    } else if (ord === -Infinity) {
+      results[i] = Math.min(...Array.from(slice).map(Math.abs));
+    } else if (ord === 0) {
+      results[i] = Array.from(slice).filter((v) => v !== 0).length;
+    } else if (ord === 1) {
+      results[i] = Array.from(slice).reduce((sum, v) => sum + Math.abs(v), 0);
+    } else if (ord === 2) {
+      results[i] = Math.sqrt(Array.from(slice).reduce((sum, v) => sum + v * v, 0));
+    } else {
+      const pSum = Array.from(slice).reduce((sum, v) => sum + Math.pow(Math.abs(v), ord), 0);
+      results[i] = Math.pow(pSum, 1 / ord);
+    }
+  }
+
+  if (keepdims) {
+    const keepShape = [...x.shape];
+    keepShape[normalizedAxis] = 1;
+    return NDArray.fromTypedArray(results, keepShape, DType.Float64);
+  }
+
+  if (resultShape.length === 0) {
+    return results[0];
+  }
+  return NDArray.fromTypedArray(results, resultShape, DType.Float64);
+}
+
 /* ============ Export linalg namespace ============ */
 
 export const linalg = {
@@ -916,4 +1643,14 @@ export const linalg = {
 
   // Matrix Operations
   matrix_power,
+
+  // Phase 25: Advanced Linear Algebra
+  tensordot,
+  multi_dot,
+  kron,
+  cross,
+  tensorsolve,
+  tensorinv,
+  matrix_norm,
+  vector_norm,
 };
