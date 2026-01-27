@@ -54,4 +54,7 @@ __pycache__/
 .pnpm-store
 numpy/
 
-dist-ssr
+dist-ssr/
+
+# Generated API docs (built by typedoc)
+docs-site/public/api.json
