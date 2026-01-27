@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Demo from "./pages/Demo";
 import Docs from "./pages/Docs";
 import Benchmarks from "./pages/Benchmarks";
+import MCP from "./pages/MCP";
 import { Background } from "./components/background";
 
 // GitHub icon from Simple Icons (https://simpleicons.org)
@@ -64,6 +65,9 @@ function Navigation() {
           <NavLink to="/benchmarks" className={navLinkClass}>
             Benchmarks
           </NavLink>
+          <NavLink to="/mcp" className={navLinkClass}>
+            MCP
+          </NavLink>
           <Link
             href="https://github.com/mjschurig/numwasm"
             target="_blank"
@@ -121,6 +125,13 @@ function Navigation() {
           >
             Benchmarks
           </NavLink>
+          <NavLink
+            to="/mcp"
+            className={mobileNavLinkClass}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            MCP
+          </NavLink>
           <Link
             href="https://github.com/mjschurig/numwasm"
             target="_blank"
@@ -150,6 +161,7 @@ export default function App() {
             <Route path="/demo" element={<Demo />} />
             <Route path="/docs/*" element={<Docs />} />
             <Route path="/benchmarks/*" element={<Benchmarks />} />
+            <Route path="/mcp" element={<MCP />} />
           </Routes>
         </div>
       </div>
