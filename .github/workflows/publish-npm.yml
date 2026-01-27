@@ -5,7 +5,7 @@ on:
     types: [published]
 
 jobs:
-  publish:
+  publish-lib:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -44,6 +44,34 @@ jobs:
           npm version $VERSION --no-git-tag-version --allow-same-version
 
       - name: Publish to npm
+        run: pnpm publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-mcp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Install MCP server dependencies
+        working-directory: mcp-server
+        run: pnpm install
+
+      - name: Publish MCP server to npm
+        working-directory: mcp-server
         run: pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

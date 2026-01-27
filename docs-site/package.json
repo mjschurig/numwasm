@@ -7,7 +7,7 @@
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "build:ssr": "tsc -b && vite build --outDir dist-ssr --ssr src/entry-server.tsx",
-    "build:ssg": "pnpm build && pnpm build:ssr && node scripts/prerender.js",
+    "build:ssg": "pnpm build && pnpm build:ssr && node scripts/prerender.js && node scripts/generate-llms-txt.js && node ../mcp-server/generate-docs-index.js",
     "preview": "vite preview"
   },
   "dependencies": {
