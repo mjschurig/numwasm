@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { NDArray, DType, loadWasmModule } from 'numjs-wasm';
+import { NDArray, DType, loadWasmModule } from 'numwasm';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 

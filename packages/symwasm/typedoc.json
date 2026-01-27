@@ -1,0 +1,15 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "src/ts/index.ts"
+  ],
+  "json": "../../docs-site/public/api-symwasm.json",
+  "pretty": false,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "excludeExternals": true,
+  "includeVersion": true,
+  "name": "symwasm",
+  "skipErrorChecking": true
+}

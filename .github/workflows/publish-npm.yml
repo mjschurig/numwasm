@@ -5,7 +5,7 @@ on:
     types: [published]
 
 jobs:
-  publish-lib:
+  publish-packages:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,25 +31,46 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build WASM
-        run: pnpm run build:wasm
+      - name: Build numwasm
+        run: pnpm --filter numwasm run build
 
-      - name: Build library
-        run: pnpm run build:lib
+      - name: Build sciwasm
+        run: pnpm --filter sciwasm run build
+
+      - name: Build symwasm
+        run: pnpm --filter symwasm run build
 
       - name: Set version from tag
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           echo "Publishing version: $VERSION"
-          npm version $VERSION --no-git-tag-version --allow-same-version
+          cd packages/numwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
+          cd packages/sciwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
+          cd packages/symwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
 
-      - name: Publish to npm
+      - name: Publish numwasm
+        working-directory: packages/numwasm
         run: pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  publish-mcp:
+      - name: Publish sciwasm
+        working-directory: packages/sciwasm
+        run: pnpm publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish symwasm
+        working-directory: packages/symwasm
+        run: pnpm publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-mcp-servers:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        server: [numwasm-mcp, sciwasm-mcp, symwasm-mcp]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,11 +88,11 @@ jobs:
           cache: 'pnpm'
 
       - name: Install MCP server dependencies
-        working-directory: mcp-server
+        working-directory: mcp-servers/${{ matrix.server }}
         run: pnpm install
 
       - name: Publish MCP server to npm
-        working-directory: mcp-server
+        working-directory: mcp-servers/${{ matrix.server }}
         run: pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

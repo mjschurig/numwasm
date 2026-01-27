@@ -36,7 +36,7 @@ import {
   octalRepr,
   binaryReprArray,
   baseReprArray,
-} from 'numjs-wasm';
+} from 'numwasm';
 
 // Initialize WASM module
 beforeAll(async () => {

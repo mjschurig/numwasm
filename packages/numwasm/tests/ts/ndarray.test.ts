@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
-import { NDArray, DType, loadWasmModule } from 'numjs-wasm';
+import { NDArray, DType, loadWasmModule } from 'numwasm';
 
 describe('NDArray', () => {
   // Load WASM module before all tests

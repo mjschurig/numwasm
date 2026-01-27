@@ -1,15 +1,16 @@
 import { Link } from 'react-router-dom';
 import type { DeclarationReflection } from '../../types/typedoc';
 import { ReflectionKind } from '../../types/typedoc';
-import type { ModuleDef } from '../../utils/apiData';
+import type { ModuleDef, PackageId } from '../../utils/apiData';
 import { getModuleChildren, getItemDescription } from '../../utils/apiData';
 
 interface ModuleOverviewPageProps {
   module: ModuleDef;
+  packageId?: PackageId;
 }
 
-export default function ModuleOverviewPage({ module }: ModuleOverviewPageProps) {
-  const children = getModuleChildren(module.slug);
+export default function ModuleOverviewPage({ module, packageId = 'numwasm' }: ModuleOverviewPageProps) {
+  const children = getModuleChildren(module.slug, packageId);
 
   const functions = children.filter(
     c => c.kind === ReflectionKind.Function || c.kind === ReflectionKind.Method
@@ -46,6 +47,9 @@ export default function ModuleOverviewPage({ module }: ModuleOverviewPageProps) 
       <nav className="text-sm text-gray-400 mb-4" aria-label="Breadcrumb">
         <ol className="flex items-center gap-1">
           <li><Link to="/docs" className="hover:text-primary">Docs</Link></li>
+          <li className="before:content-['/'] before:mx-1">
+            <Link to={`/docs/${packageId}`} className="hover:text-primary">{packageId}</Link>
+          </li>
           <li className="before:content-['/'] before:mx-1">{module.displayName}</li>
         </ol>
       </nav>
@@ -82,14 +86,14 @@ export default function ModuleOverviewPage({ module }: ModuleOverviewPageProps) 
                   >
                     <td className="py-2 px-4 font-mono">
                       <Link
-                        to={`/docs/${module.slug}/${item.name}`}
+                        to={`/docs/${packageId}/${module.slug}/${item.name}`}
                         className="text-primary hover:text-primary/80"
                       >
                         {item.name}
                       </Link>
                     </td>
                     <td className="py-2 px-4 text-gray-400 text-sm">
-                      {getItemDescription(item)}
+                      {getItemDescription(item, packageId)}
                     </td>
                   </tr>
                 ))}

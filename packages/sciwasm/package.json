@@ -1,0 +1,55 @@
+{
+  "name": "sciwasm",
+  "version": "0.1.0",
+  "description": "SciPy-inspired scientific computing in TypeScript/WebAssembly",
+  "type": "module",
+  "main": "./dist/sciwasm.cjs",
+  "module": "./dist/sciwasm.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/sciwasm.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/sciwasm.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "clean": "rm -rf dist/",
+    "docs": "typedoc",
+    "lint": "eslint src tests --ext .ts"
+  },
+  "peerDependencies": {
+    "numwasm": ">=0.1.0"
+  },
+  "devDependencies": {
+    "numwasm": "workspace:*",
+    "@types/node": "^20.10.0",
+    "typedoc": "^0.27.0",
+    "typescript": "^5.3.0",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^1.2.0"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "scipy",
+    "scientific-computing",
+    "wasm",
+    "webassembly",
+    "typescript"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "sideEffects": false
+}

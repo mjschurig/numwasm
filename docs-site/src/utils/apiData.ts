@@ -1,11 +1,22 @@
-import apiJson from '../../public/api.json';
 import type { ProjectReflection, DeclarationReflection } from '../types/typedoc';
 import { ReflectionKind } from '../types/typedoc';
 
-export const apiData: ProjectReflection = apiJson as unknown as ProjectReflection;
+// ---------------------------------------------------------------------------
+// Package definitions
+// ---------------------------------------------------------------------------
+
+export type PackageId = 'numwasm' | 'sciwasm' | 'symwasm';
+
+export const PACKAGES: { id: PackageId; displayName: string; description: string }[] = [
+  { id: 'numwasm', displayName: 'numwasm', description: 'NumPy-compatible n-dimensional arrays' },
+  { id: 'sciwasm', displayName: 'sciwasm', description: 'SciPy-compatible scientific computing' },
+  { id: 'symwasm', displayName: 'symwasm', description: 'SymPy-compatible symbolic math' },
+];
+
+export const PACKAGE_IDS = new Set<string>(PACKAGES.map(p => p.id));
 
 // ---------------------------------------------------------------------------
-// Module definitions
+// Module definitions (per package)
 // ---------------------------------------------------------------------------
 
 export interface ModuleDef {
@@ -22,7 +33,7 @@ export interface ModuleDef {
   names?: string[];
 }
 
-export const MODULE_DEFS: ModuleDef[] = [
+const NUMWASM_MODULE_DEFS: ModuleDef[] = [
   { slug: 'linalg', displayName: 'Linear Algebra', varName: 'linalg' },
   { slug: 'fft', displayName: 'FFT', varName: 'fftModule' },
   {
@@ -53,10 +64,38 @@ export const MODULE_DEFS: ModuleDef[] = [
   { slug: 'testing', displayName: 'Testing', varName: null, isNamespace: true },
 ];
 
-export const MODULE_SLUGS = new Set(MODULE_DEFS.map(m => m.slug));
+const SCIWASM_MODULE_DEFS: ModuleDef[] = [
+  { slug: 'optimize', displayName: 'Optimization', varName: 'optimize', isNamespace: true },
+  { slug: 'integrate', displayName: 'Integration', varName: 'integrate', isNamespace: true },
+  { slug: 'interpolate', displayName: 'Interpolation', varName: 'interpolate', isNamespace: true },
+  { slug: 'stats', displayName: 'Statistics', varName: 'stats', isNamespace: true },
+  { slug: 'signal', displayName: 'Signal Processing', varName: 'signal', isNamespace: true },
+  { slug: 'spatial', displayName: 'Spatial', varName: 'spatial', isNamespace: true },
+  { slug: 'special', displayName: 'Special Functions', varName: 'special', isNamespace: true },
+  { slug: 'sparse', displayName: 'Sparse Matrices', varName: 'sparse', isNamespace: true },
+  { slug: 'cluster', displayName: 'Clustering', varName: 'cluster', isNamespace: true },
+  { slug: 'io', displayName: 'I/O', varName: 'io', isNamespace: true },
+  { slug: 'ndimage', displayName: 'N-D Image', varName: 'ndimage', isNamespace: true },
+  { slug: 'constants', displayName: 'Constants', varName: 'constants', isNamespace: true },
+];
+
+const SYMWASM_MODULE_DEFS: ModuleDef[] = [
+  { slug: 'core', displayName: 'Core', varName: 'core', isNamespace: true },
+  { slug: 'simplify', displayName: 'Simplify', varName: 'simplify', isNamespace: true },
+  { slug: 'solvers', displayName: 'Solvers', varName: 'solvers', isNamespace: true },
+  { slug: 'calculus', displayName: 'Calculus', varName: 'calculus', isNamespace: true },
+  { slug: 'matrices', displayName: 'Matrices', varName: 'matrices', isNamespace: true },
+  { slug: 'printing', displayName: 'Printing', varName: 'printing', isNamespace: true },
+];
+
+const PACKAGE_MODULE_DEFS: Record<PackageId, ModuleDef[]> = {
+  numwasm: NUMWASM_MODULE_DEFS,
+  sciwasm: SCIWASM_MODULE_DEFS,
+  symwasm: SYMWASM_MODULE_DEFS,
+};
 
 // ---------------------------------------------------------------------------
-// Category definitions for top-level (non-module) items
+// Category definitions for top-level (non-module) items — numwasm only
 // ---------------------------------------------------------------------------
 
 export interface CategoryDef {
@@ -64,7 +103,7 @@ export interface CategoryDef {
   names: string[];
 }
 
-export const CATEGORY_DEFS: CategoryDef[] = [
+const NUMWASM_CATEGORY_DEFS: CategoryDef[] = [
   {
     title: 'Array Creation',
     names: [
@@ -181,139 +220,197 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   },
 ];
 
+const PACKAGE_CATEGORY_DEFS: Record<PackageId, CategoryDef[]> = {
+  numwasm: NUMWASM_CATEGORY_DEFS,
+  sciwasm: [],
+  symwasm: [],
+};
+
 // ---------------------------------------------------------------------------
-// Derived lookups (built once at import time)
+// Per-package data store
 // ---------------------------------------------------------------------------
 
-const allChildren: DeclarationReflection[] = apiData.children || [];
+interface PackageData {
+  apiData: ProjectReflection | null;
+  allChildren: DeclarationReflection[];
+  moduleClaimedNames: Set<string>;
+  moduleChildrenMap: Map<string, DeclarationReflection[]>;
+  categoryClaimedNames: Set<string>;
+  referenceNames: Set<string>;
+}
 
-/** Map from item id to item for quick lookup */
-const idMap = new Map<number, DeclarationReflection>();
-function buildIdMap(items: DeclarationReflection[]) {
-  for (const item of items) {
-    idMap.set(item.id, item);
-    if (item.children) buildIdMap(item.children);
+function loadPackageJson(packageId: PackageId): ProjectReflection | null {
+  try {
+    // Vite glob import with eager loading for all api JSON files
+    const modules = import.meta.glob('../../public/api-*.json', { eager: true });
+    const key = `../../public/api-${packageId}.json`;
+    const mod = modules[key] as { default: unknown } | undefined;
+    return mod ? (mod.default as unknown as ProjectReflection) : null;
+  } catch {
+    return null;
   }
 }
-buildIdMap(allChildren);
 
-/** Set of names claimed by any module */
-const moduleClaimedNames = new Set<string>();
+function buildPackageData(packageId: PackageId): PackageData {
+  const apiData = loadPackageJson(packageId);
+  const allChildren: DeclarationReflection[] = apiData?.children || [];
+  const moduleDefs = PACKAGE_MODULE_DEFS[packageId];
+  const categoryDefs = PACKAGE_CATEGORY_DEFS[packageId];
 
-/** Map from module slug to its children */
-const moduleChildrenMap = new Map<string, DeclarationReflection[]>();
+  const moduleClaimedNames = new Set<string>();
+  const moduleChildrenMap = new Map<string, DeclarationReflection[]>();
 
-for (const mod of MODULE_DEFS) {
-  let children: DeclarationReflection[] = [];
+  for (const mod of moduleDefs) {
+    let children: DeclarationReflection[] = [];
 
-  if (mod.isNamespace) {
-    // Find the Namespace (kind=4) entry
-    const ns = allChildren.find(
-      c => c.kind === ReflectionKind.Namespace && c.name === mod.slug
-    );
-    if (ns?.children) {
-      children = ns.children;
-    }
-    moduleClaimedNames.add(mod.slug);
-  } else if (mod.varName) {
-    // Find the Variable (kind=32) whose type.declaration.children holds the module
-    const varItem = allChildren.find(
-      c => c.kind === ReflectionKind.Variable && c.name === mod.varName
-    );
-    if (varItem) {
-      const decl = (varItem.type as any)?.declaration;
-      if (decl?.children) {
-        children = decl.children;
+    if (mod.isNamespace) {
+      const ns = allChildren.find(
+        c => c.kind === ReflectionKind.Namespace && c.name === mod.slug
+      );
+      if (ns?.children) {
+        children = ns.children;
       }
-      moduleClaimedNames.add(mod.varName);
-    }
-  }
-
-  // Also match top-level items by explicit names or patterns
-  if (mod.names) {
-    const nameSet = new Set(mod.names);
-    for (const child of allChildren) {
-      if (nameSet.has(child.name) && child.kind !== ReflectionKind.Reference) {
-        children.push(child);
-        moduleClaimedNames.add(child.name);
-      }
-    }
-  }
-  if (mod.namePatterns) {
-    for (const child of allChildren) {
-      if (
-        child.kind !== ReflectionKind.Reference &&
-        mod.namePatterns.some(p => p.test(child.name)) &&
-        !moduleClaimedNames.has(child.name)
-      ) {
-        children.push(child);
-        moduleClaimedNames.add(child.name);
+      moduleClaimedNames.add(mod.slug);
+    } else if (mod.varName) {
+      const varItem = allChildren.find(
+        c => c.kind === ReflectionKind.Variable && c.name === mod.varName
+      );
+      if (varItem) {
+        const decl = (varItem.type as any)?.declaration;
+        if (decl?.children) {
+          children = decl.children;
+        }
+        moduleClaimedNames.add(mod.varName);
       }
     }
+
+    if (mod.names) {
+      const nameSet = new Set(mod.names);
+      for (const child of allChildren) {
+        if (nameSet.has(child.name) && child.kind !== ReflectionKind.Reference) {
+          children.push(child);
+          moduleClaimedNames.add(child.name);
+        }
+      }
+    }
+    if (mod.namePatterns) {
+      for (const child of allChildren) {
+        if (
+          child.kind !== ReflectionKind.Reference &&
+          mod.namePatterns.some(p => p.test(child.name)) &&
+          !moduleClaimedNames.has(child.name)
+        ) {
+          children.push(child);
+          moduleClaimedNames.add(child.name);
+        }
+      }
+    }
+
+    moduleChildrenMap.set(mod.slug, children);
   }
 
-  moduleChildrenMap.set(mod.slug, children);
+  const categoryClaimedNames = new Set<string>();
+  for (const cat of categoryDefs) {
+    for (const n of cat.names) categoryClaimedNames.add(n);
+  }
+
+  const referenceNames = new Set(
+    allChildren.filter(c => c.kind === ReflectionKind.Reference).map(c => c.name)
+  );
+
+  return { apiData, allChildren, moduleClaimedNames, moduleChildrenMap, categoryClaimedNames, referenceNames };
 }
 
-/** Set of names claimed by a category */
-const categoryClaimedNames = new Set<string>();
-for (const cat of CATEGORY_DEFS) {
-  for (const n of cat.names) categoryClaimedNames.add(n);
+// Build data for all packages at import time
+const packageDataMap = new Map<PackageId, PackageData>();
+for (const pkg of PACKAGES) {
+  packageDataMap.set(pkg.id, buildPackageData(pkg.id));
 }
-
-// Reference kind items (re-exports) – these should not appear in listings
-const referenceNames = new Set(
-  allChildren.filter(c => c.kind === ReflectionKind.Reference).map(c => c.name)
-);
 
 // ---------------------------------------------------------------------------
-// Public API
+// Backward-compatible exports (numwasm is the default)
 // ---------------------------------------------------------------------------
 
-export function getModuleDef(slug: string): ModuleDef | undefined {
-  return MODULE_DEFS.find(m => m.slug === slug);
+export const apiData: ProjectReflection = packageDataMap.get('numwasm')!.apiData || ({ children: [] } as unknown as ProjectReflection);
+export const MODULE_DEFS = NUMWASM_MODULE_DEFS;
+export const MODULE_SLUGS = new Set(NUMWASM_MODULE_DEFS.map(m => m.slug));
+export const CATEGORY_DEFS = NUMWASM_CATEGORY_DEFS;
+
+// ---------------------------------------------------------------------------
+// Per-package public API
+// ---------------------------------------------------------------------------
+
+export function getPackageModuleDefs(packageId: PackageId): ModuleDef[] {
+  return PACKAGE_MODULE_DEFS[packageId];
 }
 
-export function getModuleChildren(slug: string): DeclarationReflection[] {
-  return moduleChildrenMap.get(slug) || [];
+export function getPackageModuleSlugs(packageId: PackageId): Set<string> {
+  return new Set(PACKAGE_MODULE_DEFS[packageId].map(m => m.slug));
 }
 
-/** Get a module child by slug and item name */
+export function getPackageCategoryDefs(packageId: PackageId): CategoryDef[] {
+  return PACKAGE_CATEGORY_DEFS[packageId];
+}
+
+export function getPackageApiData(packageId: PackageId): ProjectReflection | null {
+  return packageDataMap.get(packageId)?.apiData || null;
+}
+
+export function hasPackageData(packageId: PackageId): boolean {
+  const data = packageDataMap.get(packageId);
+  return !!(data?.apiData && data.allChildren.length > 0);
+}
+
+// ---------------------------------------------------------------------------
+// Public API (package-aware versions)
+// ---------------------------------------------------------------------------
+
+export function getModuleDef(slug: string, packageId: PackageId = 'numwasm'): ModuleDef | undefined {
+  return PACKAGE_MODULE_DEFS[packageId].find(m => m.slug === slug);
+}
+
+export function getModuleChildren(slug: string, packageId: PackageId = 'numwasm'): DeclarationReflection[] {
+  const data = packageDataMap.get(packageId);
+  return data?.moduleChildrenMap.get(slug) || [];
+}
+
 export function getModuleChild(
   moduleSlug: string,
-  itemName: string
+  itemName: string,
+  packageId: PackageId = 'numwasm'
 ): DeclarationReflection | undefined {
-  const children = getModuleChildren(moduleSlug);
+  const children = getModuleChildren(moduleSlug, packageId);
   return children.find(c => c.name === itemName);
 }
 
-/** Get a top-level item (not inside a module) by name */
-export function getTopLevelItem(name: string): DeclarationReflection | undefined {
-  return allChildren.find(
+export function getTopLevelItem(name: string, packageId: PackageId = 'numwasm'): DeclarationReflection | undefined {
+  const data = packageDataMap.get(packageId);
+  if (!data) return undefined;
+  return data.allChildren.find(
     c => c.name === name && c.kind !== ReflectionKind.Reference
   );
 }
 
-/** Resolve item by path: "linalg/matmul" or "abs" */
-export function resolveItemByPath(path: string): DeclarationReflection | undefined {
+export function resolveItemByPath(path: string, packageId: PackageId = 'numwasm'): DeclarationReflection | undefined {
   const parts = path.split('/');
   if (parts.length === 2) {
-    return getModuleChild(parts[0], parts[1]);
+    return getModuleChild(parts[0], parts[1], packageId);
   }
-  return getTopLevelItem(parts[0]);
+  return getTopLevelItem(parts[0], packageId);
 }
 
-/**
- * Get categorised top-level items (not claimed by any module).
- * Returns the CATEGORY_DEFS groups plus an "Other" group for uncategorised items.
- */
-export function getCategorisedTopLevelItems(): Array<{
+export function getCategorisedTopLevelItems(packageId: PackageId = 'numwasm'): Array<{
   title: string;
   items: DeclarationReflection[];
 }> {
+  const data = packageDataMap.get(packageId);
+  if (!data) return [];
+
+  const categoryDefs = PACKAGE_CATEGORY_DEFS[packageId];
+  const { allChildren, moduleClaimedNames, categoryClaimedNames, referenceNames } = data;
   const result: Array<{ title: string; items: DeclarationReflection[] }> = [];
 
-  for (const cat of CATEGORY_DEFS) {
+  for (const cat of categoryDefs) {
     const nameSet = new Set(cat.names);
     const items = allChildren.filter(
       c =>
@@ -360,7 +457,6 @@ export function getCategorisedTopLevelItems(): Array<{
     ...constantNames,
     ...Array.from(referenceNames),
   ]);
-  // Also claim type items
   for (const t of typeItems) allClaimedNames.add(t.name);
 
   const other = allChildren.filter(
@@ -377,12 +473,12 @@ export function getCategorisedTopLevelItems(): Array<{
 }
 
 /** Extract a short description from a declaration's comment/signature */
-export function getItemDescription(item: DeclarationReflection): string {
+export function getItemDescription(item: DeclarationReflection, packageId: PackageId = 'numwasm'): string {
   const summary =
     item.comment?.summary
     || item.signatures?.[0]?.comment?.summary
     || (item.type as any)?.declaration?.signatures?.[0]?.comment?.summary;
-  if (!summary) return `numwasm ${item.name}`;
+  if (!summary) return `${packageId} ${item.name}`;
   return summary
     .map((p: any) => p.text)
     .join('')
@@ -394,24 +490,35 @@ export function getItemDescription(item: DeclarationReflection): string {
 export function getAllRoutes(): string[] {
   const routes: string[] = ['/docs'];
 
-  // Module overview pages
-  for (const mod of MODULE_DEFS) {
-    routes.push(`/docs/${mod.slug}`);
-    // Module children
-    const children = getModuleChildren(mod.slug);
-    for (const child of children) {
-      routes.push(`/docs/${mod.slug}/${child.name}`);
-    }
-  }
+  for (const pkg of PACKAGES) {
+    const packageId = pkg.id;
+    const moduleDefs = PACKAGE_MODULE_DEFS[packageId];
+    const data = packageDataMap.get(packageId);
 
-  // Top-level items (non-module, non-reference)
-  for (const child of allChildren) {
-    if (
-      child.kind !== ReflectionKind.Reference &&
-      child.kind !== ReflectionKind.Namespace &&
-      !moduleClaimedNames.has(child.name)
-    ) {
-      routes.push(`/docs/${child.name}`);
+    // Package landing page
+    routes.push(`/docs/${packageId}`);
+
+    // Module overview pages
+    for (const mod of moduleDefs) {
+      routes.push(`/docs/${packageId}/${mod.slug}`);
+      // Module children
+      const children = getModuleChildren(mod.slug, packageId);
+      for (const child of children) {
+        routes.push(`/docs/${packageId}/${mod.slug}/${child.name}`);
+      }
+    }
+
+    // Top-level items (non-module, non-reference) — only for packages with data
+    if (data && data.allChildren.length > 0) {
+      for (const child of data.allChildren) {
+        if (
+          child.kind !== ReflectionKind.Reference &&
+          child.kind !== ReflectionKind.Namespace &&
+          !data.moduleClaimedNames.has(child.name)
+        ) {
+          routes.push(`/docs/${packageId}/${child.name}`);
+        }
+      }
     }
   }
 

@@ -12,7 +12,7 @@ import {
   AssertionError,
   SkipTest,
   KnownFailureException,
-} from 'numjs-wasm';
+} from 'numwasm';
 
 // Initialize WASM module
 beforeAll(async () => {

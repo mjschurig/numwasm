@@ -1,0 +1,4 @@
+packages:
+  - 'packages/*'
+  - 'mcp-servers/*'
+  - 'docs-site'

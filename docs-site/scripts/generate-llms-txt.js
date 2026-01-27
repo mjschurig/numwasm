@@ -1,6 +1,6 @@
 /**
  * Generate llms.txt and llms-full.txt for AI agent access.
- * Reads api.json and produces structured markdown files following the llmstxt.org spec.
+ * Reads api-*.json and produces structured markdown files following the llmstxt.org spec.
  *
  * Usage: node scripts/generate-llms-txt.js
  * Run after: vite build (so dist/ exists)
@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, '../dist');
-const apiJsonPath = path.resolve(__dirname, '../public/api.json');
+const publicDir = path.resolve(__dirname, '../public');
 
 // ---------------------------------------------------------------------------
 // ReflectionKind constants (mirrored from typedoc.ts)
@@ -32,10 +32,31 @@ const ReflectionKind = {
 };
 
 // ---------------------------------------------------------------------------
-// Module & Category definitions (mirrored from apiData.ts)
+// Package & Module definitions
 // ---------------------------------------------------------------------------
 
-const MODULE_DEFS = [
+const PACKAGES = [
+  {
+    id: 'numwasm',
+    displayName: 'numwasm',
+    description: 'NumPy-compatible n-dimensional arrays in TypeScript with WebAssembly acceleration',
+    apiFile: 'api-numwasm.json',
+  },
+  {
+    id: 'sciwasm',
+    displayName: 'sciwasm',
+    description: 'SciPy-compatible scientific computing in TypeScript',
+    apiFile: 'api-sciwasm.json',
+  },
+  {
+    id: 'symwasm',
+    displayName: 'symwasm',
+    description: 'SymPy-compatible symbolic math in TypeScript',
+    apiFile: 'api-symwasm.json',
+  },
+];
+
+const NUMWASM_MODULE_DEFS = [
   { slug: 'linalg', displayName: 'Linear Algebra', varName: 'linalg' },
   { slug: 'fft', displayName: 'FFT', varName: 'fftModule' },
   {
@@ -65,6 +86,36 @@ const MODULE_DEFS = [
   },
   { slug: 'testing', displayName: 'Testing', varName: null, isNamespace: true },
 ];
+
+const SCIWASM_MODULE_DEFS = [
+  { slug: 'optimize', displayName: 'Optimization' },
+  { slug: 'integrate', displayName: 'Integration' },
+  { slug: 'interpolate', displayName: 'Interpolation' },
+  { slug: 'stats', displayName: 'Statistics' },
+  { slug: 'signal', displayName: 'Signal Processing' },
+  { slug: 'spatial', displayName: 'Spatial' },
+  { slug: 'special', displayName: 'Special Functions' },
+  { slug: 'sparse', displayName: 'Sparse Matrices' },
+  { slug: 'cluster', displayName: 'Clustering' },
+  { slug: 'io', displayName: 'I/O' },
+  { slug: 'ndimage', displayName: 'N-D Image' },
+  { slug: 'constants', displayName: 'Constants' },
+];
+
+const SYMWASM_MODULE_DEFS = [
+  { slug: 'core', displayName: 'Core' },
+  { slug: 'simplify', displayName: 'Simplify' },
+  { slug: 'solvers', displayName: 'Solvers' },
+  { slug: 'calculus', displayName: 'Calculus' },
+  { slug: 'matrices', displayName: 'Matrices' },
+  { slug: 'printing', displayName: 'Printing' },
+];
+
+const PACKAGE_MODULE_DEFS = {
+  numwasm: NUMWASM_MODULE_DEFS,
+  sciwasm: SCIWASM_MODULE_DEFS,
+  symwasm: SYMWASM_MODULE_DEFS,
+};
 
 const CATEGORY_DEFS = [
   {
@@ -182,64 +233,70 @@ const CATEGORY_DEFS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Load and process api.json
+// Load and process api JSON for a package
 // ---------------------------------------------------------------------------
 
-const apiData = JSON.parse(fs.readFileSync(apiJsonPath, 'utf-8'));
-const allChildren = apiData.children || [];
-
-// Build module children map (same logic as apiData.ts)
-const moduleClaimedNames = new Set();
-const moduleChildrenMap = new Map();
-
-for (const mod of MODULE_DEFS) {
-  let children = [];
-
-  if (mod.isNamespace) {
-    const ns = allChildren.find(c => c.kind === ReflectionKind.Namespace && c.name === mod.slug);
-    if (ns?.children) children = ns.children;
-    moduleClaimedNames.add(mod.slug);
-  } else if (mod.varName) {
-    const varItem = allChildren.find(c => c.kind === ReflectionKind.Variable && c.name === mod.varName);
-    if (varItem) {
-      const decl = varItem.type?.declaration;
-      if (decl?.children) children = decl.children;
-      moduleClaimedNames.add(mod.varName);
-    }
+function loadPackageData(pkg) {
+  const apiJsonPath = path.resolve(publicDir, pkg.apiFile);
+  if (!fs.existsSync(apiJsonPath)) {
+    console.warn(`Warning: ${pkg.apiFile} not found, skipping ${pkg.id} API details.`);
+    return null;
   }
 
-  if (mod.names) {
-    const nameSet = new Set(mod.names);
-    for (const child of allChildren) {
-      if (nameSet.has(child.name) && child.kind !== ReflectionKind.Reference) {
-        children.push(child);
-        moduleClaimedNames.add(child.name);
+  const apiData = JSON.parse(fs.readFileSync(apiJsonPath, 'utf-8'));
+  const allChildren = apiData.children || [];
+
+  const moduleDefs = PACKAGE_MODULE_DEFS[pkg.id] || [];
+  const moduleClaimedNames = new Set();
+  const moduleChildrenMap = new Map();
+
+  for (const mod of moduleDefs) {
+    let children = [];
+
+    if (mod.isNamespace) {
+      const ns = allChildren.find(c => c.kind === ReflectionKind.Namespace && c.name === mod.slug);
+      if (ns?.children) children = ns.children;
+      moduleClaimedNames.add(mod.slug);
+    } else if (mod.varName) {
+      const varItem = allChildren.find(c => c.kind === ReflectionKind.Variable && c.name === mod.varName);
+      if (varItem) {
+        const decl = varItem.type?.declaration;
+        if (decl?.children) children = decl.children;
+        moduleClaimedNames.add(mod.varName);
       }
     }
-  }
-  if (mod.namePatterns) {
-    for (const child of allChildren) {
-      if (
-        child.kind !== ReflectionKind.Reference &&
-        mod.namePatterns.some(p => p.test(child.name)) &&
-        !moduleClaimedNames.has(child.name)
-      ) {
-        children.push(child);
-        moduleClaimedNames.add(child.name);
+
+    if (mod.names) {
+      const nameSet = new Set(mod.names);
+      for (const child of allChildren) {
+        if (nameSet.has(child.name) && child.kind !== ReflectionKind.Reference) {
+          children.push(child);
+          moduleClaimedNames.add(child.name);
+        }
       }
     }
+    if (mod.namePatterns) {
+      for (const child of allChildren) {
+        if (
+          child.kind !== ReflectionKind.Reference &&
+          mod.namePatterns.some(p => p.test(child.name)) &&
+          !moduleClaimedNames.has(child.name)
+        ) {
+          children.push(child);
+          moduleClaimedNames.add(child.name);
+        }
+      }
+    }
+
+    moduleChildrenMap.set(mod.slug, children);
   }
 
-  moduleChildrenMap.set(mod.slug, children);
+  return { allChildren, moduleClaimedNames, moduleChildrenMap, moduleDefs };
 }
 
-// Build categorised top-level items
-const categoryClaimedNames = new Set();
-for (const cat of CATEGORY_DEFS) {
-  for (const n of cat.names) categoryClaimedNames.add(n);
-}
-
-function getCategorisedTopLevelItems() {
+function getCategorisedTopLevelItems(pkgData) {
+  if (!pkgData) return [];
+  const { allChildren, moduleClaimedNames } = pkgData;
   const result = [];
 
   for (const cat of CATEGORY_DEFS) {
@@ -250,7 +307,6 @@ function getCategorisedTopLevelItems() {
     if (items.length > 0) result.push({ title: cat.title, items });
   }
 
-  // Types
   const typeItems = allChildren.filter(
     c =>
       (c.kind === ReflectionKind.Interface || c.kind === ReflectionKind.TypeAlias || c.kind === ReflectionKind.Enum) &&
@@ -258,7 +314,6 @@ function getCategorisedTopLevelItems() {
   );
   if (typeItems.length > 0) result.push({ title: 'Types & Interfaces', items: typeItems });
 
-  // Constants
   const constantNames = new Set([
     'e', 'pi', 'inf', 'nan', 'euler_gamma', 'newaxis', 'ellipsis',
     'NAN', 'NINF', 'NZERO', 'PINF', 'PZERO',
@@ -390,7 +445,6 @@ function generateFullEntry(item, prefix) {
     lines.push(`${desc}\n`);
   }
 
-  // Parameters (for functions)
   if (sig?.parameters?.length) {
     lines.push('**Parameters:**');
     for (const param of sig.parameters) {
@@ -404,12 +458,10 @@ function generateFullEntry(item, prefix) {
     lines.push('');
   }
 
-  // Return type
   if (sig?.type) {
     lines.push(`**Returns:** \`${formatType(sig.type)}\`\n`);
   }
 
-  // Class members
   if (item.kind === ReflectionKind.Class && item.children?.length) {
     const methods = item.children.filter(
       c => c.kind === ReflectionKind.Method && !c.flags?.isPrivate
@@ -450,41 +502,54 @@ function generateFullEntry(item, prefix) {
 // Generate llms.txt (concise overview)
 // ---------------------------------------------------------------------------
 
-function generateLlmsTxt() {
-  const baseUrl = 'https://numwasm.dev';
+function generateLlmsTxt(packageDataMap) {
+  const baseUrl = 'https://wasm-sci.dev';
   const lines = [];
 
-  lines.push('# numwasm');
+  lines.push('# wasm-sci');
   lines.push('');
-  lines.push('> NumPy-inspired n-dimensional array operations in TypeScript with WebAssembly acceleration.');
-  lines.push('');
-  lines.push('numwasm provides a comprehensive NumPy-compatible API for n-dimensional arrays');
-  lines.push('in TypeScript, with performance-critical operations compiled to WebAssembly.');
+  lines.push('> Scientific computing for TypeScript. NumPy-style arrays, SciPy-style algorithms, and SymPy-style symbolic math — all with WebAssembly acceleration.');
   lines.push('');
 
-  // Modules
-  lines.push('## Modules');
-  lines.push('');
-  for (const mod of MODULE_DEFS) {
-    const children = moduleChildrenMap.get(mod.slug) || [];
-    const names = children.slice(0, 8).map(c => c.name);
-    const suffix = children.length > 8 ? ', ...' : '';
-    lines.push(`- [${mod.displayName}](${baseUrl}/docs/${mod.slug}): ${names.join(', ')}${suffix}`);
+  for (const pkg of PACKAGES) {
+    const pkgData = packageDataMap.get(pkg.id);
+    const moduleDefs = PACKAGE_MODULE_DEFS[pkg.id] || [];
+
+    lines.push(`## ${pkg.displayName}`);
+    lines.push('');
+    lines.push(`> ${pkg.description}`);
+    lines.push('');
+
+    lines.push('### Modules');
+    lines.push('');
+    for (const mod of moduleDefs) {
+      const children = pkgData?.moduleChildrenMap.get(mod.slug) || [];
+      if (children.length > 0) {
+        const names = children.slice(0, 8).map(c => c.name);
+        const suffix = children.length > 8 ? ', ...' : '';
+        lines.push(`- [${mod.displayName}](${baseUrl}/docs/${pkg.id}/${mod.slug}): ${names.join(', ')}${suffix}`);
+      } else {
+        lines.push(`- [${mod.displayName}](${baseUrl}/docs/${pkg.id}/${mod.slug})`);
+      }
+    }
+    lines.push('');
+
+    // Core API categories (numwasm only)
+    if (pkg.id === 'numwasm' && pkgData) {
+      const categories = getCategorisedTopLevelItems(pkgData);
+      if (categories.length > 0) {
+        lines.push('### Core API');
+        lines.push('');
+        for (const cat of categories) {
+          const names = cat.items.slice(0, 8).map(c => c.name);
+          const suffix = cat.items.length > 8 ? ', ...' : '';
+          lines.push(`- [${cat.title}](${baseUrl}/docs/${pkg.id}): ${names.join(', ')}${suffix}`);
+        }
+        lines.push('');
+      }
+    }
   }
-  lines.push('');
 
-  // Core API categories
-  lines.push('## Core API');
-  lines.push('');
-  const categories = getCategorisedTopLevelItems();
-  for (const cat of categories) {
-    const names = cat.items.slice(0, 8).map(c => c.name);
-    const suffix = cat.items.length > 8 ? ', ...' : '';
-    lines.push(`- [${cat.title}](${baseUrl}/docs): ${names.join(', ')}${suffix}`);
-  }
-  lines.push('');
-
-  // Links
   lines.push('## Optional');
   lines.push('');
   lines.push(`- [Full API Reference](${baseUrl}/llms-full.txt)`);
@@ -499,35 +564,47 @@ function generateLlmsTxt() {
 // Generate llms-full.txt (complete API reference)
 // ---------------------------------------------------------------------------
 
-function generateLlmsFullTxt() {
+function generateLlmsFullTxt(packageDataMap) {
   const lines = [];
 
-  lines.push('# numwasm API Reference');
+  lines.push('# wasm-sci API Reference');
   lines.push('');
-  lines.push('> Complete API reference for numwasm — NumPy-inspired n-dimensional array operations in TypeScript with WebAssembly acceleration.');
+  lines.push('> Complete API reference for wasm-sci — NumPy, SciPy, and SymPy for TypeScript with WebAssembly acceleration.');
   lines.push('');
 
-  // Modules
-  for (const mod of MODULE_DEFS) {
-    const children = moduleChildrenMap.get(mod.slug) || [];
-    if (children.length === 0) continue;
+  for (const pkg of PACKAGES) {
+    const pkgData = packageDataMap.get(pkg.id);
+    if (!pkgData) continue;
 
-    lines.push(`## ${mod.displayName} (nw.${mod.slug})`);
+    const moduleDefs = PACKAGE_MODULE_DEFS[pkg.id] || [];
+
+    lines.push(`# ${pkg.displayName}`);
     lines.push('');
 
-    for (const child of children) {
-      lines.push(generateFullEntry(child, mod.slug));
+    for (const mod of moduleDefs) {
+      const children = pkgData.moduleChildrenMap.get(mod.slug) || [];
+      if (children.length === 0) continue;
+
+      const prefix = pkg.id === 'numwasm' ? `nw.${mod.slug}` : `${pkg.id}.${mod.slug}`;
+      lines.push(`## ${mod.displayName} (${prefix})`);
+      lines.push('');
+
+      for (const child of children) {
+        lines.push(generateFullEntry(child, mod.slug));
+      }
     }
-  }
 
-  // Core API categories
-  const categories = getCategorisedTopLevelItems();
-  for (const cat of categories) {
-    lines.push(`## ${cat.title}`);
-    lines.push('');
+    // Core API categories (numwasm only)
+    if (pkg.id === 'numwasm') {
+      const categories = getCategorisedTopLevelItems(pkgData);
+      for (const cat of categories) {
+        lines.push(`## ${cat.title}`);
+        lines.push('');
 
-    for (const item of cat.items) {
-      lines.push(generateFullEntry(item, null));
+        for (const item of cat.items) {
+          lines.push(generateFullEntry(item, null));
+        }
+      }
     }
   }
 
@@ -539,16 +616,25 @@ function generateLlmsFullTxt() {
 // ---------------------------------------------------------------------------
 
 function main() {
-  if (!fs.existsSync(apiJsonPath)) {
-    console.error('Error: api.json not found at', apiJsonPath);
-    console.error('Run typedoc first to generate api.json.');
+  const packageDataMap = new Map();
+
+  for (const pkg of PACKAGES) {
+    const data = loadPackageData(pkg);
+    if (data) {
+      packageDataMap.set(pkg.id, data);
+    }
+  }
+
+  if (packageDataMap.size === 0) {
+    console.error('Error: No api-*.json files found.');
+    console.error('Run typedoc first to generate API JSON files.');
     process.exit(1);
   }
 
   fs.mkdirSync(distDir, { recursive: true });
 
-  const llmsTxt = generateLlmsTxt();
-  const llmsFullTxt = generateLlmsFullTxt();
+  const llmsTxt = generateLlmsTxt(packageDataMap);
+  const llmsFullTxt = generateLlmsFullTxt(packageDataMap);
 
   fs.writeFileSync(path.join(distDir, 'llms.txt'), llmsTxt);
   fs.writeFileSync(path.join(distDir, 'llms-full.txt'), llmsFullTxt);

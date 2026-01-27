@@ -40,13 +40,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build WASM
-        run: pnpm run build:wasm
+      - name: Build numwasm (WASM + lib)
+        run: pnpm --filter numwasm run build
 
-      - name: Build library
-        run: pnpm run build:lib
+      - name: Build sciwasm
+        run: pnpm --filter sciwasm run build
 
-      - name: Generate TypeDoc JSON
+      - name: Build symwasm
+        run: pnpm --filter symwasm run build
+
+      - name: Generate TypeDoc JSON (all packages)
         run: pnpm run docs
 
       - name: Install docs-site dependencies

@@ -68,7 +68,7 @@ async function prerender() {
   console.log(`Done. Pre-rendered ${rendered}/${allRoutes.length} routes.`);
 
   // Generate sitemap.xml
-  const baseUrl = 'https://numwasm.dev';
+  const baseUrl = 'https://wasm-sci.dev';
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${allRoutes

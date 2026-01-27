@@ -10,7 +10,7 @@ import {
   nditer,
   ndenumerate,
   ndindex,
-} from 'numjs-wasm';
+} from 'numwasm';
 
 // Track arrays for cleanup
 const tracked: NDArray[] = [];

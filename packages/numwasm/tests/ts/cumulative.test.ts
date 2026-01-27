@@ -13,7 +13,7 @@ import {
   cumprod,
   nancumsum,
   nancumprod,
-} from 'numjs-wasm';
+} from 'numwasm';
 
 describe('Cumulative Operations', () => {
   // Load WASM module before all tests

@@ -3,69 +3,76 @@ import { NavLink, useParams } from 'react-router-dom';
 import { SearchField, Input, Button } from 'react-aria-components';
 import type { ProjectReflection } from '../../types/typedoc';
 import { ReflectionKind } from '../../types/typedoc';
+import type { PackageId } from '../../utils/apiData';
 import {
-  MODULE_DEFS,
+  PACKAGES,
+  getPackageModuleDefs,
   getModuleChildren,
   getCategorisedTopLevelItems,
 } from '../../utils/apiData';
 
 interface DocsSidebarProps {
   data: ProjectReflection;
+  packageId: PackageId;
   onItemClick?: () => void;
 }
 
 interface SidebarGroup {
   title: string;
-  /** If this is a module, its slug for linking to /docs/<slug> */
+  /** If this is a module, its slug for linking to /docs/<pkg>/<slug> */
   moduleSlug?: string;
   items: Array<{ name: string; kind: number; linkTo: string }>;
 }
 
-export default function DocsSidebar({ data, onItemClick }: DocsSidebarProps) {
+export default function DocsSidebar({ data, packageId, onItemClick }: DocsSidebarProps) {
   const [search, setSearch] = useState('');
   const { '*': wildcard } = useParams();
   const pathParts = (wildcard || '').split('/').filter(Boolean);
-  const activeModule = pathParts.length >= 1 ? pathParts[0] : null;
+  // Skip the package segment to find the active module
+  const subParts = pathParts[0] === packageId ? pathParts.slice(1) : pathParts;
+  const activeModule = subParts.length >= 1 ? subParts[0] : null;
 
-  // Auto-expand the active module plus some defaults
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     if (activeModule) initial[activeModule] = true;
     return initial;
   });
 
+  const moduleDefs = getPackageModuleDefs(packageId);
+  const pkg = PACKAGES.find(p => p.id === packageId)!;
+
   const groups = useMemo((): SidebarGroup[] => {
     const result: SidebarGroup[] = [];
 
     // 1. Modules section
-    for (const mod of MODULE_DEFS) {
-      const children = getModuleChildren(mod.slug);
+    for (const mod of moduleDefs) {
+      const children = getModuleChildren(mod.slug, packageId);
       result.push({
         title: mod.displayName,
         moduleSlug: mod.slug,
         items: children.map(c => ({
           name: c.name,
           kind: c.kind,
-          linkTo: `/docs/${mod.slug}/${c.name}`,
+          linkTo: `/docs/${packageId}/${mod.slug}/${c.name}`,
         })),
       });
     }
 
     // 2. Categorised top-level items
-    const categories = getCategorisedTopLevelItems();
+    const categories = getCategorisedTopLevelItems(packageId);
     for (const cat of categories) {
       result.push({
         title: cat.title,
         items: cat.items.map(c => ({
           name: c.name,
           kind: c.kind,
-          linkTo: `/docs/${c.name}`,
+          linkTo: `/docs/${packageId}/${c.name}`,
         })),
       });
     }
 
     return result;
-  }, [data]);
+  }, [data, packageId, moduleDefs]);
 
   const filteredGroups = useMemo(() => {
     if (!search.trim()) return groups;
@@ -104,6 +111,22 @@ export default function DocsSidebar({ data, onItemClick }: DocsSidebarProps) {
 
   return (
     <aside className="w-72 lg:w-70 border-r border-gray-700 p-4 sm:p-6 overflow-y-auto h-screen lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] bg-gray-900/95 lg:bg-gray-900/50 backdrop-blur-sm">
+      {/* Package label */}
+      <NavLink
+        to={`/docs/${packageId}`}
+        end
+        className={({ isActive }) =>
+          `block mb-3 px-3 py-2 rounded-lg text-sm font-semibold transition-colors no-underline ${
+            isActive
+              ? 'bg-primary/20 text-primary'
+              : 'text-gray-200 hover:bg-gray-800/50'
+          }`
+        }
+        onClick={onItemClick}
+      >
+        {pkg.displayName}
+      </NavLink>
+
       <SearchField value={search} onChange={setSearch} className="mb-4">
         <Input
           placeholder="Search..."
@@ -136,7 +159,7 @@ export default function DocsSidebar({ data, onItemClick }: DocsSidebarProps) {
               </Button>
               {group.moduleSlug && (
                 <NavLink
-                  to={`/docs/${group.moduleSlug}`}
+                  to={`/docs/${packageId}/${group.moduleSlug}`}
                   end
                   onClick={onItemClick}
                   className={({ isActive }) =>

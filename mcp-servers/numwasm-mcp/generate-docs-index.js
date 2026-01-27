@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outputPath = path.resolve(__dirname, 'docs-index.json');
-const apiJsonPath = path.resolve(__dirname, '../docs-site/public/api.json');
+const apiJsonPath = path.resolve(__dirname, '../../docs-site/public/api-numwasm.json');
 
 // ---------------------------------------------------------------------------
 // ReflectionKind constants

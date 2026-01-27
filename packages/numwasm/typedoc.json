@@ -1,13 +1,13 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["src/ts/index.ts"],
-  "json": "docs-site/public/api.json",
+  "json": "../../docs-site/public/api-numwasm.json",
   "pretty": false,
   "excludePrivate": true,
   "excludeProtected": true,
   "excludeInternal": true,
   "excludeExternals": true,
   "includeVersion": true,
-  "name": "numjs-wasm",
+  "name": "numwasm",
   "skipErrorChecking": true
 }

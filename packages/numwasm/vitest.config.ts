@@ -12,7 +12,7 @@ export default defineConfig({
   resolve: {
     alias: {
       // Map package name to dist for tests
-      'numjs-wasm': resolve(__dirname, 'dist/numjs.mjs'),
+      'numwasm': resolve(__dirname, 'dist/numjs.mjs'),
     },
   },
 });

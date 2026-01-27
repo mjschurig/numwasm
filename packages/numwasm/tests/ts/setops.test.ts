@@ -21,7 +21,7 @@ import {
   isin,
   in1d,
   ediff1d,
-} from 'numjs-wasm';
+} from 'numwasm';
 
 // Initialize WASM module
 beforeAll(async () => {

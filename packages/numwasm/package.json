@@ -1,0 +1,90 @@
+{
+  "name": "numwasm",
+  "version": "0.1.0",
+  "description": "NumPy-inspired array operations in TypeScript/WebAssembly",
+  "type": "module",
+  "main": "./dist/numjs.cjs",
+  "module": "./dist/numjs.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "browser": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/numjs.mjs"
+      },
+      "node": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/numjs.mjs"
+        },
+        "require": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/numjs.cjs"
+        }
+      },
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/numjs.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/numjs.cjs"
+      }
+    },
+    "./wasm/numjs.wasm": "./dist/wasm/numjs.wasm"
+  },
+  "browser": {
+    "module": false,
+    "path": false,
+    "url": false,
+    "fs": false
+  },
+  "scripts": {
+    "build:wasm": "./scripts/build-wasm.sh",
+    "build:lib": "vite build",
+    "build": "pnpm run build:wasm && pnpm run build:lib",
+    "dev": "vite build --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:browser": "playwright test --config=tests/browser/playwright.config.ts",
+    "test:compare": "pnpm run generate-fixtures && vitest run tests/ts/comparison.test.ts",
+    "generate-fixtures": "python3 tests/python/generate_test_cases.py",
+    "benchmark": "pnpm run build && pnpm run build:benchmark && pnpm run benchmark:numpy && pnpm run benchmark:numjs && pnpm run benchmark:combine",
+    "benchmark:numpy": "python3 benchmark/python/run_all.py",
+    "benchmark:numjs": "node dist/benchmark/ts/run-all.js",
+    "benchmark:combine": "node dist/benchmark/scripts/combine-results.js",
+    "build:benchmark": "tsc -p benchmark/tsconfig.json",
+    "clean": "rm -rf dist/",
+    "lint": "eslint src tests --ext .ts",
+    "format": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'",
+    "docs": "typedoc"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^20.10.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.0",
+    "typedoc": "^0.27.0",
+    "typescript": "^5.3.0",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^1.2.0"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "numpy",
+    "ndarray",
+    "wasm",
+    "webassembly",
+    "array",
+    "scientific-computing",
+    "typescript"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "sideEffects": false
+}

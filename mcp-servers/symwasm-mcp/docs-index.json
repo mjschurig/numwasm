@@ -1,0 +1,1 @@
+{"overview": "# symwasm\n\n> SymPy-inspired symbolic mathematics in TypeScript.\n\n## Modules\n\n- Core Expressions (core)\n- Simplification (simplify)\n- Equation Solvers (solvers)\n- Calculus (calculus)\n- Matrices (matrices)\n- Printing (printing)\n", "sections": []}

@@ -2,18 +2,18 @@
 node_modules/
 
 # Build outputs
-dist/
+packages/*/dist/
 *.wasm
 *.js.map
 
 # Test fixtures (generated)
-tests/fixtures/*.json
+packages/numwasm/tests/fixtures/*.json
 
 # Benchmark intermediate results (final benchmarks.json is tracked)
-benchmark/results/numpy/
-benchmark/results/numjs/
-benchmark/results/numjs_results.json
-benchmark/results/numpy_results.json
+packages/numwasm/benchmark/results/numpy/
+packages/numwasm/benchmark/results/numjs/
+packages/numwasm/benchmark/results/numjs_results.json
+packages/numwasm/benchmark/results/numpy_results.json
 
 # IDE
 .idea/
@@ -57,4 +57,4 @@ numpy/
 dist-ssr/
 
 # Generated API docs (built by typedoc)
-docs-site/public/api.json
+docs-site/public/api-*.json

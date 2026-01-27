@@ -1,0 +1,21 @@
+{
+  "name": "symwasm-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for searching symwasm API documentation",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "symwasm-mcp": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "docs-index.json"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^4.3.6"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

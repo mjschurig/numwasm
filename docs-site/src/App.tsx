@@ -48,7 +48,7 @@ function Navigation() {
           to="/"
           className="text-xl sm:text-2xl font-bold hero-text no-underline hover:no-underline"
         >
-          numwasm
+          *wasm
         </NavLink>
 
         {/* Desktop nav */}
@@ -163,6 +163,12 @@ export default function App() {
             <Route path="/benchmarks/*" element={<Benchmarks />} />
             <Route path="/mcp" element={<MCP />} />
           </Routes>
+          {/* Docs routes are handled inside Docs component via wildcard:
+              /docs           → package picker landing
+              /docs/numwasm/* → numwasm docs
+              /docs/sciwasm/* → sciwasm docs
+              /docs/symwasm/* → symwasm docs
+          */}
         </div>
       </div>
     </div>
