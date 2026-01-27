@@ -55,6 +55,8 @@ __pycache__/
 numpy/
 
 dist-ssr/
+*/dist
+*/api.json
 
 # Generated API docs (built by typedoc)
 docs-site/public/api-*.json
