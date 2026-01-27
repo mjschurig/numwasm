@@ -1933,15 +1933,15 @@ export class Generator {
     const wasm = getWasmModule();
 
     if (size === null || size === undefined) {
-      return Number(wasm._random_binomial(this._wasmBitgen, p, n));
+      return wasm._random_binomial32(this._wasmBitgen, p, n);
     }
 
     const sizeArr = typeof size === 'number' ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
-    const result = _createInt64Array(sizeArr);
+    const result = _createFloat64Array(sizeArr);
 
     for (let i = 0; i < totalSize; i++) {
-      result.set(Number(wasm._random_binomial(this._wasmBitgen, p, n)), i);
+      result.set(wasm._random_binomial32(this._wasmBitgen, p, n), i);
     }
 
     return result;
@@ -1961,15 +1961,15 @@ export class Generator {
     const wasm = getWasmModule();
 
     if (size === null || size === undefined) {
-      return Number(wasm._random_poisson(this._wasmBitgen, lam));
+      return wasm._random_poisson32(this._wasmBitgen, lam);
     }
 
     const sizeArr = typeof size === 'number' ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
-    const result = _createInt64Array(sizeArr);
+    const result = _createFloat64Array(sizeArr);
 
     for (let i = 0; i < totalSize; i++) {
-      result.set(Number(wasm._random_poisson(this._wasmBitgen, lam)), i);
+      result.set(wasm._random_poisson32(this._wasmBitgen, lam), i);
     }
 
     return result;
@@ -1989,15 +1989,15 @@ export class Generator {
     const wasm = getWasmModule();
 
     if (size === null || size === undefined) {
-      return Number(wasm._random_geometric(this._wasmBitgen, p));
+      return wasm._random_geometric32(this._wasmBitgen, p);
     }
 
     const sizeArr = typeof size === 'number' ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
-    const result = _createInt64Array(sizeArr);
+    const result = _createFloat64Array(sizeArr);
 
     for (let i = 0; i < totalSize; i++) {
-      result.set(Number(wasm._random_geometric(this._wasmBitgen, p)), i);
+      result.set(wasm._random_geometric32(this._wasmBitgen, p), i);
     }
 
     return result;
@@ -2019,15 +2019,15 @@ export class Generator {
     const wasm = getWasmModule();
 
     if (size === null || size === undefined) {
-      return Number(wasm._random_negative_binomial(this._wasmBitgen, n, p));
+      return wasm._random_negative_binomial32(this._wasmBitgen, n, p);
     }
 
     const sizeArr = typeof size === 'number' ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
-    const result = _createInt64Array(sizeArr);
+    const result = _createFloat64Array(sizeArr);
 
     for (let i = 0; i < totalSize; i++) {
-      result.set(Number(wasm._random_negative_binomial(this._wasmBitgen, n, p)), i);
+      result.set(wasm._random_negative_binomial32(this._wasmBitgen, n, p), i);
     }
 
     return result;
@@ -2052,15 +2052,15 @@ export class Generator {
     const wasm = getWasmModule();
 
     if (size === null || size === undefined) {
-      return Number(wasm._random_hypergeometric(this._wasmBitgen, ngood, nbad, nsample));
+      return wasm._random_hypergeometric32(this._wasmBitgen, ngood, nbad, nsample);
     }
 
     const sizeArr = typeof size === 'number' ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
-    const result = _createInt64Array(sizeArr);
+    const result = _createFloat64Array(sizeArr);
 
     for (let i = 0; i < totalSize; i++) {
-      result.set(Number(wasm._random_hypergeometric(this._wasmBitgen, ngood, nbad, nsample)), i);
+      result.set(wasm._random_hypergeometric32(this._wasmBitgen, ngood, nbad, nsample), i);
     }
 
     return result;

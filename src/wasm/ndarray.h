@@ -118,7 +118,7 @@ void ndarray_free(NDArray* arr);
  * @param arr    Array to copy
  * @return       New NDArray or NULL on allocation failure
  */
-NDArray* ndarray_copy(NDArray* arr);
+NDArray* ndarray_copy(const NDArray* arr);
 
 /*
  * Create a copy with a different dtype.
@@ -275,7 +275,7 @@ void ndarray_set_item(NDArray* arr, int32_t* indices, int32_t ndim, double value
  * @param flat_idx  Flat index
  * @return          Element value as double
  */
-double ndarray_get_flat(NDArray* arr, size_t flat_idx);
+double ndarray_get_flat(const NDArray* arr, size_t flat_idx);
 
 /*
  * Set element value at flat index.
@@ -367,7 +367,7 @@ NDArray* ndarray_get_base(NDArray* arr);
 /*
  * Check if array is C-contiguous (row-major).
  */
-bool ndarray_is_c_contiguous(NDArray* arr);
+bool ndarray_is_c_contiguous(const NDArray* arr);
 
 /*
  * Check if array is F-contiguous (column-major).

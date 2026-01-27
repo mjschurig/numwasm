@@ -729,6 +729,16 @@ export async function pinv(a: NDArray, rcond: number = 1e-15): Promise<NDArray> 
     throw new LinAlgError('pinv requires at least a 2-dimensional array');
   }
 
+  // For wide matrices (m < n), compute pinv(A) = pinv(A^T)^T
+  // This works around an SVD bug with wide matrices
+  const m0 = a.shape[0];
+  const n0 = a.shape[1];
+  if (m0 < n0) {
+    const aT = a.T;
+    const pinvAT = await pinv(aT, rcond);
+    return pinvAT.T;
+  }
+
   // SVD-based pseudo-inverse
   const { U, S, Vh } = await svd(a, false);
 
@@ -761,17 +771,14 @@ export async function pinv(a: NDArray, rcond: number = 1e-15): Promise<NDArray> 
   // For simplicity, construct explicitly
   // pinv[i,j] = sum_k V[i,k] * sInv[k] * Ut[k,j]
 
-  const result = await NDArray.zeros([n, m], { dtype: a.dtype });
-  const resultData = result.toArray() as number[];
-
-  const vData = V.toArray() as number[];
-  const utData = Ut.toArray() as number[];
+  // Use element access (.get) to correctly handle transposed views
+  const resultData: number[] = new Array(n * m);
 
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < m; j++) {
       let sum = 0;
       for (let l = 0; l < k; l++) {
-        sum += vData[i * k + l] * sInv[l] * utData[l * m + j];
+        sum += (V.get(i, l) as number) * sInv[l] * (Ut.get(l, j) as number);
       }
       resultData[i * m + j] = sum;
     }

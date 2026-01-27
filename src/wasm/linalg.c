@@ -933,7 +933,7 @@ EXPORT SVDResult* linalg_svd(const NDArray* a, int32_t full_matrices) {
         double* U_f = (double*)malloc(m * u_cols * sizeof(double));
         double* VT_f = (double*)malloc(vh_rows * n * sizeof(double));
         double* s = (double*)malloc(k * sizeof(double));
-        int32_t lwork = 3 * k * k + MAX(MAX(m, n), 4 * k * k + 4 * k);
+        int32_t lwork = 4 * k * k + 7 * k + MAX(m, n);
         double* work = (double*)malloc(lwork * sizeof(double));
         int32_t* iwork = (int32_t*)malloc(8 * k * sizeof(int32_t));
 
@@ -962,7 +962,7 @@ EXPORT SVDResult* linalg_svd(const NDArray* a, int32_t full_matrices) {
         float* U_f = (float*)malloc(m * u_cols * sizeof(float));
         float* VT_f = (float*)malloc(vh_rows * n * sizeof(float));
         float* s = (float*)malloc(k * sizeof(float));
-        int32_t lwork = 3 * k * k + MAX(MAX(m, n), 4 * k * k + 4 * k);
+        int32_t lwork = 4 * k * k + 7 * k + MAX(m, n);
         float* work = (float*)malloc(lwork * sizeof(float));
         int32_t* iwork = (int32_t*)malloc(8 * k * sizeof(int32_t));
 

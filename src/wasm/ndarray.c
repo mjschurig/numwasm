@@ -50,7 +50,7 @@ static void compute_strides(int32_t ndim, int32_t* shape, DType dtype, int32_t* 
 
 /* ============ Contiguity Checks ============ */
 
-EXPORT bool ndarray_is_c_contiguous(NDArray* arr)
+EXPORT bool ndarray_is_c_contiguous(const NDArray* arr)
 {
     if (!arr) return false;
     if (arr->ndim == 0) return true;
@@ -238,7 +238,7 @@ EXPORT void ndarray_free(NDArray* arr)
     free(arr);
 }
 
-EXPORT NDArray* ndarray_copy(NDArray* arr)
+EXPORT NDArray* ndarray_copy(const NDArray* arr)
 {
     if (!arr) return NULL;
 
@@ -646,7 +646,7 @@ EXPORT bool ndarray_check_bounds(NDArray* arr, int32_t* indices, int32_t ndim)
  * Convert flat index to byte offset using strides.
  * This properly handles non-contiguous arrays (views with strides).
  */
-static size_t flat_to_byte_offset(NDArray* arr, size_t flat_idx)
+static size_t flat_to_byte_offset(const NDArray* arr, size_t flat_idx)
 {
     if (arr->ndim == 0) {
         return 0;
@@ -668,7 +668,7 @@ static size_t flat_to_byte_offset(NDArray* arr, size_t flat_idx)
     return byte_offset;
 }
 
-EXPORT double ndarray_get_flat(NDArray* arr, size_t flat_idx)
+EXPORT double ndarray_get_flat(const NDArray* arr, size_t flat_idx)
 {
     if (!arr || !arr->data || flat_idx >= arr->size) {
         return 0.0;
