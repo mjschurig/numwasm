@@ -379,10 +379,12 @@ export function getCategorisedTopLevelItems(): Array<{
 /** Extract a short description from a declaration's comment/signature */
 export function getItemDescription(item: DeclarationReflection): string {
   const summary =
-    item.comment?.summary || item.signatures?.[0]?.comment?.summary;
+    item.comment?.summary
+    || item.signatures?.[0]?.comment?.summary
+    || (item.type as any)?.declaration?.signatures?.[0]?.comment?.summary;
   if (!summary) return `numwasm ${item.name}`;
   return summary
-    .map(p => p.text)
+    .map((p: any) => p.text)
     .join('')
     .replace(/\n/g, ' ')
     .slice(0, 160);

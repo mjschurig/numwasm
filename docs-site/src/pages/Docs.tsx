@@ -88,16 +88,38 @@ function Breadcrumbs({ moduleName }: { moduleName?: string }) {
 function ItemView({ item, moduleName }: { item: DeclarationReflection; moduleName?: string }) {
   switch (item.kind) {
     case ReflectionKind.Function:
+    case ReflectionKind.Method:
+    case ReflectionKind.Property: {
+      // Property items from module-like objects (e.g. linalg.cholesky) have
+      // callable signatures at type.declaration.signatures — FunctionView
+      // handles this fallback internally.
+      const isCallable = item.kind === ReflectionKind.Function
+        || item.kind === ReflectionKind.Method
+        || !!(item.type as any)?.declaration?.signatures;
+      if (isCallable) {
+        return (
+          <div className="text-gray-100">
+            <Breadcrumbs moduleName={moduleName} />
+            <div className="border-b border-gray-700 pb-4 mb-8">
+              <span className="text-gray-400 text-sm uppercase tracking-wide">Function</span>
+              <h1 className="text-3xl font-bold">{item.name}</h1>
+            </div>
+            <FunctionView reflection={item} />
+          </div>
+        );
+      }
+      // Non-callable property: fall through to default
       return (
         <div className="text-gray-100">
           <Breadcrumbs moduleName={moduleName} />
           <div className="border-b border-gray-700 pb-4 mb-8">
-            <span className="text-gray-400 text-sm uppercase tracking-wide">Function</span>
+            <span className="text-gray-400 text-sm uppercase tracking-wide">Property</span>
             <h1 className="text-3xl font-bold">{item.name}</h1>
           </div>
-          <FunctionView reflection={item} />
+          <CommentView comment={item.comment} />
         </div>
       );
+    }
 
     case ReflectionKind.Class:
       return (

@@ -1,4 +1,4 @@
-import type { DeclarationReflection } from '../../types/typedoc';
+import type { DeclarationReflection, SignatureReflection } from '../../types/typedoc';
 import TypeView from './TypeView';
 import CommentView from './CommentView';
 
@@ -7,7 +7,10 @@ interface FunctionViewProps {
 }
 
 export default function FunctionView({ reflection }: FunctionViewProps) {
-  const signature = reflection.signatures?.[0];
+  // Functions have signatures directly; Properties (from module-like objects)
+  // store them at type.declaration.signatures
+  const signature: SignatureReflection | undefined = reflection.signatures?.[0]
+    ?? (reflection.type as any)?.declaration?.signatures?.[0];
 
   if (!signature) {
     return (
