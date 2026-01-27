@@ -5,6 +5,7 @@ import { Menu, X } from 'lucide-react';
 import { useApiDocs } from '../hooks/useApiDocs';
 import DocsSidebar from '../components/docs/DocsSidebar';
 import ModuleView from '../components/docs/ModuleView';
+import ModuleOverviewPage from '../components/docs/ModuleOverviewPage';
 import FunctionView from '../components/docs/FunctionView';
 import ClassView from '../components/docs/ClassView';
 import InterfaceView from '../components/docs/InterfaceView';
@@ -12,14 +13,22 @@ import { ReflectionKind, getKindString } from '../types/typedoc';
 import type { DeclarationReflection } from '../types/typedoc';
 import TypeView from '../components/docs/TypeView';
 import CommentView from '../components/docs/CommentView';
+import {
+  MODULE_SLUGS,
+  getModuleDef,
+  getModuleChild,
+  getTopLevelItem,
+  getCategorisedTopLevelItems,
+  getItemDescription,
+} from '../utils/apiData';
+import SEO from '../components/SEO';
 
-function DocsOverview({ children }: { children: DeclarationReflection[] }) {
-  const functions = children.filter(c => c.kind === ReflectionKind.Function);
-  const classes = children.filter(c => c.kind === ReflectionKind.Class);
-  const interfaces = children.filter(c => c.kind === ReflectionKind.Interface);
-  const types = children.filter(c => c.kind === ReflectionKind.TypeAlias);
-  const variables = children.filter(c => c.kind === ReflectionKind.Variable);
-  const enums = children.filter(c => c.kind === ReflectionKind.Enum);
+// ---------------------------------------------------------------------------
+// Docs Overview (landing page at /docs)
+// ---------------------------------------------------------------------------
+
+function DocsOverview() {
+  const categories = getCategorisedTopLevelItems();
 
   return (
     <div className="text-gray-100">
@@ -31,93 +40,57 @@ function DocsOverview({ children }: { children: DeclarationReflection[] }) {
       </div>
 
       <div className="space-y-8">
-        {classes.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">Classes ({classes.length})</h2>
+        {categories.map(cat => (
+          <div key={cat.title}>
+            <h2 className="text-xl font-semibold text-primary mb-4">
+              {cat.title} ({cat.items.length})
+            </h2>
             <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
-              {classes.map(c => (
+              {cat.items.map(c => (
                 <li key={c.id}>
-                  <Link to={`/docs/${c.name}`} className="text-primary hover:text-primary-dark">{c.name}</Link>
+                  <Link to={`/docs/${c.name}`} className="text-primary hover:text-primary/80">
+                    {c.name}
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
-        )}
-
-        {interfaces.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">Interfaces ({interfaces.length})</h2>
-            <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
-              {interfaces.map(i => (
-                <li key={i.id}>
-                  <Link to={`/docs/${i.name}`} className="text-primary hover:text-primary-dark">{i.name}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {types.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">Type Aliases ({types.length})</h2>
-            <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
-              {types.map(t => (
-                <li key={t.id}>
-                  <Link to={`/docs/${t.name}`} className="text-primary hover:text-primary-dark">{t.name}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {enums.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">Enums ({enums.length})</h2>
-            <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
-              {enums.map(e => (
-                <li key={e.id}>
-                  <Link to={`/docs/${e.name}`} className="text-primary hover:text-primary-dark">{e.name}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {variables.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">Variables ({variables.length})</h2>
-            <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
-              {variables.map(v => (
-                <li key={v.id}>
-                  <Link to={`/docs/${v.name}`} className="text-primary hover:text-primary-dark">{v.name}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {functions.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">Functions ({functions.length})</h2>
-            <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
-              {functions.map(f => (
-                <li key={f.id}>
-                  <Link to={`/docs/${f.name}`} className="text-primary hover:text-primary-dark">{f.name}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        ))}
       </div>
     </div>
   );
 }
 
-function ItemView({ item }: { item: DeclarationReflection }) {
+// ---------------------------------------------------------------------------
+// Single item view (function, class, interface, etc.)
+// ---------------------------------------------------------------------------
+
+function Breadcrumbs({ moduleName }: { moduleName?: string }) {
+  const mod = moduleName ? getModuleDef(moduleName) : null;
+  return (
+    <nav className="text-sm text-gray-400 mb-4" aria-label="Breadcrumb">
+      <ol className="flex items-center gap-1">
+        <li>
+          <Link to="/docs" className="hover:text-primary">Docs</Link>
+        </li>
+        {mod && (
+          <li className="before:content-['/'] before:mx-1">
+            <Link to={`/docs/${mod.slug}`} className="hover:text-primary">
+              {mod.displayName}
+            </Link>
+          </li>
+        )}
+      </ol>
+    </nav>
+  );
+}
+
+function ItemView({ item, moduleName }: { item: DeclarationReflection; moduleName?: string }) {
   switch (item.kind) {
     case ReflectionKind.Function:
       return (
         <div className="text-gray-100">
+          <Breadcrumbs moduleName={moduleName} />
           <div className="border-b border-gray-700 pb-4 mb-8">
             <span className="text-gray-400 text-sm uppercase tracking-wide">Function</span>
             <h1 className="text-3xl font-bold">{item.name}</h1>
@@ -127,10 +100,20 @@ function ItemView({ item }: { item: DeclarationReflection }) {
       );
 
     case ReflectionKind.Class:
-      return <ClassView reflection={item} />;
+      return (
+        <div>
+          <Breadcrumbs moduleName={moduleName} />
+          <ClassView reflection={item} />
+        </div>
+      );
 
     case ReflectionKind.Interface:
-      return <InterfaceView reflection={item} />;
+      return (
+        <div>
+          <Breadcrumbs moduleName={moduleName} />
+          <InterfaceView reflection={item} />
+        </div>
+      );
 
     case ReflectionKind.Module:
     case ReflectionKind.Namespace:
@@ -139,6 +122,7 @@ function ItemView({ item }: { item: DeclarationReflection }) {
     case ReflectionKind.TypeAlias:
       return (
         <div className="text-gray-100">
+          <Breadcrumbs moduleName={moduleName} />
           <div className="border-b border-gray-700 pb-4 mb-8">
             <span className="text-gray-400 text-sm uppercase tracking-wide">Type Alias</span>
             <h1 className="text-3xl font-bold">{item.name}</h1>
@@ -153,6 +137,7 @@ function ItemView({ item }: { item: DeclarationReflection }) {
     case ReflectionKind.Enum:
       return (
         <div className="text-gray-100">
+          <Breadcrumbs moduleName={moduleName} />
           <div className="border-b border-gray-700 pb-4 mb-8">
             <span className="text-gray-400 text-sm uppercase tracking-wide">Enum</span>
             <h1 className="text-3xl font-bold">{item.name}</h1>
@@ -182,6 +167,7 @@ function ItemView({ item }: { item: DeclarationReflection }) {
     case ReflectionKind.Variable:
       return (
         <div className="text-gray-100">
+          <Breadcrumbs moduleName={moduleName} />
           <div className="border-b border-gray-700 pb-4 mb-8">
             <span className="text-gray-400 text-sm uppercase tracking-wide">
               {item.flags?.isConst ? 'Constant' : 'Variable'}
@@ -199,6 +185,7 @@ function ItemView({ item }: { item: DeclarationReflection }) {
     default:
       return (
         <div className="text-gray-100">
+          <Breadcrumbs moduleName={moduleName} />
           <div className="border-b border-gray-700 pb-4 mb-8">
             <span className="text-gray-400 text-sm uppercase tracking-wide">
               {getKindString(item.kind)}
@@ -211,46 +198,125 @@ function ItemView({ item }: { item: DeclarationReflection }) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Not found
+// ---------------------------------------------------------------------------
+
+function NotFound({ name }: { name: string }) {
+  return (
+    <div className="text-gray-100">
+      <Breadcrumbs />
+      <div className="border-b border-gray-700 pb-4 mb-8">
+        <h1 className="text-3xl font-bold">Not Found</h1>
+      </div>
+      <p className="text-gray-400">
+        No documentation found for <code className="bg-gray-800 px-2 py-1 rounded">{name}</code>.
+      </p>
+      <Link to="/docs" className="text-primary hover:text-primary/80 mt-4 inline-block">
+        Back to API Documentation
+      </Link>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Docs page
+// ---------------------------------------------------------------------------
+
 export default function Docs() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { '*': itemName } = useParams();
-  const { data, loading, error } = useApiDocs();
+  const { '*': wildcard } = useParams();
+  const { data } = useApiDocs();
 
-  if (loading) {
-    return (
-      <div className="flex min-h-[calc(100vh-4rem)]">
-        <div className="flex-1 p-4 sm:p-8">
-          <div className="flex justify-center items-center min-h-[200px] text-gray-400">
-            Loading documentation...
-          </div>
-        </div>
-      </div>
-    );
+  // Parse the wildcard path: "" | "itemName" | "moduleName/itemName"
+  const pathParts = (wildcard || '').split('/').filter(Boolean);
+
+  let content: React.ReactNode;
+  let seoNode: React.ReactNode = (
+    <SEO
+      title="API Documentation"
+      description="Complete API reference for numwasm — NumPy-inspired n-dimensional array operations in TypeScript/WebAssembly."
+      path="/docs"
+      breadcrumbs={[
+        { name: 'Home', url: '/' },
+        { name: 'Docs', url: '/docs' },
+      ]}
+    />
+  );
+
+  if (pathParts.length === 0) {
+    // /docs — overview
+    content = <DocsOverview />;
+  } else if (pathParts.length === 1) {
+    const name = pathParts[0];
+    if (MODULE_SLUGS.has(name)) {
+      const mod = getModuleDef(name)!;
+      content = <ModuleOverviewPage module={mod} />;
+      seoNode = (
+        <SEO
+          title={`${mod.displayName} — API`}
+          description={`numwasm ${mod.displayName} module reference. Functions and classes for ${mod.displayName.toLowerCase()} operations.`}
+          path={`/docs/${mod.slug}`}
+          breadcrumbs={[
+            { name: 'Home', url: '/' },
+            { name: 'Docs', url: '/docs' },
+            { name: mod.displayName, url: `/docs/${mod.slug}` },
+          ]}
+        />
+      );
+    } else {
+      const item = getTopLevelItem(name);
+      if (item) {
+        content = <ItemView item={item} />;
+        seoNode = (
+          <SEO
+            title={`${item.name} — API`}
+            description={getItemDescription(item)}
+            path={`/docs/${item.name}`}
+            breadcrumbs={[
+              { name: 'Home', url: '/' },
+              { name: 'Docs', url: '/docs' },
+              { name: item.name, url: `/docs/${item.name}` },
+            ]}
+          />
+        );
+      } else {
+        content = <NotFound name={name} />;
+      }
+    }
+  } else if (pathParts.length === 2) {
+    const [moduleName, itemName] = pathParts;
+    if (MODULE_SLUGS.has(moduleName)) {
+      const mod = getModuleDef(moduleName)!;
+      const item = getModuleChild(moduleName, itemName);
+      if (item) {
+        content = <ItemView item={item} moduleName={moduleName} />;
+        seoNode = (
+          <SEO
+            title={`${item.name} — ${mod.displayName} — API`}
+            description={getItemDescription(item)}
+            path={`/docs/${moduleName}/${item.name}`}
+            breadcrumbs={[
+              { name: 'Home', url: '/' },
+              { name: 'Docs', url: '/docs' },
+              { name: mod.displayName, url: `/docs/${mod.slug}` },
+              { name: item.name, url: `/docs/${moduleName}/${item.name}` },
+            ]}
+          />
+        );
+      } else {
+        content = <NotFound name={`${moduleName}/${itemName}`} />;
+      }
+    } else {
+      content = <NotFound name={pathParts.join('/')} />;
+    }
+  } else {
+    content = <NotFound name={pathParts.join('/')} />;
   }
-
-  if (error || !data) {
-    return (
-      <div className="flex min-h-[calc(100vh-4rem)]">
-        <div className="flex-1 p-4 sm:p-8">
-          <div className="text-red-400 p-4 sm:p-8">
-            <h2 className="text-xl font-bold mb-2">Error Loading Documentation</h2>
-            <p>{error || 'Failed to load API documentation'}</p>
-            <p className="mt-4 text-gray-400">
-              Make sure to run <code className="bg-gray-800 px-2 py-1 rounded">pnpm run docs</code> to generate the API documentation.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const children = data.children || [];
-  const selectedItem = itemName
-    ? children.find(c => c.name === itemName)
-    : null;
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)]">
+      {seoNode}
       {/* Mobile sidebar toggle */}
       <Button
         onPress={() => setSidebarOpen(!sidebarOpen)}
@@ -279,11 +345,7 @@ export default function Docs() {
       </div>
 
       <main className="flex-1 p-4 sm:p-8 max-w-full overflow-x-hidden">
-        {selectedItem ? (
-          <ItemView item={selectedItem} />
-        ) : (
-          <DocsOverview children={children} />
-        )}
+        {content}
       </main>
     </div>
   );

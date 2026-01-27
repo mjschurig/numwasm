@@ -8,4 +8,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
+  ssr: {
+    // Bundle these CJS packages into the SSR output to avoid ESM import issues
+    noExternal: ['react-helmet-async'],
+  },
 });

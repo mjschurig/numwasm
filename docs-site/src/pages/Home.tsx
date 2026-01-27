@@ -1,11 +1,17 @@
 import { Button } from 'react-aria-components';
 import { useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 export default function Home() {
   const navigate = useNavigate();
 
   return (
     <main className="text-gray-100">
+      <SEO
+        title="numwasm - NumPy for TypeScript"
+        description="NumPy-inspired n-dimensional array operations in TypeScript with WebAssembly acceleration. Full type safety, browser and Node.js support."
+        path="/"
+      />
       <section className="text-center py-12 sm:py-20 px-4 sm:px-8 max-w-3xl mx-auto relative">
         <div className="hero-glow" />
         <h1 className="text-4xl sm:text-6xl font-bold hero-text mb-4 sm:mb-6">numwasm</h1>

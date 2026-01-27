@@ -7,6 +7,7 @@ import BenchmarksSidebar from '../components/benchmarks/BenchmarksSidebar';
 import SizeScalingChart from '../components/benchmarks/SizeScalingChart';
 import SpeedupChart from '../components/benchmarks/SpeedupChart';
 import BenchmarkTable from '../components/benchmarks/BenchmarkTable';
+import SEO from '../components/SEO';
 import type { BenchmarkCategory, BenchmarkOperation, BenchmarkResults } from '../types/benchmarks';
 
 function BenchmarksOverview({ data }: { data: BenchmarkResults }) {
@@ -288,6 +289,15 @@ export default function Benchmarks() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)]">
+      <SEO
+        title="Benchmarks"
+        description="Performance benchmarks comparing numwasm WebAssembly operations against native JavaScript. See speedup charts and detailed results."
+        path="/benchmarks"
+        breadcrumbs={[
+          { name: 'Home', url: '/' },
+          { name: 'Benchmarks', url: '/benchmarks' },
+        ]}
+      />
       {/* Mobile sidebar toggle */}
       <Button
         onPress={() => setSidebarOpen(!sidebarOpen)}
