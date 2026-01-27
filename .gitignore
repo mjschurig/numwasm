@@ -53,3 +53,5 @@ __pycache__/
 
 .pnpm-store
 numpy/
+
+dist-ssr
