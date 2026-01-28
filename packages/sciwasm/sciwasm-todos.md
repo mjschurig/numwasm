@@ -10,7 +10,7 @@ Legend: ✅ = implemented, 🔲 = stubbed (exists but throws NotImplementedError
 
 For each function/module, follow these steps in order:
 
-### Step 1: Identify the underlying C/Fortran code in `/scipy`
+### Step 1: Identify the underlying C/Fortran code in `/packages/sciwasm/reference/scipy`
 - Look at the reference scipy implementation for the function
 - Trace through the Python code to find the underlying C, C++, or Fortran source (e.g., in `scipy/special/cephes/`, `scipy/linalg/src/`, LAPACK/BLAS wrappers, etc.)
 - These are the computational kernels that do the real work

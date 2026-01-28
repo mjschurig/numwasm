@@ -1,0 +1,116 @@
+> 
+> ccfeh dr-Elsnor
+ NUMBER OF PRESCRIBED GRID POINTS:            2
+ NUMBER OF DELAYED COMPONENTS:            1
+ EXIT OF RADAR5 AT X=        0.1033E+01
+  MORE THAN NMAX =      100000 STEPS ARE NEEDED
+        6521  COMPUTED BREAKING POINTS: 
+ SOLUTION:    1.0330601822589895       0.18182459194460868     
+  *** TOL=   1.0000000000000013E-009  ***   Time =   0.121978991    
+ fcn= 696015 jac= 45216 step=100001 accpt= 59128 rejct=     7 dec= 94577 sol= 212293 fullits =      0
+
+
+> ccfeh dr-Elsnor   
+ NUMBER OF PRESCRIBED GRID POINTS:            2
+ NUMBER OF DELAYED COMPONENTS:            1
+ EXIT OF RADAR5 AT X=        0.1033E+01
+  MORE THAN NMAX =      100000 STEPS ARE NEEDED
+        6521  COMPUTED BREAKING POINTS: 
+ SOLUTION:    1.0330601822589895       0.18182459194460868     
+  *** TOL=   1.0000000000000013E-009  ***   Time =   0.134528995    
+ fcn= 696015 jac= 45216 step=100001 accpt= 59128 rejct=     7 dec= 94577 sol= 212293 fullits =      0
+
+
+> ccfeh dr-Enzyme   
+ NUMBER OF PRESCRIBED GRID POINTS:           11
+ NUMBER OF DELAYED COMPONENTS:            1
+           1  COMPUTED BREAKING POINTS: 
+ X =  160.00    Y =  0.3392588181E+02  0.2270653755E+02  0.1883054891E+02  0.2226593586E+02
+  *** TOL=   1.0000000000000008E-006  ***   Time =    4.76900022E-03
+ fcn=   3051 jac=   293 step=   435 accpt=   422 rejct=    13 dec=   390 sol=    876 fullits =      0
+
+
+> ccfeh dr-hayashi   
+ NUMBER OF PRESCRIBED GRID POINTS:            0
+ NUMBER OF DELAYED COMPONENTS:            2
+           1  COMPUTED BREAKING POINTS: 
+ Time =    1.56200025E-03
+ X =    3.14    Y = -0.6671130798E-06 -0.1000000687E+01
+  *** TOL=   1.0000000000000007E-004  ***   Time =    1.56200025E-03
+ fcn=    268 jac=    16 step=    35 accpt=    21 rejct=     1 dec=    35 sol=     82 fullits =      5
+
+
+> ccfeh dr-hepat
+ NUMBER OF PRESCRIBED GRID POINTS:            0
+ NUMBER OF DELAYED COMPONENTS:            5
+           1  COMPUTED BREAKING POINTS: 
+ X =  130.00    Y = -0.3583480382E-32  0.1546001139E-29  0.8395600218E-14  0.4855303782E-26  0.9999966811E-18
+ X =  130.00    Y =  0.1000022584E-18  0.2808939783E-10  0.2241296368E-11  0.1417010219E-16  0.5944521340E-07
+  *** TOL=   1.0000000000000012E-011  ***   Time =    5.17139994E-02
+ fcn=  15990 jac=   748 step=  2198 accpt=  2198 rejct=     0 dec=  1437 sol=   4597 fullits =      0
+
+
+> ccfeh dr-modceg   
+ NUMBER OF PRESCRIBED GRID POINTS:            0
+ NUMBER OF DELAYED COMPONENTS:            2
+  WARNING!: SOLUTION DOES NOT EXIST AT X=    4.0921817929651514     
+           8  COMPUTED BREAKING POINTS: 
+ X =    4.09    Y = -0.8934284207E+00  0.1343690295E+00
+  *** TOL=   9.9999999999999995E-008  ***   Time =    1.03689991E-02
+ fcn=   1408 jac=   104 step=   154 accpt=   126 rejct=    11 dec=   145 sol=    427 fullits =      0
+
+
+> ccfeh dr-neutlog
+ NUMBER OF PRESCRIBED GRID POINTS:           71
+ NUMBER OF DELAYED COMPONENTS:            2
+           1  COMPUTED BREAKING POINTS: 
+   30.000000000000000       0.33186161828377608        2.2222766622092811        2.6696505445055752E-003
+  *** TOL=   1.0000000000000001E-009  ***   Time =    5.13719991E-02
+ fcn=   9223 jac=   481 step=   943 accpt=   900 rejct=    31 dec=   709 sol=   2773 fullits =      0
+
+
+> ccfeh dr-oregon   
+ NUMBER OF PRESCRIBED GRID POINTS:            1
+ NUMBER OF DELAYED COMPONENTS:            1
+           4  COMPUTED BREAKING POINTS: 
+ X =  100.50    Y =  0.2749861670E-09  0.3559046559E-06
+  *** TOL=   1.0000000000000013E-009  ***   Time =    5.15950024E-02
+ fcn=  70447 jac=  5080 step=  9288 accpt=  9073 rejct=   191 dec=  7596 sol=  20456 fullits =      0
+
+
+> ccfeh dr-paul   
+ NUMBER OF PRESCRIBED GRID POINTS:            0
+ NUMBER OF DELAYED COMPONENTS:            1
+           3  COMPUTED BREAKING POINTS: 
+ Time =    5.16800024E-03
+ X =    5.50    Y =  0.4241412263E+01  0.3172350915E-07
+  *** TOL=   1.0000000000000008E-006  ***   Time =    5.16800024E-03
+ fcn=    120 jac=     6 step=    17 accpt=    13 rejct=     2 dec=    16 sol=     35 fullits =      0
+
+
+> ccfeh dr-roberts   
+ NUMBER OF PRESCRIBED GRID POINTS:            1
+ NUMBER OF DELAYED COMPONENTS:            1
+           1  COMPUTED BREAKING POINTS: 
+ X =********    Y =  0.2083340039E-07  0.8333360328E-13  0.9999999792E+00
+  *** TOL=   1.0000000000000013E-009  ***   Time =    7.26899970E-03
+ fcn=   5431 jac=   551 step=   721 accpt=   705 rejct=     2 dec=   690 sol=   1575 fullits =      0
+> 
+
+
+> ccfeh dr-sdisc   
+ NUMBER OF PRESCRIBED GRID POINTS:           30
+ NUMBER OF DELAYED COMPONENTS:            1
+          43  COMPUTED BREAKING POINTS: 
+ X =  100.50    Y =  0.1570796332E+01
+  *** TOL=   1.0000000000000008E-006  ***   Time =    1.28390007E-02
+ fcn=   2052 jac=   132 step=   282 accpt=   221 rejct=    40 dec=   277 sol=    606 fullits =      0
+
+
+> ccfeh dr-waltman   
+ NUMBER OF PRESCRIBED GRID POINTS:            2
+ NUMBER OF DELAYED COMPONENTS:            3
+          10  COMPUTED BREAKING POINTS: 
+ X =  300.00    Y =  0.6148775731E-15  0.3377212187E-06  0.4221517407E-06  0.2142625590E-05
+  *** TOL=   1.0000000000000000E-008  ***   Time =    9.10369977E-02
+ fcn=   6003 jac=   460 step=   800 accpt=   742 rejct=    30 dec=   690 sol=   1752 fullits =      0
