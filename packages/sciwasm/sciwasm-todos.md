@@ -48,8 +48,8 @@ For each function/module, follow these steps in order:
 - 🔲 `j0(x)` — Bessel J₀
 - 🔲 `j1(x)` — Bessel J₁
 - ✅ `factorial(n, exact?)` — Factorial
-- 🔲 `comb(N, k, exact?)` — Binomial coefficient
-- 🔲 `perm(N, k, exact?)` — Permutations
+- ✅ `comb(N, k, exact?)` — Binomial coefficient
+- ✅ `perm(N, k, exact?)` — Permutations
 
 ### Priority Additions
 - ⬜ `betaln(a, b)` — Log of beta function

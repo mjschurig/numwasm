@@ -31,7 +31,7 @@ echo ""
 
 # Step 1: Compile C source files to .o
 C_OBJS=()
-for cfile in "$SRC_DIR/optimize/nelder_mead.c" "$SRC_DIR/optimize/bfgs.c" "$SRC_DIR/optimize/lbfgsb.c" "$SRC_DIR/optimize/blas_lite.c" "$SRC_DIR/quadpack.c" "$SRC_DIR/quadpack_wasm.c"; do
+for cfile in "$SRC_DIR/optimize/nelder_mead.c" "$SRC_DIR/optimize/bfgs.c" "$SRC_DIR/optimize/lbfgsb.c" "$SRC_DIR/optimize/blas_lite.c" "$SRC_DIR/quadpack.c" "$SRC_DIR/quadpack_wasm.c" "$SRC_DIR/special/comb.c"; do
     if [ -f "$cfile" ]; then
         base=$(basename "$cfile" .c)
         obj="$OBJ_DIR/${base}.o"
@@ -67,6 +67,10 @@ EXPORTED_FUNCTIONS='[
     "_wasm_gamma",
     "_wasm_gammaln",
     "_wasm_rgamma",
+    "_wasm_binom",
+    "_wasm_binom_exact",
+    "_wasm_poch",
+    "_wasm_perm_exact",
     "_sp_csr_matvec_f64",
     "_sp_csr_matvecs_f64",
     "_sp_csr_tocsc_f64",

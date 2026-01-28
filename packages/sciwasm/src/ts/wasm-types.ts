@@ -75,6 +75,12 @@ export interface SciWasmModule {
   _wasm_gammaln(x: number): number;
   _wasm_rgamma(x: number): number;
 
+  // Special functions (combinatorial)
+  _wasm_binom(n: number, k: number): number;
+  _wasm_binom_exact(n: number, k: number): number;
+  _wasm_poch(x: number, m: number): number;
+  _wasm_perm_exact(n: number, k: number): number;
+
   // Sparse matrix operations (sparsetools)
   _sp_csr_matvec_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
   _sp_csr_matvecs_f64(n_row: number, n_col: number, n_vecs: number, Ap: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
