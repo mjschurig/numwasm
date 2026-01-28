@@ -180,7 +180,7 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 ## 3. `optimize` — Optimization and Root Finding
 
 ### Current Stubs
-- 🔲 `minimize(fun, x0, options?)` — Minimize scalar function of one or more variables
+- ✅ `minimize(fun, x0, options?)` — Minimize scalar function of one or more variables (Nelder-Mead, BFGS, L-BFGS-B)
 - 🔲 `least_squares(fun, x0)` — Nonlinear least-squares
 - 🔲 `root_scalar(f, options?)` — Find root of scalar function
 - 🔲 `linprog(c, options?)` — Linear programming
@@ -206,8 +206,8 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 - ⬜ `bracket(func)` — Bracket a minimum
 - ⬜ `approx_fprime(xk, f)` — Finite-difference gradient approximation
 - ⬜ `check_grad(func, grad, x0)` — Check gradient correctness
-- ⬜ `OptimizeResult` — Result class (type already exists, needs full implementation)
-- ⬜ `Bounds` — Variable bounds
+- ✅ `OptimizeResult` — Result class
+- ✅ `Bounds` — Variable bounds
 - ⬜ `LinearConstraint` — Linear constraint
 - ⬜ `NonlinearConstraint` — Nonlinear constraint
 
@@ -598,7 +598,7 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 |--------|---------|-----------|-------------|-------|
 | special | 0 | 10 | ~35 | ~45 |
 | stats | 4 | 9 | ~37 | ~50 |
-| optimize | 0 | 5 | ~20 | ~25 |
+| optimize | 3 | 4 | ~18 | ~25 |
 | integrate | 1 | 5 | ~9 | ~15 |
 | interpolate | 0 | 4 | ~14 | ~18 |
 | signal | 0 | 7 | ~35 | ~42 |
@@ -608,4 +608,4 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 | cluster | 0 | 3 | ~15 | ~18 |
 | io | 0 | 2 | ~10 | ~12 |
 | constants | 10 | 1 | ~50+ | ~61 |
-| **Total** | **18** | **60** | **~295** | **~373** |
+| **Total** | **21** | **59** | **~293** | **~373** |
