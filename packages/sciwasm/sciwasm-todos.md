@@ -15,8 +15,8 @@ For each function/module, follow these steps in order:
 - Trace through the Python code to find the underlying C, C++, or Fortran source (e.g., in `scipy/special/cephes/`, `scipy/linalg/src/`, LAPACK/BLAS wrappers, etc.)
 - These are the computational kernels that do the real work
 
-### Step 2: Compile C/Fortran to WebAssembly
-- Copy the identified C/Fortran source files into the sciwasm build
+### Step 2: Compile C/C++/Fortran to WebAssembly
+- Copy the identified C/C++/Fortran source files into the sciwasm build
 - Compile them to `.wasm` using Emscripten (or similar toolchain)
 - Expose the necessary entry points for calling from JS/TS
 
@@ -389,7 +389,7 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 - ✅ `diags(diagonals, offsets?, shape?)` — Diagonal sparse matrix
 
 ### Priority Additions — Formats
-- ⬜ `coo_matrix(data)` / `coo_array(data)` — Coordinate format
+- ✅ `coo_matrix(data)` / `coo_array(data)` — Coordinate format
 - ⬜ `lil_matrix(shape)` / `lil_array(shape)` — List of lists (construction)
 - ⬜ `bsr_matrix(data)` / `bsr_array(data)` — Block sparse row
 - ⬜ `dok_matrix(shape)` / `dok_array(shape)` — Dictionary of keys
@@ -603,9 +603,9 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 | interpolate | 0 | 4 | ~14 | ~18 |
 | signal | 0 | 7 | ~35 | ~42 |
 | spatial | 0 | 8 | ~15 | ~23 |
-| sparse | 4 | 0 | ~30 | ~34 |
+| sparse | 5 | 0 | ~29 | ~34 |
 | ndimage | 0 | 5 | ~25 | ~30 |
 | cluster | 0 | 3 | ~15 | ~18 |
 | io | 0 | 2 | ~10 | ~12 |
 | constants | 10 | 1 | ~50+ | ~61 |
-| **Total** | **21** | **59** | **~293** | **~373** |
+| **Total** | **22** | **59** | **~292** | **~373** |

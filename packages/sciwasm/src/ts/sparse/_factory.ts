@@ -1,25 +1,36 @@
 /**
- * Factory registry to break circular dependencies between CSR and CSC.
- * Both modules register their constructors here, and other modules
+ * Factory registry to break circular dependencies between sparse matrix formats.
+ * All sparse matrix modules register their constructors here, and other modules
  * use this to create instances without direct imports.
  */
-import type { SparseConstructorArrays } from './types.js';
+import type { SparseConstructorArrays, COOConstructorArrays } from './types.js';
 import type { CompressedSparseMatrix } from './compressed.js';
+import type { SparseMatrix } from './base.js';
 
-type SparseFactory = (
+type CompressedSparseFactory = (
   arrays: SparseConstructorArrays,
   options: { shape: [number, number] }
 ) => CompressedSparseMatrix;
 
-let _csrFactory: SparseFactory | null = null;
-let _cscFactory: SparseFactory | null = null;
+type COOSparseFactory = (
+  arrays: COOConstructorArrays,
+  options: { shape: [number, number] }
+) => SparseMatrix;
 
-export function registerCSRFactory(factory: SparseFactory): void {
+let _csrFactory: CompressedSparseFactory | null = null;
+let _cscFactory: CompressedSparseFactory | null = null;
+let _cooFactory: COOSparseFactory | null = null;
+
+export function registerCSRFactory(factory: CompressedSparseFactory): void {
   _csrFactory = factory;
 }
 
-export function registerCSCFactory(factory: SparseFactory): void {
+export function registerCSCFactory(factory: CompressedSparseFactory): void {
   _cscFactory = factory;
+}
+
+export function registerCOOFactory(factory: COOSparseFactory): void {
+  _cooFactory = factory;
 }
 
 export function createCSR(
@@ -36,4 +47,12 @@ export function createCSC(
 ): CompressedSparseMatrix {
   if (!_cscFactory) throw new Error('CSCMatrix not registered');
   return _cscFactory(arrays, { shape });
+}
+
+export function createCOO(
+  arrays: COOConstructorArrays,
+  shape: [number, number]
+): SparseMatrix {
+  if (!_cooFactory) throw new Error('COOMatrix not registered');
+  return _cooFactory(arrays, { shape });
 }
