@@ -40,14 +40,14 @@ For each function/module, follow these steps in order:
 ## 1. `special` — Special Mathematical Functions
 
 ### Current Stubs
-- 🔲 `gamma(z)` — Gamma function
-- 🔲 `gammaln(x)` — Log-gamma function
+- ✅ `gamma(z)` — Gamma function
+- ✅ `gammaln(x)` — Log-gamma function
 - 🔲 `beta(a, b)` — Beta function
 - 🔲 `erf(z)` — Error function
 - 🔲 `erfc(x)` — Complementary error function
 - 🔲 `j0(x)` — Bessel J₀
 - 🔲 `j1(x)` — Bessel J₁
-- 🔲 `factorial(n, exact?)` — Factorial
+- ✅ `factorial(n, exact?)` — Factorial
 - 🔲 `comb(N, k, exact?)` — Binomial coefficient
 - 🔲 `perm(N, k, exact?)` — Permutations
 
@@ -76,8 +76,9 @@ For each function/module, follow these steps in order:
 - ⬜ `exprel(x)` — Relative error exponential
 - ⬜ `zeta(x)` — Riemann zeta function
 - ⬜ `lambertw(z)` — Lambert W function
-- ⬜ `factorial2(n)` — Double factorial
-- ⬜ `factorialk(n, k)` — Multifactorial
+- ✅ `factorial2(n)` — Double factorial
+- ✅ `factorialk(n, k)` — Multifactorial
+- ✅ `rgamma(x)` — Reciprocal gamma function
 - ⬜ `stirling2(N, K)` — Stirling numbers of the second kind
 - ⬜ `ndtr(x)` — Standard normal CDF
 - ⬜ `ndtri(y)` — Inverse standard normal CDF

@@ -70,6 +70,11 @@ export interface SciWasmModule {
     iord: number, last: number,
   ): void;
 
+  // Special functions (gamma)
+  _wasm_gamma(x: number): number;
+  _wasm_gammaln(x: number): number;
+  _wasm_rgamma(x: number): number;
+
   // Sparse matrix operations (sparsetools)
   _sp_csr_matvec_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
   _sp_csr_matvecs_f64(n_row: number, n_col: number, n_vecs: number, Ap: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
@@ -105,6 +110,40 @@ export interface SciWasmModule {
   _sp_coo_matvec_f64(nnz: number, Ai: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
   _sp_malloc(size: number): number;
   _sp_free(ptr: number): void;
+
+  // KDTree spatial data structure
+  _kdtree_build(
+    dataPtr: number,
+    n: number,
+    m: number,
+    leafsize: number,
+    balanced: number,
+    compact: number
+  ): number;
+  _kdtree_query_knn(
+    treePtr: number,
+    xPtr: number,
+    nQueries: number,
+    k: number,
+    p: number,
+    eps: number,
+    distanceUpperBound: number,
+    distancesOutPtr: number,
+    indicesOutPtr: number
+  ): number;
+  _kdtree_query_ball_point(
+    treePtr: number,
+    xPtr: number,
+    nQueries: number,
+    rPtr: number,
+    p: number,
+    eps: number,
+    returnLength: number,
+    sortOutput: number,
+    resultsOutPtr: number,
+    countsOutPtr: number
+  ): number;
+  _kdtree_free(treePtr: number): void;
 
   // Memory management
   _malloc(size: number): number;

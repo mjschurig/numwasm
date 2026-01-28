@@ -43,12 +43,12 @@ done
 
 # Step 2: Compile C++ source files to .o
 CPP_OBJS=()
-for cppfile in "$SRC_DIR/sparsetools.cpp"; do
+for cppfile in "$SRC_DIR/sparsetools.cpp" "$SRC_DIR/spatial/build.cxx" "$SRC_DIR/spatial/query.cxx" "$SRC_DIR/spatial/query_ball_point.cxx" "$SRC_DIR/spatial/kdtree_wrapper.cpp" "$SRC_DIR/special/gamma.cpp"; do
     if [ -f "$cppfile" ]; then
-        base=$(basename "$cppfile" .cpp)
+        base=$(basename "$cppfile" | sed 's/\.[^.]*$//')
         obj="$OBJ_DIR/${base}.o"
         echo "Compiling C++: $cppfile"
-        emcc -c "$cppfile" -o "$obj" -std=c++17 -I"$SRC_DIR" -O2
+        emcc -c "$cppfile" -o "$obj" -std=c++17 -I"$SRC_DIR" -I"$SRC_DIR/spatial" -I"$SRC_DIR/xsf" -O2
         CPP_OBJS+=("$obj")
     fi
 done
@@ -64,6 +64,9 @@ EXPORTED_FUNCTIONS='[
     "_setulb",
     "_wasm_dqagse",
     "_wasm_dqagie",
+    "_wasm_gamma",
+    "_wasm_gammaln",
+    "_wasm_rgamma",
     "_sp_csr_matvec_f64",
     "_sp_csr_matvecs_f64",
     "_sp_csr_tocsc_f64",
@@ -98,6 +101,10 @@ EXPORTED_FUNCTIONS='[
     "_sp_coo_matvec_f64",
     "_sp_malloc",
     "_sp_free",
+    "_kdtree_build",
+    "_kdtree_query_knn",
+    "_kdtree_query_ball_point",
+    "_kdtree_free",
     "_malloc",
     "_free"
 ]'
