@@ -383,10 +383,10 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 ## 8. `sparse` — Sparse Matrices
 
 ### Current Stubs
-- 🔲 `csr_matrix(data)` — Compressed Sparse Row
-- 🔲 `csc_matrix(data)` — Compressed Sparse Column
-- 🔲 `eye(m, n?, k?)` — Sparse identity matrix
-- 🔲 `diags(diagonals, offsets?, shape?)` — Diagonal sparse matrix
+- ✅ `csr_matrix(data)` — Compressed Sparse Row
+- ✅ `csc_matrix(data)` — Compressed Sparse Column
+- ✅ `eye(m, n?, k?)` — Sparse identity matrix
+- ✅ `diags(diagonals, offsets?, shape?)` — Diagonal sparse matrix
 
 ### Priority Additions — Formats
 - ⬜ `coo_matrix(data)` / `coo_array(data)` — Coordinate format
@@ -603,9 +603,9 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 | interpolate | 0 | 4 | ~14 | ~18 |
 | signal | 0 | 7 | ~35 | ~42 |
 | spatial | 0 | 8 | ~15 | ~23 |
-| sparse | 0 | 4 | ~30 | ~34 |
+| sparse | 4 | 0 | ~30 | ~34 |
 | ndimage | 0 | 5 | ~25 | ~30 |
 | cluster | 0 | 3 | ~15 | ~18 |
 | io | 0 | 2 | ~10 | ~12 |
 | constants | 10 | 1 | ~50+ | ~61 |
-| **Total** | **14** | **64** | **~295** | **~373** |
+| **Total** | **18** | **60** | **~295** | **~373** |

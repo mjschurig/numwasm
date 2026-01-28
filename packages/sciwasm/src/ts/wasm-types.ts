@@ -23,6 +23,36 @@ export interface SciWasmModule {
     funcPtr: number
   ): number;
 
+  // BFGS optimization
+  _bfgs_minimize(
+    n: number,
+    x0Ptr: number,
+    xOutPtr: number,
+    hessInvOutPtr: number,
+    jacOutPtr: number,
+    resultPtr: number,
+    gtol: number,
+    maxiter: number,
+    c1: number,
+    c2: number,
+    hasJac: number,
+    eps: number,
+    funcPtr: number,
+    gradPtr: number
+  ): number;
+
+  // L-BFGS-B optimization (reverse communication via setulb)
+  _setulb(
+    n: number, m: number,
+    xPtr: number, lPtr: number, uPtr: number, nbdPtr: number,
+    fPtr: number, gPtr: number,
+    factr: number, pgtol: number,
+    waPtr: number, iwaPtr: number,
+    taskPtr: number, lsavePtr: number,
+    isavePtr: number, dsavePtr: number,
+    maxls: number, lnTaskPtr: number
+  ): void;
+
   // QUADPACK adaptive quadrature
   _wasm_dqagse(
     fcn: number, a: number, b: number,
@@ -39,6 +69,42 @@ export interface SciWasmModule {
     alist: number, blist: number, rlist: number, elist: number,
     iord: number, last: number,
   ): void;
+
+  // Sparse matrix operations (sparsetools)
+  _sp_csr_matvec_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
+  _sp_csr_matvecs_f64(n_row: number, n_col: number, n_vecs: number, Ap: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
+  _sp_csr_tocsc_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Bp: number, Bi: number, Bx: number): void;
+  _sp_csr_todense_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Bx: number): void;
+  _sp_csr_diagonal_f64(k: number, n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Yx: number): void;
+  _sp_csr_sort_indices_f64(n_row: number, Ap: number, Aj: number, Ax: number): void;
+  _sp_csr_has_sorted_indices(n_row: number, Ap: number, Aj: number): number;
+  _sp_csr_has_canonical_format(n_row: number, Ap: number, Aj: number): number;
+  _sp_csr_sum_duplicates_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number): void;
+  _sp_csr_eliminate_zeros_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number): void;
+  _sp_csr_matmat_maxnnz(n_row: number, n_col: number, Ap: number, Aj: number, Bp: number, Bj: number): number;
+  _sp_csr_matmat_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Bp: number, Bj: number, Bx: number, Cp: number, Cj: number, Cx: number): void;
+  _sp_csr_plus_csr_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Bp: number, Bj: number, Bx: number, Cp: number, Cj: number, Cx: number): void;
+  _sp_csr_minus_csr_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Bp: number, Bj: number, Bx: number, Cp: number, Cj: number, Cx: number): void;
+  _sp_csr_elmul_csr_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Bp: number, Bj: number, Bx: number, Cp: number, Cj: number, Cx: number): void;
+  _sp_csr_eldiv_csr_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Bp: number, Bj: number, Bx: number, Cp: number, Cj: number, Cx: number): void;
+  _sp_csr_scale_rows_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Xx: number): void;
+  _sp_csr_scale_columns_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Xx: number): void;
+  _sp_expandptr(n_row: number, Ap: number, Bi: number): void;
+  _sp_csr_row_index_f64(n_row_idx: number, rows: number, Ap: number, Aj: number, Ax: number, Bj: number, Bx: number): void;
+  _sp_csr_row_slice_f64(start: number, stop: number, step: number, Ap: number, Aj: number, Ax: number, Bj: number, Bx: number): void;
+  _sp_csr_column_index1(n_idx: number, col_idxs: number, n_row: number, n_col: number, Ap: number, Aj: number, col_offsets: number, Bp: number): void;
+  _sp_csr_column_index2_f64(col_order: number, col_offsets: number, nnz: number, Aj: number, Ax: number, Bj: number, Bx: number): void;
+  _sp_csr_sample_offsets(n_row: number, n_col: number, Ap: number, Aj: number, n_samples: number, Bi: number, Bj: number, Bp: number): number;
+  _sp_csr_sample_values_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, n_samples: number, Bi: number, Bj: number, Bx: number): void;
+  _sp_get_csr_submatrix_nnz(n_row: number, n_col: number, Ap: number, Aj: number, ir0: number, ir1: number, ic0: number, ic1: number): number;
+  _sp_get_csr_submatrix_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, ir0: number, ir1: number, ic0: number, ic1: number, Bp: number, Bj: number, Bx: number): void;
+  _sp_csc_matvec_f64(n_row: number, n_col: number, Ap: number, Ai: number, Ax: number, Xx: number, Yx: number): void;
+  _sp_csc_matvecs_f64(n_row: number, n_col: number, n_vecs: number, Ap: number, Ai: number, Ax: number, Xx: number, Yx: number): void;
+  _sp_coo_tocsr_f64(n_row: number, n_col: number, nnz: number, Ai: number, Aj: number, Ax: number, Bp: number, Bj: number, Bx: number): void;
+  _sp_coo_todense_f64(n_row: number, n_col: number, nnz: number, Ai: number, Aj: number, Ax: number, Bx: number, fortran: number): void;
+  _sp_coo_matvec_f64(nnz: number, Ai: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
+  _sp_malloc(size: number): number;
+  _sp_free(ptr: number): void;
 
   // Memory management
   _malloc(size: number): number;

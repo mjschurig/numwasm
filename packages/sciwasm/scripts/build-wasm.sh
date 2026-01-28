@@ -31,7 +31,7 @@ echo ""
 
 # Step 1: Compile C source files to .o
 C_OBJS=()
-for cfile in "$SRC_DIR/optimize/nelder_mead.c" "$SRC_DIR/quadpack.c" "$SRC_DIR/quadpack_wasm.c"; do
+for cfile in "$SRC_DIR/optimize/nelder_mead.c" "$SRC_DIR/optimize/bfgs.c" "$SRC_DIR/optimize/lbfgsb.c" "$SRC_DIR/optimize/blas_lite.c" "$SRC_DIR/quadpack.c" "$SRC_DIR/quadpack_wasm.c"; do
     if [ -f "$cfile" ]; then
         base=$(basename "$cfile" .c)
         obj="$OBJ_DIR/${base}.o"
@@ -60,6 +60,8 @@ echo ""
 # All exported functions
 EXPORTED_FUNCTIONS='[
     "_nelder_mead_minimize",
+    "_bfgs_minimize",
+    "_setulb",
     "_wasm_dqagse",
     "_wasm_dqagie",
     "_sp_csr_matvec_f64",
