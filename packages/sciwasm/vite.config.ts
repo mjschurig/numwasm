@@ -18,6 +18,7 @@ export default defineConfig({
       fileName: (format) => `sciwasm.${format === 'es' ? 'mjs' : 'cjs'}`,
     },
     outDir: 'dist',
+    emptyOutDir: false,
     rollupOptions: {
       external: ['numwasm', 'module', 'path', 'url', 'fs'],
     },

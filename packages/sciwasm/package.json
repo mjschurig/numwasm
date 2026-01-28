@@ -16,10 +16,13 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/sciwasm.cjs"
       }
-    }
+    },
+    "./wasm/sciwasm.wasm": "./dist/wasm/sciwasm.wasm"
   },
   "scripts": {
-    "build": "vite build",
+    "build:wasm": "./scripts/build-wasm.sh",
+    "build:lib": "vite build",
+    "build": "pnpm run build:wasm && pnpm run build:lib",
     "test": "vitest run",
     "clean": "rm -rf dist/",
     "docs": "typedoc",

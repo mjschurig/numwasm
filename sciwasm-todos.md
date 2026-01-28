@@ -216,7 +216,7 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 ## 4. `integrate` — Integration and ODEs
 
 ### Current Stubs
-- 🔲 `quad(func, a, b, options?)` — Adaptive quadrature
+- ✅ `quad(func, a, b, options?)` — Adaptive quadrature
 - 🔲 `dblquad(func, a, b, gfun, hfun)` — Double integration
 - 🔲 `tplquad(func, a, b, gfun, hfun, qfun, rfun)` — Triple integration
 - 🔲 `trapezoid(y, x?, dx?)` — Trapezoidal rule
@@ -599,7 +599,7 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 | special | 0 | 10 | ~35 | ~45 |
 | stats | 4 | 9 | ~37 | ~50 |
 | optimize | 0 | 5 | ~20 | ~25 |
-| integrate | 0 | 6 | ~9 | ~15 |
+| integrate | 1 | 5 | ~9 | ~15 |
 | interpolate | 0 | 4 | ~14 | ~18 |
 | signal | 0 | 7 | ~35 | ~42 |
 | spatial | 0 | 8 | ~15 | ~23 |
