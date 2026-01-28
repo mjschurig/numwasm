@@ -105,7 +105,7 @@ For each function/module, follow these steps in order:
 ## 2. `stats` — Statistical Functions
 
 ### Current Stubs
-- 🔲 `describe(a)` — Descriptive statistics
+- ✅ `describe(a)` — Descriptive statistics
 - 🔲 `norm(loc?, scale?)` — Normal distribution
 - 🔲 `t(df, loc?, scale?)` — Student's t distribution
 - 🔲 `f(dfn, dfd, loc?, scale?)` — F distribution
@@ -155,9 +155,9 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 
 ### Priority Additions — Descriptive
 - ⬜ `mode(a)` — Modal value
-- ⬜ `moment(a, moment?)` — Central moment
-- ⬜ `skew(a)` — Skewness
-- ⬜ `kurtosis(a)` — Kurtosis
+- ✅ `moment(a, moment?)` — Central moment
+- ✅ `skew(a)` — Skewness
+- ✅ `kurtosis(a)` — Kurtosis
 - ⬜ `sem(a)` — Standard error of the mean
 - ⬜ `zscore(a)` — Z-score standardization
 - ⬜ `iqr(x)` — Interquartile range
@@ -597,7 +597,7 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 | Module | ✅ Done | 🔲 Stubbed | ⬜ To Create | Total |
 |--------|---------|-----------|-------------|-------|
 | special | 0 | 10 | ~35 | ~45 |
-| stats | 0 | 10 | ~40 | ~50 |
+| stats | 4 | 9 | ~37 | ~50 |
 | optimize | 0 | 5 | ~20 | ~25 |
 | integrate | 0 | 6 | ~9 | ~15 |
 | interpolate | 0 | 4 | ~14 | ~18 |
@@ -608,4 +608,4 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 | cluster | 0 | 3 | ~15 | ~18 |
 | io | 0 | 2 | ~10 | ~12 |
 | constants | 10 | 1 | ~50+ | ~61 |
-| **Total** | **10** | **65** | **~298** | **~373** |
+| **Total** | **14** | **64** | **~295** | **~373** |
