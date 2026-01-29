@@ -670,3 +670,45 @@ export function bitwise_count(x: NDArray): NDArray {
   }
   return applyUnary(x, (ptr) => getWasmModule()._ufunc_bitwise_count(ptr));
 }
+
+/* ============ Complex Number Operations ============ */
+
+/**
+ * Return the complex conjugate, element-wise.
+ *
+ * The complex conjugate of a complex number is obtained by changing
+ * the sign of its imaginary part.
+ *
+ * For non-complex arrays, returns a copy of the input.
+ *
+ * @param x - Input array
+ * @returns The complex conjugate of x, with same dtype as input
+ *
+ * @example
+ * ```typescript
+ * const c = await NDArray.fromArray([1+2j, 3-4j], { dtype: DType.Complex128 });
+ * const conj = conjugate(c);  // [1-2j, 3+4j]
+ * ```
+ */
+export function conjugate(x: NDArray): NDArray {
+  // For non-complex types, just return a copy
+  if (x.dtype !== DType.Complex64 && x.dtype !== DType.Complex128) {
+    return x.copy();
+  }
+
+  // For complex types, negate the imaginary part
+  const result = x.copy();
+  const size = x.size;
+  const module = x._wasmModule;
+
+  for (let flatIdx = 0; flatIdx < size; flatIdx++) {
+    const realVal = module._ndarray_get_complex_real(x._wasmPtr, flatIdx);
+    const imagVal = module._ndarray_get_complex_imag(x._wasmPtr, flatIdx);
+    module._ndarray_set_complex(result._wasmPtr, flatIdx, realVal, -imagVal);
+  }
+
+  return result;
+}
+
+/** Alias for conjugate. */
+export const conj = conjugate;

@@ -262,3 +262,154 @@ export class SymEngineSet {
     return result;
   }
 }
+
+/**
+ * Wrapper class for SymEngine CVecBasic container
+ * Used for operations that return vectors of Basic objects (e.g., get_args)
+ */
+export class SymEngineVec {
+  private ptr: number;
+
+  constructor() {
+    const wasm = getWasmModule();
+    this.ptr = wasm._vecbasic_new();
+  }
+
+  /**
+   * Get the WASM pointer to this vector
+   */
+  getPtr(): number {
+    return this.ptr;
+  }
+
+  /**
+   * Check if this vector has been freed
+   */
+  isValid(): boolean {
+    return this.ptr !== 0;
+  }
+
+  /**
+   * Free the WASM memory for this vector
+   */
+  free(): void {
+    if (this.ptr) {
+      const wasm = getWasmModule();
+      wasm._vecbasic_free(this.ptr);
+      this.ptr = 0;
+    }
+  }
+
+  /**
+   * Get the number of elements in this vector
+   */
+  size(): number {
+    if (!this.isValid()) {
+      throw new Error('Cannot get size of freed SymEngineVec');
+    }
+    const wasm = getWasmModule();
+    return wasm._vecbasic_size(this.ptr);
+  }
+
+  /**
+   * Get the nth element from the vector
+   * @param n Index (0-based)
+   * @returns A new SymEngineObject containing the element
+   */
+  get(n: number): SymEngineObject {
+    if (!this.isValid()) {
+      throw new Error('Cannot get element from freed SymEngineVec');
+    }
+    const wasm = getWasmModule();
+    const resultPtr = wasm._basic_new_heap();
+    wasm._vecbasic_get(this.ptr, n, resultPtr);
+    return new SymEngineObject(resultPtr);
+  }
+
+  /**
+   * Append an element to the vector
+   * @param obj The SymEngineObject to append
+   */
+  push(obj: SymEngineObject): void {
+    if (!this.isValid()) {
+      throw new Error('Cannot push to freed SymEngineVec');
+    }
+    const wasm = getWasmModule();
+    wasm._vecbasic_push_back(this.ptr, obj.getPtr());
+  }
+
+  /**
+   * Convert the vector to an array of SymEngineObjects
+   * Note: The caller is responsible for freeing the returned objects
+   */
+  toArray(): SymEngineObject[] {
+    const count = this.size();
+    const result: SymEngineObject[] = [];
+    for (let i = 0; i < count; i++) {
+      result.push(this.get(i));
+    }
+    return result;
+  }
+}
+
+/**
+ * Wrapper class for SymEngine CMapBasicBasic container
+ * Used for map-based substitution operations
+ */
+export class SymEngineMap {
+  private ptr: number;
+
+  constructor() {
+    const wasm = getWasmModule();
+    this.ptr = wasm._mapbasicbasic_new();
+  }
+
+  /**
+   * Get the WASM pointer to this map
+   */
+  getPtr(): number {
+    return this.ptr;
+  }
+
+  /**
+   * Check if this map has been freed
+   */
+  isValid(): boolean {
+    return this.ptr !== 0;
+  }
+
+  /**
+   * Free the WASM memory for this map
+   */
+  free(): void {
+    if (this.ptr) {
+      const wasm = getWasmModule();
+      wasm._mapbasicbasic_free(this.ptr);
+      this.ptr = 0;
+    }
+  }
+
+  /**
+   * Insert a key-value pair into the map
+   * @param keyPtr WASM pointer to the key Basic
+   * @param valuePtr WASM pointer to the value Basic
+   */
+  insert(keyPtr: number, valuePtr: number): void {
+    if (!this.isValid()) {
+      throw new Error('Cannot insert into freed SymEngineMap');
+    }
+    const wasm = getWasmModule();
+    wasm._mapbasicbasic_insert(this.ptr, keyPtr, valuePtr);
+  }
+
+  /**
+   * Get the number of entries in this map
+   */
+  size(): number {
+    if (!this.isValid()) {
+      throw new Error('Cannot get size of freed SymEngineMap');
+    }
+    const wasm = getWasmModule();
+    return wasm._mapbasicbasic_size(this.ptr);
+  }
+}

@@ -3,11 +3,15 @@
  *
  * Tests Expr base class methods: equals, hash, get_type, free_symbols, toString, free
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import * as sym from '../../src/ts/index';
 
 describe('core: Expr base class', () => {
-  describe('sentinel constants (pi, E, I, oo)', () => {
+  beforeAll(async () => {
+    await sym.core.loadWasmModule();
+  });
+
+  describe('WASM-backed constants (pi, E, I, oo)', () => {
     it('toString() returns correct string representation', () => {
       expect(sym.core.pi.toString()).toBe('pi');
       expect(sym.core.E.toString()).toBe('E');
@@ -36,16 +40,16 @@ describe('core: Expr base class', () => {
       expect(sym.core.oo.free_symbols()).toEqual([]);
     });
 
-    it('hash() throws for sentinel constants without WASM backing', () => {
-      expect(() => sym.core.pi.hash()).toThrow(
-        'Cannot hash expression not backed by WASM object'
-      );
+    it('hash() returns consistent value for constants', () => {
+      const h1 = sym.core.pi.hash();
+      const h2 = sym.core.pi.hash();
+      expect(h1).toBe(h2);
     });
 
-    it('get_type() throws for sentinel constants without WASM backing', () => {
-      expect(() => sym.core.pi.get_type()).toThrow(
-        'Cannot get type of expression not backed by WASM object'
-      );
+    it('get_type() returns correct type for constants', () => {
+      expect(sym.core.pi.get_type()).toBe(sym.core.SymEngineTypeID.SYMENGINE_CONSTANT);
+      expect(sym.core.E.get_type()).toBe(sym.core.SymEngineTypeID.SYMENGINE_CONSTANT);
+      expect(sym.core.oo.get_type()).toBe(sym.core.SymEngineTypeID.SYMENGINE_INFTY);
     });
   });
 
@@ -66,9 +70,8 @@ describe('core: Expr base class', () => {
   });
 
   describe('Expr.free() method', () => {
-    it('free() is callable on sentinel constants (no-op)', () => {
-      // Sentinel constants should not throw when free() is called
-      // (they have no WASM backing to free)
+    it('free() is callable on constants (no-op for singleton constants)', () => {
+      // Constants should not throw when free() is called
       const piCopy = sym.core.pi;
       expect(() => piCopy.free()).not.toThrow();
     });

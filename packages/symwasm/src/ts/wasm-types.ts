@@ -62,6 +62,7 @@ export interface SymwasmModule extends EmscriptenModule {
   _rational_set_si(ptr: number, num: number, den: number): number;
   _rational_set_ui(ptr: number, num: number, den: number): number;
   _real_double_set_d(ptr: number, value: number): number;
+  _complex_set(s: number, re: number, im: number): number; // re, im are Basic pointers
 
   // === Basic Arithmetic ===
   _basic_add(result: number, a: number, b: number): number;
@@ -69,6 +70,17 @@ export interface SymwasmModule extends EmscriptenModule {
   _basic_mul(result: number, a: number, b: number): number;
   _basic_div(result: number, a: number, b: number): number;
   _basic_pow(result: number, base: number, exp: number): number;
+  _basic_neg(result: number, a: number): number;
+
+  // === Expression Arguments ===
+  _basic_get_args(self: number, args: number): number; // args is CVecBasic*
+
+  // === Vector Container Operations (CVecBasic) ===
+  _vecbasic_new(): number; // Returns CVecBasic*
+  _vecbasic_free(self: number): void;
+  _vecbasic_size(self: number): number; // Returns size_t
+  _vecbasic_get(self: number, n: number, result: number): number; // Gets nth element
+  _vecbasic_push_back(self: number, value: number): number; // Appends element
 
   // === Constants ===
   _basic_const_zero(ptr: number): number;
@@ -77,6 +89,27 @@ export interface SymwasmModule extends EmscriptenModule {
   _basic_const_I(ptr: number): number;
   _basic_const_pi(ptr: number): number;
   _basic_const_E(ptr: number): number;
+  _basic_const_infinity(ptr: number): number;
+  _basic_const_neginfinity(ptr: number): number;
+  _basic_const_complex_infinity(ptr: number): number;
+  _basic_const_EulerGamma(ptr: number): number;
+  _basic_const_Catalan(ptr: number): number;
+  _basic_const_GoldenRatio(ptr: number): number;
+  _basic_const_nan(ptr: number): number;
+
+  // === Substitution ===
+  _basic_subs2(result: number, expr: number, old: number, new_: number): number;
+  _basic_subs(result: number, expr: number, mapbb: number): number;
+
+  // === Map Container Operations (CMapBasicBasic) ===
+  _mapbasicbasic_new(): number;
+  _mapbasicbasic_free(self: number): void;
+  _mapbasicbasic_insert(self: number, key: number, mapped: number): void;
+  _mapbasicbasic_size(self: number): number;
+
+  // === Numerical Evaluation ===
+  _basic_evalf(s: number, b: number, bits: number, real: number): number;
+  _real_double_get_d(s: number): number;
 
   // === Type Information ===
   _basic_get_type(ptr: number): number;
@@ -146,4 +179,13 @@ export enum SymEngineException {
   NOT_IMPLEMENTED = 3,
   DOMAIN_ERROR = 4,
   PARSE_ERROR = 5,
+}
+
+/**
+ * Domain for numerical evaluation (from eval.h)
+ */
+export enum EvalfDomain {
+  Complex = 0,
+  Real = 1,
+  Symbolic = 2,
 }

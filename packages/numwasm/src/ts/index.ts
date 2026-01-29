@@ -145,7 +145,7 @@ export {
 export type { ClipMode } from './indexing.js';
 
 // Sorting functions (Phase 6)
-export { sort, argsort, partition, argpartition } from './sorting.js';
+export { sort, argsort, partition, argpartition, sort_complex } from './sorting.js';
 export type { SortKind } from './sorting.js';
 
 // Statistics functions (Phase 6)
@@ -247,6 +247,8 @@ export {
   allclose,
   array_equal,
   array_equiv,
+  // Complex utilities
+  real_if_close,
 } from './logic.js';
 
 // Universal functions (Ufuncs) - Level 3
@@ -353,6 +355,9 @@ export {
   heaviside,
   divmod,
   bitwise_count,
+  // Complex number operations
+  conjugate,
+  conj,
 } from './ufunc.js';
 
 // Functional programming (Level 10)
@@ -824,3 +829,6 @@ export {
 export { ma } from './ma/index.js';
 export { MaskedArray } from './ma/core.js';
 export type { MaskType, MaskedConstant, SliceInfo } from './ma/index.js';
+
+// Type checking and complex utilities
+export { angle, real, imag } from './type_check.js';

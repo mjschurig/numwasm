@@ -9,6 +9,7 @@
 
 import { NDArray } from './NDArray.js';
 import { DType } from './types.js';
+import { absolute } from './ufunc.js';
 
 /* ============ Element-wise Predicates ============ */
 
@@ -467,4 +468,65 @@ export async function array_equiv(a1: NDArray, a2: NDArray): Promise<boolean> {
   const result = module._ndarray_array_equiv(a1._wasmPtr, a2._wasmPtr);
 
   return result !== 0;
+}
+
+/**
+ * If input is complex with all imaginary parts close to zero, return real parts.
+ *
+ * "Close to zero" is defined as `tol` times the machine epsilon of the type.
+ *
+ * @param a - Input array
+ * @param tol - Tolerance in machine epsilons for complex128, or absolute
+ *              tolerance if tol < 1. Default is 100.
+ * @returns Real array if imaginary parts are negligible, otherwise the input
+ *
+ * @example
+ * ```typescript
+ * // Imaginary parts within tolerance - returns real
+ * const c1 = await NDArray.fromArray([1+1e-16j, 2+1e-16j], { dtype: DType.Complex128 });
+ * const r1 = await real_if_close(c1);  // [1, 2] (Float64)
+ *
+ * // Imaginary parts too large - returns complex unchanged
+ * const c2 = await NDArray.fromArray([1+1j, 2+2j], { dtype: DType.Complex128 });
+ * const r2 = await real_if_close(c2);  // [1+1j, 2+2j] (Complex128)
+ * ```
+ */
+export async function real_if_close(
+  a: NDArray,
+  tol: number = 100
+): Promise<NDArray> {
+  // For non-complex arrays, return as-is
+  if (!iscomplexobj(a)) {
+    return a;
+  }
+
+  // Get machine epsilon for this type
+  // Float32 epsilon: ~1.19e-7, Float64 epsilon: ~2.22e-16
+  const eps =
+    a.dtype === DType.Complex64 ? 1.1920929e-7 : 2.220446049250313e-16;
+  const tolerance = tol > 1 ? eps * tol : tol;
+
+  // Check if all imaginary parts are below tolerance
+  const imagPart = a.imag;
+  const absImag = absolute(imagPart);
+
+  // Find maximum absolute imaginary value
+  const module = a._wasmModule;
+  const size = absImag.size;
+  let maxImag = 0;
+
+  for (let i = 0; i < size; i++) {
+    const val = module._ndarray_get_flat(absImag._wasmPtr, i);
+    if (val > maxImag) {
+      maxImag = val;
+    }
+  }
+
+  if (maxImag < tolerance) {
+    // All imaginary parts are negligible, return real parts
+    return a.real;
+  }
+
+  // Imaginary parts are significant, return as-is
+  return a;
 }

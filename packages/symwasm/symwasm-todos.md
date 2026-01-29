@@ -83,47 +83,68 @@ For each function/module, follow these steps in order:
 - ⬜ `Wild(name)` — Wildcard for pattern matching
 - **Note**: Also fixed WASM memory management to use `_basic_new_heap`/`_basic_free_heap` instead of stack allocation
 
-#### 1.4 Number Types
+#### 1.4 Number Types ✅ COMPLETED
 **SymEngine Files**: `number.h`, `integer.h`, `rational.h`, `real_double.h`, `complex_double.h`, `complex.h`
-- 🔲 `Integer(value)` — Exact integer (maps to `Integer` class)
-- 🔲 `Rational(p, q)` — Exact rational p/q (maps to `Rational` class)
-- 🔲 `Float(value, precision?)` — Arbitrary precision float (maps to `RealDouble` or `RealMPFR`)
-- ⬜ `Complex(re, im)` — Exact complex number (maps to `Complex` class)
-- ⬜ `RealDouble(value)` — Machine precision real (C++ `RealDouble`)
-- ⬜ `ComplexDouble(re, im)` — Machine precision complex (C++ `ComplexDouble`)
-- ⬜ `RealMPFR(value, precision)` — Arbitrary precision real (requires MPFR)
-- ⬜ `ComplexMPC(re, im, precision)` — Arbitrary precision complex (requires MPC)
+- ✅ `Integer(value)` — Exact integer (maps to `Integer` class, uses `_integer_set_si`)
+- ✅ `Rational(p, q)` — Exact rational p/q (maps to `Rational` class, uses `_rational_set_si`)
+- ✅ `Float(value, precision?)` — Machine precision float (maps to `RealDouble`, uses `_real_double_set_d`)
+- ✅ `Complex(re, im)` — Exact complex number (maps to `Complex` class, uses `_complex_set`)
+- ✅ `S.Zero`, `S.One`, `S.NegativeOne`, `S.Half` — Lazy-initialized singleton constants
+- ⬜ `ComplexDouble(re, im)` — Machine precision complex (no cwrapper creation function)
+- ⬜ `RealMPFR(value, precision)` — Arbitrary precision real (requires MPFR library)
+- ⬜ `ComplexMPC(re, im, precision)` — Arbitrary precision complex (requires MPC library)
+- **Note**: SymEngine simplifies rationals automatically (e.g., 4/8 → 1/2). Float precision parameter ignored without MPFR. ComplexDouble/RealMPFR/ComplexMPC not available due to missing cwrapper support or library dependencies.
 
-#### 1.5 Core Arithmetic Operations
+#### 1.5 Core Arithmetic Operations ✅ COMPLETED
 **SymEngine Files**: `add.h`, `mul.h`, `pow.h`
-- 🔲 `Add(args)` — Symbolic addition (C++ `Add` class)
-- 🔲 `Mul(args)` — Symbolic multiplication (C++ `Mul` class)
-- 🔲 `Pow(base, exp)` — Symbolic exponentiation (C++ `Pow` class)
+- ✅ `Add` — Symbolic addition class with lazy args extraction
+- ✅ `Mul` — Symbolic multiplication class with lazy args extraction
+- ✅ `Pow` — Symbolic exponentiation class with base/exp properties
+- ✅ `add(a, b)` — Add two expressions (`_basic_add`)
+- ✅ `sub(a, b)` — Subtract two expressions (`_basic_sub`)
+- ✅ `mul(a, b)` — Multiply two expressions (`_basic_mul`)
+- ✅ `div(a, b)` — Divide two expressions (`_basic_div`)
+- ✅ `pow(base, exp)` — Raise to power (`_basic_pow`)
+- ✅ `neg(a)` — Negate expression (`_basic_neg`)
+- ✅ `Expr.get_args()` — Get sub-expressions (`_basic_get_args`)
+- ✅ `SymEngineVec` — Wrapper for CVecBasic container
+- ✅ `exprFromWasm()` — Factory function for type-based Expr creation
 - ⬜ Operator overloading support in TypeScript wrappers
+- **Note**: SymEngine auto-simplifies: `x + x` → `2*x`, `x * x` → `x**2`. Results dispatched to correct Expr subclass (Integer, Add, Mul, Pow, etc.)
 
-#### 1.6 Constants
+#### 1.6 Constants ✅ COMPLETED
 **SymEngine Files**: `constants.h`, `constants.cpp`
-- 🔲 `pi` — Pi (π) → `Pi` class
-- 🔲 `E` — Euler's number (e) → `E_` class
-- 🔲 `I` — Imaginary unit (i) → `I_` class
-- 🔲 `oo` — Infinity → `Infty` class
-- 🔲 `S.Zero`, `S.One`, `S.NegativeOne`, `S.Half` — Numeric constants
-- ⬜ `EulerGamma` — Euler-Mascheroni constant γ → `EulerGamma` class
-- ⬜ `Catalan` — Catalan's constant → `Catalan` class
-- ⬜ `GoldenRatio` — Golden ratio φ → `GoldenRatio` class
-- ⬜ `NaN` — Not a number → `NaN_` class
+- ✅ `pi` — Pi (π) → `Constant` class (WASM-backed via `_basic_const_pi`)
+- ✅ `E` — Euler's number (e) → `Constant` class (WASM-backed via `_basic_const_E`)
+- ✅ `I` — Imaginary unit (i) → `ImaginaryUnit` class (WASM-backed via `_basic_const_I`)
+- ✅ `oo` — Positive infinity → `Infinity_` class (WASM-backed via `_basic_const_infinity`)
+- ✅ `S.Zero`, `S.One`, `S.NegativeOne`, `S.Half` — Numeric constants (implemented in Phase 1.4)
+- ✅ `S.Infinity`, `S.NegativeInfinity`, `S.ComplexInfinity` — Infinity variants (WASM-backed)
+- ✅ `S.NaN` — Not a number → `NaN_` class (WASM-backed via `_basic_const_nan`)
+- ✅ `EulerGamma` — Euler-Mascheroni constant γ → `Constant` class (WASM-backed)
+- ✅ `Catalan` — Catalan's constant → `Constant` class (WASM-backed)
+- ✅ `GoldenRatio` — Golden ratio φ → `Constant` class (WASM-backed)
+- **Note**: All constants use lazy initialization via Proxy to defer WASM calls until first use. Constants support full arithmetic operations, hashing, and type identification.
 
-#### 1.7 Basic Expression Manipulation
+#### 1.7 Basic Expression Manipulation ✅ COMPLETED
 **SymEngine Files**: `subs.h`, `subs.cpp`
-- 🔲 `Expr.subs(old, new)` — Substitution (`basic_subs`)
-- ⬜ `Expr.subs(dict)` — Multiple substitutions (`basic_subs` with map)
-- ⬜ `Expr.xreplace(dict)` — Exact structural replacement
+- ✅ `Expr.subs(old, new)` — Single substitution (WASM-backed via `_basic_subs2`)
+- ✅ `Expr.subs(Map<Expr, Expr>)` — Multiple simultaneous substitutions (WASM-backed via `_basic_subs` with `CMapBasicBasic`)
+- ✅ `Expr.subs({ x: 1, y: 2 })` — Object notation for symbol substitution (convenience wrapper)
+- ⬜ `Expr.xreplace(dict)` — Exact structural replacement (not exposed in C API, cannot implement)
+- **Note**: Map-based substitution is atomic (all substitutions happen simultaneously), unlike chained single substitutions which apply sequentially. Object notation creates symbols by name and converts numbers to Integer automatically.
 
-#### 1.8 Numerical Evaluation
+#### 1.8 Numerical Evaluation ✅ COMPLETED
 **SymEngine Files**: `eval.h`, `eval_double.h`, `eval_mpfr.h`
-- 🔲 `Expr.evalf(precision?)` — Numerical evaluation (`eval_double`, `evalf`)
-- ⬜ `N(expr, n)` — Numerical evaluation (alias)
-- ⬜ `evalf_complex(expr, precision)` — Complex numerical evaluation
+- ✅ `Expr.evalf(precision?)` — Numerical evaluation (WASM-backed via `_basic_evalf`)
+- ✅ `Expr.evalfNumber()` — Extract JavaScript number from evaluated expression
+- ✅ `Expr.evalfComplex()` — Extract complex number { real, imag }
+- ⬜ `N(expr, n)` — Numerical evaluation (alias) - deferred
+- **Note**: Default precision is 53 bits (double precision). Higher precision requires MPFR which is not compiled into current WASM build. Complex results parsed from string representation.
+
+---
+
+**Phase 1 Complete**: All core foundation features implemented (197 tests passing).
 
 ---
 
@@ -624,12 +645,12 @@ symengine/llvm_double.h            → LLVM JIT compilation (optional)
 | **1** | **Foundation** | | | | | |
 | 1.1 | Build System | ~6 | 0 | 0 | ~6 | cwrapper.h/cpp ✅ |
 | 1.2 | Core Base | ~9 | 0 | 0 | ~9 | basic.h ✅ |
-| 1.3 | Symbols | 0 | 2 | ~2 | ~4 | symbol.h |
-| 1.4 | Numbers | 0 | 3 | ~5 | ~8 | number.h, integer.h, rational.h, complex*.h |
-| 1.5 | Arithmetic | 0 | 3 | ~1 | ~4 | add.h, mul.h, pow.h |
-| 1.6 | Constants | 0 | 6 | ~4 | ~10 | constants.h |
-| 1.7 | Substitution | 0 | 1 | ~2 | ~3 | subs.h |
-| 1.8 | Evaluation | 0 | 1 | ~2 | ~3 | eval*.h |
+| 1.3 | Symbols | ~2 | 0 | ~2 | ~4 | symbol.h ✅ |
+| 1.4 | Numbers | ~5 | 0 | ~3 | ~8 | number.h, integer.h, rational.h, complex*.h ✅ |
+| 1.5 | Arithmetic | ~12 | 0 | ~1 | ~13 | add.h, mul.h, pow.h ✅ |
+| 1.6 | Constants | ~11 | 0 | 0 | ~11 | constants.h ✅ |
+| 1.7 | Substitution | ~3 | 0 | ~1 | ~4 | subs.h ✅ |
+| 1.8 | Evaluation | ~3 | 0 | ~1 | ~4 | eval*.h ✅ |
 | **2** | **Essential Functions** | | | | | |
 | 2 | Functions | 0 | 0 | ~50 | ~50 | functions.h |
 | 2 | Calculus | 0 | 3 | ~7 | ~10 | derivative.h, series.h |
@@ -647,7 +668,7 @@ symengine/llvm_double.h            → LLVM JIT compilation (optional)
 | 5 | Codegen | 0 | 0 | ~5 | ~5 | printers/codegen.h |
 | 5 | Parsing | 0 | 0 | ~3 | ~3 | parser/ |
 | 5 | Lambda/CSE | 0 | 0 | ~3 | ~3 | lambda_double.h, llvm_double.h |
-| **Total** | | **~15** | **48** | **~205** | **~268** | **65 main headers + subdirs** |
+| **Total** | | **~46** | **29** | **~193** | **~268** | **65 main headers + subdirs** |
 
 ---
 

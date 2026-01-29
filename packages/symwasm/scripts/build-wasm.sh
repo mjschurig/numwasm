@@ -175,7 +175,30 @@ EXPORTED_FUNCTIONS='[
     "_setbasic_new",
     "_setbasic_free",
     "_setbasic_get",
-    "_setbasic_size"
+    "_setbasic_size",
+    "_complex_set",
+    "_basic_neg",
+    "_basic_get_args",
+    "_vecbasic_new",
+    "_vecbasic_free",
+    "_vecbasic_size",
+    "_vecbasic_get",
+    "_vecbasic_push_back",
+    "_basic_const_infinity",
+    "_basic_const_neginfinity",
+    "_basic_const_complex_infinity",
+    "_basic_const_EulerGamma",
+    "_basic_const_Catalan",
+    "_basic_const_GoldenRatio",
+    "_basic_const_nan",
+    "_basic_subs2",
+    "_basic_subs",
+    "_mapbasicbasic_new",
+    "_mapbasicbasic_free",
+    "_mapbasicbasic_insert",
+    "_mapbasicbasic_size",
+    "_basic_evalf",
+    "_real_double_get_d"
 ]'
 
 EXPORTED_RUNTIME='["ccall", "cwrap", "getValue", "setValue", "UTF8ToString", "stringToUTF8", "lengthBytesUTF8", "HEAPF64", "HEAP32", "HEAPU8"]'

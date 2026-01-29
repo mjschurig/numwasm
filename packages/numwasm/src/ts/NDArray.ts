@@ -1025,6 +1025,106 @@ export class NDArray {
   }
 
   /**
+   * Extract the real part of a complex array.
+   * For non-complex arrays, returns a copy of the array.
+   *
+   * @returns New NDArray containing the real parts
+   *
+   * @example
+   * ```typescript
+   * const c = await NDArray.fromArray([[1, 2], [3, 4]], { dtype: DType.Complex128 });
+   * const r = c.real;  // Float64 array with real parts
+   * ```
+   */
+  get real(): NDArray {
+    this.ensureNotDisposed();
+
+    // For non-complex arrays, return a copy
+    if (this.dtype !== DType.Complex64 && this.dtype !== DType.Complex128) {
+      return this.copy();
+    }
+
+    // Complex -> Float conversion extracts real part via astype
+    const targetDtype =
+      this.dtype === DType.Complex64 ? DType.Float32 : DType.Float64;
+    return this.astype(targetDtype);
+  }
+
+  /**
+   * Extract the imaginary part of a complex array.
+   * For non-complex arrays, returns an array of zeros with the same shape.
+   *
+   * @returns New NDArray containing the imaginary parts
+   *
+   * @example
+   * ```typescript
+   * const c = await NDArray.fromArray([[1+2j, 3+4j]], { dtype: DType.Complex128 });
+   * const i = c.imag;  // Float64 array: [[2, 4]]
+   * ```
+   */
+  get imag(): NDArray {
+    this.ensureNotDisposed();
+
+    const targetDtype =
+      this.dtype === DType.Complex64
+        ? DType.Float32
+        : this.dtype === DType.Complex128
+          ? DType.Float64
+          : this.dtype === DType.Float32
+            ? DType.Float32
+            : DType.Float64;
+
+    // For non-complex arrays, return zeros with same shape
+    if (this.dtype !== DType.Complex64 && this.dtype !== DType.Complex128) {
+      // Create zeros array using _ndarray_create (creates zero-initialized array)
+      const shape = this.shape;
+      const shapePtr = this._module._malloc(shape.length * 4);
+      for (let i = 0; i < shape.length; i++) {
+        this._module.setValue(shapePtr + i * 4, shape[i], 'i32');
+      }
+      const ptr = this._module._ndarray_create(shape.length, shapePtr, targetDtype);
+      this._module._free(shapePtr);
+      if (ptr === 0) {
+        throw new Error('Failed to create zeros array for imag');
+      }
+      return new NDArray(ptr, this._module);
+    }
+
+    // For complex arrays, extract imaginary parts element-wise
+    const shape = this.shape;
+    const size = this.size;
+
+    // Create empty result array
+    const shapePtr = this._module._malloc(shape.length * 4);
+    for (let i = 0; i < shape.length; i++) {
+      this._module.setValue(shapePtr + i * 4, shape[i], 'i32');
+    }
+    const resultPtr = this._module._ndarray_empty(
+      shape.length,
+      shapePtr,
+      targetDtype
+    );
+    this._module._free(shapePtr);
+
+    if (resultPtr === 0) {
+      throw new Error('Failed to create array for imag');
+    }
+
+    const result = new NDArray(resultPtr, this._module);
+
+    // Extract imaginary parts using flat indexing
+    for (let flatIdx = 0; flatIdx < size; flatIdx++) {
+      const imagValue = this._module._ndarray_get_complex_imag(
+        this._ptr,
+        flatIdx
+      );
+      this._module._ndarray_set_flat(resultPtr, flatIdx, imagValue);
+    }
+
+    return result;
+  }
+
+  /**
    * Transpose of the array (reverses axes).
    * Returns a view that shares data with the original array.
    */
