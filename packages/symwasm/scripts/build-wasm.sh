@@ -170,7 +170,12 @@ EXPORTED_FUNCTIONS='[
     "_basic_const_minus_one",
     "_basic_const_I",
     "_basic_const_pi",
-    "_basic_const_E"
+    "_basic_const_E",
+    "_basic_free_symbols",
+    "_setbasic_new",
+    "_setbasic_free",
+    "_setbasic_get",
+    "_setbasic_size"
 ]'
 
 EXPORTED_RUNTIME='["ccall", "cwrap", "getValue", "setValue", "UTF8ToString", "stringToUTF8", "lengthBytesUTF8", "HEAPF64", "HEAP32", "HEAPU8"]'

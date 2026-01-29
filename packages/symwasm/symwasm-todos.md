@@ -62,14 +62,18 @@ For each function/module, follow these steps in order:
 - **Dependencies**: GMP library compiled to WASM at `.gmp-build/`
 - **Verified**: Integer arithmetic (3+5=8, 3*5=15, 3^5=243) and symbolic math (x+x=2*x, x*x=x**2) working
 
-#### 1.2 Core Base Classes
+#### 1.2 Core Base Classes ✅ COMPLETED
 **SymEngine Files**: `basic.h`, `basic-inl.h`, `dict.h`, `type_codes.h`
-- 🔲 `Expr` — Base class for all symbolic expressions (maps to `Basic` in SymEngine)
-- 🔲 `Expr.equals(other)` — Structural equality (`basic_eq`)
-- 🔲 `Expr.free_symbols()` — Get free symbols (`basic_free_symbols`)
-- ⬜ `Expr.hash()` — Hash code (`basic_hash`)
-- ⬜ `Expr.get_type()` — Type identification (`basic_get_type`)
-- ⬜ `Expr.str()` — String representation (`basic_str`)
+- ✅ `Expr` — Base class for all symbolic expressions (maps to `Basic` in SymEngine)
+- ✅ `Expr.equals(other)` — Structural equality (`basic_eq`)
+- ✅ `Expr.free_symbols()` — Get free symbols (`basic_free_symbols`)
+- ✅ `Expr.hash()` — Hash code (`basic_hash`)
+- ✅ `Expr.get_type()` — Type identification (`basic_get_type`)
+- ✅ `Expr.toString()` — String representation (`basic_str`)
+- ✅ `Expr.free()` — Release WASM memory
+- ✅ `SymEngineSet` — Wrapper for CSetBasic container
+- ✅ `Symbol._fromWasm()` — Internal factory for creating Symbol from WASM object
+- **Note**: Full functionality requires WASM-backed expressions (Phase 1.3+). Sentinel constants (pi, E, I, oo) work with limited functionality.
 
 #### 1.3 Symbols and Variables
 **SymEngine Files**: `symbol.h`, `symbol.cpp`
@@ -617,14 +621,14 @@ symengine/llvm_double.h            → LLVM JIT compilation (optional)
 | Phase | Module | ✅ Done | 🔲 Stubbed | ⬜ To Create | Total | SymEngine Files |
 |-------|--------|---------|-----------|-------------|-------|-----------------|
 | **1** | **Foundation** | | | | | |
-| 1 | Build System | 0 | 0 | ~6 | ~6 | cwrapper.h/cpp |
-| 1 | Core Base | 0 | 3 | ~3 | ~6 | basic.h |
-| 1 | Symbols | 0 | 2 | ~2 | ~4 | symbol.h |
-| 1 | Numbers | 0 | 3 | ~5 | ~8 | number.h, integer.h, rational.h, complex*.h |
-| 1 | Arithmetic | 0 | 3 | ~1 | ~4 | add.h, mul.h, pow.h |
-| 1 | Constants | 0 | 6 | ~4 | ~10 | constants.h |
-| 1 | Substitution | 0 | 1 | ~2 | ~3 | subs.h |
-| 1 | Evaluation | 0 | 1 | ~2 | ~3 | eval*.h |
+| 1.1 | Build System | ~6 | 0 | 0 | ~6 | cwrapper.h/cpp ✅ |
+| 1.2 | Core Base | ~9 | 0 | 0 | ~9 | basic.h ✅ |
+| 1.3 | Symbols | 0 | 2 | ~2 | ~4 | symbol.h |
+| 1.4 | Numbers | 0 | 3 | ~5 | ~8 | number.h, integer.h, rational.h, complex*.h |
+| 1.5 | Arithmetic | 0 | 3 | ~1 | ~4 | add.h, mul.h, pow.h |
+| 1.6 | Constants | 0 | 6 | ~4 | ~10 | constants.h |
+| 1.7 | Substitution | 0 | 1 | ~2 | ~3 | subs.h |
+| 1.8 | Evaluation | 0 | 1 | ~2 | ~3 | eval*.h |
 | **2** | **Essential Functions** | | | | | |
 | 2 | Functions | 0 | 0 | ~50 | ~50 | functions.h |
 | 2 | Calculus | 0 | 3 | ~7 | ~10 | derivative.h, series.h |
@@ -642,7 +646,7 @@ symengine/llvm_double.h            → LLVM JIT compilation (optional)
 | 5 | Codegen | 0 | 0 | ~5 | ~5 | printers/codegen.h |
 | 5 | Parsing | 0 | 0 | ~3 | ~3 | parser/ |
 | 5 | Lambda/CSE | 0 | 0 | ~3 | ~3 | lambda_double.h, llvm_double.h |
-| **Total** | | **0** | **51** | **~217** | **~268** | **65 main headers + subdirs** |
+| **Total** | | **~15** | **48** | **~205** | **~268** | **65 main headers + subdirs** |
 
 ---
 

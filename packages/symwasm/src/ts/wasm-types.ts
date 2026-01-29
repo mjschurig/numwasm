@@ -85,6 +85,15 @@ export interface SymwasmModule extends EmscriptenModule {
 
   // === String Conversion ===
   _basic_str(ptr: number): number; // Returns char* (must be freed)
+
+  // === Free Symbols Extraction ===
+  _basic_free_symbols(self: number, symbols: number): number; // Returns exception code
+
+  // === Set Container Operations (CSetBasic) ===
+  _setbasic_new(): number; // Returns CSetBasic*
+  _setbasic_free(self: number): void;
+  _setbasic_get(self: number, n: number, result: number): void; // Gets nth element into result
+  _setbasic_size(self: number): number; // Returns size_t
 }
 
 /**

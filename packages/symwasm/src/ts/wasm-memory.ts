@@ -184,3 +184,80 @@ export function withTempString<T>(str: string, operation: (ptr: number) => T): T
     freeString(ptr);
   }
 }
+
+/**
+ * Wrapper class for SymEngine CSetBasic container
+ * Used for operations that return sets of Basic objects (e.g., free_symbols)
+ */
+export class SymEngineSet {
+  private ptr: number;
+
+  constructor() {
+    const wasm = getWasmModule();
+    this.ptr = wasm._setbasic_new();
+  }
+
+  /**
+   * Get the WASM pointer to this set
+   */
+  getPtr(): number {
+    return this.ptr;
+  }
+
+  /**
+   * Check if this set has been freed
+   */
+  isValid(): boolean {
+    return this.ptr !== 0;
+  }
+
+  /**
+   * Free the WASM memory for this set
+   */
+  free(): void {
+    if (this.ptr) {
+      const wasm = getWasmModule();
+      wasm._setbasic_free(this.ptr);
+      this.ptr = 0;
+    }
+  }
+
+  /**
+   * Get the number of elements in this set
+   */
+  size(): number {
+    if (!this.isValid()) {
+      throw new Error('Cannot get size of freed SymEngineSet');
+    }
+    const wasm = getWasmModule();
+    return wasm._setbasic_size(this.ptr);
+  }
+
+  /**
+   * Get the nth element from the set
+   * @param n Index (0-based)
+   * @returns A new SymEngineObject containing the element
+   */
+  get(n: number): SymEngineObject {
+    if (!this.isValid()) {
+      throw new Error('Cannot get element from freed SymEngineSet');
+    }
+    const wasm = getWasmModule();
+    const resultPtr = wasm._basic_new_stack();
+    wasm._setbasic_get(this.ptr, n, resultPtr);
+    return new SymEngineObject(resultPtr);
+  }
+
+  /**
+   * Convert the set to an array of SymEngineObjects
+   * Note: The caller is responsible for freeing the returned objects
+   */
+  toArray(): SymEngineObject[] {
+    const count = this.size();
+    const result: SymEngineObject[] = [];
+    for (let i = 0; i < count; i++) {
+      result.push(this.get(i));
+    }
+    return result;
+  }
+}

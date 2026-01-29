@@ -5,9 +5,14 @@
 
 import { NotImplementedError } from '../errors.js';
 import { loadWasmModule, getWasmModule } from '../wasm-loader.js';
+import { SymEngineObject, SymEngineSet, checkException } from '../wasm-memory.js';
+import { SymEngineTypeID } from '../wasm-types.js';
 
 // Export WASM initialization for users
 export { loadWasmModule };
+
+// Re-export type ID enum for users
+export { SymEngineTypeID };
 
 // Internal WASM access helper
 export function getWasm() {
@@ -17,10 +22,49 @@ export function getWasm() {
 /**
  * Base class for all symbolic expressions.
  * All symbolic objects (symbols, numbers, operations) extend this class.
+ *
+ * Expressions are backed by SymEngine WASM objects. The _obj field holds
+ * the pointer wrapper; it may be null for sentinel constants (pi, E, etc.)
+ * that aren't yet fully backed by WASM.
  */
 export abstract class Expr {
-  /** String representation of this expression. */
-  abstract toString(): string;
+  /** @internal WASM pointer wrapper - null for sentinel constants */
+  protected _obj: SymEngineObject | null = null;
+
+  /**
+   * @internal Get the underlying WASM pointer
+   * @throws Error if not backed by WASM object
+   */
+  protected getWasmPtr(): number {
+    if (!this._obj) {
+      throw new Error('Expr not backed by WASM object');
+    }
+    return this._obj.getPtr();
+  }
+
+  /**
+   * @internal Check if this expression is backed by a WASM object
+   */
+  protected hasWasmBacking(): boolean {
+    return this._obj !== null && this._obj.isValid();
+  }
+
+  /**
+   * String representation of this expression.
+   * Uses WASM _basic_str if available, otherwise falls back to subclass implementation.
+   */
+  toString(): string {
+    if (this._obj && this._obj.isValid()) {
+      return this._obj.toString();
+    }
+    return this._fallbackString();
+  }
+
+  /**
+   * @internal Fallback string representation for subclasses
+   * Used when WASM object is not available
+   */
+  protected abstract _fallbackString(): string;
 
   /** Substitute a symbol with another expression. */
   subs(_old: Expr, _new: Expr): Expr {
@@ -32,14 +76,79 @@ export abstract class Expr {
     throw new NotImplementedError('symwasm.core.Expr.evalf');
   }
 
-  /** Check structural equality with another expression. */
-  equals(_other: Expr): boolean {
-    throw new NotImplementedError('symwasm.core.Expr.equals');
+  /**
+   * Check structural equality with another expression.
+   * Two expressions are equal if they have the same mathematical structure.
+   */
+  equals(other: Expr): boolean {
+    // If both have WASM backing, use WASM comparison
+    if (this._obj && other._obj) {
+      return this._obj.equals(other._obj);
+    }
+    // For sentinel constants without WASM backing, use reference equality
+    return this === other;
   }
 
-  /** Return free symbols in this expression. */
+  /**
+   * Get the hash code for this expression.
+   * Equal expressions will have equal hash codes.
+   * @throws Error if not backed by WASM object
+   */
+  hash(): number {
+    if (!this._obj) {
+      throw new Error('Cannot hash expression not backed by WASM object');
+    }
+    return this._obj.hash();
+  }
+
+  /**
+   * Get the SymEngine type ID for this expression.
+   * @throws Error if not backed by WASM object
+   */
+  get_type(): SymEngineTypeID {
+    if (!this._obj) {
+      throw new Error('Cannot get type of expression not backed by WASM object');
+    }
+    return this._obj.getType() as SymEngineTypeID;
+  }
+
+  /**
+   * Return free symbols in this expression.
+   * A free symbol is a Symbol that appears in the expression.
+   */
   free_symbols(): Symbol[] {
-    throw new NotImplementedError('symwasm.core.Expr.free_symbols');
+    // No WASM backing means no symbols (e.g., sentinel constants)
+    if (!this._obj || !this._obj.isValid()) {
+      return [];
+    }
+
+    const wasm = getWasmModule();
+    const set = new SymEngineSet();
+    try {
+      const code = wasm._basic_free_symbols(this._obj.getPtr(), set.getPtr());
+      checkException(code);
+
+      const symbols: Symbol[] = [];
+      const count = set.size();
+      for (let i = 0; i < count; i++) {
+        const obj = set.get(i);
+        symbols.push(Symbol._fromWasm(obj));
+      }
+      return symbols;
+    } finally {
+      set.free();
+    }
+  }
+
+  /**
+   * Free the underlying WASM memory.
+   * After calling this, the expression becomes invalid.
+   */
+  free(): void {
+    if (this._obj) {
+      this._obj.free();
+      this._obj = null;
+    }
   }
 }
 
@@ -56,8 +165,20 @@ export class Symbol extends Expr {
     throw new NotImplementedError('symwasm.core.Symbol');
   }
 
-  toString(): string {
+  protected _fallbackString(): string {
     return this.name;
+  }
+
+  /**
+   * @internal Create a Symbol from an existing WASM object.
+   * Used by free_symbols() and other methods that return symbols.
+   */
+  static _fromWasm(obj: SymEngineObject): Symbol {
+    // Use Object.create to bypass the constructor (which throws)
+    const sym = Object.create(Symbol.prototype) as Symbol;
+    (sym as any)._obj = obj;
+    (sym as any).name = obj.toString();
+    return sym;
   }
 }
 
@@ -79,7 +200,7 @@ export class Integer extends Expr {
     throw new NotImplementedError('symwasm.core.Integer');
   }
 
-  toString(): string {
+  protected _fallbackString(): string {
     return String(this.value);
   }
 }
@@ -96,7 +217,7 @@ export class Rational extends Expr {
     throw new NotImplementedError('symwasm.core.Rational');
   }
 
-  toString(): string {
+  protected _fallbackString(): string {
     return this.p + "/" + this.q;
   }
 }
@@ -111,44 +232,82 @@ export class Float extends Expr {
     throw new NotImplementedError('symwasm.core.Float');
   }
 
-  toString(): string {
+  protected _fallbackString(): string {
     return String(this.value);
   }
 }
 
 /** Symbolic addition. Mirrors sympy.Add. */
 export class Add extends Expr {
-  constructor(readonly args: Expr[]) {
+  readonly args: Expr[];
+
+  constructor(args: Expr[]) {
     super();
+    this.args = args;
     throw new NotImplementedError('symwasm.core.Add');
   }
 
-  toString(): string {
+  protected _fallbackString(): string {
     return this.args.map(a => a.toString()).join(' + ');
   }
 }
 
 /** Symbolic multiplication. Mirrors sympy.Mul. */
 export class Mul extends Expr {
-  constructor(readonly args: Expr[]) {
+  readonly args: Expr[];
+
+  constructor(args: Expr[]) {
     super();
+    this.args = args;
     throw new NotImplementedError('symwasm.core.Mul');
   }
 
-  toString(): string {
+  protected _fallbackString(): string {
     return this.args.map(a => a.toString()).join('*');
   }
 }
 
 /** Symbolic exponentiation. Mirrors sympy.Pow. */
 export class Pow extends Expr {
-  constructor(readonly base: Expr, readonly exp: Expr) {
+  readonly base: Expr;
+  readonly exp: Expr;
+
+  constructor(base: Expr, exp: Expr) {
     super();
+    this.base = base;
+    this.exp = exp;
     throw new NotImplementedError('symwasm.core.Pow');
   }
 
-  toString(): string {
+  protected _fallbackString(): string {
     return this.base + '**' + this.exp;
+  }
+}
+
+/**
+ * @internal A sentinel expression for constants like pi, E, I, oo.
+ * These are placeholder expressions without full WASM backing.
+ */
+class SentinelExpr extends Expr {
+  private readonly _name: string;
+
+  constructor(name: string) {
+    super();
+    this._name = name;
+  }
+
+  protected _fallbackString(): string {
+    return this._name;
+  }
+
+  // Override to return empty array (no free symbols in constants)
+  free_symbols(): Symbol[] {
+    return [];
+  }
+
+  // Override equals to use reference equality for sentinels
+  equals(other: Expr): boolean {
+    return this === other;
   }
 }
 
@@ -172,13 +331,13 @@ export const S = {
 };
 
 /** Positive infinity. */
-export const oo: Expr = Object.freeze({ toString: () => 'oo' }) as unknown as Expr;
+export const oo: Expr = new SentinelExpr('oo');
 
 /** Pi (π). */
-export const pi: Expr = Object.freeze({ toString: () => 'pi' }) as unknown as Expr;
+export const pi: Expr = new SentinelExpr('pi');
 
 /** Euler's number (e). */
-export const E: Expr = Object.freeze({ toString: () => 'E' }) as unknown as Expr;
+export const E: Expr = new SentinelExpr('E');
 
 /** Imaginary unit (i). */
-export const I: Expr = Object.freeze({ toString: () => 'I' }) as unknown as Expr;
+export const I: Expr = new SentinelExpr('I');
