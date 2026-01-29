@@ -4,6 +4,15 @@
  */
 
 import { NotImplementedError } from '../errors.js';
+import { loadWasmModule, getWasmModule } from '../wasm-loader.js';
+
+// Export WASM initialization for users
+export { loadWasmModule };
+
+// Internal WASM access helper
+export function getWasm() {
+  return getWasmModule();
+}
 
 /**
  * Base class for all symbolic expressions.

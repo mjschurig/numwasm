@@ -19,9 +19,14 @@
     }
   },
   "scripts": {
-    "build": "vite build",
+    "copy:symengine": "./scripts/copy-symengine.sh",
+    "prebuild:wasm": "pnpm run copy:symengine",
+    "build:wasm": "./scripts/build-wasm.sh",
+    "build:lib": "vite build",
+    "build": "pnpm run build:wasm && pnpm run build:lib",
     "test": "vitest run",
-    "clean": "rm -rf dist/",
+    "clean": "rm -rf dist/ .build-wasm/",
+    "clean:all": "pnpm run clean && rm -rf src/wasm/symengine/",
     "docs": "typedoc",
     "lint": "eslint src tests --ext .ts"
   },

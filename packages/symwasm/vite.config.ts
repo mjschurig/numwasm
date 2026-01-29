@@ -18,6 +18,7 @@ export default defineConfig({
       fileName: (format) => `symwasm.${format === 'es' ? 'mjs' : 'cjs'}`,
     },
     outDir: 'dist',
+    emptyOutDir: false, // Don't delete WASM files built by build-wasm.sh
     rollupOptions: {
       external: ['module', 'path', 'url', 'fs'],
     },
