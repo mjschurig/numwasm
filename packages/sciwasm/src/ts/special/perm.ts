@@ -84,8 +84,8 @@ export async function perm(
   }
 
   // Array mode: apply element-wise
-  const NArray = N instanceof NDArray ? N : await NDArray.array([N]);
-  const kArray = k instanceof NDArray ? k : await NDArray.array([k]);
+  const NArray = N instanceof NDArray ? N : await NDArray.fromArray([N]);
+  const kArray = k instanceof NDArray ? k : await NDArray.fromArray([k]);
 
   return elementWise(NArray, kArray, (n, k_val) => {
     const wasm = getWasmModule();

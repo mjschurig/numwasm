@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:benchmark:*)",
+      "Bash(node:*)",
+      "Bash(npm run build:lib:*)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(xargs:*)",
+      "Bash(grep:*)",
+      "Bash(npm run build:wasm:*)",
+      "Bash(npm run build:ts:*)",
+      "Bash(npm run build:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(npx tsc:*)",
+      "Bash(tsc:*)",
+      "Bash(pnpm run build:*)",
+      "Bash(npm run test:browser:*)",
+      "Bash(pnpm run test:browser:*)",
+      "Bash(git stash:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(npx tsx:*)",
+      "Bash(git -C /workspace show HEAD:packages/sciwasm/src/ts/optimize/index.ts)",
+      "Bash(git -C /workspace show HEAD:packages/sciwasm/src/ts/constants/index.ts)",
+      "Bash(git -C /workspace show HEAD:packages/sciwasm/src/ts/errors.ts)",
+      "Bash(git -C /workspace show d468b2f:packages/sciwasm/src/ts/interpolate/index.ts)",
+      "Bash(git -C /workspace show d468b2f:packages/sciwasm/src/ts/errors.ts)",
+      "Bash(git -C:*)",
+      "Bash(git -C /workspace log --all --full-history --oneline -- \"packages/sciwasm/src/ts/*\")",
+      "Bash(git -C /workspace show HEAD:packages/sciwasm/)",
+      "Bash(git -C /workspace log --oneline packages/sciwasm/)",
+      "Bash(git -C /workspace show d468b2f:packages/sciwasm/)",
+      "Bash(git -C /workspace log --all --oneline)",
+      "Bash(pnpm run build:wasm:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm run build:lib:*)"
+    ]
+  }
+}

@@ -103,8 +103,8 @@ export async function comb(
         return wasm._wasm_binom(nVal + kVal - 1, kVal);
       } else {
         // Array case: apply element-wise
-        const NArray = N instanceof NDArray ? N : await NDArray.array([N]);
-        const kArray = k instanceof NDArray ? k : await NDArray.array([k]);
+        const NArray = N instanceof NDArray ? N : await NDArray.fromArray([N]);
+        const kArray = k instanceof NDArray ? k : await NDArray.fromArray([k]);
 
         return elementWise(NArray, kArray, (n, k_val) => {
           if (k_val === 0 && n >= 0) return 1.0;
@@ -138,8 +138,8 @@ export async function comb(
   }
 
   // Array mode: apply element-wise
-  const NArray = N instanceof NDArray ? N : await NDArray.array([N]);
-  const kArray = k instanceof NDArray ? k : await NDArray.array([k]);
+  const NArray = N instanceof NDArray ? N : await NDArray.fromArray([N]);
+  const kArray = k instanceof NDArray ? k : await NDArray.fromArray([k]);
 
   return elementWise(NArray, kArray, (n, k_val) => {
     const wasm = getWasmModule();

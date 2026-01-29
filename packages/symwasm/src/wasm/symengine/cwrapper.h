@@ -265,6 +265,16 @@ int basic_neq(const basic a, const basic b);
 
 //! Expands the expr a and assigns to s.
 CWRAPPER_OUTPUT_TYPE basic_expand(basic s, const basic a);
+//! Simplifies the expr a using heuristics and assigns to s.
+CWRAPPER_OUTPUT_TYPE basic_simplify(basic s, const basic a);
+//! Rewrites trig functions as exponentials using Euler's formula.
+CWRAPPER_OUTPUT_TYPE basic_rewrite_as_exp(basic s, const basic a);
+//! Rewrites trig functions in terms of sine.
+CWRAPPER_OUTPUT_TYPE basic_rewrite_as_sin(basic s, const basic a);
+//! Rewrites trig functions in terms of cosine.
+CWRAPPER_OUTPUT_TYPE basic_rewrite_as_cos(basic s, const basic a);
+//! Extracts real and imaginary parts of a complex expression.
+CWRAPPER_OUTPUT_TYPE basic_as_real_imag(basic real, basic imag, const basic x);
 //! Assigns s = -a.
 CWRAPPER_OUTPUT_TYPE basic_neg(basic s, const basic a);
 
@@ -356,6 +366,14 @@ CWRAPPER_OUTPUT_TYPE basic_floor(basic s, const basic a);
 CWRAPPER_OUTPUT_TYPE basic_ceiling(basic s, const basic a);
 //! Assigns s = sign(a).
 CWRAPPER_OUTPUT_TYPE basic_sign(basic s, const basic a);
+//! Assigns s = digamma(a).
+CWRAPPER_OUTPUT_TYPE basic_digamma(basic s, const basic a);
+//! Assigns s = conjugate(a).
+CWRAPPER_OUTPUT_TYPE basic_conjugate(basic s, const basic a);
+
+//! Compute Taylor series expansion of expr around var=0 with prec terms.
+//! Assigns the result (as a polynomial Basic) to s.
+CWRAPPER_OUTPUT_TYPE basic_series(basic s, const basic expr, const basic var, unsigned int prec);
 
 //! Assigns s = atan2(a, b).
 CWRAPPER_OUTPUT_TYPE basic_atan2(basic s, const basic a, const basic b);

@@ -69,12 +69,12 @@ export async function elementWise(
   fn: (n: number, k: number) => number
 ): Promise<NDArray> {
   // Ensure both are NDArrays
-  const NArray = N instanceof NDArray ? N : await NDArray.array(N);
-  const kArray = k instanceof NDArray ? k : await NDArray.array(k);
+  const NArray = N instanceof NDArray ? N : await NDArray.fromArray(N);
+  const kArray = k instanceof NDArray ? k : await NDArray.fromArray(k);
 
-  // Get data as typed arrays
-  const nData = await NArray.getData();
-  const kData = await kArray.getData();
+  // Get data as arrays
+  const nData = NArray.toArray() as number[];
+  const kData = kArray.toArray() as number[];
 
   // Broadcast shapes if needed (for now, assume compatible shapes)
   const size = Math.max(nData.length, kData.length);
@@ -87,5 +87,5 @@ export async function elementWise(
   }
 
   // Create result array with same shape as input (or broadcast shape)
-  return NDArray.array(Array.from(result));
+  return NDArray.fromArray(Array.from(result));
 }

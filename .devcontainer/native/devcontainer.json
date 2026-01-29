@@ -27,7 +27,7 @@
     },
     "ghcr.io/ebaskoro/devcontainer-features/emscripten:1": {}
   },
-  "postCreateCommand": "pip install numpy && pnpm install",
+  "postCreateCommand": "bash .devcontainer/setup.sh",
   "mounts": [
     "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind,consistency=cached",
     "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind,consistency=cached",

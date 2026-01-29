@@ -1,5 +1,6 @@
 #include "ckdtree_decl.h"
 
+#include <cassert>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -20,14 +21,14 @@ using std::isinf;
 #define tree_buffer_root(buf) (&(buf)[0][0])
 
 static ckdtree_intp_t
-build(ckdtree *self, ckdtree_intp_t start_idx, intptr_t end_idx,
+build(ckdtree *self, ckdtree_intp_t start_idx, ckdtree_intp_t end_idx,
       double *maxes, double *mins,
       const int _median, const int _compact)
 {
 
     const ckdtree_intp_t m = self->m;
     const double *data = self->raw_data;
-    ckdtree_intp_t *indices = (intptr_t *)(self->raw_indices);
+    ckdtree_intp_t *indices = self->raw_indices;
 
     ckdtreenode new_node = {}, *n, *root;
     ckdtree_intp_t node_index, _less, _greater;
@@ -197,7 +198,7 @@ build(ckdtree *self, ckdtree_intp_t start_idx, intptr_t end_idx,
 
 
 
-int build_ckdtree(ckdtree *self, ckdtree_intp_t start_idx, intptr_t end_idx,
+int build_ckdtree(ckdtree *self, ckdtree_intp_t start_idx, ckdtree_intp_t end_idx,
               double *maxes, double *mins, int _median, int _compact)
 
 {
@@ -212,7 +213,7 @@ add_weights(ckdtree *self,
            double *weights)
 {
 
-    ckdtree_intp_t *indices = (intptr_t *)(self->raw_indices);
+    ckdtree_intp_t *indices = self->raw_indices;
 
     ckdtreenode *n, *root;
 

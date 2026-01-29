@@ -955,9 +955,9 @@ class GenericExpr extends Expr {
 
 /**
  * Create an Expr subclass instance from a WASM object based on its type.
- * @internal
+ * Used internally and by the matrices module to convert WASM basic pointers to Expr.
  */
-function exprFromWasm(obj: SymEngineObject): Expr {
+export function exprFromWasm(obj: SymEngineObject): Expr {
   const typeId = obj.getType();
   switch (typeId) {
     case SymEngineTypeID.SYMENGINE_INTEGER:
@@ -1123,6 +1123,632 @@ export function neg(a: Expr): Expr {
   const code = wasm._basic_neg(obj.getPtr(), a.getWasmPtr());
   checkException(code);
   return exprFromWasm(obj);
+}
+
+// ============================================================================
+// Elementary Function Factories
+// ============================================================================
+
+/**
+ * Internal helper to create a 1-argument function wrapper.
+ * @internal
+ */
+function makeOneArgFunc(
+  wasmFnName: keyof ReturnType<typeof getWasmModule>
+): (x: Expr) => Expr {
+  return (x: Expr): Expr => {
+    const wasm = getWasmModule();
+    const obj = createBasic();
+    try {
+      const fn = wasm[wasmFnName] as (result: number, arg: number) => number;
+      const code = fn.call(wasm, obj.getPtr(), x.getWasmPtr());
+      checkException(code);
+      return exprFromWasm(obj);
+    } catch (e) {
+      obj.free();
+      throw e;
+    }
+  };
+}
+
+/**
+ * Internal helper to create a 2-argument function wrapper.
+ * @internal
+ */
+function makeTwoArgFunc(
+  wasmFnName: keyof ReturnType<typeof getWasmModule>
+): (a: Expr, b: Expr) => Expr {
+  return (a: Expr, b: Expr): Expr => {
+    const wasm = getWasmModule();
+    const obj = createBasic();
+    try {
+      const fn = wasm[wasmFnName] as (
+        result: number,
+        arg1: number,
+        arg2: number
+      ) => number;
+      const code = fn.call(wasm, obj.getPtr(), a.getWasmPtr(), b.getWasmPtr());
+      checkException(code);
+      return exprFromWasm(obj);
+    } catch (e) {
+      obj.free();
+      throw e;
+    }
+  };
+}
+
+// ============================================================================
+// Trigonometric Functions
+// ============================================================================
+
+/** Sine: sin(x) */
+export const sin = makeOneArgFunc('_basic_sin');
+/** Cosine: cos(x) */
+export const cos = makeOneArgFunc('_basic_cos');
+/** Tangent: tan(x) */
+export const tan = makeOneArgFunc('_basic_tan');
+/** Cotangent: cot(x) = 1/tan(x) */
+export const cot = makeOneArgFunc('_basic_cot');
+/** Secant: sec(x) = 1/cos(x) */
+export const sec = makeOneArgFunc('_basic_sec');
+/** Cosecant: csc(x) = 1/sin(x) */
+export const csc = makeOneArgFunc('_basic_csc');
+
+// ============================================================================
+// Inverse Trigonometric Functions
+// ============================================================================
+
+/** Arcsine: asin(x) */
+export const asin = makeOneArgFunc('_basic_asin');
+/** Arccosine: acos(x) */
+export const acos = makeOneArgFunc('_basic_acos');
+/** Arctangent: atan(x) */
+export const atan = makeOneArgFunc('_basic_atan');
+/** Arc-cotangent: acot(x) */
+export const acot = makeOneArgFunc('_basic_acot');
+/** Arc-secant: asec(x) */
+export const asec = makeOneArgFunc('_basic_asec');
+/** Arc-cosecant: acsc(x) */
+export const acsc = makeOneArgFunc('_basic_acsc');
+/** Two-argument arctangent: atan2(y, x) */
+export const atan2 = makeTwoArgFunc('_basic_atan2');
+
+// ============================================================================
+// Hyperbolic Functions
+// ============================================================================
+
+/** Hyperbolic sine: sinh(x) */
+export const sinh = makeOneArgFunc('_basic_sinh');
+/** Hyperbolic cosine: cosh(x) */
+export const cosh = makeOneArgFunc('_basic_cosh');
+/** Hyperbolic tangent: tanh(x) */
+export const tanh = makeOneArgFunc('_basic_tanh');
+/** Hyperbolic cotangent: coth(x) */
+export const coth = makeOneArgFunc('_basic_coth');
+/** Hyperbolic secant: sech(x) */
+export const sech = makeOneArgFunc('_basic_sech');
+/** Hyperbolic cosecant: csch(x) */
+export const csch = makeOneArgFunc('_basic_csch');
+
+// ============================================================================
+// Inverse Hyperbolic Functions
+// ============================================================================
+
+/** Inverse hyperbolic sine: asinh(x) */
+export const asinh = makeOneArgFunc('_basic_asinh');
+/** Inverse hyperbolic cosine: acosh(x) */
+export const acosh = makeOneArgFunc('_basic_acosh');
+/** Inverse hyperbolic tangent: atanh(x) */
+export const atanh = makeOneArgFunc('_basic_atanh');
+/** Inverse hyperbolic cotangent: acoth(x) */
+export const acoth = makeOneArgFunc('_basic_acoth');
+/** Inverse hyperbolic secant: asech(x) */
+export const asech = makeOneArgFunc('_basic_asech');
+/** Inverse hyperbolic cosecant: acsch(x) */
+export const acsch = makeOneArgFunc('_basic_acsch');
+
+// ============================================================================
+// Exponential & Logarithmic Functions
+// ============================================================================
+
+/** Exponential: exp(x) = e^x */
+export const exp = makeOneArgFunc('_basic_exp');
+/** Natural logarithm: log(x) = ln(x) */
+export const log = makeOneArgFunc('_basic_log');
+/** Square root: sqrt(x) */
+export const sqrt = makeOneArgFunc('_basic_sqrt');
+/** Cube root: cbrt(x) */
+export const cbrt = makeOneArgFunc('_basic_cbrt');
+/** Lambert W function: lambertw(x) (principal branch) */
+export const lambertw = makeOneArgFunc('_basic_lambertw');
+
+// ============================================================================
+// Other Mathematical Functions
+// ============================================================================
+
+/** Absolute value: abs(x) */
+export const abs = makeOneArgFunc('_basic_abs');
+/** Sign function: sign(x) returns -1, 0, or 1 */
+export const sign = makeOneArgFunc('_basic_sign');
+/** Floor function: floor(x) = largest integer ≤ x */
+export const floor = makeOneArgFunc('_basic_floor');
+/** Ceiling function: ceiling(x) = smallest integer ≥ x */
+export const ceiling = makeOneArgFunc('_basic_ceiling');
+
+// ============================================================================
+// Special Functions
+// ============================================================================
+
+/** Gamma function: gamma(x) = Γ(x) = (x-1)! for positive integers */
+export const gamma = makeOneArgFunc('_basic_gamma');
+/** Log-gamma function: loggamma(x) = log(Γ(x)) */
+export const loggamma = makeOneArgFunc('_basic_loggamma');
+/** Error function: erf(x) */
+export const erf = makeOneArgFunc('_basic_erf');
+/** Complementary error function: erfc(x) = 1 - erf(x) */
+export const erfc = makeOneArgFunc('_basic_erfc');
+/** Riemann zeta function: zeta(s) */
+export const zeta = makeOneArgFunc('_basic_zeta');
+/** Dirichlet eta function: dirichlet_eta(s) */
+export const dirichlet_eta = makeOneArgFunc('_basic_dirichlet_eta');
+/** Beta function: beta(a, b) = Γ(a)Γ(b)/Γ(a+b) */
+export const beta = makeTwoArgFunc('_basic_beta');
+/** Lower incomplete gamma: lowergamma(s, x) = γ(s, x) */
+export const lowergamma = makeTwoArgFunc('_basic_lowergamma');
+/** Upper incomplete gamma: uppergamma(s, x) = Γ(s, x) */
+export const uppergamma = makeTwoArgFunc('_basic_uppergamma');
+/** Polygamma function: polygamma(n, x) = ψ^(n)(x) */
+export const polygamma = makeTwoArgFunc('_basic_polygamma');
+/** Kronecker delta: kronecker_delta(i, j) = 1 if i=j, else 0 */
+export const kronecker_delta = makeTwoArgFunc('_basic_kronecker_delta');
+
+// ============================================================================
+// Additional Functions (Phase 2.1b)
+// ============================================================================
+
+/** Digamma function: digamma(x) = ψ(x) = d/dx ln(Γ(x)) */
+export const digamma = makeOneArgFunc('_basic_digamma');
+
+/** Complex conjugate: conjugate(a + bi) = a - bi */
+export const conjugate = makeOneArgFunc('_basic_conjugate');
+
+/** Real part: re(x) extracts the real component of a complex expression */
+export function re(x: Expr): Expr {
+  const wasm = getWasmModule();
+  const obj = createBasic();
+  try {
+    const code = wasm._complex_base_real_part(obj.getPtr(), x.getWasmPtr());
+    checkException(code);
+    return exprFromWasm(obj);
+  } catch (e) {
+    obj.free();
+    throw e;
+  }
+}
+
+/** Imaginary part: im(x) extracts the imaginary component of a complex expression */
+export function im(x: Expr): Expr {
+  const wasm = getWasmModule();
+  const obj = createBasic();
+  try {
+    const code = wasm._complex_base_imaginary_part(obj.getPtr(), x.getWasmPtr());
+    checkException(code);
+    return exprFromWasm(obj);
+  } catch (e) {
+    obj.free();
+    throw e;
+  }
+}
+
+/** Argument (phase) of complex number: arg(x) = atan2(im(x), re(x)) */
+export function arg(x: Expr): Expr {
+  return atan2(im(x), re(x));
+}
+
+/** Maximum of multiple values: Max(a, b, c, ...) */
+export function Max(...args: Expr[]): Expr {
+  const wasm = getWasmModule();
+  const vec = new SymEngineVec();
+  const result = createBasic();
+
+  try {
+    for (const a of args) {
+      wasm._vecbasic_push_back(vec.getPtr(), a.getWasmPtr());
+    }
+    const code = wasm._basic_max(result.getPtr(), vec.getPtr());
+    checkException(code);
+    return exprFromWasm(result);
+  } catch (e) {
+    result.free();
+    throw e;
+  } finally {
+    vec.free();
+  }
+}
+
+/** Minimum of multiple values: Min(a, b, c, ...) */
+export function Min(...args: Expr[]): Expr {
+  const wasm = getWasmModule();
+  const vec = new SymEngineVec();
+  const result = createBasic();
+
+  try {
+    for (const a of args) {
+      wasm._vecbasic_push_back(vec.getPtr(), a.getWasmPtr());
+    }
+    const code = wasm._basic_min(result.getPtr(), vec.getPtr());
+    checkException(code);
+    return exprFromWasm(result);
+  } catch (e) {
+    result.free();
+    throw e;
+  } finally {
+    vec.free();
+  }
+}
+
+// ============================================================================
+// Calculus Functions (Phase 2.2)
+// ============================================================================
+
+/**
+ * Differentiate an expression with respect to one or more symbols.
+ *
+ * Supports multiple calling conventions:
+ * - `diff(expr, x)` — First derivative with respect to x
+ * - `diff(expr, x, 2)` — Second derivative with respect to x
+ * - `diff(expr, x, y)` — Mixed partial: ∂²f/∂x∂y
+ * - `diff(expr, x, y, z)` — Mixed partial: ∂³f/∂x∂y∂z
+ * - `diff(expr, x, 2, y, 3)` — ∂⁵f/∂x²∂y³
+ *
+ * @param expr The expression to differentiate
+ * @param args Symbols and optional derivative orders
+ * @returns The derivative expression
+ *
+ * @example
+ * const [x, y] = symbols('x y');
+ * diff(pow(x, 3), x);           // → 3*x**2
+ * diff(sin(x), x);              // → cos(x)
+ * diff(pow(x, 3), x, 2);        // → 6*x (second derivative)
+ * diff(mul(x, y), x, y);        // → 1 (∂²(xy)/∂x∂y)
+ * diff(pow(x, 2), x, 2, y, 1);  // → 0 (no y dependence)
+ */
+export function diff(expr: Expr, ...args: (Expr | number)[]): Expr {
+  if (args.length === 0) {
+    throw new Error('diff() requires at least one symbol argument');
+  }
+
+  const wasm = getWasmModule();
+  let current = expr;
+
+  // Parse args: alternating [symbol, count?] pattern
+  // e.g., [x], [x, 2], [x, y], [x, 2, y, 3]
+  let i = 0;
+  while (i < args.length) {
+    const arg = args[i];
+
+    // Must be an Expr (symbol)
+    if (!(arg instanceof Expr)) {
+      throw new Error(
+        `diff() argument at position ${i + 1} must be a symbol, got number without preceding symbol`
+      );
+    }
+
+    const symbol = arg;
+    i++;
+
+    // Check if next argument is a number (derivative order)
+    let order = 1;
+    if (i < args.length && typeof args[i] === 'number') {
+      order = args[i] as number;
+      i++;
+    }
+
+    if (order < 0) {
+      throw new Error('Derivative order must be non-negative');
+    }
+
+    // Apply differentiation 'order' times with respect to 'symbol'
+    for (let j = 0; j < order; j++) {
+      const result = createBasic();
+      try {
+        const code = wasm._basic_diff(
+          result.getPtr(),
+          current.getWasmPtr(),
+          symbol.getWasmPtr()
+        );
+        checkException(code);
+        current = exprFromWasm(result);
+      } catch (e) {
+        result.free();
+        throw e;
+      }
+    }
+  }
+
+  return current;
+}
+
+/**
+ * Compute Taylor series expansion around x=0.
+ *
+ * @param expr The expression to expand
+ * @param x The expansion variable
+ * @param x0 The expansion point (currently only 0 is supported)
+ * @param n Number of terms (precision = n, so terms up to x^(n-1))
+ * @returns The series expansion as a polynomial (without O() term)
+ *
+ * @example
+ * series(sin(x), x);           // x - x³/6 + x⁵/120
+ * series(exp(x), x, 0, 4);     // 1 + x + x²/2 + x³/6
+ */
+export function series(
+  expr: Expr,
+  x: Expr,
+  x0: number | Expr = 0,
+  n: number = 6
+): Expr {
+  // Validate x0 = 0 (only supported case)
+  const x0Val = typeof x0 === 'number' ? x0 : null;
+  if (x0Val !== 0) {
+    throw new Error('series() currently only supports expansion around x=0');
+  }
+
+  const wasm = getWasmModule();
+  const result = createBasic();
+
+  try {
+    const code = wasm._basic_series(
+      result.getPtr(),
+      expr.getWasmPtr(),
+      x.getWasmPtr(),
+      n
+    );
+    checkException(code);
+    return exprFromWasm(result);
+  } catch (e) {
+    result.free();
+    throw e;
+  }
+}
+
+// ============================================================================
+// Simplification Functions (Phase 2.4)
+// ============================================================================
+
+/**
+ * Expand an expression by distributing multiplication over addition.
+ *
+ * @param expr The expression to expand
+ * @returns The expanded expression
+ *
+ * @example
+ * expand((x + 1)**2);         // x**2 + 2*x + 1
+ * expand((a + b) * (c + d));  // a*c + a*d + b*c + b*d
+ */
+export function expand(expr: Expr): Expr {
+  const wasm = getWasmModule();
+  const result = createBasic();
+
+  try {
+    const code = wasm._basic_expand(result.getPtr(), expr.getWasmPtr());
+    checkException(code);
+    return exprFromWasm(result);
+  } catch (e) {
+    result.free();
+    throw e;
+  }
+}
+
+/**
+ * Simplify an expression using heuristics.
+ *
+ * The simplification includes:
+ * - Converting csc(x)**(-1) to sin(x)
+ * - Converting sec(x)**(-1) to cos(x)
+ * - Converting cot(x)**(-1) to tan(x)
+ *
+ * @param expr The expression to simplify
+ * @returns The simplified expression
+ *
+ * @example
+ * simplify(csc(x)**(-1));  // sin(x)
+ * simplify(sec(x)**(-1));  // cos(x)
+ */
+export function simplify(expr: Expr): Expr {
+  const wasm = getWasmModule();
+  const result = createBasic();
+
+  try {
+    const code = wasm._basic_simplify(result.getPtr(), expr.getWasmPtr());
+    checkException(code);
+    return exprFromWasm(result);
+  } catch (e) {
+    result.free();
+    throw e;
+  }
+}
+
+/**
+ * Extract the numerator of an expression.
+ *
+ * @param expr The expression
+ * @returns The numerator
+ *
+ * @example
+ * numer(x / y);  // x
+ * numer(3);      // 3
+ * numer(Rational(3, 4));  // 3
+ */
+export function numer(expr: Expr): Expr {
+  const wasm = getWasmModule();
+  const numerResult = createBasic();
+  const denomResult = createBasic();
+
+  try {
+    const code = wasm._basic_as_numer_denom(
+      numerResult.getPtr(),
+      denomResult.getPtr(),
+      expr.getWasmPtr()
+    );
+    checkException(code);
+    denomResult.free();
+    return exprFromWasm(numerResult);
+  } catch (e) {
+    numerResult.free();
+    denomResult.free();
+    throw e;
+  }
+}
+
+/**
+ * Extract the denominator of an expression.
+ *
+ * @param expr The expression
+ * @returns The denominator
+ *
+ * @example
+ * denom(x / y);  // y
+ * denom(3);      // 1
+ * denom(Rational(3, 4));  // 4
+ */
+export function denom(expr: Expr): Expr {
+  const wasm = getWasmModule();
+  const numerResult = createBasic();
+  const denomResult = createBasic();
+
+  try {
+    const code = wasm._basic_as_numer_denom(
+      numerResult.getPtr(),
+      denomResult.getPtr(),
+      expr.getWasmPtr()
+    );
+    checkException(code);
+    numerResult.free();
+    return exprFromWasm(denomResult);
+  } catch (e) {
+    numerResult.free();
+    denomResult.free();
+    throw e;
+  }
+}
+
+/**
+ * Simplify trigonometric expressions.
+ * Currently uses general simplify() internally.
+ *
+ * @param expr The expression to simplify
+ * @returns The simplified expression
+ */
+export function trigsimp(expr: Expr): Expr {
+  return simplify(expr);
+}
+
+/**
+ * Simplify expressions with radicals.
+ * Currently uses general simplify() internally.
+ *
+ * @param expr The expression to simplify
+ * @returns The simplified expression
+ */
+export function radsimp(expr: Expr): Expr {
+  return simplify(expr);
+}
+
+/**
+ * Simplify combinatorial expressions with powers.
+ * Currently uses general simplify() internally.
+ *
+ * @param expr The expression to simplify
+ * @returns The simplified expression
+ */
+export function powsimp(expr: Expr): Expr {
+  return simplify(expr);
+}
+
+/**
+ * Rewrite trigonometric functions as exponentials using Euler's formula.
+ * sin(x) → (e^(ix) - e^(-ix)) / (2i)
+ * cos(x) → (e^(ix) + e^(-ix)) / 2
+ *
+ * @param expr The expression to rewrite
+ * @returns Expression with trig functions as exponentials
+ */
+export function rewrite_as_exp(expr: Expr): Expr {
+  const wasm = getWasmModule();
+  const result = createBasic();
+  checkException(wasm._basic_rewrite_as_exp(result.getPtr(), expr.getWasmPtr()));
+  return exprFromWasm(result);
+}
+
+/**
+ * Rewrite trigonometric functions in terms of sine.
+ * cos(x) → sin(x + π/2)
+ * tan(x) → sin(x) / sin(π/2 - x)
+ *
+ * @param expr The expression to rewrite
+ * @returns Expression with trig functions in terms of sine
+ */
+export function rewrite_as_sin(expr: Expr): Expr {
+  const wasm = getWasmModule();
+  const result = createBasic();
+  checkException(wasm._basic_rewrite_as_sin(result.getPtr(), expr.getWasmPtr()));
+  return exprFromWasm(result);
+}
+
+/**
+ * Rewrite trigonometric functions in terms of cosine.
+ * sin(x) → cos(π/2 - x)
+ * tan(x) → cos(π/2 - x) / cos(x)
+ *
+ * @param expr The expression to rewrite
+ * @returns Expression with trig functions in terms of cosine
+ */
+export function rewrite_as_cos(expr: Expr): Expr {
+  const wasm = getWasmModule();
+  const result = createBasic();
+  checkException(wasm._basic_rewrite_as_cos(result.getPtr(), expr.getWasmPtr()));
+  return exprFromWasm(result);
+}
+
+/**
+ * Extract real and imaginary parts of a complex expression.
+ * For x + iy, returns { real: x, imag: y }
+ *
+ * @param expr The expression to analyze
+ * @returns Object with real and imag Expr properties
+ */
+export function as_real_imag(expr: Expr): { real: Expr; imag: Expr } {
+  const wasm = getWasmModule();
+  const realResult = createBasic();
+  const imagResult = createBasic();
+  checkException(wasm._basic_as_real_imag(realResult.getPtr(), imagResult.getPtr(), expr.getWasmPtr()));
+  return {
+    real: exprFromWasm(realResult),
+    imag: exprFromWasm(imagResult),
+  };
+}
+
+/**
+ * Expand trigonometric functions.
+ * Applies rewrite_as_exp followed by expand.
+ *
+ * @param expr The expression to expand
+ * @returns Expression with expanded trig functions
+ */
+export function expand_trig(expr: Expr): Expr {
+  return expand(rewrite_as_exp(expr));
+}
+
+/**
+ * Expand complex expressions, extracting real and imaginary parts.
+ * Alias for as_real_imag.
+ *
+ * @param expr The expression to expand
+ * @returns Object with real and imag Expr properties
+ */
+export function expand_complex(expr: Expr): { real: Expr; imag: Expr } {
+  return as_real_imag(expr);
 }
 
 // Private cache for singleton constants (lazy initialization)

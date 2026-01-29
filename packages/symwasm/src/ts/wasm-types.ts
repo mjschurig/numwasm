@@ -111,6 +111,78 @@ export interface SymwasmModule extends EmscriptenModule {
   _basic_evalf(s: number, b: number, bits: number, real: number): number;
   _real_double_get_d(s: number): number;
 
+  // === Elementary Functions (1-argument) ===
+  _basic_sin(result: number, arg: number): number;
+  _basic_cos(result: number, arg: number): number;
+  _basic_tan(result: number, arg: number): number;
+  _basic_cot(result: number, arg: number): number;
+  _basic_sec(result: number, arg: number): number;
+  _basic_csc(result: number, arg: number): number;
+  _basic_asin(result: number, arg: number): number;
+  _basic_acos(result: number, arg: number): number;
+  _basic_atan(result: number, arg: number): number;
+  _basic_acot(result: number, arg: number): number;
+  _basic_asec(result: number, arg: number): number;
+  _basic_acsc(result: number, arg: number): number;
+  _basic_sinh(result: number, arg: number): number;
+  _basic_cosh(result: number, arg: number): number;
+  _basic_tanh(result: number, arg: number): number;
+  _basic_coth(result: number, arg: number): number;
+  _basic_sech(result: number, arg: number): number;
+  _basic_csch(result: number, arg: number): number;
+  _basic_asinh(result: number, arg: number): number;
+  _basic_acosh(result: number, arg: number): number;
+  _basic_atanh(result: number, arg: number): number;
+  _basic_acoth(result: number, arg: number): number;
+  _basic_asech(result: number, arg: number): number;
+  _basic_acsch(result: number, arg: number): number;
+  _basic_exp(result: number, arg: number): number;
+  _basic_log(result: number, arg: number): number;
+  _basic_sqrt(result: number, arg: number): number;
+  _basic_cbrt(result: number, arg: number): number;
+  _basic_lambertw(result: number, arg: number): number;
+  _basic_abs(result: number, arg: number): number;
+  _basic_sign(result: number, arg: number): number;
+  _basic_floor(result: number, arg: number): number;
+  _basic_ceiling(result: number, arg: number): number;
+  _basic_gamma(result: number, arg: number): number;
+  _basic_loggamma(result: number, arg: number): number;
+  _basic_erf(result: number, arg: number): number;
+  _basic_erfc(result: number, arg: number): number;
+  _basic_zeta(result: number, arg: number): number;
+  _basic_dirichlet_eta(result: number, arg: number): number;
+
+  // === Elementary Functions (2-argument) ===
+  _basic_atan2(result: number, y: number, x: number): number;
+  _basic_beta(result: number, a: number, b: number): number;
+  _basic_lowergamma(result: number, s: number, x: number): number;
+  _basic_uppergamma(result: number, s: number, x: number): number;
+  _basic_polygamma(result: number, n: number, x: number): number;
+  _basic_kronecker_delta(result: number, i: number, j: number): number;
+
+  // === Additional Functions (Phase 2.1b) ===
+  _basic_max(result: number, args: number): number; // args is CVecBasic*
+  _basic_min(result: number, args: number): number; // args is CVecBasic*
+  _complex_base_real_part(result: number, com: number): number;
+  _complex_base_imaginary_part(result: number, com: number): number;
+  _basic_digamma(result: number, arg: number): number;
+  _basic_conjugate(result: number, arg: number): number;
+
+  // === Calculus (Phase 2.2) ===
+  _basic_diff(result: number, expr: number, symbol: number): number;
+
+  // === Series Expansion (Phase 2.3) ===
+  _basic_series(result: number, expr: number, symbol: number, prec: number): number;
+
+  // === Simplification (Phase 2.4) ===
+  _basic_expand(result: number, a: number): number;
+  _basic_simplify(result: number, a: number): number;
+  _basic_as_numer_denom(numer: number, denom: number, x: number): number;
+  _basic_rewrite_as_exp(result: number, a: number): number;
+  _basic_rewrite_as_sin(result: number, a: number): number;
+  _basic_rewrite_as_cos(result: number, a: number): number;
+  _basic_as_real_imag(real: number, imag: number, x: number): number;
+
   // === Type Information ===
   _basic_get_type(ptr: number): number;
 
@@ -129,6 +201,22 @@ export interface SymwasmModule extends EmscriptenModule {
   _setbasic_free(self: number): void;
   _setbasic_get(self: number, n: number, result: number): void; // Gets nth element into result
   _setbasic_size(self: number): number; // Returns size_t
+
+  // === Dense Matrix Operations (Phase 3.1) ===
+  _dense_matrix_new(): number; // Returns CDenseMatrix*
+  _dense_matrix_new_rows_cols(r: number, c: number): number; // Returns CDenseMatrix*
+  _dense_matrix_new_vec(rows: number, cols: number, l: number): number; // Returns CDenseMatrix*, l is CVecBasic*
+  _dense_matrix_free(self: number): void;
+  _dense_matrix_rows(s: number): number;
+  _dense_matrix_cols(s: number): number;
+  _dense_matrix_str(s: number): number; // Returns char* (must be freed)
+  _dense_matrix_eq(lhs: number, rhs: number): number; // Returns 1 if equal
+  _dense_matrix_get_basic(s: number, mat: number, r: number, c: number): number;
+  _dense_matrix_set_basic(mat: number, r: number, c: number, s: number): number;
+  _dense_matrix_eye(s: number, N: number, M: number, k: number): number;
+  _dense_matrix_zeros(s: number, r: number, c: number): number;
+  _dense_matrix_ones(s: number, r: number, c: number): number;
+  _dense_matrix_diag(s: number, d: number, k: number): number; // d is CVecBasic*
 }
 
 /**

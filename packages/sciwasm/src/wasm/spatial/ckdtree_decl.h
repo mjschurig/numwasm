@@ -47,7 +47,7 @@ struct ckdtree {
 /* Build methods in C++ for better speed and GIL release */
 
 int
-build_ckdtree(ckdtree *self, ckdtree_intp_t start_idx, intptr_t end_idx,
+build_ckdtree(ckdtree *self, ckdtree_intp_t start_idx, ckdtree_intp_t end_idx,
               double *maxes, double *mins, int _median, int _compact);
 
 int

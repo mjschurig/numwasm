@@ -30,8 +30,9 @@ echo "Using Emscripten: $(emcc --version | head -1)"
 echo ""
 
 # Step 1: Compile C source files to .o
+# Note: QUADPACK is built separately via scripts/build-quadpack.sh
 C_OBJS=()
-for cfile in "$SRC_DIR/optimize/nelder_mead.c" "$SRC_DIR/optimize/bfgs.c" "$SRC_DIR/optimize/lbfgsb.c" "$SRC_DIR/optimize/blas_lite.c" "$SRC_DIR/quadpack.c" "$SRC_DIR/quadpack_wasm.c" "$SRC_DIR/special/comb.c"; do
+for cfile in "$SRC_DIR/optimize/nelder_mead.c" "$SRC_DIR/optimize/bfgs.c" "$SRC_DIR/optimize/lbfgsb.c" "$SRC_DIR/optimize/blas_lite.c" "$SRC_DIR/special/comb.c"; do
     if [ -f "$cfile" ]; then
         base=$(basename "$cfile" .c)
         obj="$OBJ_DIR/${base}.o"
@@ -53,17 +54,70 @@ for cppfile in "$SRC_DIR/sparsetools.cpp" "$SRC_DIR/spatial/build.cxx" "$SRC_DIR
     fi
 done
 
-ALL_OBJS=("${C_OBJS[@]}" "${CPP_OBJS[@]}")
+# Step 3: Compile SuperLU source files
+SUPERLU_SRC="$SRC_DIR/superlu/SRC"
+SUPERLU_CBLAS="$SRC_DIR/superlu/CBLAS"
+SUPERLU_OBJS=()
+
+if [ -d "$SUPERLU_SRC" ]; then
+    echo ""
+    echo "Compiling SuperLU..."
+    for cfile in "$SUPERLU_SRC"/*.c; do
+        if [ -f "$cfile" ]; then
+            base=$(basename "$cfile" .c)
+            obj="$OBJ_DIR/superlu_${base}.o"
+            echo "Compiling SuperLU: $(basename "$cfile")"
+            emcc -c "$cfile" -o "$obj" -O2 \
+                -I"$SUPERLU_SRC" \
+                -I"$SRC_DIR/superlu"
+            SUPERLU_OBJS+=("$obj")
+        fi
+    done
+fi
+
+# Compile CBLAS files, skipping those that conflict with blas_lite.c
+# Conflicts: daxpy, dcopy, ddot, dnrm2, dscal (already in blas_lite.c)
+CBLAS_SKIP="daxpy dcopy ddot dnrm2 dscal"
+if [ -d "$SUPERLU_CBLAS" ]; then
+    echo ""
+    echo "Compiling CBLAS..."
+    for cfile in "$SUPERLU_CBLAS"/*.c; do
+        if [ -f "$cfile" ]; then
+            base=$(basename "$cfile" .c)
+            # Skip files that conflict with blas_lite.c
+            skip=0
+            for s in $CBLAS_SKIP; do
+                if [ "$base" = "$s" ]; then
+                    echo "Skipping CBLAS: $(basename "$cfile") (conflicts with blas_lite.c)"
+                    skip=1
+                    break
+                fi
+            done
+            if [ $skip -eq 0 ]; then
+                obj="$OBJ_DIR/cblas_${base}.o"
+                echo "Compiling CBLAS: $(basename "$cfile")"
+                emcc -c "$cfile" -o "$obj" -O2 \
+                    -I"$SUPERLU_SRC" \
+                    -I"$SRC_DIR/superlu"
+                SUPERLU_OBJS+=("$obj")
+            fi
+        fi
+    done
+fi
+
+# Note: ARPACK is built separately via scripts/build-arpack.sh
+# This avoids symbol conflicts between SuperLU's CBLAS and ARPACK's bundled BLAS
+
+ALL_OBJS=("${C_OBJS[@]}" "${CPP_OBJS[@]}" "${SUPERLU_OBJS[@]}")
 
 echo ""
 
 # All exported functions
+# Note: QUADPACK exports (_wasm_dqagse, _wasm_dqagie) moved to quadpack.wasm
 EXPORTED_FUNCTIONS='[
     "_nelder_mead_minimize",
     "_bfgs_minimize",
     "_setulb",
-    "_wasm_dqagse",
-    "_wasm_dqagie",
     "_wasm_gamma",
     "_wasm_gammaln",
     "_wasm_rgamma",
@@ -103,12 +157,29 @@ EXPORTED_FUNCTIONS='[
     "_sp_coo_tocsr_f64",
     "_sp_coo_todense_f64",
     "_sp_coo_matvec_f64",
+    "_sp_dia_matvec_f64",
+    "_sp_dia_tocsr_f64",
+    "_sp_bsr_matvec_f64",
+    "_sp_bsr_tocsr_f64",
+    "_sp_bsr_transpose_f64",
+    "_sp_bsr_diagonal_f64",
+    "_sp_coo_tril_f64_entry",
+    "_sp_coo_triu_f64_entry",
+    "_sp_csr_hstack_f64_entry",
+    "_sp_coo_vstack_f64_entry",
+    "_sp_coo_hstack_f64_entry",
+    "_sp_coo_block_diag_f64_entry",
+    "_sp_coo_kron_f64_entry",
+    "_sp_coo_random_f64_entry",
     "_sp_malloc",
     "_sp_free",
     "_kdtree_build",
     "_kdtree_query_knn",
     "_kdtree_query_ball_point",
     "_kdtree_free",
+    "_dgssv",
+    "_dgstrf",
+    "_dgstrs",
     "_malloc",
     "_free"
 ]'

@@ -413,3 +413,98 @@ export class SymEngineMap {
     return wasm._mapbasicbasic_size(this.ptr);
   }
 }
+
+/**
+ * Wrapper class for SymEngine CDenseMatrix objects
+ * Manages lifecycle and memory cleanup for dense matrices
+ */
+export class DenseMatrixObject {
+  private ptr: number;
+
+  constructor(ptr: number) {
+    this.ptr = ptr;
+  }
+
+  /**
+   * Get the WASM pointer to this matrix
+   */
+  getPtr(): number {
+    return this.ptr;
+  }
+
+  /**
+   * Check if this matrix has been freed
+   */
+  isValid(): boolean {
+    return this.ptr !== 0;
+  }
+
+  /**
+   * Free the WASM memory for this matrix
+   */
+  free(): void {
+    if (this.ptr) {
+      const wasm = getWasmModule();
+      wasm._dense_matrix_free(this.ptr);
+      this.ptr = 0;
+    }
+  }
+
+  /**
+   * Get the string representation of this matrix
+   */
+  toString(): string {
+    if (!this.isValid()) {
+      throw new Error('Cannot convert freed DenseMatrixObject to string');
+    }
+    const wasm = getWasmModule();
+    const strPtr = wasm._dense_matrix_str(this.ptr);
+    const str = wasm.UTF8ToString(strPtr);
+    wasm._free(strPtr);
+    return str;
+  }
+
+  /**
+   * Get the number of rows in this matrix
+   */
+  rows(): number {
+    if (!this.isValid()) {
+      throw new Error('Cannot get rows of freed DenseMatrixObject');
+    }
+    const wasm = getWasmModule();
+    return wasm._dense_matrix_rows(this.ptr);
+  }
+
+  /**
+   * Get the number of columns in this matrix
+   */
+  cols(): number {
+    if (!this.isValid()) {
+      throw new Error('Cannot get cols of freed DenseMatrixObject');
+    }
+    const wasm = getWasmModule();
+    return wasm._dense_matrix_cols(this.ptr);
+  }
+}
+
+/**
+ * Create a new empty DenseMatrixObject
+ * @returns A new DenseMatrixObject wrapper
+ */
+export function createDenseMatrix(): DenseMatrixObject {
+  const wasm = getWasmModule();
+  const ptr = wasm._dense_matrix_new();
+  return new DenseMatrixObject(ptr);
+}
+
+/**
+ * Create a DenseMatrixObject with specified dimensions
+ * @param rows Number of rows
+ * @param cols Number of columns
+ * @returns A new DenseMatrixObject wrapper
+ */
+export function createDenseMatrixWithSize(rows: number, cols: number): DenseMatrixObject {
+  const wasm = getWasmModule();
+  const ptr = wasm._dense_matrix_new_rows_cols(rows, cols);
+  return new DenseMatrixObject(ptr);
+}

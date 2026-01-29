@@ -3,6 +3,7 @@ import type { SparseFormat, COOConstructorArrays } from './types.js';
 import { getWasmModule } from '../wasm-loader.js';
 import type { SciWasmModule } from '../wasm-types.js';
 import { createCSR, registerCOOFactory } from './_factory.js';
+import type { CSRMatrix } from './csr.js';
 
 /**
  * Helper: copy a typed array into WASM heap and return the pointer.
@@ -188,15 +189,17 @@ export class COOMatrix extends SparseMatrix {
     const colPtr = toWasm(wasm, this._col);
     const dataPtr = toWasm(wasm, this._data);
 
-    // Allocate output dense array
+    // Allocate output dense array and initialize to zero
     const densePtr = wasm._malloc(nrow * ncol * 8);
+    // Zero the output array - coo_todense accumulates values
+    wasm.HEAPF64.fill(0, densePtr >> 3, (densePtr >> 3) + nrow * ncol);
 
     try {
       // Call WASM function to convert COO -> dense
       wasm._sp_coo_todense_f64(
         nrow, ncol, nnz,
         rowPtr, colPtr, dataPtr,
-        densePtr
+        densePtr, 0
       );
 
       // Extract dense array and convert to 2D
@@ -241,7 +244,7 @@ export class COOMatrix extends SparseMatrix {
     try {
       // Call WASM function for COO matrix-vector multiply
       wasm._sp_coo_matvec_f64(
-        nrow, ncol, nnz,
+        nnz,
         rowPtr, colPtr, dataPtr,
         xPtr, yPtr
       );
@@ -288,28 +291,28 @@ export class COOMatrix extends SparseMatrix {
    * Add another sparse matrix (delegates to CSR)
    */
   add(other: SparseMatrix): SparseMatrix {
-    return this.tocsr().add(other);
+    return (this.tocsr() as CSRMatrix).add(other.tocsr() as CSRMatrix);
   }
 
   /**
    * Subtract another sparse matrix (delegates to CSR)
    */
   subtract(other: SparseMatrix): SparseMatrix {
-    return this.tocsr().subtract(other);
+    return (this.tocsr() as CSRMatrix).subtract(other.tocsr() as CSRMatrix);
   }
 
   /**
    * Element-wise multiply (delegates to CSR)
    */
   multiply(other: SparseMatrix): SparseMatrix {
-    return this.tocsr().multiply(other);
+    return (this.tocsr() as CSRMatrix).multiply(other.tocsr() as CSRMatrix);
   }
 
   /**
    * Matrix-matrix multiplication (delegates to CSR)
    */
   matmul(other: SparseMatrix): SparseMatrix {
-    return this.tocsr().matmul(other);
+    return (this.tocsr() as CSRMatrix).matmul(other.tocsr() as CSRMatrix);
   }
 
   /**

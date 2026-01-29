@@ -32,7 +32,7 @@ double wasm_gammaln(double x) {
  * More numerically stable than computing 1/gamma(x) for large |x|.
  */
 double wasm_rgamma(double x) {
-    return cephes::rgamma(x);
+    return xsf::cephes::rgamma(x);
 }
 
 } // extern "C"

@@ -18,6 +18,9 @@
 #include "csr.h"
 #include "csc.h"
 #include "coo.h"
+#include "dia.h"
+#include "bsr.h"
+#include "sparse_construct.h"
 
 extern "C" {
 
@@ -308,7 +311,7 @@ void sp_coo_tocsr_f64(int32_t n_row, int32_t n_col, int32_t nnz,
 }
 
 EMSCRIPTEN_KEEPALIVE
-void sp_coo_todense_f64(int32_t n_row, int32_t n_col, int64_t nnz,
+void sp_coo_todense_f64(int32_t n_row, int32_t n_col, int32_t nnz,
     const int32_t* Ai, const int32_t* Aj, const double* Ax,
     double* Bx, int32_t fortran)
 {
@@ -316,11 +319,132 @@ void sp_coo_todense_f64(int32_t n_row, int32_t n_col, int64_t nnz,
 }
 
 EMSCRIPTEN_KEEPALIVE
-void sp_coo_matvec_f64(int64_t nnz,
+void sp_coo_matvec_f64(int32_t nnz,
     const int32_t* Ai, const int32_t* Aj, const double* Ax,
     const double* Xx, double* Yx)
 {
     coo_matvec(nnz, Ai, Aj, Ax, Xx, Yx);
+}
+
+/* ===== DIA kernels ===== */
+
+EMSCRIPTEN_KEEPALIVE
+void sp_dia_matvec_f64(int32_t n_row, int32_t n_col, int32_t n_diags, int32_t L,
+    const int32_t* offsets, const double* diags,
+    const double* Xx, double* Yx)
+{
+    dia_matvec(n_row, n_col, n_diags, L, offsets, diags, Xx, Yx);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int32_t sp_dia_tocsr_f64(int32_t n_rows, int32_t n_cols, int32_t n_diags, int32_t L,
+    const int32_t* offsets, const double* data, const int32_t* order,
+    double* csr_data, int32_t* indices, int32_t* indptr)
+{
+    return dia_tocsr(n_rows, n_cols, n_diags, L, offsets, data, order, csr_data, indices, indptr);
+}
+
+/* ===== BSR kernels ===== */
+
+EMSCRIPTEN_KEEPALIVE
+void sp_bsr_matvec_f64(int32_t n_brow, int32_t n_bcol, int32_t R, int32_t C,
+    const int32_t* Ap, const int32_t* Aj, const double* Ax,
+    const double* Xx, double* Yx)
+{
+    bsr_matvec(n_brow, n_bcol, R, C, Ap, Aj, Ax, Xx, Yx);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sp_bsr_tocsr_f64(int32_t n_brow, int32_t n_bcol, int32_t R, int32_t C,
+    const int32_t* Ap, const int32_t* Aj, const double* Ax,
+    int32_t* Bp, int32_t* Bj, double* Bx)
+{
+    bsr_tocsr(n_brow, n_bcol, R, C, Ap, Aj, Ax, Bp, Bj, Bx);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sp_bsr_transpose_f64(int32_t n_brow, int32_t n_bcol, int32_t R, int32_t C,
+    const int32_t* Ap, const int32_t* Aj, const double* Ax,
+    int32_t* Bp, int32_t* Bi, double* Bx)
+{
+    bsr_transpose(n_brow, n_bcol, R, C, Ap, Aj, Ax, Bp, Bi, Bx);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sp_bsr_diagonal_f64(int32_t k, int32_t n_brow, int32_t n_bcol, int32_t R, int32_t C,
+    const int32_t* Ap, const int32_t* Aj, const double* Ax, double* Yx)
+{
+    bsr_diagonal(k, n_brow, n_bcol, R, C, Ap, Aj, Ax, Yx);
+}
+
+/* ===== Sparse Construction ===== */
+
+EMSCRIPTEN_KEEPALIVE
+int32_t sp_coo_tril_f64_entry(int32_t nnz, int32_t k,
+    const int32_t* row_in, const int32_t* col_in, const double* data_in,
+    int32_t* row_out, int32_t* col_out, double* data_out)
+{
+    return sp_coo_tril_f64(nnz, k, row_in, col_in, data_in, row_out, col_out, data_out);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int32_t sp_coo_triu_f64_entry(int32_t nnz, int32_t k,
+    const int32_t* row_in, const int32_t* col_in, const double* data_in,
+    int32_t* row_out, int32_t* col_out, double* data_out)
+{
+    return sp_coo_triu_f64(nnz, k, row_in, col_in, data_in, row_out, col_out, data_out);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sp_csr_hstack_f64_entry(int32_t n_blocks, int32_t n_row,
+    const int32_t* n_col, const int32_t* Ap_cat, const int32_t* Aj_cat, const double* Ax_cat,
+    int32_t* Bp, int32_t* Bj, double* Bx)
+{
+    sp_csr_hstack_f64(n_blocks, n_row, n_col, Ap_cat, Aj_cat, Ax_cat, Bp, Bj, Bx);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sp_coo_vstack_f64_entry(int32_t n_blocks,
+    const int32_t* n_row, const int32_t* nnz_per_block,
+    const int32_t* row_cat, const int32_t* col_cat, const double* data_cat,
+    int32_t* row_out, int32_t* col_out, double* data_out)
+{
+    sp_coo_vstack_f64(n_blocks, n_row, nnz_per_block, row_cat, col_cat, data_cat, row_out, col_out, data_out);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sp_coo_hstack_f64_entry(int32_t n_blocks,
+    const int32_t* n_col, const int32_t* nnz_per_block,
+    const int32_t* row_cat, const int32_t* col_cat, const double* data_cat,
+    int32_t* row_out, int32_t* col_out, double* data_out)
+{
+    sp_coo_hstack_f64(n_blocks, n_col, nnz_per_block, row_cat, col_cat, data_cat, row_out, col_out, data_out);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sp_coo_block_diag_f64_entry(int32_t n_blocks,
+    const int32_t* n_row, const int32_t* n_col, const int32_t* nnz_per_block,
+    const int32_t* row_cat, const int32_t* col_cat, const double* data_cat,
+    int32_t* row_out, int32_t* col_out, double* data_out)
+{
+    sp_coo_block_diag_f64(n_blocks, n_row, n_col, nnz_per_block, row_cat, col_cat, data_cat, row_out, col_out, data_out);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sp_coo_kron_f64_entry(int32_t nnz_A, int32_t nnz_B, int32_t B_nrow, int32_t B_ncol,
+    const int32_t* A_row, const int32_t* A_col, const double* A_data,
+    const int32_t* B_row, const int32_t* B_col, const double* B_data,
+    int32_t* out_row, int32_t* out_col, double* out_data)
+{
+    sp_coo_kron_f64(nnz_A, nnz_B, B_nrow, B_ncol, A_row, A_col, A_data, B_row, B_col, B_data, out_row, out_col, out_data);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sp_coo_random_f64_entry(int32_t nnz, int32_t n_row, int32_t n_col,
+    const int32_t* flat_indices, const double* random_values,
+    int32_t* row_out, int32_t* col_out, double* data_out)
+{
+    sp_coo_random_f64(nnz, n_row, n_col, flat_indices, random_values, row_out, col_out, data_out);
 }
 
 /* ===== Memory helpers ===== */

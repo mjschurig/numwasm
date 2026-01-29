@@ -15,9 +15,9 @@ const TASK_NEW_X = 1;
 const TASK_FG = 3;
 const TASK_CONVERGENCE = 4;
 const TASK_STOP = 5;
-const TASK_WARNING = 6;
-const TASK_ERROR = 7;
-const TASK_ABNORMAL = 8;
+const _TASK_WARNING = 6;  // Reserved for future use
+const _TASK_ERROR = 7;    // Reserved for future use
+const _TASK_ABNORMAL = 8; // Reserved for future use
 
 const STATUS_MESSAGES: Record<number, string> = {
   0: 'Optimization terminated successfully.',

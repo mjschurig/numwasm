@@ -1,0 +1,201 @@
+/* zptsl.f -- translated by f2c (version 20240504).
+   You must link the resulting object file with libf2c:
+	on Microsoft Windows system, link with libf2c.lib;
+	on Linux or Unix systems, link with .../path/to/libf2c.a -lm
+	or, if you install libf2c.a in a standard place, with -lf2c -lm
+	-- in that order, at the end of the command line, as in
+		cc *.o -lf2c -lm
+	Source for libf2c is in /netlib/f2c/libf2c.zip, e.g.,
+
+		http://netlib.org/f2c/libf2c.zip
+*/
+
+#include "f2c.h"
+
+/* Subroutine */ int zptsl_(integer *n, doublecomplex *d__, doublecomplex *e, 
+	doublecomplex *b)
+{
+    /* System generated locals */
+    integer i__1, i__2, i__3, i__4, i__5;
+    doublecomplex z__1, z__2, z__3, z__4;
+
+    /* Builtin functions */
+    void z_div(doublecomplex *, doublecomplex *, doublecomplex *), d_cnjg(
+	    doublecomplex *, doublecomplex *);
+
+    /* Local variables */
+    integer k;
+    doublecomplex t1, t2;
+    integer ke, kf, kp1, nm1, kbm1, nm1d2;
+
+
+/*     zptsl given a positive definite tridiagonal matrix and a right */
+/*     hand side will find the solution. */
+
+/*     on entry */
+
+/*        n        integer */
+/*                 is the order of the tridiagonal matrix. */
+
+/*        d        complex*16(n) */
+/*                 is the diagonal of the tridiagonal matrix. */
+/*                 on output d is destroyed. */
+
+/*        e        complex*16(n) */
+/*                 is the offdiagonal of the tridiagonal matrix. */
+/*                 e(1) through e(n-1) should contain the */
+/*                 offdiagonal. */
+
+/*        b        complex*16(n) */
+/*                 is the right hand side vector. */
+
+/*     on return */
+
+/*        b        contains the soultion. */
+
+/*     linpack. this version dated 08/14/78 . */
+/*     jack dongarra, argonne national laboratory. */
+
+/*     no externals */
+/*     fortran dconjg,mod */
+
+/*     internal variables */
+
+
+/*     check for 1 x 1 case */
+
+    /* Parameter adjustments */
+    --b;
+    --e;
+    --d__;
+
+    /* Function Body */
+    if (*n != 1) {
+	goto L10;
+    }
+    z_div(&z__1, &b[1], &d__[1]);
+    b[1].r = z__1.r, b[1].i = z__1.i;
+    goto L70;
+L10:
+    nm1 = *n - 1;
+    nm1d2 = nm1 / 2;
+    if (*n == 2) {
+	goto L30;
+    }
+    kbm1 = *n - 1;
+
+/*           zero top half of subdiagonal and bottom half of */
+/*           superdiagonal */
+
+    i__1 = nm1d2;
+    for (k = 1; k <= i__1; ++k) {
+	d_cnjg(&z__2, &e[k]);
+	z_div(&z__1, &z__2, &d__[k]);
+	t1.r = z__1.r, t1.i = z__1.i;
+	i__2 = k + 1;
+	i__3 = k + 1;
+	i__4 = k;
+	z__2.r = t1.r * e[i__4].r - t1.i * e[i__4].i, z__2.i = t1.r * e[i__4]
+		.i + t1.i * e[i__4].r;
+	z__1.r = d__[i__3].r - z__2.r, z__1.i = d__[i__3].i - z__2.i;
+	d__[i__2].r = z__1.r, d__[i__2].i = z__1.i;
+	i__2 = k + 1;
+	i__3 = k + 1;
+	i__4 = k;
+	z__2.r = t1.r * b[i__4].r - t1.i * b[i__4].i, z__2.i = t1.r * b[i__4]
+		.i + t1.i * b[i__4].r;
+	z__1.r = b[i__3].r - z__2.r, z__1.i = b[i__3].i - z__2.i;
+	b[i__2].r = z__1.r, b[i__2].i = z__1.i;
+	z_div(&z__1, &e[kbm1], &d__[kbm1 + 1]);
+	t2.r = z__1.r, t2.i = z__1.i;
+	i__2 = kbm1;
+	i__3 = kbm1;
+	d_cnjg(&z__3, &e[kbm1]);
+	z__2.r = t2.r * z__3.r - t2.i * z__3.i, z__2.i = t2.r * z__3.i + t2.i 
+		* z__3.r;
+	z__1.r = d__[i__3].r - z__2.r, z__1.i = d__[i__3].i - z__2.i;
+	d__[i__2].r = z__1.r, d__[i__2].i = z__1.i;
+	i__2 = kbm1;
+	i__3 = kbm1;
+	i__4 = kbm1 + 1;
+	z__2.r = t2.r * b[i__4].r - t2.i * b[i__4].i, z__2.i = t2.r * b[i__4]
+		.i + t2.i * b[i__4].r;
+	z__1.r = b[i__3].r - z__2.r, z__1.i = b[i__3].i - z__2.i;
+	b[i__2].r = z__1.r, b[i__2].i = z__1.i;
+	--kbm1;
+/* L20: */
+    }
+L30:
+    kp1 = nm1d2 + 1;
+
+/*        clean up for possible 2 x 2 block at center */
+
+    if (*n % 2 != 0) {
+	goto L40;
+    }
+    d_cnjg(&z__2, &e[kp1]);
+    z_div(&z__1, &z__2, &d__[kp1]);
+    t1.r = z__1.r, t1.i = z__1.i;
+    i__1 = kp1 + 1;
+    i__2 = kp1 + 1;
+    i__3 = kp1;
+    z__2.r = t1.r * e[i__3].r - t1.i * e[i__3].i, z__2.i = t1.r * e[i__3].i + 
+	    t1.i * e[i__3].r;
+    z__1.r = d__[i__2].r - z__2.r, z__1.i = d__[i__2].i - z__2.i;
+    d__[i__1].r = z__1.r, d__[i__1].i = z__1.i;
+    i__1 = kp1 + 1;
+    i__2 = kp1 + 1;
+    i__3 = kp1;
+    z__2.r = t1.r * b[i__3].r - t1.i * b[i__3].i, z__2.i = t1.r * b[i__3].i + 
+	    t1.i * b[i__3].r;
+    z__1.r = b[i__2].r - z__2.r, z__1.i = b[i__2].i - z__2.i;
+    b[i__1].r = z__1.r, b[i__1].i = z__1.i;
+    ++kp1;
+L40:
+
+/*        back solve starting at the center, going towards the top */
+/*        and bottom */
+
+    i__1 = kp1;
+    z_div(&z__1, &b[kp1], &d__[kp1]);
+    b[i__1].r = z__1.r, b[i__1].i = z__1.i;
+    if (*n == 2) {
+	goto L60;
+    }
+    k = kp1 - 1;
+    ke = kp1 + nm1d2 - 1;
+    i__1 = ke;
+    for (kf = kp1; kf <= i__1; ++kf) {
+	i__2 = k;
+	i__3 = k;
+	i__4 = k;
+	i__5 = k + 1;
+	z__3.r = e[i__4].r * b[i__5].r - e[i__4].i * b[i__5].i, z__3.i = e[
+		i__4].r * b[i__5].i + e[i__4].i * b[i__5].r;
+	z__2.r = b[i__3].r - z__3.r, z__2.i = b[i__3].i - z__3.i;
+	z_div(&z__1, &z__2, &d__[k]);
+	b[i__2].r = z__1.r, b[i__2].i = z__1.i;
+	i__2 = kf + 1;
+	i__3 = kf + 1;
+	d_cnjg(&z__4, &e[kf]);
+	i__4 = kf;
+	z__3.r = z__4.r * b[i__4].r - z__4.i * b[i__4].i, z__3.i = z__4.r * b[
+		i__4].i + z__4.i * b[i__4].r;
+	z__2.r = b[i__3].r - z__3.r, z__2.i = b[i__3].i - z__3.i;
+	z_div(&z__1, &z__2, &d__[kf + 1]);
+	b[i__2].r = z__1.r, b[i__2].i = z__1.i;
+	--k;
+/* L50: */
+    }
+L60:
+    if (*n % 2 == 0) {
+	z__3.r = e[1].r * b[2].r - e[1].i * b[2].i, z__3.i = e[1].r * b[2].i 
+		+ e[1].i * b[2].r;
+	z__2.r = b[1].r - z__3.r, z__2.i = b[1].i - z__3.i;
+	z_div(&z__1, &z__2, &d__[1]);
+	b[1].r = z__1.r, b[1].i = z__1.i;
+    }
+L70:
+    return 0;
+} /* zptsl_ */
+

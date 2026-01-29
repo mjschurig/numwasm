@@ -391,36 +391,38 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 
 ### Priority Additions — Formats
 - ✅ `coo_matrix(data)` / `coo_array(data)` — Coordinate format
-- ⬜ `lil_matrix(shape)` / `lil_array(shape)` — List of lists (construction)
-- ⬜ `bsr_matrix(data)` / `bsr_array(data)` — Block sparse row
-- ⬜ `dok_matrix(shape)` / `dok_array(shape)` — Dictionary of keys
-- ⬜ `dia_matrix(data)` / `dia_array(data)` — Diagonal format
+- ✅ `lil_matrix(shape)` / `lil_array(shape)` — List of lists (construction)
+- ✅ `bsr_matrix(data)` / `bsr_array(data)` — Block sparse row (WASM-accelerated)
+- ✅ `dok_matrix(shape)` / `dok_array(shape)` — Dictionary of keys
+- ✅ `dia_matrix(data)` / `dia_array(data)` — Diagonal format (WASM-accelerated)
 
 ### Priority Additions — Construction
-- ⬜ `random(m, n, density?)` — Random sparse matrix
-- ⬜ `kron(A, B)` — Kronecker product
-- ⬜ `kronsum(A, B)` — Kronecker sum
-- ⬜ `block_diag(mats)` — Block diagonal matrix
-- ⬜ `hstack(blocks)` — Horizontal stack
-- ⬜ `vstack(blocks)` — Vertical stack
-- ⬜ `tril(A, k?)` — Lower triangle
-- ⬜ `triu(A, k?)` — Upper triangle
-- ⬜ `issparse(x)` — Check if sparse
+- ✅ `random(m, n, density?)` — Random sparse matrix
+- ✅ `kron(A, B)` — Kronecker product
+- ✅ `kronsum(A, B)` — Kronecker sum
+- ✅ `block_diag(mats)` — Block diagonal matrix
+- ✅ `hstack(blocks)` — Horizontal stack
+- ✅ `vstack(blocks)` — Vertical stack
+- ✅ `tril(A, k?)` — Lower triangle
+- ✅ `triu(A, k?)` — Upper triangle
+- ✅ `issparse(x)` — Check if sparse
 
 ### Priority Additions — `sparse.linalg`
-- ⬜ `linalg.spsolve(A, b)` — Solve sparse system
-- ⬜ `linalg.eigs(A, k?)` — Eigenvalues (sparse, largest)
-- ⬜ `linalg.eigsh(A, k?)` — Eigenvalues (sparse, symmetric)
-- ⬜ `linalg.svds(A, k?)` — SVD (sparse, truncated)
-- ⬜ `linalg.inv(A)` — Sparse inverse
-- ⬜ `linalg.norm(x)` — Sparse norm
+- ⬜ `linalg.spsolve(A, b)` — Solve sparse system (requires SuperLU)
+- ⬜ `linalg.eigs(A, k?)` — Eigenvalues (sparse, largest) (requires ARPACK)
+- ⬜ `linalg.eigsh(A, k?)` — Eigenvalues (sparse, symmetric) (requires ARPACK)
+- ⬜ `linalg.svds(A, k?)` — SVD (sparse, truncated) (requires ARPACK)
+- ⬜ `linalg.inv(A)` — Sparse inverse (requires spsolve)
+- ✅ `linalg.norm(x)` — Sparse norm (Frobenius, 1, inf, -1, -inf)
 - ⬜ `linalg.expm(A)` — Sparse matrix exponential
-- ⬜ `linalg.cg(A, b)` — Conjugate gradient solver
-- ⬜ `linalg.gmres(A, b)` — GMRES solver
-- ⬜ `linalg.bicgstab(A, b)` — BiCGSTAB solver
-- ⬜ `linalg.splu(A)` — Sparse LU decomposition
-- ⬜ `linalg.spilu(A)` — Sparse incomplete LU
-- ⬜ `linalg.LinearOperator` — Abstract linear operator
+- ✅ `linalg.cg(A, b)` — Conjugate gradient solver
+- ✅ `linalg.gmres(A, b)` — GMRES solver
+- ✅ `linalg.bicgstab(A, b)` — BiCGSTAB solver
+- ⬜ `linalg.splu(A)` — Sparse LU decomposition (requires SuperLU)
+- ⬜ `linalg.spilu(A)` — Sparse incomplete LU (requires SuperLU)
+- ✅ `linalg.LinearOperator` — Abstract linear operator
+- ✅ `linalg.aslinearoperator(A)` — Convert to LinearOperator
+- ✅ `linalg.IdentityOperator(n)` — Identity operator
 
 ### Priority Additions — `sparse.csgraph`
 - ⬜ `csgraph.shortest_path(csgraph)` — Shortest path (all algorithms)
@@ -597,16 +599,16 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 
 | Module | ✅ Done | 🔲 Stubbed | ⬜ To Create | Total |
 |--------|---------|-----------|-------------|-------|
-| special | 0 | 10 | ~35 | ~45 |
+| special | 8 | 5 | ~32 | ~45 |
 | stats | 4 | 9 | ~37 | ~50 |
 | optimize | 3 | 4 | ~18 | ~25 |
 | integrate | 1 | 5 | ~9 | ~15 |
 | interpolate | 0 | 4 | ~14 | ~18 |
 | signal | 0 | 7 | ~35 | ~42 |
 | spatial | 0 | 8 | ~15 | ~23 |
-| sparse | 5 | 0 | ~29 | ~34 |
+| sparse | 18 | 0 | ~16 | ~34 |
 | ndimage | 0 | 5 | ~25 | ~30 |
 | cluster | 0 | 3 | ~15 | ~18 |
 | io | 0 | 2 | ~10 | ~12 |
 | constants | 10 | 1 | ~50+ | ~61 |
-| **Total** | **22** | **59** | **~292** | **~373** |
+| **Total** | **39** | **54** | **~280** | **~373** |

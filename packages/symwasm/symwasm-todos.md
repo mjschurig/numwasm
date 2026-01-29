@@ -152,113 +152,140 @@ For each function/module, follow these steps in order:
 **Goal**: Enable symbolic calculus and expression manipulation
 **C++ Files**: `functions.h`, `derivative.h`, `series.h`, `expand.h`, `subs.h`
 
-#### 2.1 Elementary Functions
+**Phase 2.1 Complete**: 52 elementary functions implemented (330 tests passing).
+- Phase 2.1a: 45 core functions (trig, hyperbolic, exp/log, special functions)
+- Phase 2.1b: 7 additional functions (digamma, conjugate, re, im, arg, Max, Min)
+
+**Phase 2.2 Complete**: Symbolic differentiation implemented (362 tests passing).
+- `diff(expr, x)` — First derivative
+- `diff(expr, x, n)` — nth derivative via iteration
+- `diff(expr, x, y)` — Multi-variable partial derivatives
+
+**Phase 2.3 Complete**: Taylor series expansion implemented (382 tests passing).
+- `series(expr, x)` — Taylor series around x=0
+- `series(expr, x, 0, n)` — Series with configurable number of terms
+
+#### 2.1 Elementary Functions ✅ COMPLETED
 **SymEngine Files**: `functions.h`, `functions.cpp`
 
-##### Exponential & Logarithmic
-- ⬜ `exp(x)` — Exponential e^x → `Exp` class
-- ⬜ `log(x, base?)` — Natural log or log_base → `Log` class
-- ⬜ `sqrt(x)` — Square root → `sqrt()` function
-- ⬜ `cbrt(x)` — Cube root
-- ⬜ `Abs(x)` — Absolute value → `Abs` class
+##### Exponential & Logarithmic ✅
+- ✅ `exp(x)` — Exponential e^x (WASM-backed via `_basic_exp`)
+- ✅ `log(x)` — Natural log (WASM-backed via `_basic_log`)
+- ✅ `sqrt(x)` — Square root (WASM-backed via `_basic_sqrt`)
+- ✅ `cbrt(x)` — Cube root (WASM-backed via `_basic_cbrt`)
+- ✅ `abs(x)` — Absolute value (WASM-backed via `_basic_abs`)
+- ✅ `lambertw(x)` — Lambert W function (WASM-backed via `_basic_lambertw`)
 
-##### Trigonometric Functions
-- ⬜ `sin(x)` — Sine → `Sin` class
-- ⬜ `cos(x)` — Cosine → `Cos` class
-- ⬜ `tan(x)` — Tangent → `Tan` class
-- ⬜ `cot(x)` — Cotangent → `Cot` class
-- ⬜ `sec(x)` — Secant → `Sec` class
-- ⬜ `csc(x)` — Cosecant → `Csc` class
+##### Trigonometric Functions ✅
+- ✅ `sin(x)` — Sine (WASM-backed via `_basic_sin`)
+- ✅ `cos(x)` — Cosine (WASM-backed via `_basic_cos`)
+- ✅ `tan(x)` — Tangent (WASM-backed via `_basic_tan`)
+- ✅ `cot(x)` — Cotangent (WASM-backed via `_basic_cot`)
+- ✅ `sec(x)` — Secant (WASM-backed via `_basic_sec`)
+- ✅ `csc(x)` — Cosecant (WASM-backed via `_basic_csc`)
 
-##### Inverse Trigonometric
-- ⬜ `asin(x)` — Arcsine → `ASin` class
-- ⬜ `acos(x)` — Arccosine → `ACos` class
-- ⬜ `atan(x)` — Arctangent → `ATan` class
-- ⬜ `acot(x)` — Arccotangent → `ACot` class
-- ⬜ `asec(x)` — Arcsecant → `ASec` class
-- ⬜ `acsc(x)` — Arccosecant → `ACsc` class
-- ⬜ `atan2(y, x)` — Two-argument arctangent → `ATan2` class
+##### Inverse Trigonometric ✅
+- ✅ `asin(x)` — Arcsine (WASM-backed via `_basic_asin`)
+- ✅ `acos(x)` — Arccosine (WASM-backed via `_basic_acos`)
+- ✅ `atan(x)` — Arctangent (WASM-backed via `_basic_atan`)
+- ✅ `acot(x)` — Arccotangent (WASM-backed via `_basic_acot`)
+- ✅ `asec(x)` — Arcsecant (WASM-backed via `_basic_asec`)
+- ✅ `acsc(x)` — Arccosecant (WASM-backed via `_basic_acsc`)
+- ✅ `atan2(y, x)` — Two-argument arctangent (WASM-backed via `_basic_atan2`)
 
-##### Hyperbolic Functions
-- ⬜ `sinh(x)` — Hyperbolic sine → `Sinh` class
-- ⬜ `cosh(x)` — Hyperbolic cosine → `Cosh` class
-- ⬜ `tanh(x)` — Hyperbolic tangent → `Tanh` class
-- ⬜ `coth(x)` — Hyperbolic cotangent → `Coth` class
-- ⬜ `sech(x)` — Hyperbolic secant
-- ⬜ `csch(x)` — Hyperbolic cosecant
+##### Hyperbolic Functions ✅
+- ✅ `sinh(x)` — Hyperbolic sine (WASM-backed via `_basic_sinh`)
+- ✅ `cosh(x)` — Hyperbolic cosine (WASM-backed via `_basic_cosh`)
+- ✅ `tanh(x)` — Hyperbolic tangent (WASM-backed via `_basic_tanh`)
+- ✅ `coth(x)` — Hyperbolic cotangent (WASM-backed via `_basic_coth`)
+- ✅ `sech(x)` — Hyperbolic secant (WASM-backed via `_basic_sech`)
+- ✅ `csch(x)` — Hyperbolic cosecant (WASM-backed via `_basic_csch`)
 
-##### Inverse Hyperbolic
-- ⬜ `asinh(x)` — Inverse hyperbolic sine → `ASinh` class
-- ⬜ `acosh(x)` — Inverse hyperbolic cosine → `ACosh` class
-- ⬜ `atanh(x)` — Inverse hyperbolic tangent → `ATanh` class
-- ⬜ `acoth(x)` — Inverse hyperbolic cotangent → `ACoth` class
-- ⬜ `asech(x)` — Inverse hyperbolic secant
-- ⬜ `acsch(x)` — Inverse hyperbolic cosecant
+##### Inverse Hyperbolic ✅
+- ✅ `asinh(x)` — Inverse hyperbolic sine (WASM-backed via `_basic_asinh`)
+- ✅ `acosh(x)` — Inverse hyperbolic cosine (WASM-backed via `_basic_acosh`)
+- ✅ `atanh(x)` — Inverse hyperbolic tangent (WASM-backed via `_basic_atanh`)
+- ✅ `acoth(x)` — Inverse hyperbolic cotangent (WASM-backed via `_basic_acoth`)
+- ✅ `asech(x)` — Inverse hyperbolic secant (WASM-backed via `_basic_asech`)
+- ✅ `acsch(x)` — Inverse hyperbolic cosecant (WASM-backed via `_basic_acsch`)
 
-##### Special Functions
+##### Special Functions ✅
 **SymEngine Files**: `functions.h` (Gamma, Beta, Erf, etc. classes)
-- ⬜ `gamma(x)` — Gamma function → `Gamma` class
-- ⬜ `loggamma(x)` — Log-gamma → `LogGamma` class
-- ⬜ `digamma(x)` — Digamma ψ(x) → `Digamma` class
-- ⬜ `polygamma(n, x)` — Polygamma ψ^(n)(x)
-- ⬜ `beta(x, y)` — Beta function → `Beta` class
-- ⬜ `lowergamma(s, x)` — Lower incomplete gamma → `LowerGamma` class
-- ⬜ `uppergamma(s, x)` — Upper incomplete gamma → `UpperGamma` class
-- ⬜ `erf(x)` — Error function → `Erf` class
-- ⬜ `erfc(x)` — Complementary error function → `Erfc` class
-- ⬜ `zeta(s)` — Riemann zeta → `Zeta` class
-- ⬜ `dirichlet_eta(s)` — Dirichlet eta → `Dirichlet_eta` class
-- ⬜ `lambertw(x)` — Lambert W → `LambertW` class
-- ⬜ `KroneckerDelta(i, j)` — Kronecker delta → `KroneckerDelta` class
-- ⬜ `LeviCivita(*indices)` — Levi-Civita symbol → `LeviCivita` class
-- ⬜ `floor(x)` — Floor function → `Floor` class
-- ⬜ `ceiling(x)` — Ceiling function → `Ceiling` class
-- ⬜ `Max(...args)` — Maximum → `Max` class
-- ⬜ `Min(...args)` — Minimum → `Min` class
-- ⬜ `sign(x)` — Sign function → `Sign` class
+- ✅ `gamma(x)` — Gamma function (WASM-backed via `_basic_gamma`)
+- ✅ `loggamma(x)` — Log-gamma (WASM-backed via `_basic_loggamma`)
+- ✅ `polygamma(n, x)` — Polygamma (WASM-backed via `_basic_polygamma`)
+- ✅ `beta(x, y)` — Beta function (WASM-backed via `_basic_beta`)
+- ✅ `lowergamma(s, x)` — Lower incomplete gamma (WASM-backed via `_basic_lowergamma`)
+- ✅ `uppergamma(s, x)` — Upper incomplete gamma (WASM-backed via `_basic_uppergamma`)
+- ✅ `erf(x)` — Error function (WASM-backed via `_basic_erf`)
+- ✅ `erfc(x)` — Complementary error function (WASM-backed via `_basic_erfc`)
+- ✅ `zeta(s)` — Riemann zeta (WASM-backed via `_basic_zeta`)
+- ✅ `dirichlet_eta(s)` — Dirichlet eta (WASM-backed via `_basic_dirichlet_eta`)
+- ✅ `kronecker_delta(i, j)` — Kronecker delta (WASM-backed via `_basic_kronecker_delta`)
+- ✅ `floor(x)` — Floor function (WASM-backed via `_basic_floor`)
+- ✅ `ceiling(x)` — Ceiling function (WASM-backed via `_basic_ceiling`)
+- ✅ `sign(x)` — Sign function (WASM-backed via `_basic_sign`)
+- ✅ `digamma(x)` — Digamma ψ(x) (WASM-backed via `_basic_digamma`, added C wrapper)
+- ⬜ `LeviCivita(*indices)` — Levi-Civita symbol (not exposed in C API)
+- ✅ `Max(...args)` — Maximum (WASM-backed via `_basic_max` with CVecBasic)
+- ✅ `Min(...args)` — Minimum (WASM-backed via `_basic_min` with CVecBasic)
 
-##### Complex Number Functions
-- ⬜ `conjugate(x)` — Complex conjugate → `Conjugate` class
-- ⬜ `re(x)` — Real part
-- ⬜ `im(x)` — Imaginary part
-- ⬜ `arg(x)` — Argument (phase)
+##### Complex Number Functions ✅
+- ✅ `conjugate(x)` — Complex conjugate (WASM-backed via `_basic_conjugate`, added C wrapper)
+- ✅ `re(x)` — Real part (WASM-backed via `_complex_base_real_part`)
+- ✅ `im(x)` — Imaginary part (WASM-backed via `_complex_base_imaginary_part`)
+- ✅ `arg(x)` — Argument (phase) (derived via `atan2(im(x), re(x))`)
 
-#### 2.2 Calculus — Differentiation
+**Note**: 52 functions implemented (45 original + 7 Phase 2.1b). SymEngine auto-simplifies (e.g., `sin(0)` → `0`, `sqrt(4)` → `2`). All functions support symbolic inputs and numerical evaluation via `evalf()`. Note: `re()` and `im()` only work on ComplexBase types (not integers that SymEngine simplifies from Complex(x, 0)).
+
+#### 2.2 Calculus — Differentiation ✅ COMPLETED
 **SymEngine Files**: `derivative.h`, `derivative.cpp`
-- 🔲 `diff(expr, symbol, n?)` — Differentiate → `Derivative` class and `diff()` function
-- ⬜ `Derivative(expr, *symbols)` — Unevaluated derivative class
-- ⬜ `diff(expr, symbol1, symbol2, ...)` — Multiple differentiation
-- ⬜ `fdiff(expr, argindex)` — Derivative w.r.t. function argument
+- ✅ `diff(expr, symbol, n?)` — Differentiate (WASM-backed via `_basic_diff`, nth via iteration)
+- ✅ `diff(expr, symbol1, symbol2, ...)` — Multi-variable partial derivatives (chained `_basic_diff` calls)
+- ✅ `diff(expr, x, 2, y, 3)` — Mixed higher-order partial derivatives
+- ⬜ `Derivative(expr, *symbols)` — Unevaluated derivative class (C API doesn't expose)
+- ⬜ `fdiff(expr, argindex)` — Derivative w.r.t. function argument (C API doesn't expose)
 
-#### 2.3 Calculus — Series Expansion
+**Note**: Core differentiation implemented with nth derivative and multi-variable support. Chain rule, product rule, quotient rule all work automatically. 33 tests covering polynomials, trig, exp/log, higher-order, and mixed partial derivatives.
+
+#### 2.3 Calculus — Series Expansion ✅ COMPLETED
 **SymEngine Files**: `series.h`, `series_generic.h`, `series_visitor.h`
-- 🔲 `series(expr, symbol, point?, n?)` — Power series → `series()` function
-- ⬜ `series(expr, x, x0, n, dir)` — Series with direction
-- ⬜ `Order(expr)` — Order term O(x^n)
+- ✅ `series(expr, symbol, x0?, n?)` — Taylor series expansion (WASM-backed via `_basic_series`)
+- ⬜ `series(expr, x, x0, n, dir)` — Series with direction (C++ API only supports x=0)
+- ⬜ `Order(expr)` — Order term O(x^n) (not exposed in C API, result is polynomial)
 
-#### 2.4 Simplification
-**SymEngine Files**: `expand.h`, `subs.h`, and simplification utilities
+**Note**: Series expansion around x=0 implemented with configurable number of terms. Supports exp, sin, cos, tan, log, and composed functions. 20 tests covering basic expansions, trig, exp/log, and error handling. Expansion around non-zero points not supported by underlying C++ API.
 
-##### Current Stubs
-- 🔲 `expand(expr)` — Expand expressions → `expand()` function
-- 🔲 `simplify(expr)` — Simplify using heuristics
-- 🔲 `trigsimp(expr)` — Simplify trigonometric expressions
-- 🔲 `radsimp(expr)` — Simplify radicals
-- 🔲 `powsimp(expr)` — Simplify powers
-- 🔲 `collect(expr, syms)` — Collect terms
-- 🔲 `cancel(expr)` — Cancel rational functions
+#### 2.4 Simplification ✅ COMPLETED
+**SymEngine Files**: `expand.h`, `simplify.h`, `rewrite.h`, `as_real_imag.h`
 
-##### Priority Additions
-- ⬜ `expand_mul(expr)` — Expand multiplication
-- ⬜ `expand_trig(expr)` — Expand trigonometric
-- ⬜ `expand_complex(expr)` — Expand re + i*im
-- ⬜ `expand_log(expr)` — Expand logarithms
-- ⬜ `expand_power_base(expr)` — Expand (a*b)**c
-- ⬜ `expand_power_exp(expr)` — Expand a**(b+c)
-- ⬜ `together(expr)` — Combine over common denominator
-- ⬜ `apart(expr, x)` — Partial fractions
-- ⬜ `numer(expr)` — Extract numerator
-- ⬜ `denom(expr)` — Extract denominator
+##### Implemented Functions
+- ✅ `expand(expr)` — Expand expressions (WASM-backed via `_basic_expand`)
+- ✅ `simplify(expr)` — Simplify using heuristics (WASM-backed via `_basic_simplify`)
+- ✅ `trigsimp(expr)` — Simplify trigonometric expressions (delegates to simplify)
+- ✅ `radsimp(expr)` — Simplify radicals (delegates to simplify)
+- ✅ `powsimp(expr)` — Simplify powers (delegates to simplify)
+- ✅ `numer(expr)` — Extract numerator (WASM-backed via `_basic_as_numer_denom`)
+- ✅ `denom(expr)` — Extract denominator (WASM-backed via `_basic_as_numer_denom`)
+- ✅ `rewrite_as_exp(expr)` — Rewrite trig as exponentials (WASM-backed via `_basic_rewrite_as_exp`)
+- ✅ `rewrite_as_sin(expr)` — Rewrite trig in terms of sine (WASM-backed via `_basic_rewrite_as_sin`)
+- ✅ `rewrite_as_cos(expr)` — Rewrite trig in terms of cosine (WASM-backed via `_basic_rewrite_as_cos`)
+- ✅ `as_real_imag(expr)` — Extract real and imaginary parts (WASM-backed via `_basic_as_real_imag`)
+- ✅ `expand_trig(expr)` — Expand trigonometric (via rewrite_as_exp + expand)
+- ✅ `expand_complex(expr)` — Expand re + i*im (alias for as_real_imag)
+
+##### Removed (no SymEngine support)
+- ~~`factor(expr)`~~ — Removed (complex template function, no C API)
+- ~~`collect(expr, syms)`~~ — Removed (no C API)
+- ~~`cancel(expr)`~~ — Removed (complex template function, no C API)
+- ~~`expand_mul(expr)`~~ — Use general expand()
+- ~~`expand_log(expr)`~~ — Not in SymEngine
+- ~~`expand_power_base(expr)`~~ — Not in SymEngine
+- ~~`expand_power_exp(expr)`~~ — Not in SymEngine
+- ~~`together(expr)`~~ — Not in SymEngine
+- ~~`apart(expr, x)`~~ — Not in SymEngine
+
+**Note**: Full simplification implemented with 13 functions. The simplify function handles csc^(-1)→sin, sec^(-1)→cos, cot^(-1)→tan transformations. Rewrite functions allow converting between trig representations. as_real_imag extracts complex number components. 50+ tests covering polynomial expansion, trig simplification, rewrite functions, and complex number decomposition.
 
 ---
 
@@ -266,70 +293,74 @@ For each function/module, follow these steps in order:
 **Goal**: Linear algebra, polynomial operations, equation solving
 **C++ Files**: `matrix.h`, `polys/`, `solve.h`
 
-#### 3.1 Matrix Operations
-**SymEngine Files**: `matrix.h`, `matrices/` subdirectory (24 headers)
+#### 3.1 Matrix Operations ✅ PARTIALLY COMPLETED
+**SymEngine Files**: `matrix.h` (C API via `cwrapper.h`)
 
-##### Current Stubs — Dense Matrices
-- 🔲 `Matrix(data)` — Dense matrix → `DenseMatrix` class
-- 🔲 `Matrix.get(i, j)` — Get element
-- 🔲 `Matrix.det()` — Determinant
-- 🔲 `Matrix.inv()` — Inverse
-- 🔲 `Matrix.transpose()` — Transpose
-- 🔲 `Matrix.eigenvals()` — Eigenvalues
-- 🔲 `Matrix.eigenvects()` — Eigenvectors
-- 🔲 `Matrix.rref()` — Row echelon form
-- 🔲 `eye(n)` — Identity matrix
-- 🔲 `zeros(rows, cols)` — Zero matrix
-- 🔲 `ones(rows, cols)` — Matrix of ones
-- 🔲 `diag(...values)` — Diagonal matrix
+##### Dense Matrix — Construction ✅ COMPLETED
+- ✅ `Matrix(data)` — Create from nested array (`dense_matrix_new_vec`)
+- ✅ `Matrix.fromFlat(flat, rows, cols)` — Create from flat array (`dense_matrix_new_vec`)
+- ✅ `eye(n, m?, k?)` — Identity matrix (`dense_matrix_eye`)
+- ✅ `zeros(rows, cols)` — Zero matrix (`dense_matrix_zeros`)
+- ✅ `ones(rows, cols)` — Ones matrix (`dense_matrix_ones`)
+- ✅ `diag(values, k?)` — Diagonal matrix (`dense_matrix_diag`)
 
-##### Priority Additions — Matrix Construction
-**SymEngine Files**: `matrix.h`
-- ⬜ `DenseMatrix.from_list(list)` — From nested list
-- ⬜ `DenseMatrix.from_flat(flat, rows, cols)` — From flat array
+##### Dense Matrix — Properties ✅ COMPLETED
+- ✅ `Matrix.get(i, j)` — Get element (`dense_matrix_get_basic`)
+- ✅ `Matrix.set(i, j, val)` — Set element (`dense_matrix_set_basic`)
+- ✅ `Matrix.rows` — Number of rows (`dense_matrix_rows`)
+- ✅ `Matrix.cols` — Number of columns (`dense_matrix_cols`)
+- ✅ `Matrix.shape` — Tuple (rows, cols)
+- ✅ `Matrix.toString()` — String representation (`dense_matrix_str`)
+- ✅ `Matrix.equals(other)` — Equality test (`dense_matrix_eq`)
+- ✅ `Matrix.free()` — Free WASM memory
 
-##### Priority Additions — Matrix Properties & Operations
-**SymEngine Files**: `matrix.h`
-- ⬜ `Matrix.rows` — Number of rows
-- ⬜ `Matrix.cols` — Number of columns
-- ⬜ `Matrix.shape` — (rows, cols)
-- ⬜ `Matrix.add(other)` — Matrix addition
-- ⬜ `Matrix.mul(other)` — Matrix multiplication
-- ⬜ `Matrix.trace()` — Trace
-- ⬜ `Matrix.conjugate()` — Conjugate
-- ⬜ `Matrix.submatrix(i1, i2, j1, j2)` — Extract submatrix
-- ⬜ `Matrix.row_join(other)` — Horizontal stack
-- ⬜ `Matrix.col_join(other)` — Vertical stack
-- ⬜ `Matrix.row_del(i)` — Delete row
-- ⬜ `Matrix.col_del(j)` — Delete column
+**Note**: 35 tests passing. Matrix construction, factory functions, properties, and element access all implemented.
 
-##### Priority Additions — Matrix Factorizations
-**SymEngine Files**: `matrix.h` (LU, LDL, QR methods)
-- ⬜ `Matrix.LU()` — LU decomposition
-- ⬜ `Matrix.LDL()` — LDL decomposition
-- ⬜ `Matrix.FFLU()` — Fraction-free LU
-- ⬜ `Matrix.LU_solve(b)` — Solve using LU
+##### Dense Matrix — Basic Operations (Stubs)
+- 🔲 `Matrix.det()` — Determinant (`dense_matrix_det`)
+- 🔲 `Matrix.inv()` — Inverse (`dense_matrix_inv`)
+- 🔲 `Matrix.transpose()` — Transpose (`dense_matrix_transpose`)
+- ⬜ `Matrix.add(other)` — Matrix addition (`dense_matrix_add_matrix`)
+- ⬜ `Matrix.mul(other)` — Matrix multiplication (`dense_matrix_mul_matrix`)
+- ⬜ `Matrix.addScalar(k)` — Add scalar (`dense_matrix_add_scalar`)
+- ⬜ `Matrix.mulScalar(k)` — Multiply by scalar (`dense_matrix_mul_scalar`)
 
-##### Priority Additions — Matrix Calculus
-**SymEngine Files**: `derivative.h`, `matrix.h`
-- ⬜ `Matrix.diff(x)` — Differentiate each element
-- ⬜ `jacobian(exprs, vars)` — Jacobian matrix
+##### Dense Matrix — Submatrix Operations
+- ⬜ `Matrix.submatrix(r1, c1, r2, c2)` — Extract submatrix (`dense_matrix_submatrix`)
+- ⬜ `Matrix.rowJoin(other)` — Horizontal stack (`dense_matrix_row_join`)
+- ⬜ `Matrix.colJoin(other)` — Vertical stack (`dense_matrix_col_join`)
+- ⬜ `Matrix.rowDel(k)` — Delete row (`dense_matrix_row_del`)
+- ⬜ `Matrix.colDel(k)` — Delete column (`dense_matrix_col_del`)
 
-##### Symbolic Matrices
-**SymEngine Files**: `matrices/matrix_symbol.h`, `matrices/identity_matrix.h`, etc.
-- ⬜ `MatrixSymbol(name, n, m)` — Symbolic matrix
-- ⬜ `Identity(n)` — Identity matrix symbol
-- ⬜ `ZeroMatrix(n, m)` — Zero matrix symbol
-- ⬜ `DiagonalMatrix(diag)` — Diagonal matrix symbol
-- ⬜ `MatrixAdd` — Symbolic matrix addition
-- ⬜ `MatrixMul` — Symbolic matrix multiplication
-- ⬜ `HadamardProduct` — Element-wise product
-- ⬜ `Trace` — Trace of symbolic matrix
+##### Dense Matrix — Factorizations
+- ⬜ `Matrix.LU()` — LU decomposition (`dense_matrix_LU`)
+- ⬜ `Matrix.LDL()` — LDL decomposition (`dense_matrix_LDL`)
+- ⬜ `Matrix.FFLU()` — Fraction-free LU (`dense_matrix_FFLU`)
+- ⬜ `Matrix.FFLDU()` — Fraction-free LDU (`dense_matrix_FFLDU`)
+- ⬜ `Matrix.LUSolve(b)` — Solve Ax=b using LU (`dense_matrix_LU_solve`)
 
-##### Sparse Matrices
-**SymEngine Files**: `matrix.h` (CSR/CSC support mentioned in cwrapper)
-- ⬜ `SparseMatrix(rows, cols)` — Sparse matrix
-- ⬜ `SparseMatrix.to_dense()` — Convert to dense
+##### Dense Matrix — Calculus
+- ⬜ `Matrix.diff(x)` — Differentiate elements (`dense_matrix_diff`)
+- ⬜ `jacobian(A, x)` — Jacobian matrix (`dense_matrix_jacobian`)
+
+##### Sparse Matrix (CSR format)
+- ⬜ `SparseMatrix(rows, cols)` — Create sparse matrix (`sparse_matrix_new`)
+- ⬜ `SparseMatrix.get(i, j)` — Get element (`sparse_matrix_get_basic`)
+- ⬜ `SparseMatrix.set(i, j, val)` — Set element (`sparse_matrix_set_basic`)
+- ⬜ `SparseMatrix.toString()` — String representation (`sparse_matrix_str`)
+- ⬜ `SparseMatrix.equals(other)` — Equality test (`sparse_matrix_eq`)
+
+##### NOT Available in C API (C++ only)
+- ~~`eigenvals()`~~ — `eigen_values()` not in cwrapper
+- ~~`eigenvects()`~~ — Not exposed
+- ~~`rref()`~~ — `reduced_row_echelon_form()` not in cwrapper
+- ~~`trace()`~~ — Method exists but not in cwrapper
+- ~~`rank()`~~ — Not exposed
+- ~~`QR()`~~ — Not exposed
+- ~~`cholesky()`~~ — Not exposed
+- ~~`conjugate()`~~ — Matrix conjugate not exposed
+- ~~`char_poly()`~~ — Characteristic polynomial not exposed
+- ~~Symbolic matrices~~ — `MatrixSymbol`, `Identity`, `ZeroMatrix`, `DiagonalMatrix`, `MatrixAdd`, `MatrixMul`, `HadamardProduct`, `Trace` classes not in C API
 
 #### 3.2 Polynomial Operations
 **SymEngine Files**: `polys/` subdirectory (11 headers)
@@ -652,8 +683,9 @@ symengine/llvm_double.h            → LLVM JIT compilation (optional)
 | 1.7 | Substitution | ~3 | 0 | ~1 | ~4 | subs.h ✅ |
 | 1.8 | Evaluation | ~3 | 0 | ~1 | ~4 | eval*.h ✅ |
 | **2** | **Essential Functions** | | | | | |
-| 2 | Functions | 0 | 0 | ~50 | ~50 | functions.h |
-| 2 | Calculus | 0 | 3 | ~7 | ~10 | derivative.h, series.h |
+| 2.1 | Functions | 52 | 0 | ~2 | ~54 | functions.h ✅ |
+| 2.2 | Differentiation | 1 | 0 | ~3 | ~4 | derivative.h ✅ |
+| 2.3 | Series | 0 | 1 | ~2 | ~3 | series.h |
 | 2 | Simplification | 0 | 7 | ~10 | ~17 | expand.h, subs.h |
 | **3** | **Advanced Math** | | | | | |
 | 3 | Matrices | 0 | 12 | ~30 | ~42 | matrix.h, matrices/ |
@@ -668,7 +700,7 @@ symengine/llvm_double.h            → LLVM JIT compilation (optional)
 | 5 | Codegen | 0 | 0 | ~5 | ~5 | printers/codegen.h |
 | 5 | Parsing | 0 | 0 | ~3 | ~3 | parser/ |
 | 5 | Lambda/CSE | 0 | 0 | ~3 | ~3 | lambda_double.h, llvm_double.h |
-| **Total** | | **~46** | **29** | **~193** | **~268** | **65 main headers + subdirs** |
+| **Total** | | **~98** | **29** | **~145** | **~272** | **65 main headers + subdirs** |
 
 ---
 

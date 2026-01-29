@@ -9,6 +9,9 @@
 #include <symengine/parser.h>
 #include <symengine/lambda_double.h>
 #include <symengine/solve.h>
+#include <symengine/series.h>
+#include <symengine/simplify.h>
+#include <symengine/basic.h>
 #ifdef HAVE_SYMENGINE_LLVM
 #include <symengine/llvm_double.h>
 using SymEngine::LLVMDoubleVisitor;
@@ -606,6 +609,18 @@ int basic_neq(const basic a, const basic b)
     }
 
 IMPLEMENT_ONE_ARG_FUNC(expand)
+IMPLEMENT_ONE_ARG_FUNC(simplify)
+IMPLEMENT_ONE_ARG_FUNC(rewrite_as_exp)
+IMPLEMENT_ONE_ARG_FUNC(rewrite_as_sin)
+IMPLEMENT_ONE_ARG_FUNC(rewrite_as_cos)
+
+CWRAPPER_OUTPUT_TYPE basic_as_real_imag(basic real, basic imag, const basic x)
+{
+    CWRAPPER_BEGIN
+    SymEngine::as_real_imag(x->m, SymEngine::outArg(real->m), SymEngine::outArg(imag->m));
+    CWRAPPER_END
+}
+
 IMPLEMENT_ONE_ARG_FUNC(neg)
 IMPLEMENT_ONE_ARG_FUNC(abs)
 IMPLEMENT_ONE_ARG_FUNC(erf)
@@ -646,6 +661,8 @@ IMPLEMENT_ONE_ARG_FUNC(log)
 IMPLEMENT_ONE_ARG_FUNC(floor)
 IMPLEMENT_ONE_ARG_FUNC(ceiling)
 IMPLEMENT_ONE_ARG_FUNC(sign)
+IMPLEMENT_ONE_ARG_FUNC(digamma)
+IMPLEMENT_ONE_ARG_FUNC(conjugate)
 
 #define IMPLEMENT_TWO_ARG_FUNC(func)                                           \
     CWRAPPER_OUTPUT_TYPE basic_##func(basic s, const basic a, const basic b)   \
@@ -661,6 +678,17 @@ IMPLEMENT_TWO_ARG_FUNC(lowergamma)
 IMPLEMENT_TWO_ARG_FUNC(uppergamma)
 IMPLEMENT_TWO_ARG_FUNC(beta)
 IMPLEMENT_TWO_ARG_FUNC(polygamma)
+
+CWRAPPER_OUTPUT_TYPE basic_series(basic s, const basic expr, const basic var, unsigned int prec)
+{
+    CWRAPPER_BEGIN
+    SYMENGINE_ASSERT(is_a<Symbol>(*var->m));
+    auto result = SymEngine::series(expr->m,
+                                    rcp_static_cast<const Symbol>(var->m),
+                                    prec);
+    s->m = result->as_basic();
+    CWRAPPER_END
+}
 
 #define IMPLEMENT_STR_CONVERSION(name, func)                                   \
     char *basic_##name(const basic s)                                          \

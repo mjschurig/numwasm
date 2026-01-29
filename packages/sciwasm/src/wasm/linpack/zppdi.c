@@ -1,0 +1,207 @@
+/* zppdi.f -- translated by f2c (version 20240504).
+   You must link the resulting object file with libf2c:
+	on Microsoft Windows system, link with libf2c.lib;
+	on Linux or Unix systems, link with .../path/to/libf2c.a -lm
+	or, if you install libf2c.a in a standard place, with -lf2c -lm
+	-- in that order, at the end of the command line, as in
+		cc *.o -lf2c -lm
+	Source for libf2c is in /netlib/f2c/libf2c.zip, e.g.,
+
+		http://netlib.org/f2c/libf2c.zip
+*/
+
+#include "f2c.h"
+
+/* Table of constant values */
+
+static doublecomplex c_b11 = {1.,0.};
+static integer c__1 = 1;
+
+/* Subroutine */ int zppdi_(doublecomplex *ap, integer *n, doublereal *det, 
+	integer *job)
+{
+    /* System generated locals */
+    integer i__1, i__2, i__3;
+    doublereal d__1;
+    doublecomplex z__1;
+
+    /* Builtin functions */
+    void z_div(doublecomplex *, doublecomplex *, doublecomplex *), d_cnjg(
+	    doublecomplex *, doublecomplex *);
+
+    /* Local variables */
+    integer i__, j, k;
+    doublereal s;
+    doublecomplex t;
+    integer j1, k1, ii, jj, kj, kk, jm1, kp1;
+    extern /* Subroutine */ int zscal_(integer *, doublecomplex *, 
+	    doublecomplex *, integer *), zaxpy_(integer *, doublecomplex *, 
+	    doublecomplex *, integer *, doublecomplex *, integer *);
+
+
+/*     zppdi computes the determinant and inverse */
+/*     of a complex*16 hermitian positive definite matrix */
+/*     using the factors computed by zppco or zppfa . */
+
+/*     on entry */
+
+/*        ap      complex*16 (n*(n+1)/2) */
+/*                the output from zppco or zppfa. */
+
+/*        n       integer */
+/*                the order of the matrix  a . */
+
+/*        job     integer */
+/*                = 11   both determinant and inverse. */
+/*                = 01   inverse only. */
+/*                = 10   determinant only. */
+
+/*     on return */
+
+/*        ap      the upper triangular half of the inverse . */
+/*                the strict lower triangle is unaltered. */
+
+/*        det     double precision(2) */
+/*                determinant of original matrix if requested. */
+/*                otherwise not referenced. */
+/*                determinant = det(1) * 10.0**det(2) */
+/*                with  1.0 .le. det(1) .lt. 10.0 */
+/*                or  det(1) .eq. 0.0 . */
+
+/*     error condition */
+
+/*        a division by zero will occur if the input factor contains */
+/*        a zero on the diagonal and the inverse is requested. */
+/*        it will not occur if the subroutines are called correctly */
+/*        and if zpoco or zpofa has set info .eq. 0 . */
+
+/*     linpack.  this version dated 08/14/78 . */
+/*     cleve moler, university of new mexico, argonne national lab. */
+
+/*     subroutines and functions */
+
+/*     blas zaxpy,zscal */
+/*     fortran dconjg,mod */
+
+/*     internal variables */
+
+
+/*     compute determinant */
+
+    /* Parameter adjustments */
+    --det;
+    --ap;
+
+    /* Function Body */
+    if (*job / 10 == 0) {
+	goto L70;
+    }
+    det[1] = 1.;
+    det[2] = 0.;
+    s = 10.;
+    ii = 0;
+    i__1 = *n;
+    for (i__ = 1; i__ <= i__1; ++i__) {
+	ii += i__;
+	i__2 = ii;
+/* Computing 2nd power */
+	d__1 = ap[i__2].r;
+	det[1] = d__1 * d__1 * det[1];
+/*        ...exit */
+	if (det[1] == 0.) {
+	    goto L60;
+	}
+L10:
+	if (det[1] >= 1.) {
+	    goto L20;
+	}
+	det[1] = s * det[1];
+	det[2] += -1.;
+	goto L10;
+L20:
+L30:
+	if (det[1] < s) {
+	    goto L40;
+	}
+	det[1] /= s;
+	det[2] += 1.;
+	goto L30;
+L40:
+/* L50: */
+	;
+    }
+L60:
+L70:
+
+/*     compute inverse(r) */
+
+    if (*job % 10 == 0) {
+	goto L140;
+    }
+    kk = 0;
+    i__1 = *n;
+    for (k = 1; k <= i__1; ++k) {
+	k1 = kk + 1;
+	kk += k;
+	i__2 = kk;
+	z_div(&z__1, &c_b11, &ap[kk]);
+	ap[i__2].r = z__1.r, ap[i__2].i = z__1.i;
+	i__2 = kk;
+	z__1.r = -ap[i__2].r, z__1.i = -ap[i__2].i;
+	t.r = z__1.r, t.i = z__1.i;
+	i__2 = k - 1;
+	zscal_(&i__2, &t, &ap[k1], &c__1);
+	kp1 = k + 1;
+	j1 = kk + 1;
+	kj = kk + k;
+	if (*n < kp1) {
+	    goto L90;
+	}
+	i__2 = *n;
+	for (j = kp1; j <= i__2; ++j) {
+	    i__3 = kj;
+	    t.r = ap[i__3].r, t.i = ap[i__3].i;
+	    i__3 = kj;
+	    ap[i__3].r = 0., ap[i__3].i = 0.;
+	    zaxpy_(&k, &t, &ap[k1], &c__1, &ap[j1], &c__1);
+	    j1 += j;
+	    kj += j;
+/* L80: */
+	}
+L90:
+/* L100: */
+	;
+    }
+
+/*        form  inverse(r) * ctrans(inverse(r)) */
+
+    jj = 0;
+    i__1 = *n;
+    for (j = 1; j <= i__1; ++j) {
+	j1 = jj + 1;
+	jj += j;
+	jm1 = j - 1;
+	k1 = 1;
+	kj = j1;
+	if (jm1 < 1) {
+	    goto L120;
+	}
+	i__2 = jm1;
+	for (k = 1; k <= i__2; ++k) {
+	    d_cnjg(&z__1, &ap[kj]);
+	    t.r = z__1.r, t.i = z__1.i;
+	    zaxpy_(&k, &t, &ap[j1], &c__1, &ap[k1], &c__1);
+	    k1 += k;
+	    ++kj;
+/* L110: */
+	}
+L120:
+	d_cnjg(&z__1, &ap[jj]);
+	t.r = z__1.r, t.i = z__1.i;
+	zscal_(&j, &t, &ap[j1], &c__1);
+/* L130: */
+    }
+L140:
+    return 0;
+} /* zppdi_ */
+

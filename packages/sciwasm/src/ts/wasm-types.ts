@@ -114,6 +114,51 @@ export interface SciWasmModule {
   _sp_coo_tocsr_f64(n_row: number, n_col: number, nnz: number, Ai: number, Aj: number, Ax: number, Bp: number, Bj: number, Bx: number): void;
   _sp_coo_todense_f64(n_row: number, n_col: number, nnz: number, Ai: number, Aj: number, Ax: number, Bx: number, fortran: number): void;
   _sp_coo_matvec_f64(nnz: number, Ai: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
+
+  // DIA sparse matrix operations
+  _sp_dia_matvec_f64(n_row: number, n_col: number, n_diags: number, L: number,
+    offsets: number, diags: number, Xx: number, Yx: number): void;
+  _sp_dia_tocsr_f64(n_rows: number, n_cols: number, n_diags: number, L: number,
+    offsets: number, data: number, order: number,
+    csr_data: number, indices: number, indptr: number): number;
+
+  // BSR (Block Sparse Row) matrix operations
+  _sp_bsr_matvec_f64(n_brow: number, n_bcol: number, R: number, C: number,
+    Ap: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
+  _sp_bsr_tocsr_f64(n_brow: number, n_bcol: number, R: number, C: number,
+    Ap: number, Aj: number, Ax: number, Bp: number, Bj: number, Bx: number): void;
+  _sp_bsr_transpose_f64(n_brow: number, n_bcol: number, R: number, C: number,
+    Ap: number, Aj: number, Ax: number, Bp: number, Bi: number, Bx: number): void;
+  _sp_bsr_diagonal_f64(k: number, n_brow: number, n_bcol: number, R: number, C: number,
+    Ap: number, Aj: number, Ax: number, Yx: number): void;
+
+  // Sparse matrix construction functions
+  _sp_coo_tril_f64_entry(nnz: number, k: number,
+    row_in: number, col_in: number, data_in: number,
+    row_out: number, col_out: number, data_out: number): number;
+  _sp_coo_triu_f64_entry(nnz: number, k: number,
+    row_in: number, col_in: number, data_in: number,
+    row_out: number, col_out: number, data_out: number): number;
+  _sp_csr_hstack_f64_entry(n_blocks: number, n_row: number, n_col: number,
+    Ap_cat: number, Aj_cat: number, Ax_cat: number,
+    Bp: number, Bj: number, Bx: number): void;
+  _sp_coo_vstack_f64_entry(n_blocks: number, n_row: number, nnz_per_block: number,
+    row_cat: number, col_cat: number, data_cat: number,
+    row_out: number, col_out: number, data_out: number): void;
+  _sp_coo_hstack_f64_entry(n_blocks: number, n_col: number, nnz_per_block: number,
+    row_cat: number, col_cat: number, data_cat: number,
+    row_out: number, col_out: number, data_out: number): void;
+  _sp_coo_block_diag_f64_entry(n_blocks: number, n_row: number, n_col: number,
+    nnz_per_block: number, row_cat: number, col_cat: number, data_cat: number,
+    row_out: number, col_out: number, data_out: number): void;
+  _sp_coo_kron_f64_entry(nnz_A: number, nnz_B: number, B_nrow: number, B_ncol: number,
+    A_row: number, A_col: number, A_data: number,
+    B_row: number, B_col: number, B_data: number,
+    out_row: number, out_col: number, out_data: number): void;
+  _sp_coo_random_f64_entry(nnz: number, n_row: number, n_col: number,
+    flat_indices: number, random_values: number,
+    row_out: number, col_out: number, data_out: number): void;
+
   _sp_malloc(size: number): number;
   _sp_free(ptr: number): void;
 

@@ -6,17 +6,11 @@
 import type { Expr, Symbol } from '../core/index.js';
 import { NotImplementedError } from '../errors.js';
 
-/**
- * Differentiate an expression.
- * Mirrors sympy.diff.
- */
-export function diff(
-  _expr: Expr,
-  _symbol: Symbol,
-  _n?: number
-): Expr {
-  throw new NotImplementedError('symwasm.calculus.diff');
-}
+// Re-export diff from core (implemented in Phase 2.2)
+export { diff } from '../core/index.js';
+
+// Re-export series from core (implemented in Phase 2.3)
+export { series } from '../core/index.js';
 
 /**
  * Compute the indefinite or definite integral.
@@ -40,19 +34,6 @@ export function limit(
   _dir?: '+' | '-'
 ): Expr {
   throw new NotImplementedError('symwasm.calculus.limit');
-}
-
-/**
- * Compute a power series expansion.
- * Mirrors sympy.series.
- */
-export function series(
-  _expr: Expr,
-  _symbol: Symbol,
-  _point?: number | Expr,
-  _n?: number
-): Expr {
-  throw new NotImplementedError('symwasm.calculus.series');
 }
 
 /**

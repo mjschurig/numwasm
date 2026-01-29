@@ -53,7 +53,7 @@ SOURCES=(
   "prime_sieve.cpp"
   "rational.cpp"
   "real_double.cpp"
-  "refine.cpp"
+  # "refine.cpp"  # Disabled: requires assumptions functions not available
   "rewrite.cpp"
   "rings.cpp"
   "series.cpp"
@@ -65,6 +65,7 @@ SOURCES=(
   "sparse_matrix.cpp"
   "symbol.cpp"
   "symengine_rcp.cpp"
+  "test_visitors.cpp"
   "tuple.cpp"
   "visitor.cpp"
   # Printers
@@ -198,7 +199,81 @@ EXPORTED_FUNCTIONS='[
     "_mapbasicbasic_insert",
     "_mapbasicbasic_size",
     "_basic_evalf",
-    "_real_double_get_d"
+    "_real_double_get_d",
+    "_basic_sin",
+    "_basic_cos",
+    "_basic_tan",
+    "_basic_cot",
+    "_basic_sec",
+    "_basic_csc",
+    "_basic_asin",
+    "_basic_acos",
+    "_basic_atan",
+    "_basic_acot",
+    "_basic_asec",
+    "_basic_acsc",
+    "_basic_atan2",
+    "_basic_sinh",
+    "_basic_cosh",
+    "_basic_tanh",
+    "_basic_coth",
+    "_basic_sech",
+    "_basic_csch",
+    "_basic_asinh",
+    "_basic_acosh",
+    "_basic_atanh",
+    "_basic_acoth",
+    "_basic_asech",
+    "_basic_acsch",
+    "_basic_exp",
+    "_basic_log",
+    "_basic_sqrt",
+    "_basic_cbrt",
+    "_basic_lambertw",
+    "_basic_abs",
+    "_basic_sign",
+    "_basic_floor",
+    "_basic_ceiling",
+    "_basic_gamma",
+    "_basic_loggamma",
+    "_basic_erf",
+    "_basic_erfc",
+    "_basic_zeta",
+    "_basic_dirichlet_eta",
+    "_basic_beta",
+    "_basic_lowergamma",
+    "_basic_uppergamma",
+    "_basic_polygamma",
+    "_basic_kronecker_delta",
+    "_basic_max",
+    "_basic_min",
+    "_complex_base_real_part",
+    "_complex_base_imaginary_part",
+    "_basic_digamma",
+    "_basic_conjugate",
+    "_basic_diff",
+    "_basic_series",
+    "_basic_expand",
+    "_basic_simplify",
+    "_basic_as_numer_denom",
+    "_basic_rewrite_as_exp",
+    "_basic_rewrite_as_sin",
+    "_basic_rewrite_as_cos",
+    "_basic_as_real_imag",
+    "_dense_matrix_new",
+    "_dense_matrix_new_rows_cols",
+    "_dense_matrix_new_vec",
+    "_dense_matrix_free",
+    "_dense_matrix_rows",
+    "_dense_matrix_cols",
+    "_dense_matrix_str",
+    "_dense_matrix_eq",
+    "_dense_matrix_get_basic",
+    "_dense_matrix_set_basic",
+    "_dense_matrix_eye",
+    "_dense_matrix_zeros",
+    "_dense_matrix_ones",
+    "_dense_matrix_diag"
 ]'
 
 EXPORTED_RUNTIME='["ccall", "cwrap", "getValue", "setValue", "UTF8ToString", "stringToUTF8", "lengthBytesUTF8", "HEAPF64", "HEAP32", "HEAPU8"]'
