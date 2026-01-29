@@ -38,8 +38,7 @@ function fromWasmI64(wasm: any, ptr: number, len: number): number[] {
     // For now, assume values fit in 32 bits (tree indices typically do)
     // Read as int32 pairs but only use lower 32 bits
     const low = heap32[offset + i * 2];
-    const high = heap32[offset + i * 2 + 1];
-    // If high !== 0, we have a real 64-bit value, but for indices this shouldn't happen
+    // Skip high word (heap32[offset + i * 2 + 1]) - for indices this is always 0
     result.push(low);
   }
   return result;

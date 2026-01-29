@@ -158,7 +158,7 @@ async function factorial2Array(
  */
 function factorial2ArrayExactImpl(
   n: number[],
-  extend: string
+  _extend: string
 ): (number | bigint)[] {
   // Validate all inputs are integers
   for (const val of n) {

@@ -1,2 +1,4 @@
 .build-wasm
 .gmp-build
+gmp-*
+*.tar.xz

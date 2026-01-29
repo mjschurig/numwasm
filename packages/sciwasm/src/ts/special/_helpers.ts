@@ -179,9 +179,3 @@ export function factorialArrayExact(n: number[], k: number = 1): (number | bigin
   return n.map(val => factorials.get(val)!);
 }
 
-/**
- * Check if a number is a safe integer (can be represented precisely as a number).
- */
-function isSafeInteger(n: number): boolean {
-  return Number.isSafeInteger(n);
-}

@@ -174,7 +174,7 @@ async function factorialkArray(
 function factorialkArrayExactImpl(
   n: number[],
   k: number,
-  extend: string
+  _extend: string
 ): (number | bigint)[] {
   // Validate all inputs are integers
   for (const val of n) {

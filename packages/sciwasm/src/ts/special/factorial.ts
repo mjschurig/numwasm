@@ -4,7 +4,7 @@
  */
 
 import { gamma } from './gamma.js';
-import { factorial64, rangeProd, factorialArrayExact } from './_helpers.js';
+import { factorial64, factorialArrayExact } from './_helpers.js';
 
 export interface FactorialOptions {
   /**
@@ -146,7 +146,7 @@ async function factorialArray(
  */
 function factorialArrayExactImpl(
   n: number[],
-  extend: string
+  _extend: string
 ): (number | bigint)[] {
   // Validate all inputs are integers
   for (const val of n) {

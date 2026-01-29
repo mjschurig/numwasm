@@ -20,13 +20,15 @@
   },
   "scripts": {
     "copy:symengine": "./scripts/copy-symengine.sh",
-    "prebuild:wasm": "pnpm run copy:symengine",
+    "build:gmp": "./scripts/build-gmp.sh",
+    "prebuild:wasm": "pnpm run copy:symengine && pnpm run build:gmp",
     "build:wasm": "./scripts/build-wasm.sh",
     "build:lib": "vite build",
     "build": "pnpm run build:wasm && pnpm run build:lib",
     "test": "vitest run",
     "clean": "rm -rf dist/ .build-wasm/",
-    "clean:all": "pnpm run clean && rm -rf src/wasm/symengine/",
+    "clean:gmp": "rm -rf .gmp-build/ gmp-*",
+    "clean:all": "pnpm run clean && pnpm run clean:gmp && rm -rf src/wasm/symengine/",
     "docs": "typedoc",
     "lint": "eslint src tests --ext .ts"
   },
