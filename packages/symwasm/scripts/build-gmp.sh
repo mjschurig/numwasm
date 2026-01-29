@@ -7,7 +7,7 @@ echo "Building GMP for WebAssembly..."
 GMP_VERSION="6.3.0"
 GMP_DIR="gmp-${GMP_VERSION}"
 GMP_TARBALL="${GMP_DIR}.tar.xz"
-GMP_URL="https://ftp.gnu.org/gnu/gmp/${GMP_TARBALL}"
+GMP_URL="https://gmplib.org/download/gmp/${GMP_TARBALL}"
 BUILD_DIR=".gmp-build"
 
 # Check if already built
