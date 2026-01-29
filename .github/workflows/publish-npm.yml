@@ -91,6 +91,13 @@ jobs:
         working-directory: mcp-servers/${{ matrix.server }}
         run: pnpm install
 
+      - name: Set version from tag
+        working-directory: mcp-servers/${{ matrix.server }}
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "Setting version to: $VERSION"
+          npm version $VERSION --no-git-tag-version --allow-same-version
+
       - name: Publish MCP server to npm
         working-directory: mcp-servers/${{ matrix.server }}
         run: pnpm publish --no-git-checks --access public

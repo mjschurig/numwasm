@@ -8,9 +8,15 @@
 #define SYMENGINE_VERSION "0.11.0"
 
 // Core features for WASM build
+#ifndef WITH_SYMENGINE_RCP
 #define WITH_SYMENGINE_RCP
+#endif
+#ifndef WITH_SYMENGINE_THREAD_SAFE
 #define WITH_SYMENGINE_THREAD_SAFE
+#endif
+#ifndef HAVE_SYMENGINE_GMP
 #define HAVE_SYMENGINE_GMP
+#endif
 
 // C++11 features (supported by Emscripten)
 #define HAVE_DEFAULT_CONSTRUCTORS

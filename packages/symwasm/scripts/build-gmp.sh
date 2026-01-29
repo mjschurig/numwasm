@@ -7,8 +7,16 @@ echo "Building GMP for WebAssembly..."
 GMP_VERSION="6.3.0"
 GMP_DIR="gmp-${GMP_VERSION}"
 GMP_TARBALL="${GMP_DIR}.tar.xz"
-GMP_URL="https://gmplib.org/download/gmp/${GMP_TARBALL}"
 BUILD_DIR=".gmp-build"
+
+# Mirror URLs (try in order)
+GMP_MIRRORS=(
+  "https://ftp.gnu.org/gnu/gmp/${GMP_TARBALL}"
+  "https://mirrors.kernel.org/gnu/gmp/${GMP_TARBALL}"
+  "https://mirror.us-midwest-1.nexcess.net/gnu/gmp/${GMP_TARBALL}"
+  "https://ftpmirror.gnu.org/gmp/${GMP_TARBALL}"
+  "https://gmplib.org/download/gmp/${GMP_TARBALL}"
+)
 
 # Check if already built
 if [ -f "$BUILD_DIR/lib/libgmp.a" ]; then
@@ -24,7 +32,29 @@ BUILD_DIR_ABS="$(cd "$BUILD_DIR" && pwd)"
 # Download GMP if not present
 if [ ! -f "$GMP_TARBALL" ]; then
   echo "Downloading GMP $GMP_VERSION..."
-  curl -L -o "$GMP_TARBALL" "$GMP_URL"
+  downloaded=0
+  for mirror in "${GMP_MIRRORS[@]}"; do
+    echo "  Trying: $mirror"
+    if curl -L --connect-timeout 10 --max-time 120 -o "$GMP_TARBALL" "$mirror" 2>/dev/null; then
+      # Verify file was actually downloaded (not empty or error page)
+      if [ -s "$GMP_TARBALL" ] && file "$GMP_TARBALL" | grep -q "XZ compressed"; then
+        echo "  Success!"
+        downloaded=1
+        break
+      else
+        echo "  Downloaded file is invalid, trying next mirror..."
+        rm -f "$GMP_TARBALL"
+      fi
+    else
+      echo "  Failed, trying next mirror..."
+      rm -f "$GMP_TARBALL"
+    fi
+  done
+
+  if [ $downloaded -eq 0 ]; then
+    echo "Error: Failed to download GMP from all mirrors"
+    exit 1
+  fi
 fi
 
 # Extract if not already extracted

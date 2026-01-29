@@ -184,7 +184,7 @@ EXPORTED_FUNCTIONS='[
     "_free"
 ]'
 
-EXPORTED_RUNTIME='["ccall", "cwrap", "getValue", "setValue", "HEAPF64", "HEAPF32", "HEAP32", "HEAP8", "HEAPU8", "HEAPU32", "addFunction", "removeFunction"]'
+EXPORTED_RUNTIME='["ccall", "cwrap", "getValue", "setValue", "addFunction", "removeFunction"]'
 
 # Link flags (shared between CJS and ESM)
 LINK_FLAGS=(

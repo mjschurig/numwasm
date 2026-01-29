@@ -428,7 +428,7 @@ emcc \
         "_malloc",
         "_free"
     ]' \
-    -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "getValue", "setValue", "HEAPF64", "HEAPF32", "HEAP32", "HEAP16", "HEAP8", "HEAPU32", "HEAPU16", "HEAPU8"]' \
+    -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "getValue", "setValue"]' \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s INITIAL_MEMORY=16777216 \
     -s STACK_SIZE=1048576 \
@@ -839,7 +839,7 @@ emcc \
         "_malloc",
         "_free"
     ]' \
-    -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "getValue", "setValue", "HEAPF64", "HEAPF32", "HEAP32", "HEAP16", "HEAP8", "HEAPU32", "HEAPU16", "HEAPU8"]' \
+    -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "getValue", "setValue"]' \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s INITIAL_MEMORY=16777216 \
     -s STACK_SIZE=1048576 \

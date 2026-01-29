@@ -276,7 +276,7 @@ EXPORTED_FUNCTIONS='[
     "_dense_matrix_diag"
 ]'
 
-EXPORTED_RUNTIME='["ccall", "cwrap", "getValue", "setValue", "UTF8ToString", "stringToUTF8", "lengthBytesUTF8", "HEAPF64", "HEAP32", "HEAPU8"]'
+EXPORTED_RUNTIME='["ccall", "cwrap", "getValue", "setValue", "UTF8ToString", "stringToUTF8", "lengthBytesUTF8"]'
 
 # Link flags (following sciwasm pattern - bare flags, no quotes around -s)
 LINK_FLAGS=(
