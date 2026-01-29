@@ -50,7 +50,7 @@ export class SymEngineObject {
   free(): void {
     if (this.ptr) {
       const wasm = getWasmModule();
-      wasm._basic_free_stack(this.ptr);
+      wasm._basic_free_heap(this.ptr);
       this.ptr = 0;
     }
   }
@@ -109,11 +109,12 @@ export class SymEngineObject {
 
 /**
  * Helper to allocate and manage SymEngine Basic objects
+ * Uses heap allocation for proper WASM memory management
  * @returns A new SymEngineObject wrapper
  */
 export function createBasic(): SymEngineObject {
   const wasm = getWasmModule();
-  const ptr = wasm._basic_new_stack();
+  const ptr = wasm._basic_new_heap();
   return new SymEngineObject(ptr);
 }
 
@@ -243,7 +244,7 @@ export class SymEngineSet {
       throw new Error('Cannot get element from freed SymEngineSet');
     }
     const wasm = getWasmModule();
-    const resultPtr = wasm._basic_new_stack();
+    const resultPtr = wasm._basic_new_heap();
     wasm._setbasic_get(this.ptr, n, resultPtr);
     return new SymEngineObject(resultPtr);
   }

@@ -53,12 +53,19 @@ async function loadWasmModuleNode(): Promise<SymwasmModule> {
     currentDir = path.dirname(fileURLToPath(import.meta.url));
   }
 
-  // Walk up to find dist/wasm/symwasm.cjs
+  // Walk up to find wasm/symwasm.cjs or dist/wasm/symwasm.cjs
   let wasmPath: string | null = null;
   for (let i = 0; i < 5; i++) {
+    // Check direct wasm/ subdirectory (for when running from dist/)
     const candidate = path.join(currentDir, 'wasm', 'symwasm.cjs');
     if (existsSync(candidate)) {
       wasmPath = candidate;
+      break;
+    }
+    // Check dist/wasm/ subdirectory (for when running from src/ during tests)
+    const distCandidate = path.join(currentDir, 'dist', 'wasm', 'symwasm.cjs');
+    if (existsSync(distCandidate)) {
+      wasmPath = distCandidate;
       break;
     }
     currentDir = path.dirname(currentDir);

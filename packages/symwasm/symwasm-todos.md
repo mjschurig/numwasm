@@ -75,12 +75,13 @@ For each function/module, follow these steps in order:
 - ✅ `Symbol._fromWasm()` — Internal factory for creating Symbol from WASM object
 - **Note**: Full functionality requires WASM-backed expressions (Phase 1.3+). Sentinel constants (pi, E, I, oo) work with limited functionality.
 
-#### 1.3 Symbols and Variables
+#### 1.3 Symbols and Variables ✅ COMPLETED
 **SymEngine Files**: `symbol.h`, `symbol.cpp`
-- 🔲 `Symbol(name, assumptions?)` — Create symbolic variable
-- 🔲 `symbols(names, assumptions?)` — Create multiple symbols
+- ✅ `Symbol(name, assumptions?)` — Create symbolic variable (uses `_symbol_set`)
+- ✅ `symbols(names, assumptions?)` — Create multiple symbols from space/comma-separated string
 - ⬜ `Dummy(name?)` — Temporary symbol (like SymPy Dummy)
 - ⬜ `Wild(name)` — Wildcard for pattern matching
+- **Note**: Also fixed WASM memory management to use `_basic_new_heap`/`_basic_free_heap` instead of stack allocation
 
 #### 1.4 Number Types
 **SymEngine Files**: `number.h`, `integer.h`, `rational.h`, `real_double.h`, `complex_double.h`, `complex.h`

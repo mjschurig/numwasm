@@ -24,16 +24,19 @@ describe('symwasm module exports', () => {
 });
 
 describe('symwasm stubs: core module', () => {
-  it('Symbol constructor throws NotImplementedError', () => {
-    expect(() => new sym.core.Symbol('x')).toThrow(NotImplementedError);
-  });
-
-  it('symbols() throws NotImplementedError', () => {
-    expect(() => sym.core.symbols('x y z')).toThrow(NotImplementedError);
-  });
+  // Note: Symbol and symbols() are now implemented (Phase 1.3)
+  // Tests for them are in symbol.test.ts
 
   it('Integer constructor throws NotImplementedError', () => {
     expect(() => new sym.core.Integer(42)).toThrow(NotImplementedError);
+  });
+
+  it('Rational constructor throws NotImplementedError', () => {
+    expect(() => new sym.core.Rational(1, 2)).toThrow(NotImplementedError);
+  });
+
+  it('Float constructor throws NotImplementedError', () => {
+    expect(() => new sym.core.Float(3.14)).toThrow(NotImplementedError);
   });
 
   it('sentinel constants exist and have correct string representation', () => {

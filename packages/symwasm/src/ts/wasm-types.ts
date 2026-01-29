@@ -47,11 +47,13 @@ export interface EmscriptenModule {
  */
 export interface SymwasmModule extends EmscriptenModule {
   // === Memory Management ===
-  _basic_new_stack(): number;
+  _basic_new_stack(): number; // For stack-allocated basic (requires pre-allocated memory)
   _basic_free_stack(ptr: number): void;
+  _basic_new_heap(): number; // For heap-allocated basic (allocates and returns pointer)
+  _basic_free_heap(ptr: number): void;
 
   // === Symbol Creation ===
-  _symbol_set(ptr: number, name: string): number;
+  _symbol_set(ptr: number, namePtr: number): number; // namePtr is a C string pointer
 
   // === Number Creation ===
   _integer_set_si(ptr: number, value: number): number;
@@ -106,16 +108,31 @@ export interface SymwasmModuleFactory {
 /**
  * SymEngine type IDs (from type_codes.inc)
  * These correspond to the TypeID enum in SymEngine
+ * Note: Values depend on compile-time configuration (MPFR, MPC, PIRANHA, FLINT)
+ * These values are empirically determined from the WASM build
  */
 export enum SymEngineTypeID {
   SYMENGINE_INTEGER = 0,
   SYMENGINE_RATIONAL = 1,
   SYMENGINE_COMPLEX = 2,
-  SYMENGINE_REAL_DOUBLE = 3,
-  SYMENGINE_SYMBOL = 4,
-  SYMENGINE_ADD = 5,
-  SYMENGINE_MUL = 6,
-  SYMENGINE_POW = 7,
+  SYMENGINE_COMPLEX_DOUBLE = 3,
+  SYMENGINE_REAL_MPFR = 4,
+  SYMENGINE_COMPLEX_MPC = 5,
+  SYMENGINE_REAL_DOUBLE = 6,
+  SYMENGINE_INFTY = 7,
+  SYMENGINE_NOT_A_NUMBER = 8,
+  SYMENGINE_URATPSERIESPIRANHA = 9,
+  SYMENGINE_UPSERIESPIRANHA = 10,
+  SYMENGINE_URATPSERIESFLINT = 11,
+  SYMENGINE_NUMBER_WRAPPER = 12,
+  // NUMBER_WRAPPER marks the end of Number subclasses
+  SYMENGINE_SYMBOL = 13,
+  SYMENGINE_DUMMY = 14,
+  SYMENGINE_MUL = 15,
+  SYMENGINE_ADD = 16,
+  SYMENGINE_POW = 17,
+  // ... more types follow
+  SYMENGINE_CONSTANT = 31,
   // Add more as needed
 }
 

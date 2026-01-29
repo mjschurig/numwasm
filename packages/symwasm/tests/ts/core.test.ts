@@ -52,14 +52,16 @@ describe('core: Expr base class', () => {
   describe('SymEngineTypeID enum', () => {
     it('exports SymEngineTypeID enum with correct values', () => {
       expect(sym.core.SymEngineTypeID).toBeDefined();
+      // Note: Values depend on compile-time configuration
+      // These are empirically determined from the WASM build
       expect(sym.core.SymEngineTypeID.SYMENGINE_INTEGER).toBe(0);
       expect(sym.core.SymEngineTypeID.SYMENGINE_RATIONAL).toBe(1);
       expect(sym.core.SymEngineTypeID.SYMENGINE_COMPLEX).toBe(2);
-      expect(sym.core.SymEngineTypeID.SYMENGINE_REAL_DOUBLE).toBe(3);
-      expect(sym.core.SymEngineTypeID.SYMENGINE_SYMBOL).toBe(4);
-      expect(sym.core.SymEngineTypeID.SYMENGINE_ADD).toBe(5);
-      expect(sym.core.SymEngineTypeID.SYMENGINE_MUL).toBe(6);
-      expect(sym.core.SymEngineTypeID.SYMENGINE_POW).toBe(7);
+      expect(sym.core.SymEngineTypeID.SYMENGINE_REAL_DOUBLE).toBe(6);
+      expect(sym.core.SymEngineTypeID.SYMENGINE_SYMBOL).toBe(13);
+      expect(sym.core.SymEngineTypeID.SYMENGINE_ADD).toBe(16);
+      expect(sym.core.SymEngineTypeID.SYMENGINE_MUL).toBe(15);
+      expect(sym.core.SymEngineTypeID.SYMENGINE_POW).toBe(17);
     });
   });
 
