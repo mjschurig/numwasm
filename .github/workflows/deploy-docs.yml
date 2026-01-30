@@ -32,23 +32,115 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
-      - name: Install Emscripten
+      - name: Install dependencies
+        run: pnpm install
+
+      # ============ NUMWASM ============
+      - name: Restore numwasm from cache
+        id: cache-numwasm
+        uses: actions/cache/restore@v4
+        with:
+          path: wasm-artifacts/numwasm-dist
+          key: numwasm-dist-${{ hashFiles('packages/numwasm/src/wasm/**', 'packages/numwasm/scripts/*.sh') }}
+
+      - name: Restore numwasm dist from cache
+        if: steps.cache-numwasm.outputs.cache-hit == 'true'
+        run: cp -r wasm-artifacts/numwasm-dist packages/numwasm/dist
+
+      - name: Install Emscripten (for numwasm)
+        if: steps.cache-numwasm.outputs.cache-hit != 'true'
         uses: mymindstorm/setup-emsdk@v14
         with:
           version: '3.1.51'
 
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build numwasm (WASM + lib)
+      - name: Build numwasm
+        if: steps.cache-numwasm.outputs.cache-hit != 'true'
         run: pnpm --filter numwasm run build
 
+      - name: Cache numwasm
+        if: steps.cache-numwasm.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p wasm-artifacts
+          cp -r packages/numwasm/dist wasm-artifacts/numwasm-dist
+
+      - name: Save numwasm to cache
+        if: steps.cache-numwasm.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: wasm-artifacts/numwasm-dist
+          key: numwasm-dist-${{ hashFiles('packages/numwasm/src/wasm/**', 'packages/numwasm/scripts/*.sh') }}
+
+      # ============ SCIWASM ============
+      - name: Restore sciwasm from cache
+        id: cache-sciwasm
+        uses: actions/cache/restore@v4
+        with:
+          path: wasm-artifacts/sciwasm-dist
+          key: sciwasm-dist-${{ hashFiles('packages/sciwasm/src/wasm/**', 'packages/sciwasm/scripts/*.sh') }}
+
+      - name: Restore sciwasm dist from cache
+        if: steps.cache-sciwasm.outputs.cache-hit == 'true'
+        run: cp -r wasm-artifacts/sciwasm-dist packages/sciwasm/dist
+
+      - name: Install Emscripten (for sciwasm)
+        if: steps.cache-sciwasm.outputs.cache-hit != 'true'
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: '3.1.51'
+
       - name: Build sciwasm
+        if: steps.cache-sciwasm.outputs.cache-hit != 'true'
         run: pnpm --filter sciwasm run build
 
+      - name: Cache sciwasm
+        if: steps.cache-sciwasm.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p wasm-artifacts
+          cp -r packages/sciwasm/dist wasm-artifacts/sciwasm-dist
+
+      - name: Save sciwasm to cache
+        if: steps.cache-sciwasm.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: wasm-artifacts/sciwasm-dist
+          key: sciwasm-dist-${{ hashFiles('packages/sciwasm/src/wasm/**', 'packages/sciwasm/scripts/*.sh') }}
+
+      # ============ SYMWASM ============
+      - name: Restore symwasm from cache
+        id: cache-symwasm
+        uses: actions/cache/restore@v4
+        with:
+          path: wasm-artifacts/symwasm-dist
+          key: symwasm-dist-${{ hashFiles('packages/symwasm/src/wasm/**', 'packages/symwasm/scripts/*.sh') }}
+
+      - name: Restore symwasm dist from cache
+        if: steps.cache-symwasm.outputs.cache-hit == 'true'
+        run: cp -r wasm-artifacts/symwasm-dist packages/symwasm/dist
+
+      - name: Install Emscripten (for symwasm)
+        if: steps.cache-symwasm.outputs.cache-hit != 'true'
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: '3.1.51'
+
       - name: Build symwasm
+        if: steps.cache-symwasm.outputs.cache-hit != 'true'
         run: pnpm --filter symwasm run build
 
+      - name: Cache symwasm
+        if: steps.cache-symwasm.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p wasm-artifacts
+          cp -r packages/symwasm/dist wasm-artifacts/symwasm-dist
+
+      - name: Save symwasm to cache
+        if: steps.cache-symwasm.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: wasm-artifacts/symwasm-dist
+          key: symwasm-dist-${{ hashFiles('packages/symwasm/src/wasm/**', 'packages/symwasm/scripts/*.sh') }}
+
+      # ============ DOCS BUILD ============
       - name: Generate TypeDoc JSON (all packages)
         run: pnpm run docs
 
@@ -59,6 +151,9 @@ jobs:
       - name: Build docs-site (SSG + sitemap + llms.txt)
         working-directory: docs-site
         run: pnpm run build:ssg
+
+      - name: Create 404.html fallback for SPA routing
+        run: cp docs-site/dist/index.html docs-site/dist/404.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

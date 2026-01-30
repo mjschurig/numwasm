@@ -374,15 +374,6 @@
         "_nelder_mead_minimize",
         "_bfgs_minimize",
         "_setulb",
-        "_wasm_dqagse",
-        "_wasm_dqagie",
-        "_wasm_gamma",
-        "_wasm_gammaln",
-        "_wasm_rgamma",
-        "_wasm_binom",
-        "_wasm_binom_exact",
-        "_wasm_poch",
-        "_wasm_perm_exact",
         "_sp_csr_matvec_f64",
         "_sp_csr_matvecs_f64",
         "_sp_csr_tocsc_f64",
@@ -437,419 +428,6 @@
         "_kdtree_free",
         "_malloc",
         "_free"
-      ],
-      "arpack": [
-        "_dsaupd_",
-        "_dseupd_",
-        "_dnaupd_",
-        "_dneupd_",
-        "_ssaupd_",
-        "_sseupd_",
-        "_snaupd_",
-        "_sneupd_",
-        "_cnaupd_",
-        "_cneupd_",
-        "_znaupd_",
-        "_zneupd_"
-      ],
-      "quadpack": [
-        "_dqagse_",
-        "_dqagie_",
-        "_dqags_",
-        "_dqagi_",
-        "_dqag_",
-        "_dqage_",
-        "_dqng_",
-        "_dqawoe_",
-        "_dqawfe_",
-        "_dqawo_",
-        "_dqawf_",
-        "_dqawse_",
-        "_dqawce_",
-        "_dqaws_",
-        "_dqawc_",
-        "_dqagpe_",
-        "_dqagp_",
-        "_dqk15_",
-        "_dqk21_",
-        "_dqk31_",
-        "_dqk41_",
-        "_dqk51_",
-        "_dqk61_",
-        "_dqk15i_",
-        "_dqk15w_",
-        "_qagse_",
-        "_qagie_",
-        "_qags_",
-        "_qagi_",
-        "_qag_",
-        "_qage_",
-        "_qng_",
-        "_qawoe_",
-        "_qawfe_",
-        "_qawo_",
-        "_qawf_",
-        "_qawse_",
-        "_qawce_",
-        "_qaws_",
-        "_qawc_",
-        "_qagpe_",
-        "_qagp_",
-        "_qk15_",
-        "_qk21_",
-        "_qk31_",
-        "_qk41_",
-        "_qk51_",
-        "_qk61_",
-        "_qk15i_",
-        "_qk15w_"
-      ],
-      "linpack": [
-        "_dgefa_",
-        "_dgesl_",
-        "_dgeco_",
-        "_dgedi_",
-        "_dgbfa_",
-        "_dgbsl_",
-        "_dgbco_",
-        "_dgbdi_",
-        "_dpofa_",
-        "_dposl_",
-        "_dpoco_",
-        "_dpodi_",
-        "_dppfa_",
-        "_dppsl_",
-        "_dppco_",
-        "_dppdi_",
-        "_dpbfa_",
-        "_dpbsl_",
-        "_dpbco_",
-        "_dpbdi_",
-        "_dsifa_",
-        "_dsisl_",
-        "_dsico_",
-        "_dsidi_",
-        "_dspfa_",
-        "_dspsl_",
-        "_dspco_",
-        "_dspdi_",
-        "_dtrco_",
-        "_dtrdi_",
-        "_dtrsl_",
-        "_dgtsl_",
-        "_dptsl_",
-        "_dqrdc_",
-        "_dqrsl_",
-        "_dsvdc_",
-        "_dchdc_",
-        "_dchdd_",
-        "_dchex_",
-        "_dchud_",
-        "_sgefa_",
-        "_sgesl_",
-        "_sgeco_",
-        "_sgedi_",
-        "_sgbfa_",
-        "_sgbsl_",
-        "_sgbco_",
-        "_sgbdi_",
-        "_spofa_",
-        "_sposl_",
-        "_spoco_",
-        "_spodi_",
-        "_sppfa_",
-        "_sppsl_",
-        "_sppco_",
-        "_sppdi_",
-        "_spbfa_",
-        "_spbsl_",
-        "_spbco_",
-        "_spbdi_",
-        "_ssifa_",
-        "_ssisl_",
-        "_ssico_",
-        "_ssidi_",
-        "_sspfa_",
-        "_sspsl_",
-        "_sspco_",
-        "_sspdi_",
-        "_strco_",
-        "_strdi_",
-        "_strsl_",
-        "_sgtsl_",
-        "_sptsl_",
-        "_sqrdc_",
-        "_sqrsl_",
-        "_ssvdc_",
-        "_schdc_",
-        "_schdd_",
-        "_schex_",
-        "_schud_",
-        "_cgefa_",
-        "_cgesl_",
-        "_cgeco_",
-        "_cgedi_",
-        "_cgbfa_",
-        "_cgbsl_",
-        "_cgbco_",
-        "_cgbdi_",
-        "_cpofa_",
-        "_cposl_",
-        "_cpoco_",
-        "_cpodi_",
-        "_cppfa_",
-        "_cppsl_",
-        "_cppco_",
-        "_cppdi_",
-        "_cpbfa_",
-        "_cpbsl_",
-        "_cpbco_",
-        "_cpbdi_",
-        "_chifa_",
-        "_chisl_",
-        "_chico_",
-        "_chidi_",
-        "_chpfa_",
-        "_chpsl_",
-        "_chpco_",
-        "_chpdi_",
-        "_csifa_",
-        "_csisl_",
-        "_csico_",
-        "_csidi_",
-        "_cspfa_",
-        "_cspsl_",
-        "_cspco_",
-        "_cspdi_",
-        "_ctrco_",
-        "_ctrdi_",
-        "_ctrsl_",
-        "_cgtsl_",
-        "_cptsl_",
-        "_cqrdc_",
-        "_cqrsl_",
-        "_csvdc_",
-        "_cchdc_",
-        "_cchdd_",
-        "_cchex_",
-        "_cchud_",
-        "_zgefa_",
-        "_zgesl_",
-        "_zgeco_",
-        "_zgedi_",
-        "_zgbfa_",
-        "_zgbsl_",
-        "_zgbco_",
-        "_zgbdi_",
-        "_zpofa_",
-        "_zposl_",
-        "_zpoco_",
-        "_zpodi_",
-        "_zppfa_",
-        "_zppsl_",
-        "_zppco_",
-        "_zppdi_",
-        "_zpbfa_",
-        "_zpbsl_",
-        "_zpbco_",
-        "_zpbdi_",
-        "_zhifa_",
-        "_zhisl_",
-        "_zhico_",
-        "_zhidi_",
-        "_zhpfa_",
-        "_zhpsl_",
-        "_zhpco_",
-        "_zhpdi_",
-        "_zsifa_",
-        "_zsisl_",
-        "_zsico_",
-        "_zsidi_",
-        "_zspfa_",
-        "_zspsl_",
-        "_zspco_",
-        "_zspdi_",
-        "_ztrco_",
-        "_ztrdi_",
-        "_ztrsl_",
-        "_zgtsl_",
-        "_zptsl_",
-        "_zqrdc_",
-        "_zqrsl_",
-        "_zsvdc_",
-        "_zchdc_",
-        "_zchdd_",
-        "_zchex_",
-        "_zchud_",
-        "_daxpy_",
-        "_dcopy_",
-        "_dscal_",
-        "_dswap_",
-        "_ddot_",
-        "_dasum_",
-        "_drot_",
-        "_dnrm2_",
-        "_drotg_",
-        "_saxpy_",
-        "_scopy_",
-        "_sscal_",
-        "_sswap_",
-        "_sdot_",
-        "_sasum_",
-        "_srot_",
-        "_snrm2_",
-        "_srotg_",
-        "_caxpy_",
-        "_ccopy_",
-        "_cscal_",
-        "_cswap_",
-        "_cdotc_",
-        "_cdotu_",
-        "_csrot_",
-        "_csscal_",
-        "_scnrm2_",
-        "_crotg_",
-        "_zaxpy_",
-        "_zcopy_",
-        "_zscal_",
-        "_zswap_",
-        "_zdotc_",
-        "_zdotu_",
-        "_zdrot_",
-        "_zdscal_",
-        "_dznrm2_",
-        "_zrotg_",
-        "_idamax_",
-        "_isamax_",
-        "_icamax_",
-        "_izamax_",
-        "_dzasum_",
-        "_scasum_",
-        "_scabs1_",
-        "_dcabs1_"
-      ],
-      "superlu": [
-        "_sgssv",
-        "_sgstrf",
-        "_sgstrs",
-        "_sgssvx",
-        "_sgsisx",
-        "_sgsitrf",
-        "_sgscon",
-        "_sgsequ",
-        "_sgsrfs",
-        "_slaqgs",
-        "_sCreate_CompCol_Matrix",
-        "_sCreate_CompRow_Matrix",
-        "_sCreate_Dense_Matrix",
-        "_sCopy_CompCol_Matrix",
-        "_sCopy_Dense_Matrix",
-        "_sCompRow_to_CompCol",
-        "_sallocateA",
-        "_sPrint_CompCol_Matrix",
-        "_sPrint_Dense_Matrix",
-        "_sGenXtrue",
-        "_sFillRHS",
-        "_sinf_norm_error",
-        "_sQuerySpace",
-        "_smemory_usage",
-        "_dgssv",
-        "_dgstrf",
-        "_dgstrs",
-        "_dgssvx",
-        "_dgsisx",
-        "_dgsitrf",
-        "_dgscon",
-        "_dgsequ",
-        "_dgsrfs",
-        "_dlaqgs",
-        "_dCreate_CompCol_Matrix",
-        "_dCreate_CompRow_Matrix",
-        "_dCreate_Dense_Matrix",
-        "_dCopy_CompCol_Matrix",
-        "_dCopy_Dense_Matrix",
-        "_dCompRow_to_CompCol",
-        "_dallocateA",
-        "_dPrint_CompCol_Matrix",
-        "_dPrint_Dense_Matrix",
-        "_dGenXtrue",
-        "_dFillRHS",
-        "_dinf_norm_error",
-        "_dQuerySpace",
-        "_dmemory_usage",
-        "_cgssv",
-        "_cgstrf",
-        "_cgstrs",
-        "_cgssvx",
-        "_cgsisx",
-        "_cgsitrf",
-        "_cgscon",
-        "_cgsequ",
-        "_cgsrfs",
-        "_claqgs",
-        "_cCreate_CompCol_Matrix",
-        "_cCreate_CompRow_Matrix",
-        "_cCreate_Dense_Matrix",
-        "_cCopy_CompCol_Matrix",
-        "_cCopy_Dense_Matrix",
-        "_cCompRow_to_CompCol",
-        "_callocateA",
-        "_cPrint_CompCol_Matrix",
-        "_cPrint_Dense_Matrix",
-        "_cGenXtrue",
-        "_cFillRHS",
-        "_cinf_norm_error",
-        "_cQuerySpace",
-        "_cmemory_usage",
-        "_zgssv",
-        "_zgstrf",
-        "_zgstrs",
-        "_zgssvx",
-        "_zgsisx",
-        "_zgsitrf",
-        "_zgscon",
-        "_zgsequ",
-        "_zgsrfs",
-        "_zlaqgs",
-        "_zCreate_CompCol_Matrix",
-        "_zCreate_CompRow_Matrix",
-        "_zCreate_Dense_Matrix",
-        "_zCopy_CompCol_Matrix",
-        "_zCopy_Dense_Matrix",
-        "_zCompRow_to_CompCol",
-        "_zallocateA",
-        "_zPrint_CompCol_Matrix",
-        "_zPrint_Dense_Matrix",
-        "_zGenXtrue",
-        "_zFillRHS",
-        "_zinf_norm_error",
-        "_zQuerySpace",
-        "_zmemory_usage",
-        "_set_default_options",
-        "_StatInit",
-        "_StatFree",
-        "_Destroy_CompCol_Matrix",
-        "_Destroy_CompRow_Matrix",
-        "_Destroy_Dense_Matrix",
-        "_Destroy_SuperNode_Matrix",
-        "_Destroy_SuperMatrix_Store",
-        "_get_perm_c",
-        "_sp_preorder",
-        "_sp_ienv",
-        "_input_error",
-        "_superlu_abort_and_exit",
-        "_intMalloc",
-        "_intCalloc",
-        "_floatMalloc",
-        "_floatCalloc",
-        "_doubleMalloc",
-        "_doubleCalloc",
-        "_singlecomplexMalloc",
-        "_singlecomplexCalloc",
-        "_doublecomplexMalloc",
-        "_doublecomplexCalloc",
-        "_superlu_malloc",
-        "_superlu_free"
       ]
     },
     "symwasm": {
@@ -984,6 +562,582 @@
         "_dense_matrix_zeros",
         "_dense_matrix_ones",
         "_dense_matrix_diag"
+      ]
+    },
+    "arwasm": {
+      "arpack": [
+        "_dsaupd_",
+        "_dseupd_",
+        "_dnaupd_",
+        "_dneupd_",
+        "_malloc",
+        "_free"
+      ]
+    },
+    "lawasm": {
+      "lapack": [
+        "_dgetrf_",
+        "_dgetrs_",
+        "_dgetri_",
+        "_dgesv_",
+        "_dgecon_",
+        "_dpotrf_",
+        "_dpotrs_",
+        "_dpotri_",
+        "_dposv_",
+        "_dpocon_",
+        "_dgeev_",
+        "_dsyev_",
+        "_dsyevd_",
+        "_dsyevr_",
+        "_dgeevx_",
+        "_dgesvd_",
+        "_dgesdd_",
+        "_dgeqrf_",
+        "_dgeqp3_",
+        "_dorgqr_",
+        "_dormqr_",
+        "_dgels_",
+        "_dgelsd_",
+        "_dgelss_",
+        "_dgelsy_",
+        "_dtrtrs_",
+        "_dtrtri_",
+        "_dlamch_",
+        "_dlange_",
+        "_dlansy_",
+        "_dlaswp_",
+        "_dlassq_",
+        "_sgetrf_",
+        "_sgetrs_",
+        "_sgetri_",
+        "_sgesv_",
+        "_sgecon_",
+        "_spotrf_",
+        "_spotrs_",
+        "_spotri_",
+        "_sposv_",
+        "_spocon_",
+        "_sgeev_",
+        "_ssyev_",
+        "_ssyevd_",
+        "_ssyevr_",
+        "_sgeevx_",
+        "_sgesvd_",
+        "_sgesdd_",
+        "_sgeqrf_",
+        "_sgeqp3_",
+        "_sorgqr_",
+        "_sormqr_",
+        "_sgels_",
+        "_sgelsd_",
+        "_sgelss_",
+        "_sgelsy_",
+        "_strtrs_",
+        "_strtri_",
+        "_slamch_",
+        "_slange_",
+        "_slansy_",
+        "_slaswp_",
+        "_slassq_",
+        "_zgetrf_",
+        "_zgetrs_",
+        "_zgetri_",
+        "_zgesv_",
+        "_zgecon_",
+        "_zpotrf_",
+        "_zpotrs_",
+        "_zpotri_",
+        "_zposv_",
+        "_zpocon_",
+        "_zgeev_",
+        "_zheev_",
+        "_zheevd_",
+        "_zheevr_",
+        "_zgeevx_",
+        "_zgesvd_",
+        "_zgesdd_",
+        "_zgeqrf_",
+        "_zgeqp3_",
+        "_zungqr_",
+        "_zunmqr_",
+        "_zgels_",
+        "_zgelsd_",
+        "_zgelss_",
+        "_zgelsy_",
+        "_ztrtrs_",
+        "_ztrtri_",
+        "_zlange_",
+        "_zlanhe_",
+        "_zlaswp_",
+        "_zlassq_",
+        "_cgetrf_",
+        "_cgetrs_",
+        "_cgetri_",
+        "_cgesv_",
+        "_cgecon_",
+        "_cpotrf_",
+        "_cpotrs_",
+        "_cpotri_",
+        "_cposv_",
+        "_cpocon_",
+        "_cgeev_",
+        "_cheev_",
+        "_cheevd_",
+        "_cheevr_",
+        "_cgeevx_",
+        "_cgesvd_",
+        "_cgesdd_",
+        "_cgeqrf_",
+        "_cgeqp3_",
+        "_cungqr_",
+        "_cunmqr_",
+        "_cgels_",
+        "_cgelsd_",
+        "_cgelss_",
+        "_cgelsy_",
+        "_ctrtrs_",
+        "_ctrtri_",
+        "_clange_",
+        "_clanhe_",
+        "_claswp_",
+        "_classq_",
+        "_daxpy_",
+        "_dcopy_",
+        "_dscal_",
+        "_dswap_",
+        "_ddot_",
+        "_dnrm2_",
+        "_dasum_",
+        "_idamax_",
+        "_saxpy_",
+        "_scopy_",
+        "_sscal_",
+        "_sswap_",
+        "_sdot_",
+        "_snrm2_",
+        "_sasum_",
+        "_isamax_",
+        "_zaxpy_",
+        "_zcopy_",
+        "_zscal_",
+        "_zswap_",
+        "_zdotc_",
+        "_zdotu_",
+        "_dznrm2_",
+        "_dzasum_",
+        "_izamax_",
+        "_caxpy_",
+        "_ccopy_",
+        "_cscal_",
+        "_cswap_",
+        "_cdotc_",
+        "_cdotu_",
+        "_scnrm2_",
+        "_scasum_",
+        "_icamax_",
+        "_dgemv_",
+        "_dtrsv_",
+        "_dtrmv_",
+        "_dger_",
+        "_dsyr_",
+        "_dsyr2_",
+        "_dsymv_",
+        "_sgemv_",
+        "_strsv_",
+        "_strmv_",
+        "_sger_",
+        "_ssyr_",
+        "_ssyr2_",
+        "_ssymv_",
+        "_zgemv_",
+        "_ztrsv_",
+        "_ztrmv_",
+        "_zgerc_",
+        "_zgeru_",
+        "_zher_",
+        "_zher2_",
+        "_zhemv_",
+        "_cgemv_",
+        "_ctrsv_",
+        "_ctrmv_",
+        "_cgerc_",
+        "_cgeru_",
+        "_cher_",
+        "_cher2_",
+        "_chemv_",
+        "_dgemm_",
+        "_dtrsm_",
+        "_dtrmm_",
+        "_dsyrk_",
+        "_dsyr2k_",
+        "_sgemm_",
+        "_strsm_",
+        "_strmm_",
+        "_ssyrk_",
+        "_ssyr2k_",
+        "_zgemm_",
+        "_ztrsm_",
+        "_ztrmm_",
+        "_zherk_",
+        "_zher2k_",
+        "_cgemm_",
+        "_ctrsm_",
+        "_ctrmm_",
+        "_cherk_",
+        "_cher2k_",
+        "_lsame_",
+        "_malloc",
+        "_free"
+      ]
+    },
+    "linwasm": {
+      "linpack": [
+        "_malloc",
+        "_free",
+        "_dgefa_",
+        "_dgesl_",
+        "_dgeco_",
+        "_dgedi_",
+        "_dgbfa_",
+        "_dgbsl_",
+        "_dgbco_",
+        "_dgbdi_",
+        "_dpofa_",
+        "_dposl_",
+        "_dpoco_",
+        "_dpodi_",
+        "_dppfa_",
+        "_dppsl_",
+        "_dppco_",
+        "_dppdi_",
+        "_dpbfa_",
+        "_dpbsl_",
+        "_dpbco_",
+        "_dpbdi_",
+        "_dsifa_",
+        "_dsisl_",
+        "_dsico_",
+        "_dsidi_",
+        "_dspfa_",
+        "_dspsl_",
+        "_dspco_",
+        "_dspdi_",
+        "_dtrco_",
+        "_dtrdi_",
+        "_dtrsl_",
+        "_dgtsl_",
+        "_dptsl_",
+        "_dqrdc_",
+        "_dqrsl_",
+        "_dsvdc_",
+        "_dchdc_",
+        "_dchdd_",
+        "_dchex_",
+        "_dchud_",
+        "_sgefa_",
+        "_sgesl_",
+        "_sgeco_",
+        "_sgedi_",
+        "_sgbfa_",
+        "_sgbsl_",
+        "_sgbco_",
+        "_sgbdi_",
+        "_spofa_",
+        "_sposl_",
+        "_spoco_",
+        "_spodi_",
+        "_sqrdc_",
+        "_sqrsl_",
+        "_ssvdc_",
+        "_cgefa_",
+        "_cgesl_",
+        "_cgeco_",
+        "_cgedi_",
+        "_cpofa_",
+        "_cposl_",
+        "_cqrdc_",
+        "_csvdc_",
+        "_zgefa_",
+        "_zgesl_",
+        "_zgeco_",
+        "_zgedi_",
+        "_zpofa_",
+        "_zposl_",
+        "_zqrdc_",
+        "_zsvdc_",
+        "_daxpy_",
+        "_dcopy_",
+        "_dscal_",
+        "_dswap_",
+        "_ddot_",
+        "_dasum_",
+        "_dnrm2_",
+        "_drot_",
+        "_drotg_",
+        "_idamax_",
+        "_saxpy_",
+        "_scopy_",
+        "_sscal_",
+        "_sswap_",
+        "_sdot_",
+        "_sasum_",
+        "_snrm2_",
+        "_srot_",
+        "_srotg_",
+        "_isamax_",
+        "_caxpy_",
+        "_ccopy_",
+        "_cscal_",
+        "_cswap_",
+        "_cdotc_",
+        "_cdotu_",
+        "_scnrm2_",
+        "_icamax_",
+        "_zaxpy_",
+        "_zcopy_",
+        "_zscal_",
+        "_zswap_",
+        "_zdotc_",
+        "_zdotu_",
+        "_dznrm2_",
+        "_izamax_"
+      ]
+    },
+    "quadwasm": {
+      "quadpack": [
+        "_dqags_",
+        "_dqagse_",
+        "_dqag_",
+        "_dqage_",
+        "_dqagi_",
+        "_dqagie_",
+        "_dqng_",
+        "_dqawo_",
+        "_dqawoe_",
+        "_dqawf_",
+        "_dqawfe_",
+        "_dqaws_",
+        "_dqawse_",
+        "_dqawc_",
+        "_dqawce_",
+        "_dqagp_",
+        "_dqagpe_",
+        "_dqk15_",
+        "_dqk21_",
+        "_dqk31_",
+        "_dqk41_",
+        "_dqk51_",
+        "_dqk61_",
+        "_dqk15i_",
+        "_dqk15w_",
+        "_qags_",
+        "_qagse_",
+        "_qag_",
+        "_qage_",
+        "_qagi_",
+        "_qagie_",
+        "_qng_",
+        "_qawo_",
+        "_qawoe_",
+        "_qawf_",
+        "_qawfe_",
+        "_qaws_",
+        "_qawse_",
+        "_qawc_",
+        "_qawce_",
+        "_qagp_",
+        "_qagpe_",
+        "_qk15_",
+        "_qk21_",
+        "_qk31_",
+        "_qk41_",
+        "_qk51_",
+        "_qk61_",
+        "_qk15i_",
+        "_qk15w_",
+        "_malloc",
+        "_free"
+      ]
+    },
+    "superluwasm": {
+      "superlu": [
+        "_dgssv",
+        "_dgstrf",
+        "_dgstrs",
+        "_dgssvx",
+        "_dgsisx",
+        "_dgsitrf",
+        "_dgscon",
+        "_dgsequ",
+        "_dgsrfs",
+        "_dlaqgs",
+        "_dCreate_CompCol_Matrix",
+        "_dCreate_CompRow_Matrix",
+        "_dCreate_Dense_Matrix",
+        "_dCopy_CompCol_Matrix",
+        "_dCopy_Dense_Matrix",
+        "_dCompRow_to_CompCol",
+        "_dallocateA",
+        "_dPrint_CompCol_Matrix",
+        "_dPrint_Dense_Matrix",
+        "_dGenXtrue",
+        "_dFillRHS",
+        "_dinf_norm_error",
+        "_dQuerySpace",
+        "_dmemory_usage",
+        "_sgssv",
+        "_sgstrf",
+        "_sgstrs",
+        "_sgssvx",
+        "_sgsisx",
+        "_sgsitrf",
+        "_sgscon",
+        "_sgsequ",
+        "_sgsrfs",
+        "_slaqgs",
+        "_sCreate_CompCol_Matrix",
+        "_sCreate_CompRow_Matrix",
+        "_sCreate_Dense_Matrix",
+        "_sCopy_CompCol_Matrix",
+        "_sCopy_Dense_Matrix",
+        "_sCompRow_to_CompCol",
+        "_sallocateA",
+        "_sPrint_CompCol_Matrix",
+        "_sPrint_Dense_Matrix",
+        "_sGenXtrue",
+        "_sFillRHS",
+        "_sinf_norm_error",
+        "_sQuerySpace",
+        "_smemory_usage",
+        "_cgssv",
+        "_cgstrf",
+        "_cgstrs",
+        "_cgssvx",
+        "_cgsisx",
+        "_cgsitrf",
+        "_cgscon",
+        "_cgsequ",
+        "_cgsrfs",
+        "_claqgs",
+        "_cCreate_CompCol_Matrix",
+        "_cCreate_CompRow_Matrix",
+        "_cCreate_Dense_Matrix",
+        "_cCopy_CompCol_Matrix",
+        "_cCopy_Dense_Matrix",
+        "_cCompRow_to_CompCol",
+        "_callocateA",
+        "_cPrint_CompCol_Matrix",
+        "_cPrint_Dense_Matrix",
+        "_cGenXtrue",
+        "_cFillRHS",
+        "_cinf_norm_error",
+        "_cQuerySpace",
+        "_cmemory_usage",
+        "_zgssv",
+        "_zgstrf",
+        "_zgstrs",
+        "_zgssvx",
+        "_zgsisx",
+        "_zgsitrf",
+        "_zgscon",
+        "_zgsequ",
+        "_zgsrfs",
+        "_zlaqgs",
+        "_zCreate_CompCol_Matrix",
+        "_zCreate_CompRow_Matrix",
+        "_zCreate_Dense_Matrix",
+        "_zCopy_CompCol_Matrix",
+        "_zCopy_Dense_Matrix",
+        "_zCompRow_to_CompCol",
+        "_zallocateA",
+        "_zPrint_CompCol_Matrix",
+        "_zPrint_Dense_Matrix",
+        "_zGenXtrue",
+        "_zFillRHS",
+        "_zinf_norm_error",
+        "_zQuerySpace",
+        "_zmemory_usage",
+        "_set_default_options",
+        "_StatInit",
+        "_StatFree",
+        "_Destroy_CompCol_Matrix",
+        "_Destroy_CompRow_Matrix",
+        "_Destroy_Dense_Matrix",
+        "_Destroy_SuperNode_Matrix",
+        "_Destroy_SuperMatrix_Store",
+        "_get_perm_c",
+        "_sp_preorder",
+        "_sp_ienv",
+        "_input_error",
+        "_superlu_abort_and_exit",
+        "_intMalloc",
+        "_intCalloc",
+        "_floatMalloc",
+        "_floatCalloc",
+        "_doubleMalloc",
+        "_doubleCalloc",
+        "_singlecomplexMalloc",
+        "_singlecomplexCalloc",
+        "_doublecomplexMalloc",
+        "_doublecomplexCalloc",
+        "_superlu_malloc",
+        "_superlu_free",
+        "_malloc",
+        "_free"
+      ]
+    },
+    "xsfwasm": {
+      "xsf": [
+        "_wasm_gamma",
+        "_wasm_gammaln",
+        "_wasm_rgamma",
+        "_wasm_beta",
+        "_wasm_betaln",
+        "_wasm_erf",
+        "_wasm_erfc",
+        "_wasm_erfcx",
+        "_wasm_erfi",
+        "_wasm_j0",
+        "_wasm_j1",
+        "_wasm_jv",
+        "_wasm_y0",
+        "_wasm_y1",
+        "_wasm_yv",
+        "_wasm_i0",
+        "_wasm_i1",
+        "_wasm_iv",
+        "_wasm_k0",
+        "_wasm_k1",
+        "_wasm_binom",
+        "_wasm_binom_exact",
+        "_wasm_poch",
+        "_wasm_perm_exact",
+        "_malloc",
+        "_free"
+      ]
+    },
+    "odewasm": {
+      "ode": [
+        "_wasm_dopri5",
+        "_wasm_dop853",
+        "_wasm_radau5",
+        "_wasm_contd5",
+        "_wasm_contd8",
+        "_wasm_contr5",
+        "_wasm_set_fcn_callback",
+        "_wasm_set_solout_callback",
+        "_wasm_set_jac_callback",
+        "_wasm_dopri5_work_size",
+        "_wasm_dopri5_iwork_size",
+        "_wasm_dop853_work_size",
+        "_wasm_dop853_iwork_size",
+        "_wasm_radau5_work_size",
+        "_wasm_radau5_iwork_size",
+        "_wasm_malloc",
+        "_wasm_free",
+        "_malloc",
+        "_free"
       ]
     }
   },
@@ -3348,7 +3502,15 @@
         "kind": "class"
       },
       {
+        "name": "ColPermSpec",
+        "kind": "type"
+      },
+      {
         "name": "LinearOperatorLike",
+        "kind": "type"
+      },
+      {
+        "name": "TransSpec",
         "kind": "type"
       },
       {
@@ -3364,7 +3526,27 @@
         "kind": "function"
       },
       {
+        "name": "eigs",
+        "kind": "function"
+      },
+      {
+        "name": "eigsh",
+        "kind": "function"
+      },
+      {
+        "name": "expm",
+        "kind": "function"
+      },
+      {
+        "name": "expm_multiply",
+        "kind": "function"
+      },
+      {
         "name": "gmres",
+        "kind": "function"
+      },
+      {
+        "name": "inv",
         "kind": "function"
       },
       {
@@ -3373,6 +3555,22 @@
       },
       {
         "name": "norm",
+        "kind": "function"
+      },
+      {
+        "name": "spilu",
+        "kind": "function"
+      },
+      {
+        "name": "splu",
+        "kind": "function"
+      },
+      {
+        "name": "spsolve",
+        "kind": "function"
+      },
+      {
+        "name": "svds",
         "kind": "function"
       },
       {
@@ -3496,7 +3694,31 @@
         "kind": "type"
       },
       {
+        "name": "beta",
+        "kind": "function"
+      },
+      {
+        "name": "betaln",
+        "kind": "function"
+      },
+      {
         "name": "comb",
+        "kind": "function"
+      },
+      {
+        "name": "erf",
+        "kind": "function"
+      },
+      {
+        "name": "erfc",
+        "kind": "function"
+      },
+      {
+        "name": "erfcx",
+        "kind": "function"
+      },
+      {
+        "name": "erfi",
         "kind": "function"
       },
       {
@@ -3520,11 +3742,55 @@
         "kind": "function"
       },
       {
+        "name": "i0",
+        "kind": "function"
+      },
+      {
+        "name": "i1",
+        "kind": "function"
+      },
+      {
+        "name": "iv",
+        "kind": "function"
+      },
+      {
+        "name": "j0",
+        "kind": "function"
+      },
+      {
+        "name": "j1",
+        "kind": "function"
+      },
+      {
+        "name": "jv",
+        "kind": "function"
+      },
+      {
+        "name": "k0",
+        "kind": "function"
+      },
+      {
+        "name": "k1",
+        "kind": "function"
+      },
+      {
         "name": "perm",
         "kind": "function"
       },
       {
         "name": "rgamma",
+        "kind": "function"
+      },
+      {
+        "name": "y0",
+        "kind": "function"
+      },
+      {
+        "name": "y1",
+        "kind": "function"
+      },
+      {
+        "name": "yv",
         "kind": "function"
       },
       {
@@ -3544,6 +3810,18 @@
         "kind": "function"
       },
       {
+        "name": "ARPACKError",
+        "kind": "class"
+      },
+      {
+        "name": "ARPACKNoConvergence",
+        "kind": "class"
+      },
+      {
+        "name": "DimensionMismatchError",
+        "kind": "class"
+      },
+      {
         "name": "IntegrationWarning",
         "kind": "class"
       },
@@ -3552,8 +3830,44 @@
         "kind": "class"
       },
       {
+        "name": "SingularMatrixError",
+        "kind": "class"
+      },
+      {
+        "name": "ARPACKModuleFactory",
+        "kind": "type"
+      },
+      {
+        "name": "LAPACKModuleFactory",
+        "kind": "type"
+      },
+      {
+        "name": "QUADPACKModuleFactory",
+        "kind": "type"
+      },
+      {
         "name": "SuperLUModuleFactory",
         "kind": "type"
+      },
+      {
+        "name": "XSFModuleFactory",
+        "kind": "type"
+      },
+      {
+        "name": "configureARPACK",
+        "kind": "function"
+      },
+      {
+        "name": "configureLAPACK",
+        "kind": "function"
+      },
+      {
+        "name": "configureLINPACK",
+        "kind": "function"
+      },
+      {
+        "name": "configureQUADPACK",
+        "kind": "function"
       },
       {
         "name": "configureSuperLU",
@@ -3564,7 +3878,47 @@
         "kind": "function"
       },
       {
+        "name": "configureXSF",
+        "kind": "function"
+      },
+      {
+        "name": "getARPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "getLAPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "getLINPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "getQUADPACKModule",
+        "kind": "function"
+      },
+      {
         "name": "getSuperLUModule",
+        "kind": "function"
+      },
+      {
+        "name": "getXSFModule",
+        "kind": "function"
+      },
+      {
+        "name": "isARPACKLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "isLAPACKLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "isLINPACKLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "isQUADPACKLoaded",
         "kind": "function"
       },
       {
@@ -3576,6 +3930,26 @@
         "kind": "function"
       },
       {
+        "name": "isXSFLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "loadARPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "loadLAPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "loadLINPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "loadQUADPACKModule",
+        "kind": "function"
+      },
+      {
         "name": "loadSuperLUModule",
         "kind": "function"
       },
@@ -3584,11 +3958,35 @@
         "kind": "function"
       },
       {
+        "name": "loadXSFModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetARPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetLAPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetLINPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetQUADPACKModule",
+        "kind": "function"
+      },
+      {
         "name": "resetSuperLUModule",
         "kind": "function"
       },
       {
         "name": "resetWasmModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetXSFModule",
         "kind": "function"
       }
     ],
@@ -4057,10 +4455,552 @@
         "name": "NotImplementedError",
         "kind": "class"
       }
+    ],
+    "arwasm": [
+      {
+        "name": "ARPACKModuleFactory",
+        "kind": "type"
+      },
+      {
+        "name": "DNAUPD_ERRORS",
+        "kind": "variable"
+      },
+      {
+        "name": "DNEUPD_ERRORS",
+        "kind": "variable"
+      },
+      {
+        "name": "DSAUPD_ERRORS",
+        "kind": "variable"
+      },
+      {
+        "name": "DSEUPD_ERRORS",
+        "kind": "variable"
+      },
+      {
+        "name": "configureARPACK",
+        "kind": "function"
+      },
+      {
+        "name": "getARPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "isARPACKLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "loadARPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetARPACKModule",
+        "kind": "function"
+      }
+    ],
+    "lawasm": [
+      {
+        "name": "LAPACKModuleFactory",
+        "kind": "type"
+      },
+      {
+        "name": "configureLAPACK",
+        "kind": "function"
+      },
+      {
+        "name": "getLAPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "isLAPACKLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "loadLAPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetLAPACKModule",
+        "kind": "function"
+      }
+    ],
+    "linwasm": [
+      {
+        "name": "configureLINPACK",
+        "kind": "function"
+      },
+      {
+        "name": "getLINPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "isLINPACKLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "loadLINPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetLINPACKModule",
+        "kind": "function"
+      }
+    ],
+    "quadwasm": [
+      {
+        "name": "QUADPACKModuleFactory",
+        "kind": "type"
+      },
+      {
+        "name": "configureQUADPACK",
+        "kind": "function"
+      },
+      {
+        "name": "getQUADPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "isQUADPACKLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "loadQUADPACKModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetQUADPACKModule",
+        "kind": "function"
+      }
+    ],
+    "superluwasm": [
+      {
+        "name": "SuperLUModuleFactory",
+        "kind": "type"
+      },
+      {
+        "name": "configureSuperLU",
+        "kind": "function"
+      },
+      {
+        "name": "getSuperLUModule",
+        "kind": "function"
+      },
+      {
+        "name": "isSuperLULoaded",
+        "kind": "function"
+      },
+      {
+        "name": "loadSuperLUModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetSuperLUModule",
+        "kind": "function"
+      }
+    ],
+    "xsfwasm": [
+      {
+        "name": "XSFModuleFactory",
+        "kind": "type"
+      },
+      {
+        "name": "configureXSF",
+        "kind": "function"
+      },
+      {
+        "name": "getXSFModule",
+        "kind": "function"
+      },
+      {
+        "name": "isXSFLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "loadXSFModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetXSFModule",
+        "kind": "function"
+      }
+    ],
+    "odewasm": [
+      {
+        "name": "EventFunction",
+        "kind": "type"
+      },
+      {
+        "name": "JacobianFunction",
+        "kind": "type"
+      },
+      {
+        "name": "ODEFunction",
+        "kind": "type"
+      },
+      {
+        "name": "ODEMethod",
+        "kind": "type"
+      },
+      {
+        "name": "ODEModuleFactory",
+        "kind": "type"
+      },
+      {
+        "name": "SoloutCallback",
+        "kind": "type"
+      },
+      {
+        "name": "STATUS_MESSAGES",
+        "kind": "variable"
+      },
+      {
+        "name": "configureODE",
+        "kind": "function"
+      },
+      {
+        "name": "getODEModule",
+        "kind": "function"
+      },
+      {
+        "name": "isODELoaded",
+        "kind": "function"
+      },
+      {
+        "name": "loadODEModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetODEModule",
+        "kind": "function"
+      },
+      {
+        "name": "solve_ivp",
+        "kind": "function"
+      },
+      {
+        "name": "solveExplicit",
+        "kind": "function"
+      },
+      {
+        "name": "solveRadau",
+        "kind": "function"
+      }
     ]
   },
   "tsToWasm": {
     "numwasm": {
+      "NDArray.zeros": [
+        "_ndarray_create"
+      ],
+      "NDArray.ones": [
+        "_ndarray_fill"
+      ],
+      "NDArray.empty": [
+        "_ndarray_empty"
+      ],
+      "NDArray.full": [
+        "_ndarray_full"
+      ],
+      "NDArray.fromArray": [
+        "_ndarray_from_data"
+      ],
+      "NDArray.shape": [
+        "_ndarray_get_ndim",
+        "_ndarray_get_shape"
+      ],
+      "NDArray.ndim": [
+        "_ndarray_get_ndim"
+      ],
+      "NDArray.size": [
+        "_ndarray_get_size"
+      ],
+      "NDArray.dtype": [
+        "_ndarray_get_dtype"
+      ],
+      "NDArray.strides": [
+        "_ndarray_get_ndim",
+        "_ndarray_get_strides"
+      ],
+      "NDArray.flags": [
+        "_ndarray_get_flags"
+      ],
+      "NDArray.imag": [
+        "_ndarray_create",
+        "_ndarray_empty",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_flat"
+      ],
+      "NDArray.T": [
+        "_ndarray_transpose"
+      ],
+      "NDArray.isView": [
+        "_ndarray_get_base"
+      ],
+      "NDArray.get": [
+        "_ndarray_check_bounds",
+        "_ndarray_get_item"
+      ],
+      "NDArray.set": [
+        "_ndarray_check_bounds",
+        "_ndarray_set_item"
+      ],
+      "NDArray.getFlat": [
+        "_ndarray_get_flat"
+      ],
+      "NDArray.setFlat": [
+        "_ndarray_set_flat"
+      ],
+      "NDArray.getComplex": [
+        "_ndarray_flat_index",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag"
+      ],
+      "NDArray.setComplex": [
+        "_ndarray_flat_index",
+        "_ndarray_set_complex"
+      ],
+      "NDArray.item": [
+        "_ndarray_get_flat"
+      ],
+      "NDArray.itemset": [
+        "_ndarray_set_flat"
+      ],
+      "NDArray.sum": [
+        "_ndarray_sum"
+      ],
+      "NDArray.fill": [
+        "_ndarray_fill"
+      ],
+      "NDArray.toArray": [
+        "_ndarray_get_flat"
+      ],
+      "NDArray.padStart": [
+        "_ndarray_reshape"
+      ],
+      "NDArray.transpose": [
+        "_ndarray_transpose"
+      ],
+      "NDArray.ravel": [
+        "_ndarray_ravel"
+      ],
+      "NDArray.flatten": [
+        "_ndarray_flatten"
+      ],
+      "NDArray.squeeze": [
+        "_ndarray_squeeze"
+      ],
+      "NDArray.expandDims": [
+        "_ndarray_expand_dims"
+      ],
+      "NDArray.swapaxes": [
+        "_ndarray_swapaxes"
+      ],
+      "NDArray.at": [
+        "_ndarray_slice"
+      ],
+      "NDArray.view": [
+        "_ndarray_view"
+      ],
+      "NDArray.viewDtype": [
+        "_ndarray_view_dtype"
+      ],
+      "NDArray.ascontiguousarray": [
+        "_ndarray_ascontiguousarray"
+      ],
+      "NDArray.asfortranarray": [
+        "_ndarray_asfortranarray"
+      ],
+      "NDArray.copy": [
+        "_ndarray_copy"
+      ],
+      "NDArray.astype": [
+        "_ndarray_astype"
+      ],
+      "NDArray.dispose": [
+        "_ndarray_free"
+      ],
+      "NDArray": [
+        "_ndarray_create",
+        "_ndarray_fill",
+        "_ndarray_empty",
+        "_ndarray_full",
+        "_ndarray_from_data",
+        "_ndarray_get_ndim",
+        "_ndarray_get_shape",
+        "_ndarray_get_size",
+        "_ndarray_get_dtype",
+        "_ndarray_get_strides",
+        "_ndarray_get_flags",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_flat",
+        "_ndarray_transpose",
+        "_ndarray_get_base",
+        "_ndarray_check_bounds",
+        "_ndarray_get_item",
+        "_ndarray_set_item",
+        "_ndarray_get_flat",
+        "_ndarray_flat_index",
+        "_ndarray_get_complex_real",
+        "_ndarray_set_complex",
+        "_ndarray_sum",
+        "_ndarray_reshape",
+        "_ndarray_ravel",
+        "_ndarray_flatten",
+        "_ndarray_squeeze",
+        "_ndarray_expand_dims",
+        "_ndarray_swapaxes",
+        "_ndarray_get_subarray",
+        "_ndarray_slice",
+        "_ndarray_view",
+        "_ndarray_view_dtype",
+        "_ndarray_ascontiguousarray",
+        "_ndarray_asfortranarray",
+        "_ndarray_copy",
+        "_ndarray_astype",
+        "_ndarray_free"
+      ],
+      "broadcastShapes": [
+        "_broadcast_shapes"
+      ],
+      "broadcastTo": [
+        "_ndarray_broadcast_to"
+      ],
+      "computeBroadcastStrides": [
+        "_broadcast_strides"
+      ],
+      "fft": [
+        "_ndarray_fft"
+      ],
+      "ifft": [
+        "_ndarray_fft"
+      ],
+      "rfft": [
+        "_ndarray_rfft"
+      ],
+      "irfft": [
+        "_ndarray_irfft"
+      ],
+      "take": [
+        "_ndarray_take"
+      ],
+      "takeFlat": [
+        "_ndarray_take_flat"
+      ],
+      "put": [
+        "_ndarray_put"
+      ],
+      "countNonzero": [
+        "_ndarray_count_nonzero"
+      ],
+      "nonzero": [
+        "_ndarray_nonzero"
+      ],
+      "flatnonzero": [
+        "_ndarray_flatnonzero"
+      ],
+      "where": [
+        "_ndarray_where"
+      ],
+      "compress": [
+        "_ndarray_compress"
+      ],
+      "extract": [
+        "_ndarray_extract"
+      ],
+      "choose": [
+        "_ndarray_choose"
+      ],
+      "diagonal": [
+        "_ndarray_diagonal"
+      ],
+      "matmul": [
+        "_linalg_matmul"
+      ],
+      "dot": [
+        "_linalg_dot"
+      ],
+      "cholesky": [
+        "_linalg_cholesky"
+      ],
+      "qr": [
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r"
+      ],
+      "svd": [
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh"
+      ],
+      "eig": [
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors"
+      ],
+      "norm": [
+        "_linalg_norm"
+      ],
+      "det": [
+        "_linalg_det"
+      ],
+      "solve": [
+        "_linalg_solve"
+      ],
+      "inv": [
+        "_linalg_inv"
+      ],
+      "kron": [
+        "_ufunc_multiply"
+      ],
+      "isfinite": [
+        "_ndarray_isfinite"
+      ],
+      "isinf": [
+        "_ndarray_isinf"
+      ],
+      "isnan": [
+        "_ndarray_isnan"
+      ],
+      "isneginf": [
+        "_ndarray_isneginf"
+      ],
+      "isposinf": [
+        "_ndarray_isposinf"
+      ],
+      "iscomplex": [
+        "_ndarray_iscomplex_elem"
+      ],
+      "isreal": [
+        "_ndarray_isreal_elem"
+      ],
+      "all": [
+        "_ndarray_all",
+        "_ndarray_all_axis"
+      ],
+      "any": [
+        "_ndarray_any",
+        "_ndarray_any_axis"
+      ],
+      "isclose": [
+        "_ndarray_isclose"
+      ],
+      "allclose": [
+        "_ndarray_allclose"
+      ],
+      "array_equal": [
+        "_ndarray_array_equal"
+      ],
+      "array_equiv": [
+        "_ndarray_array_equiv"
+      ],
+      "real_if_close": [
+        "_ndarray_get_flat"
+      ],
+      "concatenate": [
+        "_ndarray_concatenate"
+      ],
       "SeedSequence.generateState": [
         "_seed_seq_generate_words"
       ],
@@ -4086,9 +5026,6 @@
         "_pcg64_set_state"
       ],
       "PCG64.dispose": [
-        "_pcg64_free"
-      ],
-      "PCG64.if": [
         "_pcg64_free"
       ],
       "PCG64": [
@@ -4118,9 +5055,6 @@
       "SFC64.dispose": [
         "_sfc64_free"
       ],
-      "SFC64.if": [
-        "_sfc64_free"
-      ],
       "SFC64": [
         "_sfc64_next64_parts",
         "_sfc64_next32",
@@ -4145,9 +5079,6 @@
         "_mt19937_set_state"
       ],
       "MT19937.dispose": [
-        "_mt19937_free"
-      ],
-      "MT19937.if": [
         "_mt19937_free"
       ],
       "MT19937": [
@@ -4182,9 +5113,6 @@
       "Philox.dispose": [
         "_philox_free"
       ],
-      "Philox.if": [
-        "_philox_free"
-      ],
       "Philox": [
         "_philox_next64_parts",
         "_philox_next32",
@@ -4194,9 +5122,6 @@
         "_philox_get_state",
         "_philox_set_state",
         "_philox_free"
-      ],
-      "Generator.if": [
-        "_random_hypergeometric32"
       ],
       "Generator.random": [
         "_random_uniform_fill",
@@ -4248,9 +5173,6 @@
       "Generator.binomial": [
         "_random_binomial32"
       ],
-      "Generator.for": [
-        "_random_hypergeometric32"
-      ],
       "Generator.poisson": [
         "_random_poisson32"
       ],
@@ -4264,10 +5186,6 @@
         "_random_hypergeometric32"
       ],
       "Generator": [
-        "_pcg64_init_bitgen",
-        "_sfc64_init_bitgen",
-        "_mt19937_init_bitgen",
-        "_philox_init_bitgen",
         "_random_uniform_fill",
         "_random_uniform_fill_f",
         "_random_integers32",
@@ -4295,6 +5213,31 @@
         "_random_negative_binomial32",
         "_random_hypergeometric32"
       ],
+      "unique": [
+        "_ndarray_unique",
+        "_unique_result_free"
+      ],
+      "uniqueValues": [
+        "_ndarray_unique_values"
+      ],
+      "union1d": [
+        "_ndarray_union1d"
+      ],
+      "intersect1d": [
+        "_ndarray_intersect1d"
+      ],
+      "setxor1d": [
+        "_ndarray_setxor1d"
+      ],
+      "setdiff1d": [
+        "_ndarray_setdiff1d"
+      ],
+      "isin": [
+        "_ndarray_isin"
+      ],
+      "in1d": [
+        "_ndarray_in1d"
+      ],
       "sort": [
         "_ndarray_sort_copy"
       ],
@@ -4306,6 +5249,12 @@
       ],
       "argpartition": [
         "_ndarray_argpartition"
+      ],
+      "sort_complex": [
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_empty",
+        "_ndarray_set_complex"
       ],
       "sum": [
         "_ndarray_sum_axis"
@@ -4348,6 +5297,32 @@
       ],
       "nancumprod": [
         "_ndarray_nancumprod_axis"
+      ],
+      "angle": [
+        "_ndarray_create"
+      ],
+      "frexp": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free"
+      ],
+      "modf": [
+        "_ufunc_modf",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free"
+      ],
+      "divmod": [
+        "_ufunc_divmod",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free"
+      ],
+      "conjugate": [
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
       ]
     },
     "sciwasm": {
@@ -4387,9 +5362,6 @@
       "CompressedSparseMatrix.dot": [
         "_sp_csr_matvec_f64",
         "_sp_csc_matvec_f64"
-      ],
-      "CompressedSparseMatrix.if": [
-        "_sp_csr_matvec_f64"
       ],
       "CompressedSparseMatrix.matmul": [
         "_sp_csr_matmat_maxnnz",
@@ -4486,9 +5458,60 @@
         "_kdtree_query_ball_point",
         "_kdtree_free"
       ],
+      "j0": [
+        "_wasm_j0"
+      ],
+      "j1": [
+        "_wasm_j1"
+      ],
+      "jv": [
+        "_wasm_jv"
+      ],
+      "y0": [
+        "_wasm_y0"
+      ],
+      "y1": [
+        "_wasm_y1"
+      ],
+      "yv": [
+        "_wasm_yv"
+      ],
+      "i0": [
+        "_wasm_i0"
+      ],
+      "i1": [
+        "_wasm_i1"
+      ],
+      "iv": [
+        "_wasm_iv"
+      ],
+      "k0": [
+        "_wasm_k0"
+      ],
+      "k1": [
+        "_wasm_k1"
+      ],
+      "beta": [
+        "_wasm_beta"
+      ],
+      "betaln": [
+        "_wasm_betaln"
+      ],
       "comb": [
         "_wasm_binom",
         "_wasm_binom_exact"
+      ],
+      "erf": [
+        "_wasm_erf"
+      ],
+      "erfc": [
+        "_wasm_erfc"
+      ],
+      "erfcx": [
+        "_wasm_erfcx"
+      ],
+      "erfi": [
+        "_wasm_erfi"
       ],
       "gamma": [
         "_wasm_gamma"
@@ -4567,9 +5590,6 @@
       "Expr.subs": [
         "_basic_subs2"
       ],
-      "Expr.if": [
-        "_real_double_get_d"
-      ],
       "Expr.Integer": [
         "_basic_evalf"
       ],
@@ -4602,9 +5622,6 @@
         "_vecbasic_push_back",
         "_dense_matrix_diag"
       ],
-      "Matrix.for": [
-        "_vecbasic_push_back"
-      ],
       "Matrix.get": [
         "_dense_matrix_get_basic"
       ],
@@ -4615,7 +5632,6 @@
         "_dense_matrix_eq"
       ],
       "Matrix": [
-        "_vecbasic_push_back",
         "_dense_matrix_get_basic",
         "_dense_matrix_set_basic",
         "_dense_matrix_eq"
@@ -4630,9 +5646,6 @@
         "_dense_matrix_new_rows_cols"
       ],
       "SymEngineObject.free": [
-        "_basic_free_heap"
-      ],
-      "SymEngineObject.if": [
         "_basic_free_heap"
       ],
       "SymEngineObject.toString": [
@@ -4657,9 +5670,6 @@
       "SymEngineSet.free": [
         "_setbasic_free"
       ],
-      "SymEngineSet.if": [
-        "_setbasic_free"
-      ],
       "SymEngineSet.size": [
         "_setbasic_size"
       ],
@@ -4674,9 +5684,6 @@
         "_setbasic_get"
       ],
       "SymEngineVec.free": [
-        "_vecbasic_free"
-      ],
-      "SymEngineVec.if": [
         "_vecbasic_free"
       ],
       "SymEngineVec.size": [
@@ -4699,9 +5706,6 @@
       "SymEngineMap.free": [
         "_mapbasicbasic_free"
       ],
-      "SymEngineMap.if": [
-        "_mapbasicbasic_free"
-      ],
       "SymEngineMap.insert": [
         "_mapbasicbasic_insert"
       ],
@@ -4714,9 +5718,6 @@
         "_mapbasicbasic_size"
       ],
       "DenseMatrixObject.free": [
-        "_dense_matrix_free"
-      ],
-      "DenseMatrixObject.if": [
         "_dense_matrix_free"
       ],
       "DenseMatrixObject.toString": [
@@ -4733,6 +5734,32 @@
         "_dense_matrix_str",
         "_dense_matrix_rows",
         "_dense_matrix_cols"
+      ]
+    },
+    "arwasm": {},
+    "lawasm": {},
+    "linwasm": {},
+    "quadwasm": {},
+    "superluwasm": {},
+    "xsfwasm": {},
+    "odewasm": {
+      "solveExplicit": [
+        "_wasm_dopri5_work_size",
+        "_wasm_dop853_work_size",
+        "_wasm_dopri5_iwork_size",
+        "_wasm_dop853_iwork_size",
+        "_wasm_set_fcn_callback",
+        "_wasm_set_solout_callback",
+        "_wasm_dopri5",
+        "_wasm_dop853"
+      ],
+      "solveRadau": [
+        "_wasm_radau5_work_size",
+        "_wasm_radau5_iwork_size",
+        "_wasm_set_fcn_callback",
+        "_wasm_set_jac_callback",
+        "_wasm_set_solout_callback",
+        "_wasm_radau5"
       ]
     }
   }

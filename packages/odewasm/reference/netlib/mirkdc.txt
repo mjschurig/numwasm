@@ -1,0 +1,903 @@
+Name : MIRKDC
+
+Authors: Wayne Enright (enright@cs.toronto.edu), 
+         Paul Muir (muir@stmarys.ca).
+Additional programming assistance: Mark Adams, Nicole DeYoung.
+Thanks to Beta-Testers: Ian Gladwell, Larry Shampine, Richard Pancer.
+ 
+Note: This code makes use of the Level 1 BLAS routines. These must
+be linked with the MIRKDC package in order for it to work.
+
+
+Purpose : Solves a system of first order, non-linear, boundary value, 
+          ordinary differential equations, y'(t) = f(t,y(t)), with 
+          separated boundary conditions, g_a(y(a))=0 and g_b(y(b))=0.
+          Based on a mesh of points which subdivides [a,b], the code 
+          uses mono-implicit Runge-Kutta (MIRK) methods to discretize 
+          the ODE's and solves the resultant non-linear algebraic equations, 
+          using a hybrid damped Newton/fixed Jacobian iteration, to get a
+          discrete solution approximation at the meshpoints. Continuous 
+          MIRK schemes are used to augment the discrete solution with a 
+          C^1 continuous interpolant, u(t), which is then used to compute 
+          an estimate of the solution defect, | u'(t) - f(t,u(t)) |. The 
+          user defined tolerance is then applied to the defect as the 
+          termination criterion.  Adaptive mesh redistribution is performed 
+          to equidistribute the estimate of the defect. For further details 
+          see [Enright,Muir, "Runge-Kutta Software with Defect Control for
+          Boundary Value ODES",SIAM J. Sci. Comput. 17 (1996),479-497].
+
+
+Usage   : call mirkdc(method, tol, neqns, Nsub, MxNsub, mesh_input, 
+                      mesh, sol_input, Y, ldY, output_control, info, 
+                      iwork, work, init_de, init_Y, fsub, gsub, dfsub, dgsub)
+
+
+Arguments :
+  
+  method         - (input) - integer.
+                   Possible values for `method' and the corresponding MIRK 
+                   schemes are:
+ 
+                   Value of `method' |   MIRK formula
+                   ----------------------------------------------------------
+                        2            |   Second order MIRK scheme
+                                     |          (Trapezoidal scheme).
+                        4            |   Fourth order MIRK scheme
+                                     |          (Lobatto collocation scheme).
+                        6            |   Sixth order MIRK scheme.
+ 
+  tol            - (input) - double precision.
+                   A user-defined tolerance applied to an estimate of the
+                   defect of the approximate solution; the defect is the amount 
+                   by which the continuous approximate solution fails to 
+                   satisfy the ODE system. MIRKDC attempts to return, 
+                   a continuous solution approximation, u(t), such that
+                             |u'(t)-f(t,u(t))|/(|f(t,u(t))|+1) 
+                   is less than `tol'. (This is a blended absolute/relative 
+                   measure of the defect.) The same tolerance is applied to 
+                   each component of the defect. 
+
+  neqns          - (input) - integer.
+                   The number of first order differential equations.
+                   This is also the total number of boundary conditions.
+
+  Nsub           - (input/output) - integer.
+                   When passed to MIRKDC it is the initial user-defined number 
+                   of subintervals into which the problem interval is 
+                   partitioned.
+                   Upon return from MIRKDC it is the number of subintervals 
+                   in the final mesh. 
+
+  MxNsub         - (input) - integer.
+                   The user-defined maximum allowable number of subintervals. 
+                   The value of this parameter will influence storage
+                   requirements - see e.g. `iwork' and `work'.
+
+  mesh_input     - (input) - integer.
+                   a) A value of 0 indicates that a uniform initial 
+                   mesh is to be set up by MIRKDC. 
+                   b) A value of 1 indicates that an initial mesh is already 
+                   available in the array 'mesh'. This option should be 
+                   chosen if the user knows which regions of the interval 
+                   correspond to difficult solution behavior, e.g. a boundary 
+                   layer; the mesh should be finer in those regions.
+                   c) A value of 2 indicates that the user is employing a 
+                   ``continuation sequence'' of problems and that the mesh from
+                   a previous problem will be available in the array `mesh'.   
+                  
+  mesh           - (input/output) - double precision array `(0:MxNsub)'.
+                   On input to MIRKDC this is the set of points that partition 
+                   the problem interval ( empty if `mesh_input' is 0 ). 
+                   On successful return from MIRKDC it is the set of points 
+                   defining the final mesh. 
+
+  sol_input      - (input) - integer.
+                   a) A value of 1 indicates that the initial solution estimate
+                   will be provided by the user through the `init_Y' routine. 
+                   This is the usual value for `sol_input' and the usual mode of
+                   execution for MIRKDC.
+                   It is recommended that `Y' not be set to a constant in case 
+                   there is a singularity in f(t,y(t)), for that constant value.
+                   b) A value of 2 indicates that the initial solution 
+                   estimate at each mesh point is available in the 
+                   array `Y'. This option should only be chosen when solving a 
+                   continuation sequence of problems, where `Y' takes its value
+                   from the solution of a previous problem.
+
+  Y              - (input/output) - double precision two dimensional array of
+                                                   size `ldY x (MxNsub+1)'.
+                   On input to MIRKDC, if `sol_input'= 2, this is the discrete 
+                   approximation to the solution, evaluated at each point of 
+                   the mesh contained in `mesh'. (Empty if `sol_input'=1.)
+                   The i-th column of `Y' contains the solution approximation 
+                   vector for the i-th meshpoint.
+                   On successful return from MIRKDC, this is the discrete
+                   approximation to the solution evaluated at the points of the
+                   final mesh. 
+
+  ldY            - (input) - integer.
+                   The leading dimension of the array `Y'. (`ldY' >= `neqns').
+
+  output_control - (input) - integer.
+                   Controls the amount of information output. Newton iteration 
+                   counts, mesh selection information, and defect estimates are
+                   examples of such information.
+                   Possible values of `output_control' are :
+                   0 - No output,  1 - Intermediate output,  2 - Full output.
+
+  info           - (output) - integer. 
+                   A communication flag:
+                       `info' = 0 implies successful termination; the solution
+                        has been obtained such that the estimates of the defect
+                        satisfy the user defined tolerance - see `tol'.
+                       `info' = 1 implies unsuccessful termination; the size 
+                       of the new mesh would be too large. Unless `MxNsub' is
+                       actually fairly small, this is usually an indication that
+                       the code encountered difficulty with the convergence of
+                       the Newton iterations. The user-supplied routines
+                       `fsub', `dfsub', `gsub', and `dgsub' should be checked.
+
+  iwork          - (output) - integer (work) array of size at least 
+                                                         `neqns * (MxNsub + 1)'.
+
+  work           - (output) - double precision (work) array of size at least  
+                      `MxNsub * neqns * (2*neqns+35) + 6 * neqns * (4*neqns+1)'.
+
+  init_de        - User-supplied subroutine to initialize the problem
+                   dependent variables, 'leftbc', 'a', and 'b'.
+
+                   call init_de(leftbc, a, b), where
+                       leftbc - (output) - integer.
+                                Number of boundary conditions applied at the
+                                left endpoint of the problem interval.
+                       a      - (output) - double precision.
+                                The left endpoint of the problem interval.
+                       b      - (output) - double precision.
+                                The right endpoint of the problem interval.
+
+  init_Y         - User-supplied subroutine to initialize the discrete 
+                   solution approximation, `Y'. (Needed if `sol_input'=1).
+
+                   call init_Y(Nsub, neqns, mesh, Y, ldY), where
+                       Nsub   - (input) - integer.
+                                The number of subintervals in the initial mesh.
+                       neqns  - (input) - integer.
+                                The number of differential equations in the
+                                first order system.
+                       mesh   - (input) - double precision array (0:Nsub).
+                                Points making up the partition of the problem
+                                interval.
+                       Y      - (output) - double precision two dimensional
+                                array of size `ldY x (Nsub + 1)'. 
+                                The initial approximation to the discrete
+                                solution at the points in the initial mesh.
+                                The i-th column of `Y' is the solution 
+                                approximation vector at mesh point, `mesh(i-1)'.
+                       ldY    - (input) - integer.
+                                The leading dimension of Y. (`ldY' >= `neqns').
+                
+  fsub           - User-supplied subroutine which defines f(t,y) for the 
+                   first order system of differential equations, y' = f(t,y). 
+
+                   call fsub(neqns, t, y, f), where
+                       neqns   - (input) - integer.
+                                 The number of differential equations in the
+                                 first order system.
+                       t       - (input) - double precision.
+                                 A point in the problem interval. 
+                       y       - (input) - double precision array `(1:neqns)'.
+                                 The current solution approximation at t.
+                       f       - (output) - double precision array `(1:neqns)'.
+                                 The value of f(t,y).
+ 
+  gsub           - User-supplied subroutine which defines the boundary
+                   condition equations.
+
+                   call gsub(neqns, ya, yb, bc), where
+                       neqns    - (input) - integer.
+                                  The number of differential equations in the
+                                  first order system. Also the total number
+                                  of boundary conditions.
+                       ya       - (input) - double precision array `(1:neqns)'.
+                                  Current solution approximation at the left 
+                                  endpoint.
+                       yb       - (input) - double precision array `(1:neqns)'.
+                                  Current solution approximation at the right 
+                                  endpoint.
+                       bc       - (output) - double precision array `(1:neqns)'.
+                                  Boundary condition equations evaluated at
+                                  `ya' and `yb'. The first `leftbc' components
+                                  of `bc' are `g_a(ya)'; the remaining
+                                  `neqns-leftbc' components of `bc' are 
+                                  `g_b(yb)'.
+ 
+  dfsub          - User-supplied subroutine which defines the Jacobian, df/dy,
+                   of the system of differential equations.  Since the array 
+                   `JJ' has already been set to zero, it is only necessary to 
+                   set the non-zero elements.
+
+                   call dfsub(neqns, t, y, JJ), where
+                       neqns    - (input) - integer.
+                                  The number of differential equations in the
+                                  first order system.
+                       t        - (input) - double precision.
+                                  A point in the problem interval. 
+                       y        - (input) - double precision array `(1:neqns)'.
+                                  The current solution approximation at t.
+                       JJ       - (output) - double precision two dimensional 
+                                  array of size `neqns x neqns'.
+                                  Contains the Jacobian, df/dy.
+
+  dgsub          - User-supplied subroutine which defines the Jacobian of
+                   the boundary conditions, that is d(bc)/dy. The array `dbc' 
+                   has been set to zero prior to the call to 'dgsub', so it
+                   is only necessary for the user to set the non-zero elements.
+
+                   call dgsub(neqns, ya, yb, dbc), where
+                       neqns    - (input) - integer.
+                                  The number of differential equations in the
+                                  first order system. Also the total number
+                                  of boundary conditions.
+                       ya       - (input) - double precision array `(1:neqns)'.
+                                  Current solution approximation at the left 
+                                  endpoint.
+                       yb       - (input) - double precision array `(1:neqns)'.
+                                  Current solution approximation at the right 
+                                  endpoint.
+                       dbc      - (output) - double precision two dimensional 
+                                  array of size `neqns x neqns'.
+                                  Contains the Jacobian of the boundary 
+                                  conditions.
+ 
+
+Remarks:                  
+1.   On output, both the `iwork' and `work' arrays contain information 
+     that is required in order for the user to access the continuous 
+     solution approximation using the  `sol_eval' routine.
+
+2.   The code makes use of two external packages of routines.
+     The COLROW package [Diaz,Fairweather,Keast, "COLROW and 
+     ARECO:Fortran packages for solving certain almost block 
+     diagonal linear systems by modified row and column 
+     elimination",ACM Trans. Math. Soft. 9 (1983),376-380]
+     is included with the MIRKDC source code. The double 
+     precision version of the level 1 BLAS routines,
+     [Lawson,Hanson,Kincaid,Krogh,"Basic linear algebra sub-programs 
+     for Fortran usage",ACM Trans. Math. Soft. 5 (1979), 308-323],
+     is available from the netlib software repository and must 
+     be linked with the MIRKDC package.
+
+3.   The usual technique for controlling the accuracy or quality of an
+     appropriate solution is to estimate and control the global error.
+     MIRKDC, in contrast, estimates the defect, u'(t) - f(t,u(t)) (where 
+     u(t) is the continuous approximate solution) and applies the user 
+     defined tolerance to control the defect.  See `tol' parameter 
+     documentation and [Enright,Muir, "Runge-Kutta Software with Defect 
+     Control for Boundary Value ODES",SIAM J. Sci. Comput. 17 (1996),479-497].
+        
+4.   When using continuation, it should be noted that the continuation
+     sequence must be chosen so that the Newton iterations in MIRKDC
+     do not fail since the absence of an appropriate `init_Y' routine
+     will be problematic. (See e.g. [Ascher, Christiansen, Russell, 
+     "Collocation software for boundary value ODEs", Math. Comp., 33 
+     (1979), 659-679], for an example of how a BVODE code is used in 
+     a parameter continuation sequence.)
+
+
+     For further details see also the internal documentation for MIRKDC. 
+
+-------------------------------------------------------------------------------
+
+Name : Sol_eval
+
+Purpose : This routine provides the solution approximation and its derivative 
+          at a given point within the problem interval.
+
+
+Usage : call sol_eval(t,z,z_prime,iwork,work)
+
+
+Arguments :
+
+  t             - (input) - double precision.
+                  The evaluation point within the problem interval.
+
+  z             - (output) - double precision array `(1:neqns)'.
+                  The value of the interpolant at `t'.
+
+  z_prime       - (output) - double precision array `(1:neqns)'.
+                  The value of the derivative of the interpolant at `t'.
+
+  iwork         - (input) - integer array of size at least 
+                                                       `neqns * (MxNsub + 1)'.
+                  This array contains integer information employed or set in
+                  MIRKDC and needed by `sol_eval'.
+
+   work         - (input) double precision array of size at least  
+                    `MxNsub * neqns * (2*neqns+35) + 6 * neqns * (4*neqns+1)'.
+                  This array contains double precision information employed or
+                  set in MIRKDC and needed by `sol_eval'.
+
+
+------------------------------------------------------------------------------
+Sample Driver program:
+
+
+c==============================================================================
+c ***Model of main program to use MIRKDC, for Swirling Flow III test problem***
+c       "Swirling Flow III", [Ascher, Mattheij, and Russell, 
+c       "Numerical Solution of Boundary Value Problems for Ordinary 
+c       Differential Equations", Classics in Applied Mathematics Series, 
+c       Society for Industrial and Applied Mathematics, Philadelphia, 1995].
+c==============================================================================
+c
+c***declaration of constants***
+c
+              integer neqns, MxNsub, ldY
+              parameter(neqns=6,MxNsub=3000,ldY=10)
+c
+c  neqns       - The number of differential equations.
+c  MxNsub      - The maximum number of subintervals.
+c  ldY         - The leading dimension of the matrix Y.
+c
+c***declaration of remaining parameters to mirkdc***
+c
+             integer                method
+             double precision       tol
+             integer                Nsub
+             integer                mesh_input
+             double precision       mesh(0:MxNsub)
+             integer                sol_input
+             double precision       Y(ldY,(MxNsub+1))
+             integer                output_control
+             integer                info
+             double precision       work(MxNsub*neqns*(2*neqns+35)
+     +                                      +6*neqns*(4*neqns+1))
+c            Make sure 'work' is at least
+c            MxNsub*neqns*(2*neqns+35) + 6*neqns*(4*neqns+1)
+c
+             integer                iwork(neqns*(MxNsub+1))
+c            Make sure 'iwork' is at least neqns*(MxNsub+1)
+c
+             double precision epsilon
+             common /ode/ epsilon
+c            Problem dependent parameter
+c
+c                  Value of 'method' |   MIRK formula
+c                  -------------------------------------
+c                       2            |   Second order MIRK scheme
+c                       4            |   Fourth order MIRK scheme
+c                       6            |   Sixth order MIRK scheme
+c
+c  tol           - A user-defined tolerance applied to the defect of the
+c                  computed solution; the defect is the amount by which 
+c                  the continuous approximate solution fails to satisfy 
+c                  the ODE system. If 'mirkdc' returns successfully, 
+c                  |def(t)|/(|f(t,y(t))|+1) will be less than 'tol', where 
+c                  y'(t)=f(t,y(t)) is the ODE and def(t)= y'(t)-f(t,y(t)).
+c                  The defect has one component per solution component.
+c                  The same tolerance is applied to each component of the 
+c                  defect.
+c
+c  Nsub          - On input to 'mirkdc', the number of subintervals into which 
+c                  the problem interval is partitioned.
+c                  On successful return from 'mirkdc', the number of sub - 
+c                  intervals in the final mesh.
+c
+c  mesh_input    - a) A value of 0 indicates that a uniform initial 
+c                     mesh is to be set up by 'mirkdc'.
+c
+c                  b) A value of 1 indicates that an initial mesh is 
+c                     already available in the array 'mesh'. This option
+c                     should be chosen if the user knows which regions of
+c                     the interval are problematic so a finer mesh may be
+c                     used on these trouble areas.
+c
+c                  c) A value of 2 indicates that the user is doing a 
+c                     continuation problem in which case the mesh from
+c                     a previous run is stored in the array 'mesh'.
+c 
+c  mesh          - On input to 'mirkdc', the set of points that partition the 
+c                  problem interval, initially empty if 'mesh_input' = 0
+c                  On successful return from 'mirkdc', the set of points
+c                  defining the final mesh.
+c
+c  sol_input     - a) A value of 1 indicates that an initial solution
+c                     estimate is to be provided by the user through
+c                     the 'init_Y' routine. It is recommended that Y not 
+c                     be set to a constant as there could be a singularity
+c                     at that point in the differential equation. 
+c
+c                  b) A value of 2 indicates that an initial solution
+c                     estimate at each mesh point is available in the 
+c                     matrix 'Y'. This option should only be chosen when
+c                     doing continuation problems where Y takes its
+c                     value from the solution of a previous run.
+c                         
+c  Y              - On input to 'mirkdc' if 'sol_input' = 2, Y is a matrix 
+c                   containing the discrete approximation to the solution, 
+c                   evaluated at each point of the mesh contained in 'mesh'.
+c                   On successful return from 'mirkdc', Y is a matrix 
+c                   containing the discrete approximation to the solution 
+c                   evaluated at the points in 'mesh'.
+c                 
+c
+c  output_control - Controls the amount of information output. 
+c                   Profiling of Newton iteration counts, mesh selection, 
+c                   relative defect estimate are all examples of such 
+c                   information.
+c                   Possible values of output_control are:
+c                            0 - No output.
+c                            1 - Intermediate output.
+c                            2 - Full output.
+c
+c  info           - Communication flag: 
+c
+c                   info = 0  successful termination - solution obtained
+c                             to within user specified tolerance.
+c
+c                   info = -1 unsuccessful termination - the size
+c                             of the new mesh would be too large.
+c
+             external init_de,init_Y,fsub,gsub,dfsub,dgsub 
+c
+c
+c  See descriptions in the sample routines for further details.
+c
+c  init_de      - User - supplied subroutine to initialize the problem
+c                 dependent variables, 'leftbc', 'a', and 'b'.
+c                 As well this is a good place to set up any common blocks 
+c                 needed to pass ODE parameter related info to any other 
+c                 user defined routines.
+c                 call init_de(leftbc, a, b) where
+c                 leftbc - Number of boundary conditions supplied at the
+c                          left endpoint of the problem interval.(output)
+c                 a      - The left endpoint of the interval.(output)
+c                 b      - The right endpoint of the interval.(output)  
+c
+c  init_Y       - User - supplied subroutine to initialize the discrete 
+c                 solution approximation, Y. Y is a matrix of size 
+c                 (neqns) x (Nsub + 1). The i'th column of Y is the 
+c                 solution approximation vector for the mesh point,
+c                 mesh(i-1).
+c                 call init_Y(Nsub, neqns, mesh, Y, ldY) where
+c                 Nsub   - The number of subintervals in the mesh.(input)
+c                 neqns  - The number of differential equations in the
+c                          first order system.(input)
+c                 mesh   - Points making up the partition of the problem
+c                          interval.(input)
+c                 Y      - The initial approximation of the discrete
+c                          solution at the points in the initial mesh.
+c                          (output).
+c                 ldY    - The leading dimension of Y.(input)
+c               
+c  fsub         - User - supplied subroutine which defines f(t,y) for the 
+c                 first order system of differential equations, y' = f(t,y). 
+c                 call fsub(neqns, t, y, f) where
+c                 neqns   - The number of differential equations in the
+c                           first order system.(input)
+c                 t       - A point in the problem interval.(input) 
+c                 y       - The solution approximation at time, t.(input)
+c                 f       - The value of f(t,y).(output)
+c
+c  gsub         - User - supplied subroutine which defines the boundary
+c                 condition equations.
+c                 call gsub(neqns, ya, yb, bc) where
+c                 neqns    - The number of differential equations in the
+c                            first order system.(input)
+c                 ya       - Denotes the boundary conditions that have 
+c                            been specified at the left endpoint.(input)
+c                 yb       - Denotes the boundary condidtions that have
+c                            been specified at the right endpoint.(input)
+c                 bc       - The value of the boundary condition equation.
+c                            (output)
+c
+c  dfsub        - User - supplied subroutine which defines the Jacobian of
+c                 the system of differential equations with respect to y,
+c                 i.e. df/dy. The Jacobian has already been set to zero so
+c                 it is only necessary that the user input the non-zero
+c                 elements.
+c                 call dfsub(neqns, t, y, JJ) where
+c                 neqns    - The number of differential equations in the 
+c                            first order system.(input)
+c                 t        - A point in the problem interval.(input)
+c                 y        - The solution approximation at time, t.(input)
+c                 JJ       - A two-dimensional array containing the
+c                            Jacobian.(output)
+c
+c  dgsub        - User - supplied subroutine which defines the Jacobian of
+c                 the boundary conditions, that is d bc/dy. The Jacobian 
+c                 has been set to zero prior to the call to 'dgsub', so it
+c                 is only necessary that the user input the non-zero
+c                 elements.
+c                 call dgsub(neqns, ya, yb, dbc) where
+c                 neqns    - The number of differential equations in the 
+c                            first order system.(input)
+c                 ya       - Denotes the boundary conditions that have been
+c                            specified at the left endpoint.(input)
+c                 yb       - Denotes the boundary conditions that have been
+c                            specified at the right endpoint.(input)
+c                 dbc      - A two-dimensional array containing the Jacobian
+c                            of the boundary conditions.(output)
+c
+c     ***declaration of local variables***
+c
+             integer                i,j,fail
+             double precision       x,h
+             double precision       z(neqns),zp(neqns)
+c
+c  i,j       - loop indexes
+c
+c  fail      - flag to control execution of 'sol_eval'
+c
+c   x        - local variable to store a meshpoint
+c
+c   h        - local variable to store the size of a subinterval 
+c
+c   z        - value of the interpolant evaluated at a mesh point
+c
+c   zp       - value of the interpolant's derivative evaluated at a 
+c              mesh point
+c-------------------------------------------------------------------------
+c***Setup parameters***
+c
+      write(*,*)
+      write(*,*)'Initialization :'
+      write(*,*)  
+c
+c     Set the order of the MIRK scheme.
+      write(*,*)
+      write(*,*)'Input value of method 2, 4 or 6' 
+      read(5,*) method
+c
+c     Set the defect tolerance. 
+      write(*,*)'Input value of tolerance'
+      read(5,*)tol
+c
+c     Set the number of subintervals in the initial mesh.
+      write(6,*)'Input the initial number of subintervals.'
+      Read(5,*) Nsub
+c
+c     Set the value of problem dependent parameter, epsilon
+      write(6,*)'Input the value of epsilon'
+      read(5,*)epsilon
+c
+c     Set mesh_input to indicate that mirkdc should begin with a uniform mesh.
+      mesh_input = 0
+c
+c     Set indicator for type of initial solution estimate.
+      sol_input = 1
+c
+c     Set value for output_control
+      output_control = 1
+c
+      write(6,*)
+      write(6,*)'Swirling Flow III'
+      write(6,*)
+c
+c     ******Call mirkdc******
+c      
+      call mirkdc(method,tol,neqns,Nsub,MxNsub,mesh_input,
+     +        mesh,sol_input,Y,ldY,output_control,info,iwork,work,
+     +        init_de,init_Y,fsub,gsub,dfsub,dgsub)
+c      
+c     ******Return from mirkdc******
+c
+c     Upon successful return from mirkdc, print out solution.
+c     Solution interpolant is available through the sol_eval routine        
+c     This routine requires access to the work array.
+c
+c     Check return from MIRKDC
+c
+      if (info .NE. 0) then
+                write(6,*)'Unsuccessful termination'
+                stop
+      endif
+c
+c     Compute solution approximations at 11 points.
+c      
+      h = (mesh(Nsub) - mesh(0))/10.0d0
+      do 40 i = 1, 11
+         x = (mesh(0) + (i-1)*h)
+         call sol_eval(x,z,zp,fail,iwork,work)
+         if (fail.EQ.0) then
+          write(6,*)'At meshpoint x=', x,' the solution is'
+          do 35 j=1,neqns
+             write(6,100)z(j)
+ 100         format(1x,d30.15) 
+ 35       continue
+         else
+          write(6,*)'Attempted to evaluate the interpolant at a point', 
+     +      'that was outside of the problem interval. No information',
+     +      'is available for that point.'
+         end if
+ 40   continue
+ 
+      stop
+      end
+ 
+c A Test Problem for Mirkdc
+c==============================================================================
+c CONTENTS
+c
+c       This file contains the routines associated  with the nonlinear 
+c       problem "Swirling Flow III", [Ascher, Mattheij, and Russell, 
+c       "Numerical Solution of Boundary Value Problems for Ordinary 
+c       Differential Equations", Classics in Applied Mathematics Series, 
+c       Society for Industrial and Applied Mathematics, Philadelphia, 1995].
+c       This is the special case of counter rotating disks - thus Sigma_0=-1
+c       and Sigma_1=1. It is stated as:       
+c                         
+c               Original Form                First Order System Form
+c               -------------                -----------------------
+c                                             y1' = y2,
+c               g'' = gf' - fg'                                
+c                     --------- ,             y2' = y1*y4 - y3*y2
+c                      epsilon                      ------------- ,
+c                                                      epsilon
+c               f'''' = -ff''' - gg'          y3' = y4 ,
+c                       ------------ ,
+c                         epsilon             y4' = y5 ,  y5' = y6 ,
+c
+c                                             y6' = -y3*y6 - y1*y2
+c                                                   -------------- ,
+c                                                       epsilon
+c       with
+c
+c               g(0) = -1, g(1) = 1,             y1(0) = -1, y1(1) = 1,
+c
+c       f(0) = f'(0) = f(1) = f'(1) = 0,         y3(0) = y4(0) = 0,
+c                                                y3(1) = y4(1) = 0,
+c       and             
+c             epsilon = {a small parameter}.
+c
+c       No closed form solution is available.
+c==============================================================================
+c
+        subroutine init_de(leftbc,a,b)
+
+c	The purpose of this routine is to initialize the problem dependent
+c	variables 'leftbc', the number of boundary conditions at the left
+c	endpoint of the problem interval, 'neqns', the number of differential 
+c	equations, 'a', the left endpoint of the problem interval, and 'b',
+c	the right endpoint of the problem interval.
+c------------------------------------------------------------------------------
+c
+c***declaration of parameters***
+c	    exports:
+		integer leftbc
+		double precision a,b
+
+c		'leftbc' the number of boundary conditions imposed at the
+c			 left end of the problem interval
+c		'a' the left endpoint of the problem interval
+c		'b' the right endpoint of the problem intervalc
+c------------------------------------------------------------------------------
+c
+        leftbc = 3
+c
+        a = 0.0d0
+        b = 1.0d0
+c
+        return
+        end
+c       
+c=============================================================================
+c
+        subroutine init_Y(Nsub,neqns,mesh,Y,ldY)
+c
+c	The purpose of this routine is to initialize the discrete solution 
+c	approximation, 'Y'. The input, 'Nsub', is the number of subintervals 
+c	in the initial partition of the problem interval. The points of the
+c	partition are stored in 'mesh'. 'Y' has 'neqns' components per meshpoint
+c-----------------------------------------------------------------------------
+c		
+c***declaration of parameters***
+c	    imports:
+		integer Nsub, neqns, ldY
+		double precision mesh(0:Nsub)
+c
+c		'Nsub' number of subintervals in 'mesh'
+c		'neqns' number of differential equations
+c		'mesh' points making up partition of problem interval
+c               'ldY' the leading dimension of Y.
+c
+c	    exports:
+		double precision Y(ldY,(Nsub+1))
+c
+c		'Y' the initial approximation to the discrete solution
+c		    at the points of the initial mesh.
+c
+c***declaration of local variables***
+c
+		integer i
+c
+c		'i' loop index from 0 to Nsub
+c------------------------------------------------------------------------------
+c       The initial approximation is based on straight lines joining the
+c       boundary conditions for each differential equation in the first 
+c       order system. Boundary conditions are given for the first,
+c       third and fourth equations, defining the lines y = 2t-1 (or mesh(i))
+c       y = 0 and y = 0. Since there are no boundary conditions for the second,
+c       fifth, or sixth equations, the line drawn for y2 is y = 1 (the
+c       derivative of y = t since y1' = y2 ) and y5 and y6 are initialized
+c       by the line y = 0.
+c----------------------------------------------------------------------------
+c  
+        do 10 i = 0, Nsub
+            Y(1, i+1) = 2.0d0*mesh(i)-1.0d0
+            Y(2, i+1) = 2.d0
+            Y(3, i+1) = 0.d0
+            Y(4, i+1) = 0.d0
+            Y(5, i+1) = 0.d0
+            Y(6, i+1) = 0.d0   
+ 10     continue
+c
+        return
+        end
+c
+c=============================================================================
+c
+        subroutine fsub(neqns,t,y,f)
+c
+c       This routine defines f(t,y) for the first order system of 
+c       differential equations.`neqns' is the size of the system.
+c-----------------------------------------------------------------------------
+c
+c***declaration of parameters***
+c            imports:
+                integer                    neqns
+                double precision           t, y(neqns)
+c
+c               `neqns' Number of differential equations.
+c               `t' A point in the problem interval where f(t,y(t)) is to be
+c                   evaluated.
+c               `y' Current solution approximation at `t', used in the 
+c                   evaluation of f(t,y(t)).
+c            exports:
+                double precision           f(neqns)
+c
+c               `f' Value of f(t,y(t)) for given `t' and `y'.
+c
+c***declaration for parameter 'epsilon'***
+                double precision epsilon
+                common /ode/ epsilon
+c------------------------------------------------------------------------------
+c        
+        f(1) = y(2)
+        f(2) = (y(1)*y(4) - y(3)*y(2))/epsilon 
+        f(3) = y(4)
+        f(4) = y(5)
+        f(5) = y(6)
+        f(6) = (-y(3)*y(6) -  y(1)*y(2))/epsilon
+c
+        return
+        end
+c
+c==============================================================================
+c
+        subroutine dfsub(neqns,t,y,JJ)
+c
+c       This routine defines the Jacobian, d f(t,y(t))/dy, of the system of 
+c       differential equations. Since `JJ' has already been set to zero, it is 
+c       only necessary to set the non-zero elements.
+c------------------------------------------------------------------------------
+c
+c***declaration of parameters***
+c            imports:
+                integer                neqns
+                double precision       t, y(neqns)
+c
+c               `neqns' Number of differential equations.
+c               `t' A point in the problem interval where d f(t,y(t))/dy is to 
+c                   be evaluated.
+c               `y' Current solution approximation at `t', used in the 
+c                   evaluation of d f(t,y(t))/dy.
+c            exports:
+                double precision       JJ(neqns,neqns)
+c
+c               `JJ' Value of d f(t,y(t))/dy for given `t' and `y'.
+c
+c       declaration for parameter 'epsilon'
+                double precision epsilon
+                common /ode/ epsilon
+c------------------------------------------------------------------------------
+c
+        JJ(1,2) = 1.0d0
+c
+        JJ(2,1) = y(4)/epsilon
+        JJ(2,2) = -y(3)/epsilon
+        JJ(2,3) = -y(2)/epsilon
+        JJ(2,4) = y(1)/epsilon
+c       
+        JJ(3,4) = 1.0d0
+c       
+        JJ(4,5) = 1.0d0
+c        
+        JJ(5,6) = 1.0d0
+c
+        JJ(6,1) = -y(2)/epsilon
+        JJ(6,2) = -y(1)/epsilon
+        JJ(6,3) = -y(6)/epsilon
+        JJ(6,6) = -y(3)/epsilon
+c
+        return
+        end
+c
+c==============================================================================
+c
+        subroutine gsub(neqns,ya,yb,bc)
+c
+c       This routine  computes  the 'neqns' boundary conditions, assumed
+c	to be separated, applied at either the left endpoint, a, or the
+c	right endpoint, b.  Each boundary condition is assigned to the
+c	corresponding component of 'bc' as follows. The code will attempt
+c	to find 'ya' and 'yb' values (i.e. ya = y(a) and yb = y(b)) in order
+c	to make each component of 'bc' equal to zero. This each boundary 
+c	condition must be written as some quantity set equal to 0. Thus,
+c	the boundary condition, ya(2) = 3, would be assigned to say the
+c	first boundary condition as, bc(1) = ya(2) - 3.
+c------------------------------------------------------------------------------
+c
+c***declaration of parameters***
+c            imports:
+                integer                   neqns
+                double precision          ya(neqns),yb(neqns)
+c
+c               `neqns' Number of differential equations.
+c               `ya' Current solution approximation at `a', used in the 
+c                   evaluation of g_a(y(a)).
+c               `yb' Current solution approximation at `b', used in the 
+c                   evaluation of g_b(y(b)).
+c            exports:
+                 double precision          bc(neqns)
+c
+c                `bc' The first `leftbc' locations contain g_a(y(a)).
+c                     The remaining `neqns-leftbc' locations contain g_b(y(b)).
+c------------------------------------------------------------------------------
+c
+        bc(1) = ya(1) + 1.0d0
+        bc(2) = ya(3)
+        bc(3) = ya(4)
+c
+        bc(4) = yb(1) - 1.0d0
+        bc(5) = yb(3)
+        bc(6) = yb(4)
+c
+        return
+        end
+c
+c==============================================================================
+c
+        subroutine dgsub(neqns,ya,yb,dbc)
+c
+c       This routine defines the Jacobian, d bc/dy, of the boundary conditions.
+c       `dbc' has already been set to zero so it is only necessary to set
+c       the non-zero elements.
+c------------------------------------------------------------------------------
+c
+c***declaration of parameters***
+c            imports:
+                integer                   neqns
+                double precision          ya(neqns),yb(neqns)
+c
+c               `neqns' Number of differential equations.
+c               `ya' Current solution approximation at `a', used in the 
+c                   evaluation of d g_a(y(a))/d ya.
+c               `yb' Current solution approximation at `b', used in the 
+c                   evaluation of d g_b(y(b))/ d yb.
+c            exports:
+                double precision          dbc(neqns,neqns)
+c
+c               `dbc' Value of d bc/dy for given `t',`ya', and `yb'.
+c---------------------------------------------------------------------------
+c
+        dbc(1,1) = 1.0d0
+        dbc(2,3) = 1.0d0
+        dbc(3,4) = 1.0d0
+        dbc(4,1) = 1.0d0
+        dbc(5,3) = 1.0d0
+        dbc(6,4) = 1.0d0
+c
+        return
+        end

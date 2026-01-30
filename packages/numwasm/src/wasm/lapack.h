@@ -361,6 +361,50 @@ int32_t lapack_dgelsd(int32_t m, int32_t n, int32_t nrhs,
                        double* s, double rcond, int32_t* rank,
                        double* work, int32_t lwork, int32_t* iwork);
 
+/* ============ Schur Decomposition ============ */
+
+/**
+ * Compute Schur decomposition: A = Z * T * Z^T
+ * where T is upper quasi-triangular and Z is orthogonal.
+ *
+ * @param jobvs 'N' = no Schur vectors, 'V' = compute Schur vectors
+ * @param sort  'N' = no sorting of eigenvalues
+ * @param n     Order of matrix A
+ * @param A     On entry: matrix. On exit: Schur form T
+ * @param lda   Leading dimension of A
+ * @param sdim  Output: number of selected eigenvalues (0 if sort='N')
+ * @param wr    Output: real parts of eigenvalues
+ * @param wi    Output: imaginary parts of eigenvalues
+ * @param VS    Output: Schur vectors if jobvs='V'
+ * @param ldvs  Leading dimension of VS
+ * @param work  Workspace
+ * @param lwork Size of workspace. If -1, optimal size returned in work[0]
+ * @return      0 on success
+ */
+int32_t lapack_dgees(char jobvs, char sort, int32_t n,
+                      double* A, int32_t lda, int32_t* sdim,
+                      double* wr, double* wi,
+                      double* VS, int32_t ldvs,
+                      double* work, int32_t lwork);
+
+/* ============ Symmetric Indefinite Factorization ============ */
+
+/**
+ * Compute Bunch-Kaufman factorization of symmetric matrix.
+ * A = P^T * L * D * L^T * P (lower) or A = P^T * U * D * U^T * P (upper)
+ *
+ * @param uplo  'U' = upper, 'L' = lower
+ * @param n     Order of matrix A
+ * @param A     On entry: symmetric matrix. On exit: L/U and D factors
+ * @param lda   Leading dimension of A
+ * @param ipiv  Output: pivot indices
+ * @param work  Workspace
+ * @param lwork Size of workspace. If -1, optimal size returned in work[0]
+ * @return      0 on success
+ */
+int32_t lapack_dsytrf(char uplo, int32_t n, double* A, int32_t lda,
+                       int32_t* ipiv, double* work, int32_t lwork);
+
 /* ============ Triangular Inverse ============ */
 
 /**

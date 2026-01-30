@@ -1,0 +1,54 @@
+{
+  "name": "arwasm",
+  "version": "0.1.0",
+  "description": "ARPACK WebAssembly module for eigenvalue computations",
+  "type": "module",
+  "main": "./dist/arwasm.cjs",
+  "module": "./dist/arwasm.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/arwasm.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/arwasm.cjs"
+      }
+    },
+    "./wasm/arpack.wasm": "./dist/wasm/arpack.wasm"
+  },
+  "scripts": {
+    "build:wasm": "./scripts/build.sh",
+    "build:lib": "vite build",
+    "build": "pnpm run build:wasm && pnpm run build:lib",
+    "test": "vitest run",
+    "clean": "rm -rf dist/",
+    "docs": "typedoc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^1.2.0",
+    "typedoc": "^0.27.0"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "arpack",
+    "eigenvalues",
+    "eigenvectors",
+    "sparse-matrices",
+    "wasm",
+    "webassembly"
+  ],
+  "license": "BSD-3-Clause",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "sideEffects": false
+}

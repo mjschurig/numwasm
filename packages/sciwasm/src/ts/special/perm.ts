@@ -6,7 +6,7 @@
  */
 
 import { NDArray } from 'numwasm';
-import { getWasmModule } from '../wasm-loader.js';
+import { getXSFModule } from 'xsfwasm';
 import {
   isScalar,
   validateScalarInputs,
@@ -67,7 +67,7 @@ export async function perm(
     const kVal = k as number;
     validateIntegerInputs(nVal, kVal, 'perm');
 
-    const wasm = getWasmModule();
+    const wasm = getXSFModule();
     const result = wasm._wasm_perm_exact(nVal, kVal);
 
     // Check for overflow
@@ -79,7 +79,7 @@ export async function perm(
   // Non-exact mode using Pochhammer symbol
   // P(N, k) = poch(N-k+1, k) = (N-k+1) * (N-k+2) * ... * N
   if (isScalar(N) && isScalar(k)) {
-    const wasm = getWasmModule();
+    const wasm = getXSFModule();
     return wasm._wasm_poch((N as number) - (k as number) + 1, k as number);
   }
 
@@ -88,7 +88,7 @@ export async function perm(
   const kArray = k instanceof NDArray ? k : await NDArray.fromArray([k]);
 
   return elementWise(NArray, kArray, (n, k_val) => {
-    const wasm = getWasmModule();
+    const wasm = getXSFModule();
     return wasm._wasm_poch(n - k_val + 1, k_val);
   });
 }

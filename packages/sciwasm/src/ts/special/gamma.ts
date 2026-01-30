@@ -3,7 +3,7 @@
  * Mirrors scipy.special.gamma, gammaln functions.
  */
 
-import { loadWasmModule } from '../wasm-loader.js';
+import { loadXSFModule } from 'xsfwasm';
 
 /**
  * Gamma function: Γ(x)
@@ -37,7 +37,7 @@ import { loadWasmModule } from '../wasm-loader.js';
  * ```
  */
 export async function gamma(x: number | number[]): Promise<number | number[]> {
-  const Module = await loadWasmModule();
+  const Module = await loadXSFModule();
 
   // Array input
   if (Array.isArray(x)) {
@@ -76,7 +76,7 @@ export async function gamma(x: number | number[]): Promise<number | number[]> {
  * ```
  */
 export async function gammaln(x: number | number[]): Promise<number | number[]> {
-  const Module = await loadWasmModule();
+  const Module = await loadXSFModule();
 
   // Array input
   if (Array.isArray(x)) {
@@ -111,7 +111,7 @@ export async function gammaln(x: number | number[]): Promise<number | number[]> 
  * ```
  */
 export async function rgamma(x: number | number[]): Promise<number | number[]> {
-  const Module = await loadWasmModule();
+  const Module = await loadXSFModule();
 
   // Array input
   if (Array.isArray(x)) {

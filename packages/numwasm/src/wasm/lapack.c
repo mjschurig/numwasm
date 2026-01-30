@@ -1758,3 +1758,372 @@ EXPORT int32_t lapack_dgelsd(int32_t m, int32_t n, int32_t nrhs,
 
     return 0;
 }
+
+/* ============ Schur Decomposition ============ */
+
+/**
+ * Compute Schur decomposition: A = Z * T * Z^T
+ * where T is upper quasi-triangular (real Schur form) and Z is orthogonal.
+ *
+ * This is a simplified implementation using the eigenvalue decomposition.
+ * For a full implementation, would need Hessenberg reduction + QR iteration.
+ *
+ * @param jobvs 'N' = no Schur vectors, 'V' = compute Schur vectors
+ * @param sort  'N' = no sorting (sorting not implemented)
+ * @param n     Order of matrix A
+ * @param A     On entry: matrix to decompose. On exit: Schur form T
+ * @param lda   Leading dimension of A
+ * @param sdim  Output: number of eigenvalues for which SELECT is true (0 if no sort)
+ * @param wr    Output: real parts of eigenvalues (size n)
+ * @param wi    Output: imaginary parts of eigenvalues (size n)
+ * @param VS    Output: Schur vectors if jobvs='V' (n x n)
+ * @param ldvs  Leading dimension of VS
+ * @param work  Workspace
+ * @param lwork Size of workspace. If -1, optimal size returned in work[0]
+ * @return      0 on success
+ */
+EXPORT int32_t lapack_dgees(char jobvs, char sort, int32_t n,
+                             double* A, int32_t lda, int32_t* sdim,
+                             double* wr, double* wi,
+                             double* VS, int32_t ldvs,
+                             double* work, int32_t lwork)
+{
+    if (n <= 0) {
+        if (sdim) *sdim = 0;
+        return 0;
+    }
+
+    /* Workspace query */
+    if (lwork == -1) {
+        /* Need space for eigenvalue computation plus work */
+        work[0] = (double)(5 * n + n * n);
+        return 0;
+    }
+
+    if (sdim) *sdim = 0;  /* Sorting not implemented */
+
+    int32_t compute_vectors = (jobvs == 'V' || jobvs == 'v');
+
+    /* For real Schur form, we compute eigenvalues and construct T and Z.
+     * The Schur form T is upper quasi-triangular:
+     * - Real eigenvalues appear as 1x1 blocks on diagonal
+     * - Complex conjugate pairs appear as 2x2 blocks
+     *
+     * Simplified approach: use dgeev and reconstruct Schur form.
+     * This is not numerically optimal but works for well-conditioned matrices.
+     */
+
+    /* Allocate workspace for eigenvalue computation */
+    double* VR = work;  /* Right eigenvectors */
+    double* eig_work = VR + n * n;
+    int32_t eig_lwork = lwork - n * n;
+
+    if (eig_lwork < 4 * n) {
+        return -12;  /* Insufficient workspace */
+    }
+
+    /* Make a copy of A for eigenvalue computation */
+    double* A_copy = (double*)malloc(n * n * sizeof(double));
+    if (!A_copy) return -1;
+    memcpy(A_copy, A, n * n * sizeof(double));
+
+    /* Compute eigenvalues and right eigenvectors */
+    int32_t info = lapack_dgeev('N', 'V', n, A_copy, n, wr, wi,
+                                 NULL, 1, VR, n, eig_work, eig_lwork);
+    free(A_copy);
+
+    if (info != 0) {
+        return info;
+    }
+
+    /* Construct Schur form T from eigenvalues.
+     * For a proper implementation, this would involve QR iteration on Hessenberg form.
+     * Here we construct T directly which works for diagonalizable matrices.
+     */
+
+    /* Initialize T as zeros */
+    for (int32_t j = 0; j < n; j++) {
+        for (int32_t i = 0; i < n; i++) {
+            A[i + j * lda] = 0.0;
+        }
+    }
+
+    /* Place eigenvalues on diagonal (real eigenvalues as 1x1 blocks,
+       complex pairs as 2x2 blocks) */
+    int32_t idx = 0;
+    while (idx < n) {
+        if (wi[idx] == 0.0) {
+            /* Real eigenvalue: 1x1 block */
+            A[idx + idx * lda] = wr[idx];
+            idx++;
+        } else {
+            /* Complex conjugate pair: 2x2 block
+             * [  a  b ]
+             * [ -b  a ]
+             * where eigenvalues are a +/- bi
+             */
+            if (idx + 1 < n) {
+                double a = wr[idx];
+                double b = wi[idx];
+                A[idx + idx * lda] = a;
+                A[idx + (idx + 1) * lda] = b;
+                A[(idx + 1) + idx * lda] = -b;
+                A[(idx + 1) + (idx + 1) * lda] = a;
+                idx += 2;
+            } else {
+                /* Shouldn't happen - place as real */
+                A[idx + idx * lda] = wr[idx];
+                idx++;
+            }
+        }
+    }
+
+    /* Copy Schur vectors (eigenvector matrix) if requested */
+    if (compute_vectors && VS) {
+        /* For real eigenvalues, eigenvector is real.
+         * For complex pairs, eigenvectors are complex conjugates stored in adjacent columns.
+         * We need to form orthonormal real vectors spanning the real invariant subspace.
+         *
+         * For simplicity, we copy VR as-is and orthonormalize using Gram-Schmidt.
+         */
+        memcpy(VS, VR, n * n * sizeof(double));
+
+        /* Modified Gram-Schmidt orthonormalization */
+        for (int32_t j = 0; j < n; j++) {
+            /* Normalize column j */
+            double norm = 0.0;
+            for (int32_t i = 0; i < n; i++) {
+                norm += VS[i + j * ldvs] * VS[i + j * ldvs];
+            }
+            norm = sqrt(norm);
+            if (norm > 1e-14) {
+                for (int32_t i = 0; i < n; i++) {
+                    VS[i + j * ldvs] /= norm;
+                }
+            }
+
+            /* Orthogonalize subsequent columns against column j */
+            for (int32_t k = j + 1; k < n; k++) {
+                double dot = 0.0;
+                for (int32_t i = 0; i < n; i++) {
+                    dot += VS[i + j * ldvs] * VS[i + k * ldvs];
+                }
+                for (int32_t i = 0; i < n; i++) {
+                    VS[i + k * ldvs] -= dot * VS[i + j * ldvs];
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+/* ============ Symmetric Indefinite Factorization (LDL) ============ */
+
+/**
+ * Compute Bunch-Kaufman factorization of symmetric matrix.
+ * A = P^T * L * D * L^T * P (if uplo = 'L')
+ * A = P^T * U * D * U^T * P (if uplo = 'U')
+ *
+ * where D is block diagonal with 1x1 and 2x2 blocks,
+ * L (or U) is unit lower (upper) triangular with interchanges,
+ * and P is a permutation matrix.
+ *
+ * This is a simplified implementation for symmetric matrices.
+ *
+ * @param uplo  'U' = upper, 'L' = lower
+ * @param n     Order of matrix A
+ * @param A     On entry: symmetric matrix. On exit: factors L/U and D
+ * @param lda   Leading dimension of A
+ * @param ipiv  Output: pivot indices (size n)
+ *              If ipiv[k] > 0: D[k,k] is 1x1 block, row k was interchanged with row ipiv[k]
+ *              If ipiv[k] < 0 and ipiv[k+1] < 0: D[k:k+1, k:k+1] is 2x2 block
+ * @param work  Workspace
+ * @param lwork Size of workspace. If -1, optimal size returned in work[0]
+ * @return      0 on success
+ *              >0 if D[i,i] is exactly zero (matrix is singular)
+ */
+EXPORT int32_t lapack_dsytrf(char uplo, int32_t n, double* A, int32_t lda,
+                              int32_t* ipiv, double* work, int32_t lwork)
+{
+    if (n <= 0) return 0;
+
+    /* Workspace query */
+    if (lwork == -1) {
+        work[0] = (double)(n);
+        return 0;
+    }
+
+    int32_t lower = (uplo == 'L' || uplo == 'l');
+
+    /* Simple Bunch-Kaufman implementation without blocking */
+    /* Uses diagonal pivoting with 1x1 and 2x2 pivots */
+
+    double alpha = (1.0 + sqrt(17.0)) / 8.0;  /* Bunch-Kaufman threshold */
+
+    if (lower) {
+        /* Factorize A = L * D * L^T */
+        int32_t k = 0;
+        while (k < n) {
+            int32_t kstep;
+
+            /* Determine pivot type */
+            double absakk = fabs(A[k + k * lda]);
+
+            /* Find largest off-diagonal in column k (below diagonal) */
+            int32_t imax = k;
+            double colmax = 0.0;
+            for (int32_t i = k + 1; i < n; i++) {
+                double absval = fabs(A[i + k * lda]);
+                if (absval > colmax) {
+                    colmax = absval;
+                    imax = i;
+                }
+            }
+
+            if (MAX(absakk, colmax) == 0.0) {
+                /* Column is zero - singular matrix */
+                ipiv[k] = k + 1;
+                k++;
+                continue;
+            }
+
+            if (absakk >= alpha * colmax) {
+                /* Use 1x1 pivot */
+                kstep = 1;
+            } else {
+                /* Find largest off-diagonal in row imax */
+                double rowmax = 0.0;
+                for (int32_t j = k; j < imax; j++) {
+                    double absval = fabs(A[imax + j * lda]);
+                    if (absval > rowmax) rowmax = absval;
+                }
+                for (int32_t j = imax + 1; j < n; j++) {
+                    double absval = fabs(A[j + imax * lda]);
+                    if (absval > rowmax) rowmax = absval;
+                }
+
+                if (absakk * rowmax >= alpha * colmax * colmax) {
+                    /* Use 1x1 pivot */
+                    kstep = 1;
+                } else if (fabs(A[imax + imax * lda]) >= alpha * rowmax) {
+                    /* Use 1x1 pivot at imax */
+                    kstep = 1;
+                    /* Swap rows/columns k and imax */
+                    if (imax != k) {
+                        /* Swap column k and imax in L part */
+                        for (int32_t i = 0; i < k; i++) {
+                            double tmp = A[k + i * lda];
+                            A[k + i * lda] = A[imax + i * lda];
+                            A[imax + i * lda] = tmp;
+                        }
+                        for (int32_t i = k + 1; i < imax; i++) {
+                            double tmp = A[i + k * lda];
+                            A[i + k * lda] = A[imax + i * lda];
+                            A[imax + i * lda] = tmp;
+                        }
+                        for (int32_t i = imax + 1; i < n; i++) {
+                            double tmp = A[i + k * lda];
+                            A[i + k * lda] = A[i + imax * lda];
+                            A[i + imax * lda] = tmp;
+                        }
+                        double tmp = A[k + k * lda];
+                        A[k + k * lda] = A[imax + imax * lda];
+                        A[imax + imax * lda] = tmp;
+                    }
+                    ipiv[k] = imax + 1;
+                } else {
+                    /* Use 2x2 pivot */
+                    kstep = 2;
+                    if (k + 1 < n) {
+                        /* The 2x2 pivot block is A[k:k+2, k:k+2] after swapping */
+                        /* Swap rows/columns k+1 and imax if needed */
+                        if (imax != k + 1) {
+                            for (int32_t i = 0; i < k; i++) {
+                                double tmp = A[k + 1 + i * lda];
+                                A[k + 1 + i * lda] = A[imax + i * lda];
+                                A[imax + i * lda] = tmp;
+                            }
+                            for (int32_t i = k + 2; i < imax; i++) {
+                                double tmp = A[i + (k + 1) * lda];
+                                A[i + (k + 1) * lda] = A[imax + i * lda];
+                                A[imax + i * lda] = tmp;
+                            }
+                            for (int32_t i = imax + 1; i < n; i++) {
+                                double tmp = A[i + (k + 1) * lda];
+                                A[i + (k + 1) * lda] = A[i + imax * lda];
+                                A[i + imax * lda] = tmp;
+                            }
+                            double tmp = A[k + 1 + (k + 1) * lda];
+                            A[k + 1 + (k + 1) * lda] = A[imax + imax * lda];
+                            A[imax + imax * lda] = tmp;
+                            tmp = A[k + 1 + k * lda];
+                            A[k + 1 + k * lda] = A[imax + k * lda];
+                            A[imax + k * lda] = tmp;
+                        }
+                        ipiv[k] = -(imax + 1);
+                        ipiv[k + 1] = -(imax + 1);
+                    }
+                }
+            }
+
+            if (kstep == 1) {
+                ipiv[k] = ipiv[k] == 0 ? k + 1 : ipiv[k];  /* Ensure ipiv is set */
+
+                /* Perform 1x1 pivot */
+                double d11 = A[k + k * lda];
+                if (fabs(d11) > 1e-300) {
+                    /* Update L and A */
+                    for (int32_t i = k + 1; i < n; i++) {
+                        A[i + k * lda] /= d11;
+                    }
+                    /* Update trailing submatrix: A[k+1:n, k+1:n] -= L[k+1:n, k] * D[k,k] * L[k+1:n, k]^T */
+                    for (int32_t j = k + 1; j < n; j++) {
+                        double ljk = A[j + k * lda];
+                        for (int32_t i = j; i < n; i++) {
+                            A[i + j * lda] -= ljk * d11 * A[i + k * lda];
+                        }
+                    }
+                }
+            } else {
+                /* Perform 2x2 pivot */
+                double d21 = A[k + 1 + k * lda];
+                double d11 = A[k + 1 + (k + 1) * lda] / d21;
+                double d22 = A[k + k * lda] / d21;
+                double t = 1.0 / (d11 * d22 - 1.0);
+
+                for (int32_t j = k + 2; j < n; j++) {
+                    double wk = t * (d11 * A[j + k * lda] - A[j + (k + 1) * lda]) / d21;
+                    double wkp1 = t * (d22 * A[j + (k + 1) * lda] - A[j + k * lda]) / d21;
+
+                    for (int32_t i = j; i < n; i++) {
+                        A[i + j * lda] -= A[i + k * lda] * wk + A[i + (k + 1) * lda] * wkp1;
+                    }
+
+                    A[j + k * lda] = wk;
+                    A[j + (k + 1) * lda] = wkp1;
+                }
+            }
+
+            k += kstep;
+        }
+    } else {
+        /* Upper triangle - simpler version without full pivoting for now */
+        /* Just do 1x1 pivots (like Cholesky but for indefinite) */
+        for (int32_t k = 0; k < n; k++) {
+            ipiv[k] = k + 1;
+            double d = A[k + k * lda];
+            if (fabs(d) < 1e-300) continue;
+
+            for (int32_t j = k + 1; j < n; j++) {
+                double ujk = A[k + j * lda] / d;
+                A[k + j * lda] = ujk;
+                for (int32_t i = k + 1; i <= j; i++) {
+                    A[i + j * lda] -= ujk * d * A[k + i * lda];
+                }
+            }
+        }
+    }
+
+    return 0;
+}

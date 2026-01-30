@@ -38,7 +38,10 @@
       "Bash(pnpm run build:wasm:*)",
       "Bash(pnpm test:*)",
       "Bash(pnpm run build:lib:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(python3:*)",
+      "Bash(chmod:*)",
+      "Bash(pnpm exec tsc:*)"
     ]
   }
 }

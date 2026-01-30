@@ -1115,3 +1115,1153 @@ EXPORT NDArray* linalg_norm(const NDArray* a, int32_t ord) {
 
     return result;
 }
+
+/* ============ Cholesky Solve ============ */
+
+/**
+ * Solve linear system using Cholesky factorization.
+ * Solves A * x = b where c is the Cholesky factor of A.
+ *
+ * @param c      Cholesky factor from linalg_cholesky (N x N)
+ * @param b      Right-hand side (N,) or (N x NRHS)
+ * @param lower  Non-zero if c is lower triangular (A = L L^T)
+ * @return       Solution x, or NULL on error
+ */
+EXPORT NDArray* linalg_cholesky_solve(const NDArray* c, const NDArray* b, int32_t lower) {
+    if (!c || !b) return NULL;
+    if (c->ndim != 2 || c->shape[0] != c->shape[1]) return NULL;
+
+    int32_t n = c->shape[0];
+    int32_t nrhs;
+    int32_t is_vector = (b->ndim == 1);
+
+    if (is_vector) {
+        if (b->shape[0] != n) return NULL;
+        nrhs = 1;
+    } else if (b->ndim == 2) {
+        if (b->shape[0] != n) return NULL;
+        nrhs = b->shape[1];
+    } else {
+        return NULL;
+    }
+
+    /* Create result array (same shape as b) */
+    NDArray* x = ndarray_copy(b);
+    if (!x) return NULL;
+
+    if (c->dtype == DTYPE_FLOAT64) {
+        double* C_f = (double*)malloc(n * n * sizeof(double));
+        double* B_f = (double*)malloc(n * nrhs * sizeof(double));
+
+        if (!C_f || !B_f) {
+            free(C_f); free(B_f);
+            ndarray_free(x);
+            return NULL;
+        }
+
+        c_to_fortran_d((const double*)c->data, C_f, n, n);
+
+        if (is_vector) {
+            memcpy(B_f, b->data, n * sizeof(double));
+        } else {
+            c_to_fortran_d((const double*)b->data, B_f, n, nrhs);
+        }
+
+        int32_t info = lapack_dpotrs(lower ? 'L' : 'U', n, nrhs, C_f, n, B_f, n);
+
+        if (info != 0) {
+            free(C_f); free(B_f);
+            ndarray_free(x);
+            return NULL;
+        }
+
+        if (is_vector) {
+            memcpy(x->data, B_f, n * sizeof(double));
+        } else {
+            fortran_to_c_d(B_f, (double*)x->data, n, nrhs);
+        }
+
+        free(C_f);
+        free(B_f);
+    } else if (c->dtype == DTYPE_FLOAT32) {
+        float* C_f = (float*)malloc(n * n * sizeof(float));
+        float* B_f = (float*)malloc(n * nrhs * sizeof(float));
+
+        if (!C_f || !B_f) {
+            free(C_f); free(B_f);
+            ndarray_free(x);
+            return NULL;
+        }
+
+        c_to_fortran_f((const float*)c->data, C_f, n, n);
+
+        if (is_vector) {
+            memcpy(B_f, b->data, n * sizeof(float));
+        } else {
+            c_to_fortran_f((const float*)b->data, B_f, n, nrhs);
+        }
+
+        /* Note: would need lapack_spotrs for float, using double conversion for now */
+        /* TODO: add spotrs to lapack.c */
+        free(C_f); free(B_f);
+        ndarray_free(x);
+        return NULL;  /* Float not yet supported */
+    } else {
+        ndarray_free(x);
+        return NULL;
+    }
+
+    return x;
+}
+
+/* ============ LU Decomposition ============ */
+
+/**
+ * LU decomposition result structure.
+ */
+typedef struct {
+    NDArray* P;  /* Permutation matrix (M x M) */
+    NDArray* L;  /* Lower triangular (M x K) where K = min(M, N) */
+    NDArray* U;  /* Upper triangular (K x N) */
+} LUResult;
+
+/**
+ * LU decomposition with partial pivoting.
+ * A = P @ L @ U where P is permutation, L is lower triangular with unit diagonal,
+ * and U is upper triangular.
+ *
+ * @param a  Matrix A (M x N)
+ * @return   LUResult with P, L, U, or NULL on error
+ */
+EXPORT LUResult* linalg_lu(const NDArray* a) {
+    if (!a) return NULL;
+    if (a->ndim != 2) return NULL;
+
+    int32_t m = a->shape[0];
+    int32_t n = a->shape[1];
+    int32_t k = MIN(m, n);
+
+    LUResult* result = (LUResult*)malloc(sizeof(LUResult));
+    if (!result) return NULL;
+
+    /* Create output arrays */
+    int32_t p_shape[2] = {m, m};
+    int32_t l_shape[2] = {m, k};
+    int32_t u_shape[2] = {k, n};
+
+    result->P = ndarray_empty(2, p_shape, DTYPE_FLOAT64);
+    result->L = ndarray_empty(2, l_shape, a->dtype);
+    result->U = ndarray_empty(2, u_shape, a->dtype);
+
+    if (!result->P || !result->L || !result->U) {
+        if (result->P) ndarray_free(result->P);
+        if (result->L) ndarray_free(result->L);
+        if (result->U) ndarray_free(result->U);
+        free(result);
+        return NULL;
+    }
+
+    if (a->dtype == DTYPE_FLOAT64) {
+        double* A_f = (double*)malloc(m * n * sizeof(double));
+        int32_t* ipiv = (int32_t*)malloc(k * sizeof(int32_t));
+
+        if (!A_f || !ipiv) {
+            free(A_f); free(ipiv);
+            ndarray_free(result->P);
+            ndarray_free(result->L);
+            ndarray_free(result->U);
+            free(result);
+            return NULL;
+        }
+
+        c_to_fortran_d((const double*)a->data, A_f, m, n);
+
+        int32_t info = lapack_dgetrf(m, n, A_f, m, ipiv);
+        /* info > 0 means singular, but we still return the decomposition */
+
+        /* Extract L (lower with unit diagonal) */
+        double* L_f = (double*)calloc(m * k, sizeof(double));
+        for (int32_t j = 0; j < k; j++) {
+            L_f[j + j * m] = 1.0;  /* Unit diagonal */
+            for (int32_t i = j + 1; i < m; i++) {
+                L_f[i + j * m] = A_f[i + j * m];
+            }
+        }
+        fortran_to_c_d(L_f, (double*)result->L->data, m, k);
+        free(L_f);
+
+        /* Extract U (upper triangular) */
+        double* U_f = (double*)calloc(k * n, sizeof(double));
+        for (int32_t j = 0; j < n; j++) {
+            for (int32_t i = 0; i <= MIN(j, k - 1); i++) {
+                U_f[i + j * k] = A_f[i + j * m];
+            }
+        }
+        fortran_to_c_d(U_f, (double*)result->U->data, k, n);
+        free(U_f);
+
+        /* Build permutation matrix from pivot indices */
+        /* ipiv is 1-based from LAPACK; ipiv[i] means row i was swapped with row ipiv[i]-1 */
+        double* P_data = (double*)result->P->data;
+        memset(P_data, 0, m * m * sizeof(double));
+
+        /* Start with identity */
+        int32_t* perm = (int32_t*)malloc(m * sizeof(int32_t));
+        for (int32_t i = 0; i < m; i++) perm[i] = i;
+
+        /* Apply pivot swaps */
+        for (int32_t i = 0; i < k; i++) {
+            int32_t swap_row = ipiv[i] - 1;  /* Convert to 0-based */
+            if (swap_row != i) {
+                int32_t tmp = perm[i];
+                perm[i] = perm[swap_row];
+                perm[swap_row] = tmp;
+            }
+        }
+
+        /* Build P matrix: P[perm[i], i] = 1 means row perm[i] of A becomes row i of P@A */
+        /* Actually P[i, perm[i]] = 1 for P @ A = L @ U */
+        for (int32_t i = 0; i < m; i++) {
+            P_data[i * m + perm[i]] = 1.0;
+        }
+
+        free(perm);
+        free(A_f);
+        free(ipiv);
+    } else if (a->dtype == DTYPE_FLOAT32) {
+        float* A_f = (float*)malloc(m * n * sizeof(float));
+        int32_t* ipiv = (int32_t*)malloc(k * sizeof(int32_t));
+
+        if (!A_f || !ipiv) {
+            free(A_f); free(ipiv);
+            ndarray_free(result->P);
+            ndarray_free(result->L);
+            ndarray_free(result->U);
+            free(result);
+            return NULL;
+        }
+
+        c_to_fortran_f((const float*)a->data, A_f, m, n);
+
+        int32_t info = lapack_sgetrf(m, n, A_f, m, ipiv);
+
+        /* Extract L */
+        float* L_f = (float*)calloc(m * k, sizeof(float));
+        for (int32_t j = 0; j < k; j++) {
+            L_f[j + j * m] = 1.0f;
+            for (int32_t i = j + 1; i < m; i++) {
+                L_f[i + j * m] = A_f[i + j * m];
+            }
+        }
+        fortran_to_c_f(L_f, (float*)result->L->data, m, k);
+        free(L_f);
+
+        /* Extract U */
+        float* U_f = (float*)calloc(k * n, sizeof(float));
+        for (int32_t j = 0; j < n; j++) {
+            for (int32_t i = 0; i <= MIN(j, k - 1); i++) {
+                U_f[i + j * k] = A_f[i + j * m];
+            }
+        }
+        fortran_to_c_f(U_f, (float*)result->U->data, k, n);
+        free(U_f);
+
+        /* Build permutation matrix (always double for consistency) */
+        double* P_data = (double*)result->P->data;
+        memset(P_data, 0, m * m * sizeof(double));
+
+        int32_t* perm = (int32_t*)malloc(m * sizeof(int32_t));
+        for (int32_t i = 0; i < m; i++) perm[i] = i;
+
+        for (int32_t i = 0; i < k; i++) {
+            int32_t swap_row = ipiv[i] - 1;
+            if (swap_row != i) {
+                int32_t tmp = perm[i];
+                perm[i] = perm[swap_row];
+                perm[swap_row] = tmp;
+            }
+        }
+
+        for (int32_t i = 0; i < m; i++) {
+            P_data[i * m + perm[i]] = 1.0;
+        }
+
+        free(perm);
+        free(A_f);
+        free(ipiv);
+    } else {
+        ndarray_free(result->P);
+        ndarray_free(result->L);
+        ndarray_free(result->U);
+        free(result);
+        return NULL;
+    }
+
+    return result;
+}
+
+EXPORT void linalg_lu_free(LUResult* result) {
+    if (result) {
+        if (result->P) ndarray_free(result->P);
+        if (result->L) ndarray_free(result->L);
+        if (result->U) ndarray_free(result->U);
+        free(result);
+    }
+}
+
+EXPORT NDArray* linalg_lu_get_p(LUResult* result) {
+    return result ? result->P : NULL;
+}
+
+EXPORT NDArray* linalg_lu_get_l(LUResult* result) {
+    return result ? result->L : NULL;
+}
+
+EXPORT NDArray* linalg_lu_get_u(LUResult* result) {
+    return result ? result->U : NULL;
+}
+
+/* ============ Matrix Rank ============ */
+
+/**
+ * Compute numerical rank of a matrix using SVD.
+ *
+ * @param a    Input matrix (M x N)
+ * @param tol  Tolerance for singular values. Values <= tol * max(s) are considered zero.
+ *             Use negative value for default: max(M,N) * eps * max(s)
+ * @return     Numerical rank, or -1 on error
+ */
+EXPORT int32_t linalg_matrix_rank(const NDArray* a, double tol) {
+    if (!a) return -1;
+    if (a->ndim != 2) return -1;
+
+    int32_t m = a->shape[0];
+    int32_t n = a->shape[1];
+    int32_t k = MIN(m, n);
+
+    if (k == 0) return 0;
+
+    /* Compute SVD to get singular values only (using jobz='N' would be more efficient,
+       but we reuse the existing SVD implementation) */
+    if (a->dtype == DTYPE_FLOAT64) {
+        double* A_f = (double*)malloc(m * n * sizeof(double));
+        double* s = (double*)malloc(k * sizeof(double));
+        int32_t lwork = 4 * k * k + 7 * k + MAX(m, n);
+        double* work = (double*)malloc(lwork * sizeof(double));
+        int32_t* iwork = (int32_t*)malloc(8 * k * sizeof(int32_t));
+
+        /* Minimal U and VT for 'N' mode - not needed but LAPACK may require valid pointers */
+        double* U_f = (double*)malloc(1 * sizeof(double));
+        double* VT_f = (double*)malloc(1 * sizeof(double));
+
+        if (!A_f || !s || !work || !iwork || !U_f || !VT_f) {
+            free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+            return -1;
+        }
+
+        c_to_fortran_d((const double*)a->data, A_f, m, n);
+
+        /* Use jobz='N' - no U or VT computed, just singular values */
+        int32_t info = lapack_dgesdd('N', m, n, A_f, m, s, U_f, 1, VT_f, 1,
+                                      work, lwork, iwork);
+
+        if (info != 0) {
+            free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+            return -1;
+        }
+
+        /* Determine tolerance */
+        double max_s = s[0];  /* Singular values are in descending order */
+        double eps = lapack_dlamch('E');  /* Machine epsilon */
+        double actual_tol = (tol < 0) ? MAX(m, n) * eps * max_s : tol * max_s;
+
+        /* Count singular values above tolerance */
+        int32_t rank = 0;
+        for (int32_t i = 0; i < k; i++) {
+            if (s[i] > actual_tol) {
+                rank++;
+            }
+        }
+
+        free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+        return rank;
+    } else if (a->dtype == DTYPE_FLOAT32) {
+        float* A_f = (float*)malloc(m * n * sizeof(float));
+        float* s = (float*)malloc(k * sizeof(float));
+        int32_t lwork = 4 * k * k + 7 * k + MAX(m, n);
+        float* work = (float*)malloc(lwork * sizeof(float));
+        int32_t* iwork = (int32_t*)malloc(8 * k * sizeof(int32_t));
+        float* U_f = (float*)malloc(1 * sizeof(float));
+        float* VT_f = (float*)malloc(1 * sizeof(float));
+
+        if (!A_f || !s || !work || !iwork || !U_f || !VT_f) {
+            free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+            return -1;
+        }
+
+        c_to_fortran_f((const float*)a->data, A_f, m, n);
+
+        int32_t info = lapack_sgesdd('N', m, n, A_f, m, s, U_f, 1, VT_f, 1,
+                                      work, lwork, iwork);
+
+        if (info != 0) {
+            free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+            return -1;
+        }
+
+        float max_s = s[0];
+        float eps = (float)lapack_dlamch('E');
+        float actual_tol = (tol < 0) ? MAX(m, n) * eps * max_s : (float)tol * max_s;
+
+        int32_t rank = 0;
+        for (int32_t i = 0; i < k; i++) {
+            if (s[i] > actual_tol) {
+                rank++;
+            }
+        }
+
+        free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+        return rank;
+    }
+
+    return -1;
+}
+
+/* ============ Pseudo-Inverse (pinv) ============ */
+
+/**
+ * Compute Moore-Penrose pseudo-inverse using SVD.
+ * pinv(A) = V @ diag(1/s) @ U^T, with small singular values zeroed.
+ *
+ * @param a      Input matrix (M x N)
+ * @param rcond  Relative condition number. Singular values s[i] < rcond * max(s)
+ *               are treated as zero. Use negative value for default.
+ * @return       Pseudo-inverse (N x M), or NULL on error
+ */
+EXPORT NDArray* linalg_pinv(const NDArray* a, double rcond) {
+    if (!a) return NULL;
+    if (a->ndim != 2) return NULL;
+
+    int32_t m = a->shape[0];
+    int32_t n = a->shape[1];
+    int32_t k = MIN(m, n);
+
+    if (m == 0 || n == 0) {
+        /* Return empty (n, m) array */
+        int32_t result_shape[2] = {n, m};
+        return ndarray_empty(2, result_shape, a->dtype);
+    }
+
+    /* Create result array (N x M) */
+    int32_t result_shape[2] = {n, m};
+    NDArray* result = ndarray_empty(2, result_shape, a->dtype);
+    if (!result) return NULL;
+
+    if (a->dtype == DTYPE_FLOAT64) {
+        /* Compute full SVD: A = U @ diag(s) @ Vh */
+        double* A_f = (double*)malloc(m * n * sizeof(double));
+        double* U_f = (double*)malloc(m * k * sizeof(double));
+        double* VT_f = (double*)malloc(k * n * sizeof(double));
+        double* s = (double*)malloc(k * sizeof(double));
+        int32_t lwork = 4 * k * k + 7 * k + MAX(m, n);
+        double* work = (double*)malloc(lwork * sizeof(double));
+        int32_t* iwork = (int32_t*)malloc(8 * k * sizeof(int32_t));
+
+        if (!A_f || !U_f || !VT_f || !s || !work || !iwork) {
+            free(A_f); free(U_f); free(VT_f); free(s); free(work); free(iwork);
+            ndarray_free(result);
+            return NULL;
+        }
+
+        c_to_fortran_d((const double*)a->data, A_f, m, n);
+
+        /* Use jobz='S' for reduced SVD */
+        int32_t info = lapack_dgesdd('S', m, n, A_f, m, s, U_f, m, VT_f, k,
+                                      work, lwork, iwork);
+
+        if (info != 0) {
+            free(A_f); free(U_f); free(VT_f); free(s); free(work); free(iwork);
+            ndarray_free(result);
+            return NULL;
+        }
+
+        /* Determine cutoff for singular values */
+        double eps = lapack_dlamch('E');
+        double cutoff = (rcond < 0) ? MAX(m, n) * eps * s[0] : rcond * s[0];
+
+        /* Compute pinv = V @ diag(1/s) @ U^T = VT^T @ diag(1/s) @ U^T
+         * First: scale columns of U by 1/s[i] (or 0 if s[i] <= cutoff) */
+        for (int32_t i = 0; i < k; i++) {
+            double scale = (s[i] > cutoff) ? 1.0 / s[i] : 0.0;
+            for (int32_t j = 0; j < m; j++) {
+                U_f[j + i * m] *= scale;  /* Scale column i of U */
+            }
+        }
+
+        /* Now compute pinv = VT^T @ U_scaled^T = V @ U_scaled^T
+         * Result is (n x m): pinv[i,j] = sum_l V[i,l] * U_scaled[j,l]
+         *                              = sum_l VT[l,i] * U_scaled[j,l]
+         * In Fortran order: pinv_f[i + j*n] = sum_l VT_f[l + i*k] * U_f[j + l*m]
+         */
+        double* pinv_f = (double*)calloc(n * m, sizeof(double));
+        if (!pinv_f) {
+            free(A_f); free(U_f); free(VT_f); free(s); free(work); free(iwork);
+            ndarray_free(result);
+            return NULL;
+        }
+
+        /* pinv = V @ U_scaled^T where V = VT^T
+         * Using BLAS: pinv = alpha * VT^T @ U^T + beta * pinv
+         * VT is k x n, VT^T is n x k
+         * U_scaled is m x k, U_scaled^T is k x m
+         * Result: n x m
+         */
+        blas_dgemm('T', 'T', n, m, k, 1.0, VT_f, k, U_f, m, 0.0, pinv_f, n);
+
+        fortran_to_c_d(pinv_f, (double*)result->data, n, m);
+
+        free(pinv_f);
+        free(A_f); free(U_f); free(VT_f); free(s); free(work); free(iwork);
+    } else if (a->dtype == DTYPE_FLOAT32) {
+        float* A_f = (float*)malloc(m * n * sizeof(float));
+        float* U_f = (float*)malloc(m * k * sizeof(float));
+        float* VT_f = (float*)malloc(k * n * sizeof(float));
+        float* s = (float*)malloc(k * sizeof(float));
+        int32_t lwork = 4 * k * k + 7 * k + MAX(m, n);
+        float* work = (float*)malloc(lwork * sizeof(float));
+        int32_t* iwork = (int32_t*)malloc(8 * k * sizeof(int32_t));
+
+        if (!A_f || !U_f || !VT_f || !s || !work || !iwork) {
+            free(A_f); free(U_f); free(VT_f); free(s); free(work); free(iwork);
+            ndarray_free(result);
+            return NULL;
+        }
+
+        c_to_fortran_f((const float*)a->data, A_f, m, n);
+
+        int32_t info = lapack_sgesdd('S', m, n, A_f, m, s, U_f, m, VT_f, k,
+                                      work, lwork, iwork);
+
+        if (info != 0) {
+            free(A_f); free(U_f); free(VT_f); free(s); free(work); free(iwork);
+            ndarray_free(result);
+            return NULL;
+        }
+
+        float eps = (float)lapack_dlamch('E');
+        float cutoff = (rcond < 0) ? MAX(m, n) * eps * s[0] : (float)rcond * s[0];
+
+        for (int32_t i = 0; i < k; i++) {
+            float scale = (s[i] > cutoff) ? 1.0f / s[i] : 0.0f;
+            for (int32_t j = 0; j < m; j++) {
+                U_f[j + i * m] *= scale;
+            }
+        }
+
+        float* pinv_f = (float*)calloc(n * m, sizeof(float));
+        if (!pinv_f) {
+            free(A_f); free(U_f); free(VT_f); free(s); free(work); free(iwork);
+            ndarray_free(result);
+            return NULL;
+        }
+
+        blas_sgemm('T', 'T', n, m, k, 1.0f, VT_f, k, U_f, m, 0.0f, pinv_f, n);
+
+        fortran_to_c_f(pinv_f, (float*)result->data, n, m);
+
+        free(pinv_f);
+        free(A_f); free(U_f); free(VT_f); free(s); free(work); free(iwork);
+    } else {
+        ndarray_free(result);
+        return NULL;
+    }
+
+    return result;
+}
+
+/* ============ Condition Number ============ */
+
+/**
+ * Compute condition number of a matrix.
+ *
+ * @param a    Input matrix (M x N)
+ * @param p    Norm type:
+ *             2: 2-norm (default, ratio of largest to smallest singular value)
+ *            -2: ratio of smallest to largest singular value
+ *             Other values not yet supported (would need dgecon)
+ * @return     Condition number, or -1.0 on error, or INFINITY if singular
+ */
+EXPORT double linalg_cond(const NDArray* a, int32_t p) {
+    if (!a) return -1.0;
+    if (a->ndim != 2) return -1.0;
+
+    int32_t m = a->shape[0];
+    int32_t n = a->shape[1];
+    int32_t k = MIN(m, n);
+
+    if (k == 0) return 0.0;
+
+    /* For 2-norm and -2-norm, use SVD */
+    if (p == 2 || p == -2) {
+        if (a->dtype == DTYPE_FLOAT64) {
+            double* A_f = (double*)malloc(m * n * sizeof(double));
+            double* s = (double*)malloc(k * sizeof(double));
+            int32_t lwork = 4 * k * k + 7 * k + MAX(m, n);
+            double* work = (double*)malloc(lwork * sizeof(double));
+            int32_t* iwork = (int32_t*)malloc(8 * k * sizeof(int32_t));
+            double* U_f = (double*)malloc(1 * sizeof(double));
+            double* VT_f = (double*)malloc(1 * sizeof(double));
+
+            if (!A_f || !s || !work || !iwork || !U_f || !VT_f) {
+                free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+                return -1.0;
+            }
+
+            c_to_fortran_d((const double*)a->data, A_f, m, n);
+
+            int32_t info = lapack_dgesdd('N', m, n, A_f, m, s, U_f, 1, VT_f, 1,
+                                          work, lwork, iwork);
+
+            if (info != 0) {
+                free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+                return -1.0;
+            }
+
+            double cond;
+            double max_s = s[0];
+            double min_s = s[k - 1];
+
+            if (min_s == 0.0) {
+                cond = INFINITY;
+            } else if (p == 2) {
+                cond = max_s / min_s;
+            } else {  /* p == -2 */
+                cond = min_s / max_s;
+            }
+
+            free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+            return cond;
+        } else if (a->dtype == DTYPE_FLOAT32) {
+            float* A_f = (float*)malloc(m * n * sizeof(float));
+            float* s = (float*)malloc(k * sizeof(float));
+            int32_t lwork = 4 * k * k + 7 * k + MAX(m, n);
+            float* work = (float*)malloc(lwork * sizeof(float));
+            int32_t* iwork = (int32_t*)malloc(8 * k * sizeof(int32_t));
+            float* U_f = (float*)malloc(1 * sizeof(float));
+            float* VT_f = (float*)malloc(1 * sizeof(float));
+
+            if (!A_f || !s || !work || !iwork || !U_f || !VT_f) {
+                free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+                return -1.0;
+            }
+
+            c_to_fortran_f((const float*)a->data, A_f, m, n);
+
+            int32_t info = lapack_sgesdd('N', m, n, A_f, m, s, U_f, 1, VT_f, 1,
+                                          work, lwork, iwork);
+
+            if (info != 0) {
+                free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+                return -1.0;
+            }
+
+            double cond;
+            float max_s = s[0];
+            float min_s = s[k - 1];
+
+            if (min_s == 0.0f) {
+                cond = INFINITY;
+            } else if (p == 2) {
+                cond = (double)max_s / (double)min_s;
+            } else {
+                cond = (double)min_s / (double)max_s;
+            }
+
+            free(A_f); free(s); free(work); free(iwork); free(U_f); free(VT_f);
+            return cond;
+        }
+    }
+
+    /* Other norms not yet supported */
+    return -1.0;
+}
+
+/* ============ Least Squares ============ */
+
+/**
+ * Least squares result structure.
+ */
+typedef struct {
+    NDArray* x;         /* Solution (N,) or (N x NRHS) */
+    NDArray* residuals; /* Residuals (NRHS,) for overdetermined, empty otherwise */
+    int32_t rank;       /* Effective rank of matrix A */
+    NDArray* s;         /* Singular values (min(M,N),) */
+} LstsqResult;
+
+/**
+ * Solve least squares problem: minimize ||b - A @ x||_2.
+ *
+ * @param a      Matrix A (M x N)
+ * @param b      Right-hand side (M,) or (M x NRHS)
+ * @param rcond  Cutoff for small singular values. Values s[i] < rcond * max(s)
+ *               are treated as zero. Use negative for machine precision default.
+ * @return       LstsqResult with x, residuals, rank, s, or NULL on error
+ */
+EXPORT LstsqResult* linalg_lstsq(const NDArray* a, const NDArray* b, double rcond) {
+    if (!a || !b) return NULL;
+    if (a->ndim != 2) return NULL;
+
+    int32_t m = a->shape[0];
+    int32_t n = a->shape[1];
+    int32_t k = MIN(m, n);
+    int32_t nrhs;
+    int32_t is_vector = (b->ndim == 1);
+
+    if (is_vector) {
+        if (b->shape[0] != m) return NULL;
+        nrhs = 1;
+    } else if (b->ndim == 2) {
+        if (b->shape[0] != m) return NULL;
+        nrhs = b->shape[1];
+    } else {
+        return NULL;
+    }
+
+    LstsqResult* result = (LstsqResult*)malloc(sizeof(LstsqResult));
+    if (!result) return NULL;
+
+    /* Create output arrays */
+    int32_t x_shape[2] = {n, nrhs};
+    int32_t s_shape[1] = {k};
+
+    if (is_vector) {
+        int32_t x_shape_1d[1] = {n};
+        result->x = ndarray_empty(1, x_shape_1d, a->dtype);
+    } else {
+        result->x = ndarray_empty(2, x_shape, a->dtype);
+    }
+    result->s = ndarray_empty(1, s_shape, a->dtype);
+    result->rank = 0;
+
+    /* Residuals only for overdetermined systems (m > n) with full rank */
+    if (m > n) {
+        int32_t res_shape[1] = {nrhs};
+        result->residuals = ndarray_empty(1, res_shape, a->dtype);
+    } else {
+        int32_t res_shape[1] = {0};
+        result->residuals = ndarray_empty(1, res_shape, a->dtype);
+    }
+
+    if (!result->x || !result->s || !result->residuals) {
+        if (result->x) ndarray_free(result->x);
+        if (result->s) ndarray_free(result->s);
+        if (result->residuals) ndarray_free(result->residuals);
+        free(result);
+        return NULL;
+    }
+
+    if (a->dtype == DTYPE_FLOAT64) {
+        double* A_f = (double*)malloc(m * n * sizeof(double));
+        double* B_f = (double*)malloc(MAX(m, n) * nrhs * sizeof(double));
+        double* s = (double*)malloc(k * sizeof(double));
+
+        /* Query workspace size */
+        double work_query;
+        int32_t iwork_query;
+        int32_t dummy_rank;
+        lapack_dgelsd(m, n, nrhs, NULL, m, NULL, MAX(m, n), NULL, rcond, &dummy_rank,
+                      &work_query, -1, &iwork_query);
+        int32_t lwork = (int32_t)work_query + 100;  /* Add some padding */
+        double* work = (double*)malloc(lwork * sizeof(double));
+        int32_t* iwork = (int32_t*)malloc(8 * k * sizeof(int32_t));
+
+        if (!A_f || !B_f || !s || !work || !iwork) {
+            free(A_f); free(B_f); free(s); free(work); free(iwork);
+            ndarray_free(result->x);
+            ndarray_free(result->s);
+            ndarray_free(result->residuals);
+            free(result);
+            return NULL;
+        }
+
+        /* Convert A to Fortran order */
+        c_to_fortran_d((const double*)a->data, A_f, m, n);
+
+        /* Copy b to B (extended to max(m,n) rows for solution) */
+        memset(B_f, 0, MAX(m, n) * nrhs * sizeof(double));
+        if (is_vector) {
+            memcpy(B_f, b->data, m * sizeof(double));
+        } else {
+            c_to_fortran_d((const double*)b->data, B_f, m, nrhs);
+        }
+
+        /* Store original b for residual computation */
+        double* b_orig = NULL;
+        if (m > n) {
+            b_orig = (double*)malloc(m * nrhs * sizeof(double));
+            if (b_orig) {
+                memcpy(b_orig, B_f, m * nrhs * sizeof(double));
+            }
+        }
+
+        /* Solve least squares */
+        int32_t info = lapack_dgelsd(m, n, nrhs, A_f, m, B_f, MAX(m, n), s, rcond,
+                                      &result->rank, work, lwork, iwork);
+
+        if (info != 0) {
+            free(A_f); free(B_f); free(s); free(work); free(iwork);
+            if (b_orig) free(b_orig);
+            ndarray_free(result->x);
+            ndarray_free(result->s);
+            ndarray_free(result->residuals);
+            free(result);
+            return NULL;
+        }
+
+        /* Copy solution (first n rows of B) */
+        if (is_vector) {
+            memcpy(result->x->data, B_f, n * sizeof(double));
+        } else {
+            /* B_f has solution in first n rows (Fortran order) */
+            double* x_temp = (double*)malloc(n * nrhs * sizeof(double));
+            for (int32_t j = 0; j < nrhs; j++) {
+                for (int32_t i = 0; i < n; i++) {
+                    x_temp[i + j * n] = B_f[i + j * MAX(m, n)];
+                }
+            }
+            fortran_to_c_d(x_temp, (double*)result->x->data, n, nrhs);
+            free(x_temp);
+        }
+
+        /* Copy singular values */
+        memcpy(result->s->data, s, k * sizeof(double));
+
+        /* Compute residuals for overdetermined systems with full rank */
+        if (m > n && result->rank == n && b_orig) {
+            /* residuals[j] = ||b[:,j] - A @ x[:,j]||^2 */
+            /* Using the fact that dgelsd leaves residuals in rows n+1 to m of B */
+            double* res_data = (double*)result->residuals->data;
+            for (int32_t j = 0; j < nrhs; j++) {
+                double sum_sq = 0.0;
+                for (int32_t i = n; i < m; i++) {
+                    double r = B_f[i + j * MAX(m, n)];
+                    sum_sq += r * r;
+                }
+                res_data[j] = sum_sq;
+            }
+        }
+
+        free(A_f); free(B_f); free(s); free(work); free(iwork);
+        if (b_orig) free(b_orig);
+    } else if (a->dtype == DTYPE_FLOAT32) {
+        /* Float version - convert to double, solve, convert back */
+        /* TODO: implement sgelsd for native float support */
+        ndarray_free(result->x);
+        ndarray_free(result->s);
+        ndarray_free(result->residuals);
+        free(result);
+        return NULL;  /* Float not yet supported */
+    } else {
+        ndarray_free(result->x);
+        ndarray_free(result->s);
+        ndarray_free(result->residuals);
+        free(result);
+        return NULL;
+    }
+
+    return result;
+}
+
+EXPORT void linalg_lstsq_free(LstsqResult* result) {
+    if (result) {
+        if (result->x) ndarray_free(result->x);
+        if (result->residuals) ndarray_free(result->residuals);
+        if (result->s) ndarray_free(result->s);
+        free(result);
+    }
+}
+
+EXPORT NDArray* linalg_lstsq_get_x(LstsqResult* result) {
+    return result ? result->x : NULL;
+}
+
+EXPORT NDArray* linalg_lstsq_get_residuals(LstsqResult* result) {
+    return result ? result->residuals : NULL;
+}
+
+EXPORT int32_t linalg_lstsq_get_rank(LstsqResult* result) {
+    return result ? result->rank : -1;
+}
+
+EXPORT NDArray* linalg_lstsq_get_s(LstsqResult* result) {
+    return result ? result->s : NULL;
+}
+
+/* ============ Schur Decomposition ============ */
+
+/**
+ * Schur decomposition result structure.
+ */
+typedef struct {
+    NDArray* T;  /* Schur form (upper quasi-triangular, N x N) */
+    NDArray* Z;  /* Orthogonal matrix (N x N) */
+} SchurResult;
+
+/**
+ * Compute Schur decomposition: A = Z @ T @ Z^T
+ * where T is upper quasi-triangular (real Schur form) and Z is orthogonal.
+ *
+ * Real eigenvalues appear as 1x1 blocks on the diagonal of T.
+ * Complex conjugate pairs appear as 2x2 blocks.
+ *
+ * @param a  Square matrix A (N x N)
+ * @return   SchurResult with T and Z, or NULL on error
+ */
+EXPORT SchurResult* linalg_schur(const NDArray* a) {
+    if (!a) return NULL;
+    if (a->ndim != 2) return NULL;
+    if (a->shape[0] != a->shape[1]) return NULL;
+
+    int32_t n = a->shape[0];
+
+    SchurResult* result = (SchurResult*)malloc(sizeof(SchurResult));
+    if (!result) return NULL;
+
+    int32_t shape[2] = {n, n};
+    result->T = ndarray_empty(2, shape, a->dtype);
+    result->Z = ndarray_empty(2, shape, a->dtype);
+
+    if (!result->T || !result->Z) {
+        if (result->T) ndarray_free(result->T);
+        if (result->Z) ndarray_free(result->Z);
+        free(result);
+        return NULL;
+    }
+
+    if (a->dtype == DTYPE_FLOAT64) {
+        double* A_f = (double*)malloc(n * n * sizeof(double));
+        double* VS_f = (double*)malloc(n * n * sizeof(double));
+        double* wr = (double*)malloc(n * sizeof(double));
+        double* wi = (double*)malloc(n * sizeof(double));
+
+        /* Query workspace */
+        double work_query;
+        lapack_dgees('V', 'N', n, NULL, n, NULL, NULL, NULL, NULL, n, &work_query, -1);
+        int32_t lwork = (int32_t)work_query + 100;
+        double* work = (double*)malloc(lwork * sizeof(double));
+
+        if (!A_f || !VS_f || !wr || !wi || !work) {
+            free(A_f); free(VS_f); free(wr); free(wi); free(work);
+            ndarray_free(result->T);
+            ndarray_free(result->Z);
+            free(result);
+            return NULL;
+        }
+
+        c_to_fortran_d((const double*)a->data, A_f, n, n);
+
+        int32_t sdim;
+        int32_t info = lapack_dgees('V', 'N', n, A_f, n, &sdim, wr, wi, VS_f, n,
+                                     work, lwork);
+
+        if (info != 0) {
+            free(A_f); free(VS_f); free(wr); free(wi); free(work);
+            ndarray_free(result->T);
+            ndarray_free(result->Z);
+            free(result);
+            return NULL;
+        }
+
+        /* A_f now contains Schur form T, VS_f contains Z */
+        fortran_to_c_d(A_f, (double*)result->T->data, n, n);
+        fortran_to_c_d(VS_f, (double*)result->Z->data, n, n);
+
+        free(A_f); free(VS_f); free(wr); free(wi); free(work);
+    } else if (a->dtype == DTYPE_FLOAT32) {
+        /* Float version not yet implemented */
+        ndarray_free(result->T);
+        ndarray_free(result->Z);
+        free(result);
+        return NULL;
+    } else {
+        ndarray_free(result->T);
+        ndarray_free(result->Z);
+        free(result);
+        return NULL;
+    }
+
+    return result;
+}
+
+EXPORT void linalg_schur_free(SchurResult* result) {
+    if (result) {
+        if (result->T) ndarray_free(result->T);
+        if (result->Z) ndarray_free(result->Z);
+        free(result);
+    }
+}
+
+EXPORT NDArray* linalg_schur_get_t(SchurResult* result) {
+    return result ? result->T : NULL;
+}
+
+EXPORT NDArray* linalg_schur_get_z(SchurResult* result) {
+    return result ? result->Z : NULL;
+}
+
+/* ============ LDL Decomposition ============ */
+
+/**
+ * LDL decomposition result structure.
+ */
+typedef struct {
+    NDArray* L;     /* Lower triangular with unit diagonal (N x N) */
+    NDArray* D;     /* Block diagonal as 1D array (N,) - diagonal elements */
+    NDArray* perm;  /* Permutation indices (N,) */
+} LDLResult;
+
+/**
+ * Compute LDL decomposition for symmetric matrix.
+ * A = P^T @ L @ D @ L^T @ P
+ * where L is lower triangular with unit diagonal, D is diagonal,
+ * and P is a permutation matrix.
+ *
+ * @param a      Symmetric matrix A (N x N)
+ * @param lower  Non-zero to use lower triangle (default), 0 for upper
+ * @return       LDLResult with L, D, perm, or NULL on error
+ */
+EXPORT LDLResult* linalg_ldl(const NDArray* a, int32_t lower) {
+    if (!a) return NULL;
+    if (a->ndim != 2) return NULL;
+    if (a->shape[0] != a->shape[1]) return NULL;
+
+    int32_t n = a->shape[0];
+
+    LDLResult* result = (LDLResult*)malloc(sizeof(LDLResult));
+    if (!result) return NULL;
+
+    int32_t l_shape[2] = {n, n};
+    int32_t d_shape[1] = {n};
+    int32_t perm_shape[1] = {n};
+
+    result->L = ndarray_empty(2, l_shape, a->dtype);
+    result->D = ndarray_empty(1, d_shape, a->dtype);
+    result->perm = ndarray_empty(1, perm_shape, DTYPE_INT32);
+
+    if (!result->L || !result->D || !result->perm) {
+        if (result->L) ndarray_free(result->L);
+        if (result->D) ndarray_free(result->D);
+        if (result->perm) ndarray_free(result->perm);
+        free(result);
+        return NULL;
+    }
+
+    if (a->dtype == DTYPE_FLOAT64) {
+        double* A_f = (double*)malloc(n * n * sizeof(double));
+        int32_t* ipiv = (int32_t*)malloc(n * sizeof(int32_t));
+
+        /* Query workspace */
+        double work_query;
+        lapack_dsytrf(lower ? 'L' : 'U', n, NULL, n, NULL, &work_query, -1);
+        int32_t lwork = (int32_t)work_query + 100;
+        double* work = (double*)malloc(lwork * sizeof(double));
+
+        if (!A_f || !ipiv || !work) {
+            free(A_f); free(ipiv); free(work);
+            ndarray_free(result->L);
+            ndarray_free(result->D);
+            ndarray_free(result->perm);
+            free(result);
+            return NULL;
+        }
+
+        c_to_fortran_d((const double*)a->data, A_f, n, n);
+
+        int32_t info = lapack_dsytrf(lower ? 'L' : 'U', n, A_f, n, ipiv, work, lwork);
+
+        if (info < 0) {
+            free(A_f); free(ipiv); free(work);
+            ndarray_free(result->L);
+            ndarray_free(result->D);
+            ndarray_free(result->perm);
+            free(result);
+            return NULL;
+        }
+
+        /* Extract L, D, and permutation from the factored matrix */
+        double* L_data = (double*)result->L->data;
+        double* D_data = (double*)result->D->data;
+        int32_t* perm_data = (int32_t*)result->perm->data;
+
+        /* Initialize L as identity */
+        memset(L_data, 0, n * n * sizeof(double));
+        for (int32_t i = 0; i < n; i++) {
+            L_data[i * n + i] = 1.0;
+        }
+
+        /* Extract L and D from factored A_f */
+        if (lower) {
+            /* L is stored below diagonal, D on diagonal */
+            for (int32_t j = 0; j < n; j++) {
+                /* Diagonal element goes to D */
+                D_data[j] = A_f[j + j * n];
+
+                /* Below diagonal goes to L (in C-order: L[i,j] = L_data[i*n + j]) */
+                for (int32_t i = j + 1; i < n; i++) {
+                    L_data[i * n + j] = A_f[i + j * n];
+                }
+            }
+        } else {
+            /* Upper triangle stored - transpose to get L */
+            for (int32_t j = 0; j < n; j++) {
+                D_data[j] = A_f[j + j * n];
+                for (int32_t i = 0; i < j; i++) {
+                    L_data[j * n + i] = A_f[i + j * n];
+                }
+            }
+        }
+
+        /* Convert pivot indices to 0-based permutation */
+        for (int32_t i = 0; i < n; i++) {
+            perm_data[i] = (ipiv[i] > 0) ? ipiv[i] - 1 : -ipiv[i] - 1;
+        }
+
+        free(A_f); free(ipiv); free(work);
+    } else if (a->dtype == DTYPE_FLOAT32) {
+        /* Float version not yet implemented */
+        ndarray_free(result->L);
+        ndarray_free(result->D);
+        ndarray_free(result->perm);
+        free(result);
+        return NULL;
+    } else {
+        ndarray_free(result->L);
+        ndarray_free(result->D);
+        ndarray_free(result->perm);
+        free(result);
+        return NULL;
+    }
+
+    return result;
+}
+
+EXPORT void linalg_ldl_free(LDLResult* result) {
+    if (result) {
+        if (result->L) ndarray_free(result->L);
+        if (result->D) ndarray_free(result->D);
+        if (result->perm) ndarray_free(result->perm);
+        free(result);
+    }
+}
+
+EXPORT NDArray* linalg_ldl_get_l(LDLResult* result) {
+    return result ? result->L : NULL;
+}
+
+EXPORT NDArray* linalg_ldl_get_d(LDLResult* result) {
+    return result ? result->D : NULL;
+}
+
+EXPORT NDArray* linalg_ldl_get_perm(LDLResult* result) {
+    return result ? result->perm : NULL;
+}

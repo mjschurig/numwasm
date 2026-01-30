@@ -25,7 +25,10 @@
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.11"
     },
-    "ghcr.io/ebaskoro/devcontainer-features/emscripten:1": {}
+    "ghcr.io/ebaskoro/devcontainer-features/emscripten:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": false
+    }
   },
   "postCreateCommand": "bash .devcontainer/setup.sh",
   "mounts": [

@@ -6,7 +6,7 @@
  */
 
 import { NDArray } from 'numwasm';
-import { getWasmModule } from '../wasm-loader.js';
+import { getXSFModule } from 'xsfwasm';
 import {
   isScalar,
   validateScalarInputs,
@@ -93,7 +93,7 @@ export async function comb(
           return 1.0;
         }
 
-        const wasm = getWasmModule();
+        const wasm = getXSFModule();
         const cond = kVal === 0 && nVal >= 0;
         if (cond) {
           return 1.0;
@@ -108,7 +108,7 @@ export async function comb(
 
         return elementWise(NArray, kArray, (n, k_val) => {
           if (k_val === 0 && n >= 0) return 1.0;
-          const wasm = getWasmModule();
+          const wasm = getXSFModule();
           return wasm._wasm_binom(n + k_val - 1, k_val);
         });
       }
@@ -122,7 +122,7 @@ export async function comb(
     const kVal = k as number;
     validateIntegerInputs(nVal, kVal, 'comb');
 
-    const wasm = getWasmModule();
+    const wasm = getXSFModule();
     const result = wasm._wasm_binom_exact(nVal, kVal);
 
     // Check for overflow
@@ -133,7 +133,7 @@ export async function comb(
 
   // Non-exact mode
   if (isScalar(N) && isScalar(k)) {
-    const wasm = getWasmModule();
+    const wasm = getXSFModule();
     return wasm._wasm_binom(N as number, k as number);
   }
 
@@ -142,7 +142,7 @@ export async function comb(
   const kArray = k instanceof NDArray ? k : await NDArray.fromArray([k]);
 
   return elementWise(NArray, kArray, (n, k_val) => {
-    const wasm = getWasmModule();
+    const wasm = getXSFModule();
     return wasm._wasm_binom(n, k_val);
   });
 }

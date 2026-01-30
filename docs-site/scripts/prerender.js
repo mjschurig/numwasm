@@ -21,7 +21,7 @@ async function prerender() {
   const { render, getAllRoutes } = await import(path.join(ssrDir, 'entry-server.js'));
 
   // Static pages + all doc routes
-  const staticRoutes = ['/', '/demo', '/docs', '/benchmarks', '/mcp'];
+  const staticRoutes = ['/', '/demo', '/docs', '/benchmarks', '/mcp', '/overview'];
   const docRoutes = getAllRoutes();
   const allRoutes = [...staticRoutes, ...docRoutes];
 

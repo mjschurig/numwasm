@@ -3,8 +3,8 @@
  * Mirrors scipy.integrate.quad.
  */
 
-import { loadWasmModule } from '../wasm-loader.js';
-import type { SciWasmModule } from '../wasm-types.js';
+import { loadQUADPACKModule } from 'quadwasm';
+import type { QUADPACKModule } from 'quadwasm';
 import type {
   IntegrandFunction,
   QuadOptions,
@@ -176,7 +176,7 @@ async function quadWasm(
   limit: number,
   fullOutput: boolean,
 ): Promise<QuadResult | QuadFullResult | QuadFullResultWithMessage> {
-  const Module = await loadWasmModule();
+  const Module = await loadQUADPACKModule();
 
   // Determine which routine to use based on bounds
   let infbounds = 0;
@@ -293,7 +293,7 @@ async function quadWasm(
  * Read the info dictionary from WASM heap arrays.
  */
 function readInfoDict(
-  Module: SciWasmModule,
+  Module: QUADPACKModule,
   last: number,
   limit: number,
   alistPtr: number,

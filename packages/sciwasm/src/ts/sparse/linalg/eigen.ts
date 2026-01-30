@@ -18,9 +18,9 @@ import type {
   SvdsResult,
 } from './types.js';
 import { aslinearoperator } from './interface.js';
-import { loadARPACKModule, getARPACKModule } from '../../arpack-loader.js';
-import type { ARPACKModule } from '../../arpack-types.js';
-import { DSAUPD_ERRORS, DSEUPD_ERRORS, DNAUPD_ERRORS, DNEUPD_ERRORS } from '../../arpack-types.js';
+import { loadARPACKModule, getARPACKModule } from 'arwasm';
+import type { ARPACKModule } from 'arwasm';
+import { DSAUPD_ERRORS, DSEUPD_ERRORS, DNAUPD_ERRORS, DNEUPD_ERRORS } from 'arwasm';
 import { ARPACKError, ARPACKNoConvergence, DimensionMismatchError } from '../../errors.js';
 
 // ============================================================

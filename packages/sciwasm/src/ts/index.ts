@@ -9,14 +9,75 @@ export * as spatial from './spatial/index.js';
 export * as special from './special/index.js';
 export * as stats from './stats/index.js';
 
-// WASM module loaders
-export { loadWasmModule, configureWasm, isWasmLoaded, resetWasmModule } from './wasm-loader.js';
-export { loadSuperLUModule, configureSuperLU, isSuperLULoaded, resetSuperLUModule, getSuperLUModule } from './superlu-loader.js';
-export { loadARPACKModule, configureARPACK, isARPACKLoaded, resetARPACKModule, getARPACKModule } from './arpack-loader.js';
+// WASM module loaders - re-exported from separate packages
+export {
+  loadSuperLUModule,
+  configureSuperLU,
+  isSuperLULoaded,
+  resetSuperLUModule,
+  getSuperLUModule,
+  type SuperLUModule,
+  type SuperLUModuleFactory,
+  type SuperLULoadConfig,
+} from 'superluwasm';
 
-// WASM module types
-export type { SuperLUModule, SuperLUModuleFactory, SuperLUModuleOptions } from './superlu-types.js';
-export type { ARPACKModule, ARPACKModuleFactory, ARPACKModuleOptions } from './arpack-types.js';
+export {
+  loadARPACKModule,
+  configureARPACK,
+  isARPACKLoaded,
+  resetARPACKModule,
+  getARPACKModule,
+  type ARPACKModule,
+  type ARPACKModuleFactory,
+  type ARPACKLoadConfig,
+} from 'arwasm';
+
+export {
+  loadXSFModule,
+  configureXSF,
+  isXSFLoaded,
+  resetXSFModule,
+  getXSFModule,
+  type XSFModule,
+  type XSFModuleFactory,
+  type XSFLoadConfig,
+} from 'xsfwasm';
+
+export {
+  loadQUADPACKModule,
+  configureQUADPACK,
+  isQUADPACKLoaded,
+  resetQUADPACKModule,
+  getQUADPACKModule,
+  type QUADPACKModule,
+  type QUADPACKModuleFactory,
+  type QUADPACKLoadConfig,
+} from 'quadwasm';
+
+export {
+  loadLAPACKModule,
+  configureLAPACK,
+  isLAPACKLoaded,
+  resetLAPACKModule,
+  getLAPACKModule,
+  type LAPACKModule,
+  type LAPACKModuleFactory,
+  type LAPACKLoadConfig,
+} from 'lawasm';
+
+export {
+  loadLINPACKModule,
+  configureLINPACK,
+  isLINPACKLoaded,
+  resetLINPACKModule,
+  getLINPACKModule,
+  type LINPACKModule,
+  type LINPACKModuleFactory,
+  type LINPACKLoadConfig,
+} from 'linwasm';
+
+// Internal WASM module loader (sparsetools, spatial, optimize)
+export { loadWasmModule, configureWasm, isWasmLoaded, resetWasmModule } from './wasm-loader.js';
 
 // Errors
 export {

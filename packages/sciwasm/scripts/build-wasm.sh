@@ -30,9 +30,9 @@ echo "Using Emscripten: $(emcc --version | head -1)"
 echo ""
 
 # Step 1: Compile C source files to .o
-# Note: QUADPACK, LINPACK, ARPACK, and SuperLU are built separately via scripts/build-*.sh
+# Note: QUADPACK, LINPACK, ARPACK, SuperLU, and XSF are built separately via scripts/build-*.sh
 C_OBJS=()
-for cfile in "$SRC_DIR/optimize/nelder_mead.c" "$SRC_DIR/optimize/bfgs.c" "$SRC_DIR/optimize/lbfgsb.c" "$SRC_DIR/optimize/blas_lite.c" "$SRC_DIR/special/comb.c"; do
+for cfile in "$SRC_DIR/optimize/nelder_mead.c" "$SRC_DIR/optimize/bfgs.c" "$SRC_DIR/optimize/lbfgsb.c" "$SRC_DIR/optimize/blas_lite.c"; do
     if [ -f "$cfile" ]; then
         base=$(basename "$cfile" .c)
         obj="$OBJ_DIR/${base}.o"
@@ -44,7 +44,7 @@ done
 
 # Step 2: Compile C++ source files to .o
 CPP_OBJS=()
-for cppfile in "$SRC_DIR/sparsetools.cpp" "$SRC_DIR/spatial/build.cxx" "$SRC_DIR/spatial/query.cxx" "$SRC_DIR/spatial/query_ball_point.cxx" "$SRC_DIR/spatial/kdtree_wrapper.cpp" "$SRC_DIR/special/gamma.cpp"; do
+for cppfile in "$SRC_DIR/sparsetools.cpp" "$SRC_DIR/spatial/build.cxx" "$SRC_DIR/spatial/query.cxx" "$SRC_DIR/spatial/query_ball_point.cxx" "$SRC_DIR/spatial/kdtree_wrapper.cpp"; do
     if [ -f "$cppfile" ]; then
         base=$(basename "$cppfile" | sed 's/\.[^.]*$//')
         obj="$OBJ_DIR/${base}.o"
@@ -58,6 +58,7 @@ done
 # Note: ARPACK is built separately via scripts/build-arpack.sh
 # Note: QUADPACK is built separately via scripts/build-quadpack.sh
 # Note: LINPACK is built separately via scripts/build-linpack.sh
+# Note: XSF (special functions) is built separately via scripts/build-xsf.sh
 
 ALL_OBJS=("${C_OBJS[@]}" "${CPP_OBJS[@]}")
 
@@ -66,17 +67,11 @@ echo ""
 # All exported functions
 # Note: QUADPACK exports moved to quadpack.wasm
 # Note: SuperLU exports moved to superlu.wasm
+# Note: XSF exports moved to xsf.wasm
 EXPORTED_FUNCTIONS='[
     "_nelder_mead_minimize",
     "_bfgs_minimize",
     "_setulb",
-    "_wasm_gamma",
-    "_wasm_gammaln",
-    "_wasm_rgamma",
-    "_wasm_binom",
-    "_wasm_binom_exact",
-    "_wasm_poch",
-    "_wasm_perm_exact",
     "_sp_csr_matvec_f64",
     "_sp_csr_matvecs_f64",
     "_sp_csr_tocsc_f64",

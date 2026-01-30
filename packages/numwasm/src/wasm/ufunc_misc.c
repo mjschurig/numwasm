@@ -671,3 +671,65 @@ NDArray* ufunc_tuple_get_first(TupleResult* result) {
 NDArray* ufunc_tuple_get_second(TupleResult* result) {
     return result ? result->out2 : NULL;
 }
+
+/* ============ Clip: constrain values to range ============ */
+
+/**
+ * Clip array values to a specified range.
+ *
+ * @param arr Input array
+ * @param a_min Minimum value (can be NULL for no lower bound, or scalar/array)
+ * @param a_max Maximum value (can be NULL for no upper bound, or scalar/array)
+ * @return New array with clipped values
+ */
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+EMSCRIPTEN_KEEPALIVE
+#endif
+NDArray* ufunc_clip(NDArray* arr, NDArray* a_min, NDArray* a_max) {
+    if (!arr || !arr->data) return NULL;
+
+    bool has_min = (a_min != NULL && a_min->data != NULL);
+    bool has_max = (a_max != NULL && a_max->data != NULL);
+
+    /* If no bounds, just return a copy */
+    if (!has_min && !has_max) {
+        return ndarray_copy(arr);
+    }
+
+    /* For simplicity, use the input array shape as output
+     * Broadcasting could be added for more complex cases */
+    NDArray* result = ndarray_create(arr->ndim, arr->shape, arr->dtype);
+    if (!result) return NULL;
+
+    size_t n = arr->size;
+
+    /* Determine if bounds are scalars */
+    bool min_is_scalar = has_min && (a_min->size == 1);
+    bool max_is_scalar = has_max && (a_max->size == 1);
+
+    double min_scalar = min_is_scalar ? ndarray_get_flat(a_min, 0) : 0.0;
+    double max_scalar = max_is_scalar ? ndarray_get_flat(a_max, 0) : 0.0;
+
+    for (size_t i = 0; i < n; i++) {
+        double val = ndarray_get_flat(arr, i);
+
+        /* Apply minimum bound */
+        if (has_min) {
+            double min_val = min_is_scalar ? min_scalar :
+                            (i < a_min->size ? ndarray_get_flat(a_min, i) : ndarray_get_flat(a_min, i % a_min->size));
+            if (val < min_val) val = min_val;
+        }
+
+        /* Apply maximum bound */
+        if (has_max) {
+            double max_val = max_is_scalar ? max_scalar :
+                            (i < a_max->size ? ndarray_get_flat(a_max, i) : ndarray_get_flat(a_max, i % a_max->size));
+            if (val > max_val) val = max_val;
+        }
+
+        ndarray_set_flat(result, i, val);
+    }
+
+    return result;
+}

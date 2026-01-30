@@ -5,12 +5,29 @@ import { ReflectionKind } from '../types/typedoc';
 // Package definitions
 // ---------------------------------------------------------------------------
 
-export type PackageId = 'numwasm' | 'sciwasm' | 'symwasm';
+export type PackageId =
+  | 'numwasm'
+  | 'sciwasm'
+  | 'symwasm'
+  | 'arwasm'
+  | 'lawasm'
+  | 'linwasm'
+  | 'quadwasm'
+  | 'superluwasm'
+  | 'xsfwasm'
+  | 'odewasm';
 
 export const PACKAGES: { id: PackageId; displayName: string; description: string }[] = [
   { id: 'numwasm', displayName: 'numwasm', description: 'NumPy-compatible n-dimensional arrays' },
   { id: 'sciwasm', displayName: 'sciwasm', description: 'SciPy-compatible scientific computing' },
   { id: 'symwasm', displayName: 'symwasm', description: 'SymPy-compatible symbolic math' },
+  { id: 'arwasm', displayName: 'arwasm', description: 'ARPACK eigenvalue solvers' },
+  { id: 'lawasm', displayName: 'lawasm', description: 'LAPACK linear algebra routines' },
+  { id: 'linwasm', displayName: 'linwasm', description: 'LINPACK legacy linear algebra' },
+  { id: 'quadwasm', displayName: 'quadwasm', description: 'QUADPACK numerical integration' },
+  { id: 'superluwasm', displayName: 'superluwasm', description: 'SuperLU sparse matrix solvers' },
+  { id: 'xsfwasm', displayName: 'xsfwasm', description: 'Special functions (Bessel, Gamma, etc.)' },
+  { id: 'odewasm', displayName: 'odewasm', description: 'ODE solvers' },
 ];
 
 export const PACKAGE_IDS = new Set<string>(PACKAGES.map(p => p.id));
@@ -88,10 +105,26 @@ const SYMWASM_MODULE_DEFS: ModuleDef[] = [
   { slug: 'printing', displayName: 'Printing', varName: 'printing', isNamespace: true },
 ];
 
+// Standalone WASM packages (lower-level, fewer TS wrappers)
+const ARWASM_MODULE_DEFS: ModuleDef[] = [];
+const LAWASM_MODULE_DEFS: ModuleDef[] = [];
+const LINWASM_MODULE_DEFS: ModuleDef[] = [];
+const QUADWASM_MODULE_DEFS: ModuleDef[] = [];
+const SUPERLUWASM_MODULE_DEFS: ModuleDef[] = [];
+const XSFWASM_MODULE_DEFS: ModuleDef[] = [];
+const ODEWASM_MODULE_DEFS: ModuleDef[] = [];
+
 const PACKAGE_MODULE_DEFS: Record<PackageId, ModuleDef[]> = {
   numwasm: NUMWASM_MODULE_DEFS,
   sciwasm: SCIWASM_MODULE_DEFS,
   symwasm: SYMWASM_MODULE_DEFS,
+  arwasm: ARWASM_MODULE_DEFS,
+  lawasm: LAWASM_MODULE_DEFS,
+  linwasm: LINWASM_MODULE_DEFS,
+  quadwasm: QUADWASM_MODULE_DEFS,
+  superluwasm: SUPERLUWASM_MODULE_DEFS,
+  xsfwasm: XSFWASM_MODULE_DEFS,
+  odewasm: ODEWASM_MODULE_DEFS,
 };
 
 // ---------------------------------------------------------------------------
@@ -224,6 +257,13 @@ const PACKAGE_CATEGORY_DEFS: Record<PackageId, CategoryDef[]> = {
   numwasm: NUMWASM_CATEGORY_DEFS,
   sciwasm: [],
   symwasm: [],
+  arwasm: [],
+  lawasm: [],
+  linwasm: [],
+  quadwasm: [],
+  superluwasm: [],
+  xsfwasm: [],
+  odewasm: [],
 };
 
 // ---------------------------------------------------------------------------

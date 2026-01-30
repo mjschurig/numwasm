@@ -1,0 +1,105 @@
+DDASSL  91-06-25  Replaced 83-03-15 version with 91-06-24 version.  The
+                  details of the changes are described in the leading
+                  comments after "REVISION HISTORY" in the DDASSL routine.
+SDASSL  91-06-25  Replaced 83-03-15 version with 91-06-24 version.  The
+                  details of the changes are described in the leading
+                  comments after "REVISION HISTORY" in the SDASSL routine.
+
+Thu Jun 27 14:40:58 EDT 1991  ehg
+Installed VODE and VODPK codes from ERENJ.BITNET!GDBYRNE.
+
+6 Sep 1991  wmc
+single precision files merged into this directory.
+
+7 Sep 1991  wmc
+initial installation of rkc from cwi.nl!bsom
+
+15 Jul 1992  ehg
+vodpk.f   changed R1MACH to D1MACH, since this is double precision
+
+2 Jul 2001 ehg based on mail from "N. Shamsundar" <shamsundar@UH.EDU>
+acdc.f   Save Nvold
+
+
+
+
+Date: Wed, 23 Jul 2003 13:17:49 -0700 (PDT)
+From: Alan Hindmarsh <alanh@llnl.gov>
+Subject: DASSL family upgrade
+...
+DASKR is a relatively new member of the family; it is DASPK with
+rootfinding added.  We now are encouraging users of DASSL/DASRT
+to switch to DASPK/DASKR, but are leaving the older codes for the
+sake of users who don't need the newer features.
+...
+The only changes in DASSL and DASPK are the fix to the unit roundoff
+routines.  For DASRT, there were also some minor corrections needed.
+
+Date: Tue, 17 May 2005 14:33:20 -0700 (PDT)
+From: Alan Hindmarsh <alanh@llnl.gov>
+
+The changes have to do with fixes to bugs that are relatavily minor,
+which is why I waited till I had several of them before doing this
+request.  In summary, the bugs are:
+  1) In the interpolation routine (all ODEPACK and VOD* solvers), the
+     roundoff perturbation for testing the input t for legality is
+     replaced with a more robust expression.
+  2) In the rootfinding routines *RCHEK (in LSODAR, LSODKR, and DASKR),
+     imposed a better minimum on the small t increment used to check
+     for two nearby zeros.
+  3) In the *ROOTS routines (rootfinding in LSODAR, LSODKR, DASKR), used
+     a more robust algorithm for adjusting the new guess X2 in case it
+     is too close to the endpoints of the current bracketing interval.
+  4) In LSODKR demo program, corrected uninitialized workspace
+     variables to handle output at tout = 0.
+  5) Minor modifications in the DASKR package -- in the main driver
+     (rewrote stopping tests), the example and demo programs and their
+     outputs, and in preconditioner files.
+
+
+From: "Severiano Gonzalez Pinto" <spinto@ull.es>
+To: "Eric Grosse" <ehg@lucent.com>
+Subject: Re: Software for second order problems   (this-is-not-spam)
+Date: Wed, 8 Mar 2006 19:11:52 +0100
+
+Dear Eric,
+
+I have followed your three suggestions.
+
+1) FCN has been changed to FNC everywhere.
+2) All Tabs have been deleted and they have been replaced by spaces.
+3) The version of Fortran used is FORTRAN 90 (standard), supplied by Compaq 
+Visual Fortran, Professional Edition 6.6.0. Sorry, because firstly I thought 
+it was FORTRAN 77.
+
+For any question or help, do not hesitate to contact me.
+
+Thanks in advance for everything.
+Best wishes.
+
+Severiano Gonzalez Pinto
+Dpto Analisis Matematico
+Universidad de La Laguna
+phone: 922 31 82 01
+
+
+
+
+2006-07-19
+
+In response to two user bug reports, I have made some minor corrections
+in the DASKR package (which you installed for me in 2003, and replaced
+with an upgraded version in 2005).
+
+There were two minor bugs -- (a) in the ilut and ilutp routines in the
+SPARSKIT package we use for preconditioning, and (b) in the increment
+formula for difference quotient Jacobians.  Both bugs were easy to fix.
+I have discussed the changes with Linda Petzold, and she approves.
+
+There are changes in 6 files.  Along with four new source files (both
+single and double precision), there are two updated output files for
+examples that I ran to validate the code.
+
+Alan Hindmarsh
+
+

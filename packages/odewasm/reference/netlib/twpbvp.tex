@@ -1,0 +1,806 @@
+% From: ic.ac.uk!r.wright
+% Date: Mon, 14 Oct 96 17:31:16 BST
+
+\documentstyle [twoside] {article}
+\pagestyle{headings}
+\evensidemargin 0.25in
+\oddsidemargin 0.25in
+\textheight     8.7in
+\textwidth      6in
+\topmargin        0in
+\floatsep 12pt plus 2pt minus 2pt 
+\textfloatsep 10pt plus 2pt minus 4pt % change separation of figures
+
+
+\def\abstract{\if@twocolumn
+\section*{Abstract}
+\else 
+%\small % abstract set in ordinary type here
+\begin{center}
+{\bf Abstract\vspace{-.5em}\vspace{0pt}} 
+\end{center}
+\quotation 
+\fi}
+\def\endabstract{\if@twocolumn\else\endquotation\fi}
+
+\title{User's Guide for {TWPBVP}:\\
+A Code for Solving Two-Point Boundary Value Problems}
+
+\author{J.\ R.\ Cash\\
+{\small Department of Mathematics}\\
+{\small Imperial College}\\
+{\small London, England}\\
+{\small e-mail: j.cash{\rm\small $@$}ic.ac.uk}
+\and
+Margaret H. Wright\\ 
+{\small AT\&T Bell Laboratories}\\
+{\small Murray Hill, New Jersey}\\
+{\small USA}\\
+{\small e-mail: mhw{\rm\small $@$}research.att.com}
+}
+
+\date{}              
+
+\begin{document}
+
+\def\norm#1{\Vert#1\Vert}
+\def\real{\cal R}
+\def\half  {{\textstyle{1\over 2}}}
+\def\TWPBVP{\small TWPBVP}
+
+\maketitle \thispagestyle{empty}
+
+\section{Introduction}
+
+The code {\TWPBVP} (written in Fortran 77) is designed for the 
+numerical solution of the two-point boundary value problem
+\begin{eqnarray}
+{du\over dx}  = f(x,u),& & a \le x \le b, \label{eqn-prob1}\\
+g_i(u(a)) = 0, \quad i = 1,\dots p; &  &g_i(u(b)) = 0, \quad i = p+1,\dots, n,
+\label{eqn-prob2}
+\end{eqnarray}
+where $x\in\real$, 
+$u\in{\real}^n$, $g_i\in{\real}$ for $1\le i \le n$, and 
+$0 \le p \le n$.
+The functions $f$ and $\{g_i\}$ are assumed to be differentiable.
+The method used in {\TWPBVP} is a deferred correction method
+based on mono-implicit Runge-Kutta formulas and adaptive mesh
+refinement.  For details about the method, see
+\cite{Cash86,Cash88,CW1,CW2}.
+
+Two aspects of the formulation (\ref{eqn-prob1})--(\ref{eqn-prob2})
+should be noted:
+\begin{enumerate}
+\item The problem must be posed as a first-order system.
+This requirement is not unduly restrictive, however, since
+standard techniques can be used to convert an $n$th-order
+equation to a system of $n$ first-order equations.
+For example, the second-order problem
+$$
+  y'' = f(x,y,y'),\quad 0\le x \le 1,\quad
+  y(0) = \alpha,\quad y(1) = \beta,
+$$
+can be converted to the following first-order system:
+\begin{eqnarray*}
+u' = z & & u(0) = \alpha\\
+z' = f(x,u,z) & & u(1) = \beta.
+\end{eqnarray*}
+\item The boundary conditions must be separated.
+{\TWPBVP} allows all the boundary conditions to be
+imposed at one end of the interval $[a,b]$, so that 
+initial value problems are handled as a special case.  It is hoped to
+extend {\TWPBVP} to handle non-separated
+boundary conditions; see \cite{AMR} for a discussion of
+techniques that allow some non-separated
+boundary conditions to be converted to the separated form needed here.
+\end{enumerate}
+
+\section{Formal parameters}\label{sec-params}
+
+The calling sequence for {\TWPBVP} is
+
+\begin{verbatim}
+      subroutine twpbvp(ncomp, nlbc, nucol, aleft, aright,
+     *       nfxpnt, fixpnt, ntol, ltol, tol,
+     *       linear, givmsh, giveu, nmsh,
+     *       xx, nudim, u, nmax,
+     *       lwrkfl, wrk, lwrkin, iwrk, 
+     *       fsub, dfsub, gsub, dgsub, iflbvp)
+\end{verbatim}
+
+We now describe the formal parameters.
+
+\begin{description}
+\item{\tt ncomp -}  Integer, input.  {\tt ncomp} is the number of 
+first-order differential 
+equations ($n$ in (\ref{eqn-prob1})),
+and is the number of components of $u$ at each mesh point.
+{\tt ncomp} must  be positive.
+
+\item{\tt nlbc -}  Integer, input.  {\tt nlbc} is the number of 
+boundary conditions at the left endpoint ($p$ in (\ref{eqn-prob2})).
+{\tt nlbc} must be nonnegative and must
+not exceed {\tt ncomp}.  If ${\tt nlbc} = {\tt ncomp}$, all the 
+boundary conditions occur at the left endpoint,
+so the problem is an initial value problem.
+If {\tt nlbc} is zero, all the boundary conditions occur at 
+the right endpoint.
+
+\item{\tt nucol - }  Integer, input.  {\tt nucol}
+is the declared column dimension 
+of the two-dimensional array {\tt u} used to store the computed solution
+(see the discussion below of the parameter {\tt u}).  {\tt nucol} must be
+positive, and is an upper bound on {\tt nmax}, the maximum allowed 
+number of mesh points.  In the specification of {\tt nmax}, below, the
+actual formula for computing {\tt nmax} is given. In order to make full
+use of the floating-point workspace, the user should select {\tt nucol} 
+equal to {\tt nmax}.
+
+\item{\tt aleft - } Floating-point, input.  The left endpoint of 
+the interval of interest (the quantity $a$ in (\ref{eqn-prob1})).
+
+\item{\tt  aright - } Floating-point, input.  The right endpoint of the
+interval of interest (the value $b$ in (\ref{eqn-prob1})).
+{\tt aright} must strictly exceed {\tt aleft}.
+
+
+\item{\tt nfxpnt - }  Integer, input.  The number of ``fixed points'', i.e.,
+points that must be included in every mesh in addition to the endpoints
+$a$ and $b$. {\tt nfxpnt} must be
+nonnegative, and may be zero.  If ${\tt nfxpnt} = 0$, only the
+two endpoints are required to appear in every mesh.
+
+
+\item{\tt fixpnt - }  Floating-point array of size at least {\tt nfxpnt}, 
+input.  If ${\tt nfxpnt} = 0$, the {\tt fixpnt}
+array must still be declared, say as {\tt dimension fixpnt(1)}, 
+but is never accessed.  If ${\tt nfxpnt} > 0$,
+the {\tt fixpnt} array  contains
+{\tt nfxpnt} fixed points that the user wishes to be included in
+every mesh.  ${\tt fixpnt}(1)$ must strictly exceed {\tt aleft};
+for $1\le i \le {\tt nfxpnt}-1$,
+${\tt fixpnt}(i+1)$ must strictly exceed ${\tt fixpnt}(i)$;
+and ${\tt fixpnt}({\tt nfxpnt})$ must be strictly less than {\tt aright}. 
+
+\item{\tt  ntol - }  Integer, input.  The number of tolerances
+used to determine termination of {\tt twpbvp}, i.e., the
+number of components whose estimated accuracy is to be tested.
+{\tt ntol} must be positive.
+
+\item{\tt ltol - }  Integer array of size {\tt ntol}, input.  
+For each $i$, ${\tt ltol}(i)$ gives the index of the component of the
+computed solution $u$ controlled by the $i$th tolerance.
+For example, if ${\tt ntol} = 2$, ${\tt ltol}(1) = 2$
+and ${\tt ltol}(2)=3$, then component $2$ of $u$ is controlled by
+${\tt tol}(1)$ and component $3$ is controlled by ${\tt tol}(2)$;
+see below for a description of {\tt tol}.
+Each element of {\tt ltol} must be an integer between $1$ and {\tt ncomp}.
+
+
+\item{\tt tol - } Floating-point array of size {\tt ntol}, input.  
+For each $i$, ${\tt tol}(i)$ gives the $i$th error tolerance used 
+in performing  termination tests.  For each $i = 1,\dots,{\tt ntol}$, 
+the code attempts at each mesh point $x_k$ to approximate the true
+(unknown) solution $u(x_k)$ by a quantity $u_k$ such that
+\begin{equation}
+  {{|u_k^j - u^j(x_k)|}\over{\max(1, |u_k^j|)}}
+ < {\tt tol}\,(i)
+\label{eqn-errortest}
+\end{equation}
+for each $i = 1,\dots, {\tt ntol}$ and $j = {\tt ltol}(i)$,
+where $u_k^j$ denotes component $j$ of $u_k$.  Relation (\ref{eqn-errortest})
+is a mixed relative/absolute error criterion of the type normally
+used for solving differential equations.
+
+
+\item{\tt linear - }  Logical, input.  If {\tt linear} is {\tt .true.}, 
+the problem is treated as linear.  If {\tt linear} is {\tt .false}, 
+the problem is solved as nonlinear.  Note that different algorithmic
+strategies are used for linear and nonlinear problems; hence, if one
+solves the same linear problem twice, with {\tt linear} set to 
+{\tt .true.} and then to {\tt .false.}, the computed
+solutions and meshes may well be different, although
+both solutions should satisfy the same overall error criterion.
+
+\item{\tt givmsh - }  Logical, input.  If {\tt givmsh}
+is {\tt .true.}, the user must
+define two parameters: {\tt nmsh} and the {\tt xx} array;
+see below.  If {\tt givmsh} is {\tt true.},
+{\tt nmsh} must contain a positive number of initial 
+mesh points, and {\tt xx} must contain these
+mesh points.  If {\tt givmsh} is {\tt .false.}, the user need not specify
+{\tt nmsh} or {\tt xx}, which are chosen by default; see the explanations
+below of {\tt nmsh} and {\tt xx}.
+
+\item{\tt giveu - }  Logical, input.  If {\tt giveu}
+is {\tt .false}, the code sets the
+initial trial solution at all mesh points to the constant
+value {\tt uval0}, which is contained in the labeled
+common area {\tt algprs}; the default value of {\tt uval0}, set 
+in a block data routine, is zero.  To change {\tt uval0}, the user 
+should include the labeled common area {\tt algprs} in the 
+calling routine and set {\tt uval0} to the desired value;
+see Section~\ref{sec-otherpars}.
+
+If {\tt giveu} is {\tt .true.}, {\tt givmsh} must also be set to {\tt .true.}
+When {\tt giveu} is {\tt .true.}, the user must set {\tt nmsh} 
+to the initial number of mesh points, {\tt xx} to the initial 
+array of mesh points, and ${\tt u}(i,j)$, $i=1, \dots, {\tt ncomp}$ and 
+$j = 1, \dots, {\tt nmsh}$, to the initial trial
+solution at these mesh points.  However, if the first Newton procedure 
+fails with these
+values for {\tt xx} and {\tt u}, the code reverts 
+to setting all components of the initial trial solution to {\tt uval0}
+for the next mesh.
+
+\item{\tt  nmsh - } Integer, optional input and output.  
+If the parameter {\tt givmsh}
+is {\tt .true.}, the user must set {\tt nmsh} to the positive initial
+number of mesh points (including the two endpoints).
+If {\tt givmsh} is {\tt .false.}, the user need not set {\tt nmsh}.
+If {\tt givmsh} is {\tt .false.}, the initial value of {\tt nmsh} is set 
+to the greater of {\tt nfxpnt}+2  and {\tt nminit}, an integer in
+the labeled common area {\tt algprs}.  (The default value of 
+{\tt nminit} is set in a block data routine to 7;
+see Section~\ref{sec-otherpars}.)
+To specify another initial value for {\tt nmsh} without specifying the
+initial mesh points, the user can include the labeled common 
+{\tt algprs} in the calling routine and set {\tt nminit} to the desired 
+value; see Section~\ref{sec-otherpars}.
+
+On output, {\tt nmsh} contains the final number of mesh points.
+
+\item{\tt  xx - }  Floating-point array, of size {\tt nmax} (see below; 
+nmax cannot exceed {\tt nucol}), optional input and output.  
+When {\tt givmsh} is {\tt .false.}, the initial mesh {\tt xx}
+is defined as follows.
+If ${\tt nfxpnt} = 0$, the initial mesh contains {\tt nmsh} points equally
+spaced in $[{\tt aleft}, {\tt aright}]$.  If ${\tt nfxpnt} > 0$, the 
+initial mesh contains (if possible) a total of {\tt nmsh} points.  These points
+are equally spaced in each subinterval $[{\tt aleft}, {\tt fixpnt}(1)]$, 
+$[{\tt fixpnt}(1), {\tt fixpnt}(2)]$, \dots, 
+$[{\tt fixpnt}({\tt nfxpnt}), {\tt aright}]$.
+
+If {\tt givmsh} is {\tt .true.}, the user must define the {\tt xx} array
+on input as an initial mesh of strictly increasing values,
+with ${\tt xx}(1) = {\tt aleft}$ and ${\tt xx}({\tt nmsh}) = {\tt aright}$.  
+If ${\tt nfxpnt} > 0$
+and the user sets the initial mesh, the desired fixed points
+{\em must} be included in the {\tt xx} array, since the code performs
+no tests to check for their inclusion!
+If {\tt givmsh} is {\tt .false.}, {\tt nmsh} is set to the maximum 
+of {\tt nfxpnt}+2
+and {\tt nminit} as defined in the labeled common area {\tt algprs}. 
+ 
+On output, {\tt xx} contains the final array of {\tt nmsh} mesh points.
+
+\item{\tt  nudim - }  Integer, input.  {\tt nudim} is the declared row 
+dimension of the array {\tt u}.  {\tt nudim} must be greater than 
+or equal to {\tt ncomp}.
+
+\item{\tt  u - }  Floating-point array, of declared size 
+{\tt (nudim, nucol)}, and
+of conceptual size {\tt (ncomp, nmsh)}, where {\tt ncomp} is the number
+of components and {\tt nmsh} is the number of mesh points.
+The {\tt u} array is an optional input parameter, and an output parameter.
+If {\tt giveu} (see above) is {\tt .false.}, the {\tt u}
+array need not be set by the
+user.  
+
+If {\tt giveu} is {.true.}, the user must provide an initial
+array ${\tt u}(i,j)$, $i=1,\dots {\tt ncomp}$ and
+$j = 1, \dots {\tt nmsh}$, corresponding to the
+desired initial trial solution, where {\tt nmsh} is the user-specified
+number of initial mesh points.  In this case, ${\tt u}(*,1)$ corresponds 
+to the estimated solution at {\tt aleft}, and ${\tt u}(*, {\tt nmsh})$ 
+corresponds to the estimated solution at {\tt aright}.
+
+\item{\tt  nmax - }  Integer, output.  {\tt nmax} is the maximum number of mesh 
+points possible with the given values of {\tt ncomp}, {\tt ntol}, 
+{\tt lwrkfl} (size of floating-point workspace),
+{\tt lwrkin} (size of integer workspace) and {\tt nucol}.   
+(See below for the descriptions 
+of {\tt lwrkfl} and {\tt lwrkin}.)  {\tt nmax} can be no larger than 
+the input parameter {\tt nucol}.
+When the value of {\tt lwrkfl} is much greater than ${\tt ncomp*ncomp}$, 
+the maximum 
+number of mesh points allowed by the floating-point workspace limit
+is 
+$$
+  {  {{\tt lwrkfl} - 5({\tt ncomp*ncomp}) -2{\tt ntol} - 9{\tt ncomp}} \over
+   {4({\tt ncomp*ncomp}) + 12{\tt ncomp}  + 3}  }
+$$
+When {\tt lwrkin} is much greater than {\tt ncomp}, the maximum number of
+mesh points allowed by the integer workspace limit is
+$({\tt lwrkin} - {\tt ncomp})/({\tt ncomp} + 2)$.
+
+The value of {\tt nmax} is calculated in {\tt twpbvp}, and is not allowed 
+to exceed {\tt nucol}.  The user can determine the exact maximum 
+number of mesh points corresponding to specified values of {\tt ncomp}, 
+{\tt lwrkfl} and {\tt lwrkin} by calling {\tt twpbvp} with 
+${\tt nucol} = 1$ and the 
+parameter {\tt iprint} set to $0$ (its default value) or $1$; see below 
+for a discussion of {\tt iprint}. 
+
+\item{\tt lwrkfl - }  Integer, input.  The size of the user-provided 
+floating-point workspace array {\tt wrk}.
+
+\item{\tt  wrk - }  Floating-point array of size {\tt lwrkfl}, input.  
+User-provided floating-point workspace, used to store intermediate 
+values.
+
+\item{\tt lwrkin - }  Integer, input.  The size of the user-provided integer
+workspace array {\tt iwrk}.
+
+\item{\tt iwrk - }  Integer array of size {\tt lwrkin}, input.  User-provided 
+integer workspace, used to store intermediate values.
+
+\item{\tt  fsub - }  Name of user-provided subroutine.  {\tt fsub}
+{\em must} be declared
+{\tt external} in the calling routine.  {\tt fsub} defines the function
+$f$ in the formulation (\ref{eqn-prob1}) of the system of 
+first-order differential  equations.
+{\tt fsub} must have the following declaration:
+\begin{description}
+\item{$\null$} {\tt subroutine fsub(ncomp, x, u, f)}
+\item{$\null$} {\tt ncomp} (input to {\tt fsub})
+is the number of components of {\tt u};
+\item{$\null$} {\tt x} (input to {\tt fsub}) is a floating-point scalar;
+\item{$\null$} {\tt u} (input to {\tt fsub}) is a floating-point array 
+of size {\tt ncomp};
+\item{$\null$} {\tt f} (output from {\tt fsub}) is a floating-point array 
+of dimension {\tt ncomp}. On exit from {\tt fsub}, the array 
+{\tt f} must contain the {\tt ncomp}-dimensional vector {\tt f}
+whose $i$th component
+is the value of the $i$th component of the vector $f$ of (\ref{eqn-prob1})
+evaluated at {\tt x} and {\tt u}.
+\end{description}
+
+
+\item{\tt  dfsub - }  Name of user-provided subroutine.  {\tt dfsub}
+{\em must} be 
+declared {\tt external} in the calling routine.  {\tt dfsub} calculates
+the Jacobian matrix of {\tt f} as defined by the subroutine {\tt fsub}.  
+{\tt dfsub} must have the following declaration:
+\begin{description}
+\item{$\null$} {\tt subroutine dfsub(ncomp, x, u, df)}
+\item{$\null$} {\tt ncomp} (input to {\tt dfsub}) is the number of 
+components of {\tt u}; 
+\item{$\null$} {\tt x} (input to {\tt dfsub}) is a floating-point scalar;
+\item{$\null$} {\tt u} (input to {\tt dfsub}) is a floating-point 
+array of dimension {\tt ncomp};
+\item{$\null$} {\tt df} (output from {\tt dfsub}) is an 
+{\tt ncomp} by {\tt ncomp} floating-point
+array whose declared row dimension in the routine {\tt dfsub}
+must be {\tt ncomp}.  On exit from {\tt dfsub}, the 
+array {\tt df} must contain the {\tt ncomp} by {\tt ncomp} Jacobian matrix
+of $f$ from (\ref{eqn-prob1}) ({\tt f} of {\tt fsub})
+with respect to $u$, namely ${\tt df}(i,j)$ is the partial derivative
+of the $i$th function $f_i$ with respect to the $j$th component 
+of $u$.
+\end{description}
+
+\item{\tt  gsub - }  Name of user-provided subroutine.  {\tt gsub}
+{\em must} be declared {\tt external} in the calling routine.  
+{\tt gsub} is called {\tt ncomp} times
+each time the boundary conditions are calculated;
+the $i$th call to {\tt gsub} defines the $i$th function
+$g_i(\cdot)$ in the boundary conditions of (\ref{eqn-prob2}).
+{\tt gsub} must have the following declaration:
+\begin{description}
+\item{$\null$} {\tt subroutine gsub(i, ncomp, u, g)}
+\item{$\null$} {\tt i} (input to {\tt gsub}) is an integer 
+ranging from 1 to {\tt ncomp};
+\item{$\null$} {\tt ncomp} (input to {\tt gsub}) is the 
+number of components of {\tt u};
+\item{$\null$} {\tt u} (input to {\tt gsub}) is a floating-point 
+array of dimension {\tt ncomp};
+\item{$\null$} {\tt g} (output from {\tt gsub}) is a floating-point scalar.  
+On exit from the $i$th call to
+{\tt gsub}, the value of {\tt g} must
+contain the value of the function $g_i$ from (\ref{eqn-prob2})
+that defines the $i$th boundary condition evaluated at $u$.
+\end{description}
+
+\item{\tt dgsub - }  Name of user-provided subroutine.  {\tt dgsub} 
+{\em must} be 
+declared {\tt external} in the calling routine.  {\tt dgsub} calculates
+the Jacobian matrices corresponding to the functions $g_i$ 
+of (\ref{eqn-prob2}) and {\tt gsub} that define the boundary conditions. 
+{\tt dgsub} must have the following declaration:
+\begin{description}
+\item{} {\tt subroutine dgsub(i, ncomp, u, dg)}
+\item {\tt i} (input to {\tt dgsub}) is an integer ranging from 
+1 to {\tt ncomp};
+\item{$\null$} {\tt ncomp} (input to {\tt dgsub}) is the number 
+of components of {\tt u};
+\item{$\null$} {\tt u} (input to {\tt dgsub}) is a floating-point 
+array of dimension {\tt ncomp};
+\item{$\null$} {\tt dg} (output from {\tt dgsub}) is a floating-point 
+array of dimension {\tt ncomp}.  
+On exit from the $i$th call of {\tt dgsub}, the 
+vector {\tt dg }must contain the {\tt ncomp} partial derivatives of the
+$i$th function $g_i$ of (\ref{eqn-prob2}) with respect to $u$.
+\end{description}
+
+\item{\tt iflbvp - }  Integer, output.  {\tt iflbvp} indicates the result of
+{\tt twpbvp}.  If the routine has terminated with apparent success,
+${\tt iflbvp} = 0$.  If one of the input parameters is invalid,
+${\tt iflbvp} = -1$.  If the number of mesh points needed for the
+next iteration would exceed {\tt nmax}, then ${\tt iflbvp} = 1$.
+
+\end{description}
+
+\section{Related parameters}\label{sec-otherpars}
+
+Some other parameters that may be of interest to the user, but do
+not occur in the
+formal declaration of {\tt twpbvp}, are stored in the labeled common
+area {\tt algprs}, whose declaration is
+\begin{verbatim}
+        logical pdebug
+        common/algprs/ nminit, pdebug, iprint, idum, uval0
+\end{verbatim}
+
+Any of the parameters in {\tt algprs} may be changed by the user
+by including this labeled common in the calling routine
+and setting the value as desired.
+
+The value of the integer {\tt nminit} is discussed above under the
+formal parameter {\tt nmsh}.  {\tt nminit}
+specifies the default initial number of mesh points, and, if not
+altered, is set to $7$.
+
+{\tt pdebug} is a logical variable whose default value is {\tt .false.};
+if {\tt pdebug} is set to {\tt .true.}, an extensive debug printout will
+occur during execution of {\tt twpbvp}.
+
+{\tt iprint} is an integer variable controlling the amount of
+non-debug printout.  Its default value is zero, which means that
+some intermediate printing occurs (each Newton iteration,
+each change of mesh, and so on; see the example output in
+Section~\ref{sec-sampout}).  If {\tt iprint} is set to $1$, 
+more printing occurs.  If {\tt iprint} is set to $-1$, no printing at 
+all occurs in {\tt twpbvp}.  Values of {\tt iprint}
+other than $0$, $1$ and $-1$ are invalid.
+
+{\tt idum} is a dummy integer value needed only for common alignment.
+It serves no purpose in the algorithm.
+
+{\tt uval0} is a floating-point value that defines the initial
+value of the trial solution when {\tt giveu} is {\tt .false.}, or in some
+instances when an intermediate Newton process fails.  Unless changed
+by the user, the
+default value of {\tt uval0} is zero.  The user may wish to change
+{\tt uval0} if $u=0$ is inappropriate for some
+reason---for example, the function $f$ in (\ref{eqn-prob1})
+is undefined for $u=0$.
+
+The user should also look at the routine d1mach (which is provided
+automatically via netlib). The variables specified in this routine 
+describe machine precision and may need to be changed depending on
+which machine is being used.
+
+\section{Suggestions for difficult problems}
+
+For difficult, nonlinear singular perturbation problems, the code
+{\TWPBVP} may experience severe difficulties in obtaining convergence for the
+Newton iteration scheme.  In such circumstances two approaches
+may be helpful.  The first is to experiment with
+different initial meshes.  This can involve using a different
+number of equally spaced points (by changing the default value of
+the parameter {\tt nminit}; see Section \ref{sec-otherpars}),
+or, alternatively, trying a graded mesh in which 
+extra mesh points are placed in regions of known or suspected difficulty.
+
+A second possibility is to use {\sl continuation}, which is  particularly
+appropriate if a small parameter is associated with the given problem. 
+For example, a large class of important singular perturbation
+problems appear in the form
+$$
+\epsilon y'' = f(x,y,y'),
+$$
+where $\epsilon$ is a very small parameter.  
+An often-successful strategy for solving such problems is 
+to begin with a relatively large value of $\epsilon$,
+and then to solve a sequence of problems with $\epsilon$ steadily decreasing
+to the required value.  The power of this approach comes from the fact
+that information regarding meshes and solution values can be passed
+from one problem to the next.  Continuation is fully described in
+\cite{AMR}.  J.\ R.\ Cash, one of the authors of {\TWPBVP}, and
+R.\ W.\ Wright have developed an automatic continuation code that can be 
+made available (with no guarantees) to interested users. For a copy of
+this continuation code e-mail either j.cash or r.wright@ic.ac.uk.
+
+
+\section{A sample problem}\label{sec-sample}
+
+
+\subsection{Mathematical formulation}
+
+Consider a second-order boundary value problem
+parameterized in terms of $\epsilon$:
+\begin{eqnarray}
+  \epsilon u'' &  = & -e^u u' + \half \pi \sin(\half \pi x)
+ e^{2u}, \quad 0 \le x \le 1,\label{eqn-samprob}\\
+  u(0) & = & 0, \quad u(1) = 0.\nonumber
+\end{eqnarray}
+(As $\epsilon$ decreases toward zero, (\ref{eqn-samprob})
+becomes more difficult to solve numerically.)
+In order to apply {\TWPBVP} to (\ref{eqn-samprob}), it 
+must be converted to a system of two first-order equations:
+\begin{equation}
+ u'  =  z,\qquad
+ z'  =  {1\over\epsilon}\,
+          {\Bigl( -e^u z + \half \pi\, \sin(\half \pi x) \,e^{2u}\Bigr)},
+\label{eqn-newprob}
+\end{equation}
+with $u(0) = 0$ and $u(1) = 0$.
+
+Suppose now that we wish to solve (\ref{eqn-newprob}) with 
+$\epsilon = 10^{-2}$, and to achieve
+an accuracy of approximately $10^{-6}$ in the value of $u$ only.
+We shall provide neither an initial mesh nor an initial guess for
+the solution.  The problem is to be solved on a machine with
+IEEE arithmetic, and hence double precision is used (approximately
+16 decimal digits).
+
+\subsection{Sample Fortran routines}
+
+The following Fortran 77 main program calls
+{\tt twpbvp} with the user-specified parameters given above.
+The subroutines {\tt fsub},
+{\tt dfsub}, {\tt gsub} and {\tt dgsub} define the function $f$
+and the boundary conditions $g_1$ and $g_2$ for problem (\ref{eqn-newprob}).
+
+{\small
+
+\begin{verbatim}
+
+
+      implicit double precision (a-h,o-z)
+
+      dimension  fixpnt(2), ltol(2), tol(2)
+      dimension  u(2, 1000), xx(1000)
+      dimension wrk(10000), iwrk(6000)
+      character*30 pname
+
+      logical linear, giveu, givmsh
+      external fsub, dfsub, gsub, dgsub
+
+*  The value of eps represents the parameter epsilon
+*  appearing in the test problem.
+
+      common/probs/eps, pi
+
+      logical pdebug
+      common/algprs/ nminit, pdebug, iprint, idum, uval0
+
+*  blas: dload
+*  double precision datan
+
+      parameter (one = 1.0d+0, zero = 0.0d+0, ten = 10.0d+0)
+
+      pi = 4.0d+0*datan(one)
+
+      pname = `Test problem with eps = .01'
+
+      eps = 1.0d-2
+
+      nudim = 2
+      lwrkfl = 10000
+      lwrkin = 6000
+      nucol = 1000
+
+      ncomp = 2
+      nlbc = 1
+      ntol = 1
+      ltol(1) = 1
+      tol(1) = 1.0d-2
+      nfxpnt = 0
+
+      aleft = zero
+      aright = one
+
+      linear = .false.
+      giveu = .false.
+      givmsh = .false.
+
+
+      call twpbvp(ncomp, nlbc, nucol, aleft, aright,
+     *       nfxpnt, fixpnt, ntol, ltol, tol,
+     *       linear, givmsh, giveu, nmsh,
+     *       xx, nudim, u, nmax,
+     *       lwrkfl, wrk, lwrkin, iwrk, 
+     *       fsub, dfsub, gsub, dgsub, iflbvp)
+
+
+      write(6,771) pname
+      write(6,772) ncomp, nlbc, ntol
+      write(6,773) aleft, aright
+      if (linear) write (6,774)
+      if (.not. linear) write(6,775)
+      if (nfxpnt .gt. 0) write(6,776) nfxpnt
+      write(6,777) (ltol(i), i=1,ntol)
+      write(6,778) (tol(i), i=1,ntol)
+      if (iflbvp .eq. 0) then
+         write(6,901) nmsh
+         if (nmsh .lt. 25) then
+            iminc = 1
+         elseif (nmsh .lt. 75) then
+            iminc = 5
+         elseif (nmsh .lt. 200) then
+            iminc = 10
+         elseif (nmsh .lt. 1000) then
+            iminc = 20
+         else
+            iminc = 50
+         endif
+         do 100 i = 1, nmsh-1, iminc
+            write(6,900) i, xx(i), (u(j,i), j=1,ncomp)
+  100    continue
+         write(6,900) nmsh, xx(nmsh), (u(j,nmsh), j=1,ncomp)
+      endif
+
+      stop
+  771 format(1h ,a30)
+  772 format(1h ,'ncomp=',i5,5x,'nlbc=',i5,5x,'ntol=',i5)
+  773 format(1h ,'aleft =',1pe11.3,5x,'aright=',1pe11.3)
+  774 format(1h ,'solved as a linear problem')
+  775 format(1h ,'solved as a nonlinear problem')
+  776 format(1h ,'nfxpnt =',i5)
+  777 format(1h ,'ltol',5x,5i5)
+  778 format(1h ,'tolerances',5(1pe11.3))
+  900 format(1h ,i4,5(1pe14.6))
+  901 format(1h ,'final solution, nmsh =',i8)
+      end
+
+      subroutine fsub(ncomp, x, u, f)
+      implicit double precision (a-h,o-z)
+      dimension u(*), f(*)
+      common/probs/eps, pi
+
+      parameter (half = 0.5d+0, two = 2.0d+0)
+
+*  double precision dexp, dsin
+
+*  nonlinear problem 1
+
+      f(1) = u(2)
+      f(2) = (-dexp(u(1))*u(2) + 
+     *           half*pi*dsin(half*pi*x)*dexp(two*u(1)))/eps
+ 
+      return
+      end
+
+      subroutine dfsub(ncomp, x, u, df)
+      implicit double precision (a-h,o-z)
+      dimension u(*), df(ncomp,*)
+      common/probs/eps, pi
+      parameter (half = 0.5d+0, one = 1.0d+0, zero = 0.0d+0)
+      parameter (two = 2.0d+0)
+
+*  double precision dexp, dsin
+
+      df(1,1) = zero
+      df(1,2) = one
+      df(2,1) = -(dexp(u(1))*u(2) 
+     *            - pi*dsin(pi*half*x)*dexp(two*u(1)))/eps
+      df(2,2) = -dexp(u(1))/eps
+      return
+      end
+
+      subroutine gsub(i, ncomp, u, g)
+      implicit double precision (a-h,o-z)
+      dimension u(*)
+      g = u(1)
+      return
+      end
+
+
+      subroutine dgsub(i, ncomp, u, dg)
+      implicit double precision (a-h,o-z)
+      dimension u(*), dg(*)
+      parameter (one = 1.0d+0, zero = 0.0d+0)
+
+      dg(1) = one
+      dg(2) = zero
+      return
+      end
+
+\end{verbatim}
+}
+
+\subsection{Sample output}\label{sec-sampout}
+
+The complete output produced by running this example on an
+SGI 4D/240S with 25 MHz MIPS R3000 cpu chip, under
+IRIX System V release 3.3.1, with binary IEEE arithmetic, is
+given next.
+
+{\small
+\begin{verbatim}
+
+ Test problem with eps = .01   
+ ncomp =    2     nlbc =    1     ntol =    1
+ aleft =  0.000E+00     aright =  1.000E+00
+ solved as a nonlinear problem
+ ltol         1
+ tolerances  1.000E-02
+ nmax from workspace =     231
+ unimsh.  nmsh =    7
+ initu, uval0    0.00000D+00
+  iter       alfa      merit       rnsq
+     0  2.315E-01  1.043E+03  2.122E+03
+     1  1.558E-02  1.722E+04  2.060E+03
+     2  4.499E-03  1.044E+05  2.043E+03
+  dblmsh.  the doubled mesh has       13 points.
+  iter       alfa      merit       rnsq
+     0  2.404E-01  5.077E+01  4.582E+03
+     1  4.809E-01  1.320E+02  1.488E+03
+     2  9.617E-01  7.193E+02  1.743E+02
+     3  1.000E-02  8.279E+04  1.722E+02
+     4  3.271E-03  4.623E+05  1.719E+02
+ smpmsh, new nmsh =     40
+  iter       alfa      merit       rnsq
+     0  1.000E+00  1.506E+02  6.596E+01
+     1  1.000E+00  5.433E+00  4.495E+00
+     2  1.000E+00  2.004E-03  8.292E-04
+     3  1.000E+00  1.627E-10  6.306E-11
+ Convergence, iter =    4    rnsq =   6.306E-11
+ fixed Jacobian convergence    1  1.187E-10
+
+ final solution, nmsh =      40
+
+    i  mesh point        u(1)          u(2)
+    1  0.000000E+00  0.000000E+00 -4.904288E+01
+    6  4.166667E-02 -6.130136E-01 -3.138167E+00
+   11  8.333333E-02 -6.638966E-01 -2.759269E-01
+   16  1.250000E-01 -6.655629E-01  9.117284E-02
+   21  1.666667E-01 -6.596432E-01  1.807697E-01
+   26  2.083333E-01 -6.508858E-01  2.382272E-01
+   31  2.500000E-01 -6.398296E-01  2.923964E-01
+   36  6.666667E-01 -3.986648E-01  8.886575E-01
+   40  1.000000E+00 -2.509872E-30  1.546497E+00
+
+\end{verbatim}
+
+}
+
+\begin{thebibliography}{9999999999}
+
+\bibitem[AMR88]{AMR}
+ U.\ Ascher, R.\ M.\ M.\ Mattheij, and R.\ D.\ Russell,
+{\it Numerical Solution of Boundary Value Problems for Ordinary
+Differential Equations},
+Prentice-Hall, Englewood Cliffs, NJ, 1988.
+
+\bibitem[Cash86]{Cash86}
+J.\ R.\ Cash (1986), On the numerical integration of nonlinear 
+two-point boundary value problems using iterated deferred 
+corrections, Part 1: A survey and comparison of some 
+one-step formulae, {\sl Comput.\ Math.\ Appl.}\ 12a, 1029--1048.
+
+\bibitem[Cash88]{Cash88}
+J.\ R.\ Cash (1988),
+On the numerical integration of nonlinear two-point boundary
+value problems using iterated deferred corrections, Part 2:
+The development and analysis of highly stable deferred correction
+formulae, {\sl SIAM J.\ Numer.\ Anal.}\ 25, 862--882.
+
+\bibitem[CW90]{CW1}
+J.\ R.\ Cash and M.\ H.\ Wright (1990),
+Implementation issues in solving nonlinear equations for
+two-point boundary value problems,
+{\sl Computing} 45, 17--37.
+
+\bibitem[CW91]{CW2}
+J.\ R.\ Cash and M.\ H.\ Wright (1991),
+A deferred correction method for nonlinear two-point boundary
+value problems: Implementation and numerical evaluation,
+{\sl SIAM J.\ Sci.\ Stat.\ Comput.}\ 12, 971--989.
+
+\end{thebibliography}
+
+\end{document}
+

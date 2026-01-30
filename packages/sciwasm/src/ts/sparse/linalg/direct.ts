@@ -11,9 +11,9 @@
 import type { SparseMatrix } from '../base.js';
 import type { CompressedSparseMatrix } from '../compressed.js';
 import type { LinearOperator } from './types.js';
-import { getSuperLUModule, loadSuperLUModule } from '../../superlu-loader.js';
-import type { SuperLUModule } from '../../superlu-types.js';
-import { SuperLUColPerm, SuperLUStype, SuperLUDtype, SuperLUMtype, SuperLUTrans, SuperLUMiluT } from '../../superlu-types.js';
+import { getSuperLUModule, loadSuperLUModule } from 'superluwasm';
+import type { SuperLUModule } from 'superluwasm';
+import { SuperLUColPerm, SuperLUStype, SuperLUDtype, SuperLUMtype, SuperLUTrans, SuperLUMiluT } from 'superluwasm';
 import { SingularMatrixError, DimensionMismatchError } from '../../errors.js';
 import { createCSC } from '../_factory.js';
 

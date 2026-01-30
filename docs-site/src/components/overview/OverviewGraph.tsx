@@ -1,16 +1,23 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
 import { useGraphData } from './useGraphData';
-import { useForceSimulation } from './useForceSimulation';
+import { useForceSimulation, type SimNode } from './useForceSimulation';
 import { ForceGraph } from './ForceGraph';
 import type { GraphFilters, PackageId } from './types';
-import { DEFAULT_FILTERS, PACKAGE_COLORS } from './types';
+import { DEFAULT_FILTERS, PACKAGE_COLORS, ALL_PACKAGES } from './types';
 
 export function OverviewGraph() {
   const [filters, setFilters] = useState<GraphFilters>(DEFAULT_FILTERS);
+  const [hoveredNode, setHoveredNode] = useState<SimNode | null>(null);
   const { elements, isLoading, error } = useGraphData(filters);
-  const { nodes, edges, step, isSettled } = useForceSimulation(elements);
+  const { nodes, edges, step, isSettled } = useForceSimulation(elements, filters.searchQuery);
+
+  // Handle hover - use callback to avoid re-renders
+  const handleHover = useCallback((node: SimNode | null) => {
+    setHoveredNode(node);
+  }, []);
 
   // Toggle package filter
   const togglePackage = (packageId: PackageId) => {
@@ -64,13 +71,13 @@ export function OverviewGraph() {
       {/* Filter controls */}
       <div className="flex flex-wrap items-center gap-4 p-4 bg-gray-900/50 border-b border-gray-700">
         {/* Package toggles */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm text-gray-400">Packages:</span>
-          {(['numwasm', 'sciwasm', 'symwasm'] as PackageId[]).map((pkg) => (
+          {ALL_PACKAGES.map((pkg) => (
             <button
               key={pkg}
               onClick={() => togglePackage(pkg)}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+              className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
                 filters.packages.has(pkg)
                   ? 'text-white'
                   : 'text-gray-500 bg-gray-800'
@@ -81,7 +88,7 @@ export function OverviewGraph() {
                   : undefined,
               }}
             >
-              {pkg}
+              {pkg.replace('wasm', '')}
             </button>
           ))}
         </div>
@@ -146,7 +153,17 @@ export function OverviewGraph() {
             edges={edges}
             onStep={step}
             isSettled={isSettled}
+            hoveredNode={hoveredNode}
+            onHover={handleHover}
           />
+          <EffectComposer>
+            <Bloom
+              luminanceThreshold={0.2}
+              luminanceSmoothing={0.9}
+              intensity={1.5}
+              mipmapBlur
+            />
+          </EffectComposer>
         </Canvas>
       </div>
 

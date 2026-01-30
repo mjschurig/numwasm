@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import type {
   WasmExportsData,
-  PackageId,
+  FunctionDocs,
   GraphFilters,
   CyElement,
   CyNode,
   CyEdge,
 } from './types';
-import { PACKAGE_COLORS, PACKAGE_COLORS_LIGHT } from './types';
+import { PACKAGE_COLORS, PACKAGE_COLORS_LIGHT, ALL_PACKAGES } from './types';
 
 interface GraphData {
   elements: CyElement[];
@@ -57,14 +57,19 @@ function findSharedFunctions(data: WasmExportsData): Set<string> {
  */
 function buildElements(
   data: WasmExportsData,
-  filters: GraphFilters
+  filters: GraphFilters,
+  docs: FunctionDocs
 ): CyElement[] {
   const elements: CyElement[] = [];
   const sharedFunctions = findSharedFunctions(data);
-  const searchLower = filters.searchQuery.toLowerCase();
   const nodeIds = new Set<string>();
 
-  for (const packageId of ['numwasm', 'sciwasm', 'symwasm'] as PackageId[]) {
+  // Dynamically iterate over all packages present in data
+  const availablePackages = ALL_PACKAGES.filter(
+    (pkg) => data.packages[pkg] || data.typescript[pkg]
+  );
+
+  for (const packageId of availablePackages) {
     if (!filters.packages.has(packageId)) continue;
 
     const modules = data.packages[packageId] || {};
@@ -89,12 +94,6 @@ function buildElements(
     if (filters.showWasmFunctions) {
       for (const [moduleName, functions] of Object.entries(modules)) {
         const moduleNodeId = `mod-${packageId}-${moduleName}`;
-
-        const filteredFunctions = searchLower
-          ? functions.filter((fn) => fn.toLowerCase().includes(searchLower))
-          : functions;
-
-        if (searchLower && filteredFunctions.length === 0) continue;
 
         // WASM Module node
         const moduleNode: CyNode = {
@@ -123,10 +122,13 @@ function buildElements(
         };
         elements.push(pkgModEdge);
 
-        // Function nodes
-        for (const fn of filteredFunctions) {
+        // Function nodes (no hard filtering - visual indication only)
+        for (const fn of functions) {
           const normalizedName = fn.replace(/^_+/, '').replace(/_+$/, '');
           const isShared = sharedFunctions.has(normalizedName);
+
+          // Look up description for WASM function (stored with underscore prefix)
+          const description = docs[packageId]?.[fn];
 
           const fnNodeId = `wasm-${packageId}-${moduleName}-${fn}`;
           const fnNode: CyNode = {
@@ -140,6 +142,7 @@ function buildElements(
               isShared,
               hasWasmBinding: false,
               color: PACKAGE_COLORS[packageId],
+              description,
             },
           };
           elements.push(fnNode);
@@ -162,14 +165,11 @@ function buildElements(
     }
 
     if (filters.showTsExports) {
-      const tsExportsFiltered = searchLower
-        ? tsExports.filter((exp) => exp.name.toLowerCase().includes(searchLower))
-        : tsExports;
-
       // Get TS→WASM mappings for this package
       const tsToWasmMappings = data.tsToWasm?.[packageId] || {};
 
-      for (const exp of tsExportsFiltered) {
+      // No hard filtering - visual indication only for search
+      for (const exp of tsExports) {
         const normalizedName = exp.name.toLowerCase();
         const isShared = sharedFunctions.has(normalizedName);
 
@@ -187,6 +187,7 @@ function buildElements(
         }
 
         const tsNodeId = `ts-${packageId}-${exp.name}`;
+        const description = docs[packageId]?.[exp.name];
         const tsNode: CyNode = {
           data: {
             id: tsNodeId,
@@ -198,6 +199,7 @@ function buildElements(
             isShared,
             hasWasmBinding: wasmBindings.length > 0,
             color: PACKAGE_COLORS[packageId],
+            description,
           },
         };
         elements.push(tsNode);
@@ -252,19 +254,25 @@ function buildElements(
 
 export function useGraphData(filters: GraphFilters): GraphData {
   const [wasmExports, setWasmExports] = useState<WasmExportsData | null>(null);
+  const [functionDocs, setFunctionDocs] = useState<FunctionDocs>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/wasm-exports.json')
-      .then((res) => {
+    Promise.all([
+      fetch('/wasm-exports.json').then((res) => {
         if (!res.ok) {
           throw new Error(`Failed to load wasm-exports.json: ${res.status}`);
         }
         return res.json();
-      })
-      .then((data: WasmExportsData) => {
-        setWasmExports(data);
+      }),
+      fetch('/function-docs.json')
+        .then((res) => (res.ok ? res.json() : {}))
+        .catch(() => ({})), // Gracefully handle missing docs
+    ])
+      .then(([exports, docs]: [WasmExportsData, FunctionDocs]) => {
+        setWasmExports(exports);
+        setFunctionDocs(docs);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -277,8 +285,8 @@ export function useGraphData(filters: GraphFilters): GraphData {
     if (!wasmExports) {
       return [];
     }
-    return buildElements(wasmExports, filters);
-  }, [wasmExports, filters]);
+    return buildElements(wasmExports, filters, functionDocs);
+  }, [wasmExports, filters, functionDocs]);
 
   return { elements, isLoading, error };
 }

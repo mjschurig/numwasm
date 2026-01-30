@@ -1,0 +1,997 @@
+\documentstyle{article}
+\evensidemargin 0.25in
+\oddsidemargin 0.25in
+\textheight 8.7in
+\textwidth 6in
+\topmargin 0in
+\floatsep 12pt plus 2pt minus 2pt 
+\textfloatsep 10pt plus 2pt minus 4pt % change separation of figures
+
+\title{User's Guide for ACDC: An Automatic Continuation Code for Solving
+Stiff Two-Point Boundary Value Problems}
+\author{J.\ R.\ Cash\thanks{E-mail: j.cash@ic.ac.uk} $\;$ and 
+R.\ W.\ Wright\thanks{E-mail: r.wright@ic.ac.uk} \\
+{\small \sl {Department of Mathematics, Imperial College,
+South Kensington, London SW7 2BZ, England}}}
+\date{}              
+
+\begin{document}
+
+\def\norm#1{\Vert#1\Vert}
+\def\real{\cal R}
+\def\half  {{\textstyle{1\over 2}}}
+\def\ACDC{\small ACDC}
+\def\TWPBVP{\small TWPBVP}
+\maketitle 
+\section{Introduction}
+
+The abbreviation {\ACDC} stands for Automatic Continuation with Deferred
+Corrections. The package {\ACDC} (which is written in {\small FORTRAN} 77) 
+is designed to solve stiff two-point boundary value problems for ordinary 
+differential equations by using continuation.
+We note that {\ACDC} is a modification of the package {\TWPBVP} of Cash and
+M.\ H.\ Wright \cite{CaWr} and that many of the original subroutines used
+in {\TWPBVP} remain unchanged in the new code. {\ACDC} has been adapted to
+allow an automatic continuation strategy to be used \cite{CaMoWr1}. 
+Furthermore, the new code incorporates implicit Runge-Kutta formulae, based on Lobatto 
+points \cite{Si}, rather than the mono-implicit formulae used in the original code.
+This code is a companion to the continuation code {\small COLMOD}, which implements
+our continuation strategy together with a high-order collocation method.
+ 
+The package solves first-order systems of ordinary differential equations involving
+a small positive parameter, which we denote by $\epsilon$. The two-point boundary 
+conditions must be separated, thus we are interested in problems of the form
+\begin{equation}
+\label{eqn-prob1}
+\begin{array}{c}
+{\bf u}'  = {\bf f}(x,{\bf u},\epsilon), \;\;\;\;\; a \le x \le b, \\
+{\bf g}_1({\bf u}(a),\epsilon) = {\bf 0},\;\;\;\;\; {\bf g}_2({\bf u}(b),\epsilon) = {\bf 0}, 
+\end{array}
+\end{equation}
+where $x\in\real$, ${\bf u},{\bf f}\in{\real}^n$, ${\bf g}_1 : {\real}^n \rightarrow 
+{\real}^p$ and  ${\bf g}_2 : {\real}^n \rightarrow {\real}^q$ with $n=p+q$.
+The functions ${\bf f}$, ${\bf g}_1$, and ${\bf g}_2$ are assumed to be differentiable.
+The numerical method used in {\ACDC} is a deferred correction method based on Lobatto 
+Runge-Kutta formulae and adaptive mesh refinement. The fact that Lobatto 
+Runge-Kutta formulae can be expressed in a symmetric manner and have good stability 
+properties means that they are suitable candidates for solving very stiff problems (for
+a discussion of this see \cite{Si}). The mesh refinement algorithm used in {\ACDC} 
+is the same as in {\TWPBVP} and is described in \cite{CW2}. The continuation algorithm used 
+is based upon the prediction of the behaviour of the monitor function (used for mesh 
+selection) from problem to problem, and is discussed in \cite{CaMoWr1}. 
+
+\subsection{Restriction on the Choice of $\epsilon$}
+
+As previously stated, the type of problems that {\ACDC} is designed to solve involve
+a small positive parameter $0 < \epsilon \ll 1$. As $\epsilon$ becomes progressively
+smaller, the problem normally becomes increasingly difficult to approximate numerically
+(e.g., due to the appearance of narrow transition layers in the profile of the
+solution). The idea of continuation is to solve a chain of problems in which
+the parameter $\epsilon$ decreases towards some desired value. That is,
+we attempt to solve a sequence of problems
+\begin{equation}
+1 > \epsilon_s >  \epsilon_1 > \epsilon_2 > \ldots > \epsilon_{min} >  0
+\end{equation}
+where $\epsilon_s$ is a user provided starting value and $\epsilon_{min}$ is a user
+provided final value for the continuation parameter. Given $\epsilon_s$ and 
+$\epsilon_{min}$ the 
+code automatically selects the intermediate $\epsilon$ values and passes on meshes
+and solutions (if solving a nonlinear problem) at each step. We note that the 
+intermediate problems are not necessarily solved to the user requested accuracy.
+However, it is expected that the intermediate problems will, 
+in the worst cases, fail the user requested accuracy by only a relatively small
+amount. For a detailed discussion of this see \cite{CaMoWr2}.
+
+The dependence on a small positive parameter in not unduly restrictive. Certainly
+the positive requirement does not pose any difficulty, and, furthermore, 
+problems involving a large parameter can simply be re-expressed as problems
+involving the reciprocal of a small parameter.  Our experience is that it is 
+possible to identify such a parameter in most stiff problems of practical
+interest. The important feature is that the difficulty in obtaining a numerical
+solution increases as the parameter decreases.
+
+\subsection{Conversion to First-Order Form}
+Two important aspects of the formulation (\ref{eqn-prob1}) should be noted, namely, 
+the problem must be posed as a first-order system and the boundary conditions must
+be separated and specified at two points only. Standard techniques can be 
+applied to overcome these restrictions \cite{AsRu}. It is possible to convert 
+any $n$th-order ordinary differential equation to a system of $n$ first-order equations. 
+For example, the second-order problem
+\[
+\epsilon y'' = f(x,y,y'),\;\;\;\;\; 0\le x \le 1,\;\;\;\;\;
+y(0) = \alpha,\;\;\;  y(1) = \beta,
+\]
+can be converted to the following first-order system
+\begin{eqnarray*}
+\begin{array}{rcl}
+u'_1 & = & u_2, \\
+u'_2 & = & f(x,u_1,u_2)/\epsilon,
+\end{array} & & \;\;\;  u_1(0) = \alpha,\;\;\;  u_1(1) = \beta.
+\end{eqnarray*}
+This technique extends naturally to equations of order greater than two.
+With regard to the boundary conditions, we note that there exist various
+techniques that enable non-separated and multi-point boundary conditions to 
+be converted to the separated form needed here. For a discussion of such
+techniques the user is referred to \cite[pp. 4-7]{AMR},\cite{AsRu}.
+
+\section{Formal parameters}
+In what follows we describe the parameters used in the calling sequence for {\ACDC},
+which is
+\begin{verbatim}
+      Call Acdc(Ncomp, Nlbc, Nucol, Aleft, Aright, Nfxpnt, Fixpnt,
+     +            Ntol, Ltol, Tol, Linear, Givmsh, Giveu, Nmsh, Xx,
+     +            Nudim, U, Nmax, Lwrkfl, Wrk, Lwrkin, Iwrk, Giveps,
+     +            Eps, Epsmin, Fsub, Dfsub, Gsub, Dgsub, Iflbvp)
+\end{verbatim}
+\begin{description}
+\item{\tt Ncomp -}  Integer, input.  {\tt Ncomp} is the number of 
+first-order differential equations ($n$ in (\ref{eqn-prob1})),
+and is the number of components of {\bf u} at each mesh point.
+{\tt Ncomp} must be positive and less than 200.
+
+\item{\tt Nlbc -}  Integer, input.  {\tt Nlbc} is the number of 
+boundary conditions at the left endpoint ($p$ in (\ref{eqn-prob1})).
+{\tt Nlbc} must be nonnegative and must
+not exceed {\tt Ncomp}.  If ${\tt Nlbc} = {\tt Ncomp}$, all the 
+boundary conditions occur at the left endpoint,
+so the problem is an initial value problem.
+If {\tt Nlbc} is zero, all the boundary conditions occur at 
+the right endpoint.
+
+\item{\tt Nucol - }  Integer, input.  {\tt Nucol}
+is the declared column dimension 
+of the two-dimensional array {\tt U} used to store the computed solution
+(see the discussion below of the parameter {\tt U}).  {\tt Nucol} must be
+positive, and is an upper bound on {\tt Nmax}, the maximum allowed 
+number of mesh points.  In the specification of {\tt Nmax}, below, the
+actual formula for computing {\tt Nmax} is given. In order to make full
+use of the floating-point workspace, the user should select {\tt Nucol} 
+equal to {\tt Nmax}.
+
+\item{\tt Aleft - } Floating-point, input.  The left endpoint of 
+the interval of integration ($a$ in (\ref{eqn-prob1})).
+
+\item{\tt Aright - } Floating-point, input.  The right endpoint of the
+interval of integration ($b$ in (\ref{eqn-prob1})).
+{\tt Aright} must strictly exceed {\tt Aleft}.
+
+\item{\tt Nfxpnt - }  Integer, input.  The number of ``fixed points'', i.e.,
+points, in addition to the endpoints $a$ and $b$, that must be included in 
+every mesh. {\tt Nfxpnt} must be
+nonnegative, and may be zero.  If ${\tt Nfxpnt} = 0$, only the
+two endpoints are required to appear in every mesh.
+
+\item{\tt Fixpnt - }  Floating-point array of size at least {\tt Nfxpnt}, 
+input.  If ${\tt Nfxpnt} = 0$, the {\tt Fixpnt}
+array must still be declared, say as {\tt Dimension Fixpnt(1)}, 
+but is never accessed.  If ${\tt Nfxpnt} > 0$,
+the {\tt Fixpnt} array  contains
+{\tt Nfxpnt} fixed points that the user wishes to be included in
+every mesh.  ${\tt Fixpnt}(1)$ must strictly exceed {\tt Aleft};
+for $1\le i \le {\tt Nfxpnt}-1$,
+${\tt Fixpnt}(i+1)$ must strictly exceed ${\tt Fixpnt}(i)$;
+and ${\tt Fixpnt}({\tt Nfxpnt})$ must be strictly less than {\tt Aright}. 
+
+\item{\tt Ntol - }  Integer, input.  The number of tolerances
+used to determine termination of {\tt ACDC}, i.e., the
+number of components whose estimated accuracy is to be tested.
+{\tt Ntol} must be positive.
+
+\item{\tt Ltol - }  Integer array of size {\tt Ntol}, input.  
+For each $i$, ${\tt Ltol}(i)$ gives the index of the component of the
+computed solution ${\bf u}$ controlled by the $i$th tolerance.
+For example, if ${\tt Ntol} = 2$, ${\tt Ltol}(1) = 2$
+and ${\tt Ltol}(2)=3$, then component $2$ of ${\bf u}$ is controlled by
+${\tt Tol}(1)$ and component $3$ is controlled by ${\tt Tol}(2)$;
+see below for a description of {\tt Tol}.
+Each element of {\tt Ltol} must be an integer between $1$ and {\tt Ncomp}.
+
+
+\item{\tt Tol - } Floating-point array of size {\tt Ntol}, input.  
+For each $i$, ${\tt Tol}(i)$ gives the $i$th error tolerance used 
+in performing  termination tests.  For each $i = 1,\dots,{\tt Ntol}$, 
+the code attempts at each mesh point $x_k$ to approximate the true
+(unknown) solution ${\bf u}(x_k)$ by a quantity ${\bf u}_k$ such that
+\begin{equation}
+  {{|u_{j,k} - u_j(x_k)|}\over{\max(1, |u_{j,k}|)}}
+ < {\tt Tol}\,(i)
+\label{eqn-errortest}
+\end{equation}
+for each $i = 1,\dots, {\tt Ntol}$ and $j = {\tt Ltol}(i)$,
+where $u_{j,k}$ denotes component $j$ of ${\bf u}_k$.  Relation (\ref{eqn-errortest})
+is a mixed relative/absolute error criterion of the type normally
+used for solving differential equations.
+
+
+\item{\tt Linear - }  Logical, input.  If {\tt Linear} is {\tt .true.}, 
+the problem is treated as linear.  If {\tt Linear} is {\tt .false.}, 
+the problem is solved as nonlinear.  Note that different algorithmic
+strategies are used for linear and nonlinear problems; hence, if one
+solves the same linear problem twice, with {\tt Linear} set to 
+{\tt .true.} and then to {\tt .false.}, the computed
+solutions and meshes may well be different, although
+both solutions should satisfy the same overall error criterion.
+
+\item{\tt Givmsh - }  Logical, input.  If {\tt Givmsh}
+is {\tt .true.}, the user must
+define two parameters: {\tt Nmsh} and the {\tt Xx} array;
+see below.  If {\tt Givmsh} is {\tt true.},
+{\tt Nmsh} must contain the number of initial 
+mesh points, and {\tt Xx} must contain these
+mesh points.  If {\tt Givmsh} is {\tt .false.}, the user need not specify
+{\tt Nmsh} or {\tt Xx}, which are chosen by default; see the explanations
+below of {\tt Nmsh} and {\tt Xx}.
+
+\item{\tt Giveu - }  Logical, input.  If {\tt Giveu}
+is {\tt .false.}, the code sets the
+initial trial solution at all mesh points to the constant
+value {\tt Uval0}, which is contained in the labeled
+common area {\tt Algprs} (see section \ref{rel-par}); the default 
+value of {\tt Uval0}, set in a block data routine, is zero.  To change 
+{\tt Uval0}, the user should include the labeled common area {\tt Algprs} in the 
+calling routine and set {\tt Uval0} to the desired value.
+
+If {\tt Giveu} is {\tt .true.}, {\tt Givmsh} must also be set to {\tt .true.}
+When {\tt Giveu} is {\tt .true.}, the user must set {\tt Nmsh} 
+to the initial number of mesh points, {\tt Xx} to the initial 
+array of mesh points, and ${\tt U}(i,j)$, $i=1, \dots, {\tt Ncomp}$ and 
+$j = 1, \dots, {\tt Nmsh}$, to the initial trial
+solution at these mesh points.  However, if the first Newton procedure 
+fails with these values for {\tt Xx} and {\tt U}, the code reverts 
+to setting all components of the initial trial solution to {\tt Uval0}
+for the next mesh.
+
+\item{\tt Nmsh - } Integer, optional input and output.  
+If the parameter {\tt Givmsh}
+is {\tt .true.}, the user must set {\tt Nmsh} to the positive initial
+number of mesh points (including the two endpoints).
+If {\tt Givmsh} is {\tt .false.}, the user need not set {\tt Nmsh}.
+If {\tt Givmsh} is {\tt .false.}, the initial value of {\tt Nmsh} is set 
+to the greater of {\tt Nfxpnt}+2  and {\tt Nminit}, an integer in
+the labeled common area {\tt Algprs} (the default value of 
+{\tt Nminit} is set in a block data routine to 7).
+To specify another initial value for {\tt Nmsh} without specifying the
+initial mesh points, the user can include the labeled common 
+{\tt Algprs} in the calling routine and set {\tt Nminit} to the desired 
+value.
+
+On output, {\tt Nmsh} contains the final number of mesh points.
+
+\item{\tt Xx - }  Floating-point array, of size {\tt Nmax} (see below; 
+{\tt Nmax} cannot exceed {\tt Nucol}), optional input and output.  
+When {\tt Givmsh} is {\tt .false.}, the initial mesh {\tt Xx}
+is defined as follows.
+If ${\tt Nfxpnt} = 0$, the initial mesh contains {\tt Nmsh} points equally
+spaced in $[{\tt Aleft}, {\tt Aright}]$.  If ${\tt Nfxpnt} > 0$, the 
+initial mesh contains (if possible) a total of {\tt Nmsh} points.  These points
+are equally spaced in each subinterval $[{\tt Aleft}, {\tt Fixpnt}(1)]$, 
+$[{\tt Fixpnt}(1), {\tt Fixpnt}(2)]$, \dots, 
+$[{\tt Fixpnt}({\tt Nfxpnt}), {\tt Aright}]$.
+
+If {\tt Givmsh} is {\tt .true.}, the user must define the {\tt Xx} array
+on input as an initial mesh of strictly increasing values,
+with ${\tt Xx}(1) = {\tt Aleft}$ and ${\tt Xx}({\tt Nmsh}) = {\tt Aright}$.  
+If ${\tt Nfxpnt} > 0$
+and the user sets the initial mesh, the desired fixed points
+{\em must} be included in the {\tt Xx} array, since the code performs
+no tests to check for their inclusion!
+If {\tt Givmsh} is {\tt .false.}, {\tt Nmsh} is set to the maximum 
+of {\tt Nfxpnt}+2
+and {\tt Nminit} as defined in the labeled common area {\tt Algprs}. 
+ 
+On output, {\tt Xx} contains the final array of {\tt Nmsh} mesh points.
+
+\item{\tt Nudim - }  Integer, input.  {\tt Nudim} is the declared row 
+dimension of the array {\tt U}.  {\tt Nudim} must be greater than 
+or equal to {\tt Ncomp}.
+
+\item{\tt U - }  Floating-point array, of declared size 
+{\tt (Nudim, Nucol)}, and
+of conceptual size {\tt (Ncomp, Nmsh)}, where {\tt Ncomp} is the number
+of components and {\tt Nmsh} is the number of mesh points.
+The {\tt U} array is an optional input parameter, and an output parameter.
+If {\tt Giveu} (see above) is {\tt .false.}, the {\tt U}
+array need not be set by the
+user.  
+
+If {\tt Giveu} is {\tt .true.}, the user must provide an initial
+array ${\tt U}(i,j)$, $i=1,\dots {\tt Ncomp}$ and
+$j = 1, \dots {\tt Nmsh}$, corresponding to the
+desired initial trial solution, where {\tt Nmsh} is the user-specified
+number of initial mesh points.  In this case, ${\tt U}(*,1)$ corresponds 
+to the estimated solution at {\tt Aleft}, and ${\tt U}(*, {\tt Nmsh})$ 
+corresponds to the estimated solution at {\tt Aright}.
+
+\item{\tt Nmax - }  Integer, output.  {\tt Nmax} is the maximum number of mesh 
+points possible with the given values of {\tt Ncomp}, {\tt Ntol}, 
+{\tt Lwrkfl} (size of floating-point workspace),
+{\tt Lwrkin} (size of integer workspace) and {\tt Nucol}.   
+(See below for the descriptions 
+of {\tt Lwrkfl} and {\tt Lwrkin}.)  {\tt Nmax} can be no larger than 
+the input parameter {\tt Nucol}.
+When the value of {\tt Lwrkfl} is much greater than ${\tt Ncomp*Ncomp}$, 
+the maximum 
+number of mesh points allowed by the floating-point workspace limit is 
+\[
+{{{\tt Lwrkfl} - 14({\tt Ncomp*Ncomp}) -2{\tt Ntol} - 13{\tt Ncomp}} \over
+4({\tt Ncomp*Ncomp}) + 10{\tt Ncomp}  + 5 + {\tt Iden}}
+\]
+where, for linear problems, ${\tt Iden} = 0$ and, for nonlinear problems, 
+${\tt Iden} = {\tt Ncomp}$. When {\tt Lwrkin} is much greater than {\tt Ncomp}, 
+the maximum number of mesh points allowed by the integer workspace limit is
+$({\tt Lwrkin} - {\tt 3Ncomp})/({\tt Ncomp} + 2)$.
+
+The value of {\tt Nmax} is calculated in {\tt ACDC}, and is not allowed 
+to exceed {\tt Nucol}.  The user can determine the exact maximum 
+number of mesh points corresponding to specified values of {\tt Ncomp}, 
+{\tt Lwrkfl} and {\tt Lwrkin} by calling {\tt ACDC} with 
+${\tt Nucol} = 1$ and the parameter {\tt Iprint} set to $1$; see below 
+for a discussion of {\tt Iprint}. 
+
+\item{\tt Lwrkfl - }  Integer, input.  The size of the user-provided 
+floating-point workspace array {\tt Wrk}.
+
+\item{\tt Wrk - }  Floating-point array of size {\tt Lwrkfl}, input.  
+User-provided floating-point workspace, used to store intermediate 
+values.
+
+\item{\tt Lwrkin - }  Integer, input.  The size of the user-provided integer
+workspace array {\tt Iwrk}.
+
+\item{\tt Iwrk - }  Integer array of size {\tt Lwrkin}, input.  User-provided 
+integer workspace, used to store intermediate values.
+
+\item{\tt Giveps - }  Logical, input.  Indicates whether the initial value
+of {\tt Eps} (see below) is provided by the user. If {\tt Giveps} is {\tt .true.}, 
+the user must specify the initial {\tt Eps} value.
+
+\item{\tt Eps - }  Floating-point, optional input and output.  
+The initial value of the continuation parameter. The user must define {\tt Eps} 
+if {\tt Giveps} is {\tt .true.} (if {\tt Giveps} is {\tt .false.},
+{\tt Eps} takes the default starting value of ${\tt Eps} = 0.5$). For many 
+singular perturbation type problems, the choice of $ 0.1 < {\tt Eps} < 1 $ 
+represents a (fairly) easy problem. The user should attempt to specify an 
+initial problem that is not `too' challenging. The code assumes that 
+${\tt Eps} = 1$ represents an `easy' problem. If {\tt Giveps} is {\tt .true.}
+then {\tt Eps} must be initialised strictly less than one and greater then zero.
+
+On output, {\tt Eps} contains the value used when solving the final continuation
+problem.
+
+\item{\tt Epsmin - }  Floating-point, input.  
+The final value of {\tt Eps} for which the user would like to solve the
+problem. {\tt Epsmin} must be less than or equal to {\tt Eps}.
+
+\item{\tt Fsub - }  Name of user-provided subroutine.  {\tt Fsub}
+{\em must} be declared
+{\tt External} in the calling routine.  {\tt Fsub} defines the function
+{\bf f} in the formulation (\ref{eqn-prob1}) of the system of 
+first-order differential  equations.
+{\tt Fsub} must have the following declaration:
+\begin{description}
+\item{$\null$} {\tt Subroutine Fsub(Ncomp, X, U, F, Eps)}
+\item{$\null$} {\tt Ncomp} (input to {\tt Fsub})
+is the number of components of {\tt U};
+\item{$\null$} {\tt X} (input to {\tt Fsub}) is a floating-point scalar;
+\item{$\null$} {\tt U} (input to {\tt Fsub}) is a floating-point array 
+of size {\tt Ncomp};
+\item{$\null$} {\tt F} (output from {\tt Fsub}) is a floating-point array 
+of dimension {\tt Ncomp}. On exit from {\tt Fsub}, the array 
+{\tt F} must contain the {\tt Ncomp}-dimensional vector {\tt F}
+whose $i$th component
+is the value of the $i$th component of the vector {\bf f} of (\ref{eqn-prob1})
+evaluated at {\tt X}, {\tt U} and {\tt Eps};
+\item{$\null$} {\tt Eps} (input to {\tt Fsub}) is a floating-point scalar.
+\end{description}
+
+
+\item{\tt Dfsub - }  Name of user-provided subroutine.  {\tt Dfsub}
+{\em must} be 
+declared {\tt External} in the calling routine.  {\tt Dfsub} calculates
+the Jacobian matrix of {\tt F} as defined by the subroutine {\tt Fsub}.  
+{\tt Dfsub} must have the following declaration:
+\begin{description}
+\item{$\null$} {\tt Subroutine Dfsub(Ncomp, X, U, Df, Eps)}
+\item{$\null$} {\tt Ncomp} (input to {\tt Dfsub}) is the number of 
+components of {\tt U}; 
+\item{$\null$} {\tt X} (input to {\tt Dfsub}) is a floating-point scalar;
+\item{$\null$} {\tt U} (input to {\tt Dfsub}) is a floating-point 
+array of dimension {\tt Ncomp};
+\item{$\null$} {\tt Df} (output from {\tt Dfsub}) is an 
+{\tt Ncomp} by {\tt Ncomp} floating-point
+array whose declared row dimension in the routine {\tt Dfsub}
+must be {\tt Ncomp}.  On exit from {\tt Dfsub}, the 
+array {\tt Df} must contain the {\tt Ncomp} by {\tt Ncomp} Jacobian matrix
+of {\bf f} from (\ref{eqn-prob1}) ({\tt F} of {\tt Fsub})
+with respect to {\bf u}, namely ${\tt Df}(i,j)$ is the partial derivative
+of the $i$th function $f_i$ with respect to the $j$th component 
+of {\bf u};
+\item{$\null$} {\tt Eps} (input to {\tt Fsub}) is a floating-point scalar.
+\end{description}
+
+\item{\tt Gsub - }  Name of user-provided subroutine.  {\tt Gsub}
+{\em must} be declared {\tt External} in the calling routine.  
+{\tt Gsub} is called {\tt Ncomp} times
+each time the boundary conditions are calculated;
+the $i$th call to {\tt Gsub} defines the $i$th function
+($g_{1,i}(\cdot)$ or $g_{2,i}(\cdot)$) in the boundary conditions 
+of (\ref{eqn-prob1}). {\tt Gsub} must have the following declaration:
+\begin{description}
+\item{$\null$} {\tt Subroutine Gsub(I, Ncomp, U, G, Eps)}
+\item{$\null$} {\tt I} (input to {\tt Gsub}) is an integer 
+ranging from 1 to {\tt Ncomp};
+\item{$\null$} {\tt Ncomp} (input to {\tt Gsub}) is the 
+number of components of {\tt U};
+\item{$\null$} {\tt U} (input to {\tt Gsub}) is a floating-point 
+array of dimension {\tt Ncomp};
+\item{$\null$} {\tt G} (output from {\tt Gsub}) is a floating-point scalar.  
+On exit from the $i$th call to {\tt Gsub}, the value of {\tt G} must
+contain the value of the function $g_{1,i}$ (if $i \leq p$) or 
+$g_{2,i}$ (if $i > p$) from (\ref{eqn-prob1})
+that defines the $i$th boundary condition evaluated at {\bf u};
+\item{$\null$} {\tt Eps} (input to {\tt Fsub}) is a floating-point scalar.
+\end{description}
+
+\item{\tt Dgsub - }  Name of user-provided subroutine.  {\tt Dgsub} 
+{\em must} be declared {\tt External} in the calling routine.  
+{\tt Dgsub} calculates the Jacobian matrices corresponding to the functions
+$g_{1,i}$, $g_{2,i}$ of (\ref{eqn-prob1}) and {\tt Gsub} that define the 
+boundary conditions. {\tt Dgsub} must have the following declaration:
+\begin{description}
+\item{$\null$} {\tt Subroutine Dgsub(I, Ncomp, U, Dg, Eps)}
+\item{$\null$} {\tt I} (input to {\tt Dgsub}) is an integer ranging from 
+1 to {\tt Ncomp};
+\item{$\null$} {\tt Ncomp} (input to {\tt Dgsub}) is the number 
+of components of {\tt U};
+\item{$\null$} {\tt U} (input to {\tt Dgsub}) is a floating-point 
+array of dimension {\tt Ncomp};
+\item{$\null$} {\tt Dg} (output from {\tt Dgsub}) is a floating-point 
+array of dimension {\tt Ncomp}.  
+On exit from the $i$th call of {\tt Dgsub}, the 
+vector {\tt Dg} must contain the {\tt Ncomp} partial derivatives of the
+$i$th function, $g_{1,i}$ or $g_{2,i}$, of (\ref{eqn-prob1}) with respect 
+to {\bf u};
+\item{$\null$} {\tt Eps} (input to {\tt Fsub}) is a floating-point scalar.
+\end{description}
+
+\item{\tt Iflbvp - }  Integer, output.  {\tt Iflbvp} indicates the result of
+{\tt ACDC}.  If the routine has terminated with apparent success,
+${\tt Iflbvp} = 0$.  If one of the input parameters is invalid,
+${\tt Iflbvp} = -1$.  If the number of mesh points needed for the
+next iteration would exceed {\tt Nmax}, then ${\tt Iflbvp} = 1$.
+
+\end{description}
+
+\section{Related parameters}\label{rel-par}
+
+Some other parameters that may be of interest to the user, but do
+not occur in the
+formal declaration of {\tt ACDC}, are stored in the labeled common
+area {\tt Algprs}, whose declaration is
+\begin{verbatim}
+      Common/Algprs/ Nminit, Iprint, Maxcon, Itsaim, Uval0
+\end{verbatim}
+Any of the parameters in {\tt Algprs} may be changed by the user
+by including this labeled common area in the calling routine
+and setting the value as desired.
+
+The value of the integer {\tt Nminit} is discussed above under the
+formal parameter {\tt Nmsh}.  {\tt Nminit}
+specifies the default initial number of mesh points, and, if not
+altered, is set to $7$.
+
+{\tt Iprint} is an integer variable controlling the amount of
+non-debug printout.  Its default value is zero, which means that
+some intermediate printing occurs (details of continuation steps,
+number of Newton iterations, size of mesh). If {\tt Iprint} is set to $1$, 
+more printing occurs.  If {\tt Iprint} is set to $-1$, no printing at 
+all occurs in {\tt ACDC}.  Values of {\tt Iprint} other than $0$, $1$ 
+and $-1$ are invalid.
+
+{\tt Maxcon} is an integer variable which indicates the maximum number of
+continuation steps to be taken when attempting to solve a particular problem.
+The default value is ${\tt Maxcon} = 50$.
+
+{\tt Itsaim} is an integer variable, used only for nonlinear problems.
+The continuation steps are chosen with the aim that the number of 
+Newton iterations required for convergence on the first mesh, for each 
+continuation problem, is less than or equal to {\tt Itsaim} (see 
+\cite{CaMoWr2} for more details). The default value is ${\tt Itsaim} = 7$.
+The user should note that small values of {\tt Itsaim} (e.g. ${\tt Itsaim} = 1,2$) 
+may restrict the size of the continuation steps significantly.
+
+{\tt Uval0} is a floating-point value that defines the initial
+value of the trial solution when {\tt Giveu} is {\tt .false.}, or in some
+instances when an intermediate Newton process fails.  Unless changed
+by the user, the default value of {\tt Uval0} is zero.  The user may 
+wish to change {\tt Uval0} if ${\bf u}={\bf 0}$ is inappropriate for some
+reason---for example, the function {\bf f} in (\ref{eqn-prob1})
+is undefined for ${\bf u}={\bf 0}$.
+
+The user should also look at the routine {\tt D1mach} (which is provided
+automatically via netlib). The variables specified in this routine 
+describe machine precision and may need to be changed depending on
+which machine is being used.
+
+\section{Sample problems}
+
+\subsection{Mathematical formulation}
+We consider two second-order boundary value problems, one linear and
+one nonlinear, parameterized in terms of $\epsilon$. The linear problem
+is
+\begin{equation}
+\label{eqn-samprob}
+\begin{array}{c}
+\epsilon y'' - y  = -(\epsilon \pi^2 + 1) \cos(\pi x), \;\;\;\;\; -1 \leq x \leq 1, \\
+y(-1) = 0, \;\;\; y(1) = 0. 
+\end{array}
+\end{equation}
+As $\epsilon$ decreases toward zero, (\ref{eqn-samprob}) becomes increasingly difficult 
+to solve numerically as boundary layers develop at $x=-1$ and $x=1$.
+In order to apply {\ACDC} to (\ref{eqn-samprob}), it must be converted to a system 
+of two first-order equations: for example 
+\begin{eqnarray}
+\label{eqn-newprob}
+\begin{array}{rcl}
+u'_1 & = & u_2, \\
+u'_2 & = & (u_1 -(\epsilon \pi^2 + 1) \cos(\pi x))/ \epsilon,
+\end{array} & & \;\;\;  u_1(-1) = u_1(1) = 0.
+\end{eqnarray}
+The nonlinear problem is the Lagerstrom-Cole model problem \cite{Co}
+\begin{equation}
+\label{eqn-samprob1}
+\begin{array}{c}
+\epsilon y'' + yy' - y = 0, \;\;\;\;\; 0 \leq x \leq 1, \\
+y(0) = 1, \;\;\; y(1) = -1/3. 
+\end{array}
+\end{equation}
+As $\epsilon$ decreases toward zero, the solution of (\ref{eqn-samprob1}) develops 
+boundary layers at $x=0$ and $x=1$. Problem (\ref{eqn-samprob1}) can be converted to
+first-order form as follows
+\begin{eqnarray}
+\label{eqn-newprob1}
+\begin{array}{rcl}
+u'_1 & = & u_2, \\
+u'_2 & = & (u_1 - u_1 u_2)/ \epsilon,
+\end{array} & & \;\;\;  u_1(0) = 1, \;\;\; u_1(1) = -1/3.
+\end{eqnarray}
+Suppose now that we wish to solve problems (\ref{eqn-newprob}) and 
+(\ref{eqn-newprob1}) with $\epsilon = 10^{-7}$, and to achieve
+an accuracy of approximately $10^{-8}$ in the value of $u_1$ and
+an accuracy of $10^{-4}$ in the value of $u_2$. We will not provide
+an initial mesh nor an initial guess for the solution.  The problems 
+are to be solved on a machine with IEEE arithmetic, and double precision 
+is used (approximately 16 decimal digits).
+
+\subsection{Sample FORTRAN routines}
+
+The following {\small FORTRAN} 77 main program calls {\tt ACDC} with the 
+user-specified parameters given above. The subroutines {\tt Fsub},
+{\tt Dfsub}, {\tt Gsub} and {\tt Dgsub} define the functions {\bf f}
+and the boundary conditions ${\bf g}_1$ and ${\bf g}_2$ for problems
+(\ref{eqn-newprob}) and (\ref{eqn-newprob1}).
+{\small
+\begin{verbatim}
+      Program Runacdc
+      Implicit Double Precision(A-H,O-Z)
+      Parameter(Lwrkfl = 500000)
+      Parameter(Lwrkin = 50000)
+      Dimension Wrk(Lwrkfl),Iwrk(Lwrkin)
+      Dimension U(2,12200),Tol(2),Ltol(2),Xx(12200),Fixpnt(1)
+      Logical Linear, Giveu, Givmsh, Giveps
+      External Fsub, Dfsub, Gsub, Dgsub
+      Common /Prob/ Linnon
+      Common /Valpi/ Pi
+
+      Pi = 4.0d0*Atan(1.0d0)
+
+C.... *****************************************************************
+C.... This Driver Is Set Up To Run Two Problems, One Linear And One
+C.... Nonlinear.
+
+C.... The Linear Test Problem (Which Has Boundary Layers At X = -1
+C.... And At X = 1) Is 
+
+C.... Eps*Y'' - Y = -(Eps*Pi*Pi + 1)*Cos(Pi*X),   Y(-1) = Y(1) = 0.
+
+C.... The Nonlinear Test Problem (Which Has Boundary Layers At X = 0
+C.... And At X = 1) Is 
+
+C.... Eps*Y'' + Y*Y' - Y = 0,   Y(0) = 1, Y(1) = -1/3.
+
+C.... Acdc Solves First Order Systems Of Differential Equations, Thus
+C.... Both Problems Are Converted To First Order Form In Subroutine
+C.... Fsub Below.
+C.... *****************************************************************
+
+C.... Specify The Number of Components And The Desired Final Eps Value.
+
+      Ncomp = 2
+      Epsmin = 1.d-7
+
+C.... Ntol Is The Number Of Tolerances
+
+      Ntol = 2
+      Tol(1) = 1.d-8
+      Tol(2) = 1.d-4
+      Ltol(1) = 1
+      Ltol(2) = 2
+
+C.... The User May Choose A Linear Or Nonlinear Test Problem 
+C.... (0 = Linear, 1 = Nonlinear).
+
+ 10   Write(*,1000) 
+      Read*, Linnon
+
+C.... Specify The Boundary Points
+
+      If (Linnon .eq. 1) Then
+        Aleft = 0.d0
+        Aright = 1.0d0
+      Else If (Linnon .eq. 0) Then
+        Aleft = -1.0d0
+        Aright = 1.0d0
+      Else
+         Write(*,2000)
+         Goto 10
+      Endif
+
+      If (Linnon .eq. 1) Then
+         Linear = .false.
+      Else
+         Linear = .true.
+      Endif
+
+      Nudim = 2
+      Nlbc = 1
+      Nfxpnt = 0
+      Nucol = 12200
+      Nmsh = 0
+
+      Giveu = .false.
+      Givmsh = .false.
+      Giveps = .false.
+
+      Call Acdc(Ncomp, Nlbc, Nucol, Aleft, Aright, Nfxpnt, Fixpnt,
+     +            Ntol, Ltol, Tol, Linear, Givmsh, Giveu, Nmsh, Xx,
+     +            Nudim, U, Nmax, Lwrkfl, Wrk, Lwrkin, Iwrk, Giveps,
+     +            Eps, Epsmin, Fsub, Dfsub, Gsub, Dgsub, Iflbvp)
+
+C-----------------------------------------------------------------------
+ 1000 Format(//,'Choose A Test Problem (0 = Linear, 1 = Nonlinear).')
+ 2000 Format(/, '** Only 0 or 1 is allowed.')
+C-----------------------------------------------------------------------
+      End
+
+      Subroutine Fsub(Ncomp,X,Z,F,Eps)
+      Implicit Double Precision(A-H,O-Z)
+      Dimension Z(*),F(*)
+      Common /Prob/ Linnon
+      Common /Valpi/ Pi
+
+      If (Linnon .eq. 0) Then
+         Pix = Pi*X
+         F(1) = Z(2)
+         F(2) = (Z(1)-Eps*Pi*Pi*Cos(Pix)-Cos(Pix))/Eps
+      Else
+         F(1) = Z(2)
+         F(2) = (Z(1)*(1.d0-Z(2)))/Eps
+      Endif
+
+      Return
+      End 
+
+      Subroutine Dfsub(Ncomp,X,Z,Df,Eps)
+      Implicit Double Precision(A-H,O-Z)
+      Dimension Z(*),Df(Ncomp,*)
+      Common /Prob/ Linnon
+
+      If (Linnon .eq. 0) Then
+         Df(1,1) = 0.d0
+         Df(1,2) = 1.0d0
+         Df(2,1) = 1.0d0/Eps
+         Df(2,2) = 0.0d0
+      Else 
+         Df(1,1) = 0.d0
+         Df(1,2) = 1.0d0
+         Df(2,1) = (1.d0-Z(2))/Eps
+         Df(2,2) = -Z(1)/Eps
+      Endif
+
+      Return
+      End 
+
+      Subroutine Gsub(I,Ncomp,Z,G,Eps)
+      Implicit Double Precision(A-H,O-Z)
+      Dimension Z(*)
+      Common /Prob/ Linnon
+
+      If (Linnon .eq. 0) Then
+         G = Z(1)
+      Else 
+         If (I .eq. 1) G = Z(1)-1.d0
+         If (I .eq. 2) G = Z(1)+1.d0/3.d0
+      Endif
+
+      Return 
+      End 
+
+      Subroutine Dgsub(I,Ncomp,Z,Dg,Eps)
+      Implicit Double Precision(A-H,O-Z)
+      Dimension Z(*),Dg(*)
+
+      Dg(1) = 1.d0
+      Dg(2) = 0.d0
+
+      Return
+      End 
+\end{verbatim} }
+
+\subsection{Sample output}
+The complete output produced by running the linear example on a Pentium
+with 100 MHz clock speed, under Linux, with binary IEEE arithmetic, is
+given next.
+{\small
+\begin{verbatim}
+ The Number Of (Linear) Differential Equations Is   2
+ Left Boundary Point = -0.1000E+01, Right Boundary Point =  0.1000E+01
+ Components Of U Requiring Tolerances -        1         2
+ Corresponding Error Tolerances -        0.10E-07  0.10E-03
+ The Initial Value Of Epsilon Is  0.0000E+00
+ The Desired Final Value Of Epsilon Is  0.1000E-06
+
+ **********************************************************************************
+ Continuation Step  1, Epsilon = .5000E+00
+ **********************************************************************************
+ The New Mesh Contains     7 Points.
+ The New Mesh Contains    19 Points.
+
+ **********************************************************************************
+ Continuation Step  2, Epsilon = .1172E+00
+ **********************************************************************************
+ The New Mesh Contains    19 Points.
+ The New Mesh Contains    29 Points.
+
+ **********************************************************************************
+ Continuation Step  3, Epsilon = .1156E-01
+ **********************************************************************************
+ The New Mesh Contains    29 Points.
+ The New Mesh Contains    47 Points.
+
+ **********************************************************************************
+ Continuation Step  4, Epsilon = .4674E-03
+ **********************************************************************************
+ The New Mesh Contains    49 Points.
+ The New Mesh Contains    97 Points.
+
+ **********************************************************************************
+ Continuation Step  5, Epsilon = .6238E-05
+ **********************************************************************************
+ The New Mesh Contains    99 Points.
+ The New Mesh Contains   163 Points.
+
+ **********************************************************************************
+ Continuation Step  6, Epsilon = .1000E-06
+ **********************************************************************************
+ The New Mesh Contains   170 Points.
+ The New Mesh Contains   265 Points.
+
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+ Tolerances Satisfied For Final Problem Epsilon = .1000E-06
+
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+ The Final Mesh And Solution Components Are:
+
+     I          X(I)               U( 1)              U( 2)
+
+     1    -0.10000000E+01     0.00000000E+00    -0.31622777E+04
+     9    -0.99938272E+00    -0.85801161E+00    -0.44899467E+03
+    17    -0.99830247E+00    -0.99532263E+00    -0.14729424E+02
+    25    -0.99598765E+00    -0.99991747E+00     0.29835583E-01
+    33    -0.98148148E+00    -0.99830816E+00     0.18266737E+00
+    41    -0.94444444E+00    -0.98480775E+00     0.54553184E+00
+    49    -0.88194444E+00    -0.93200787E+00     0.11386329E+01
+    57    -0.82638889E+00    -0.85491187E+00     0.16297730E+01
+    65    -0.74074074E+00    -0.68624164E+00     0.22851119E+01
+    73    -0.66666667E+00    -0.50000000E+00     0.27206973E+01
+    81    -0.55555556E+00    -0.17364818E+00     0.30938655E+01
+    89    -0.44444444E+00     0.17364818E+00     0.30938655E+01
+    97    -0.33333333E+00     0.50000000E+00     0.27206994E+01
+   105    -0.25000000E+00     0.70710678E+00     0.22214416E+01
+   113    -0.19444444E+00     0.81915204E+00     0.18019435E+01
+   121    -0.12962963E+00     0.91821611E+00     0.12443210E+01
+   129    -0.55555556E-01     0.98480776E+00     0.54553370E+00
+   137     0.55555556E-01     0.98480776E+00    -0.54553370E+00
+   145     0.12962963E+00     0.91821611E+00    -0.12443210E+01
+   153     0.19444444E+00     0.81915204E+00    -0.18019435E+01
+   161     0.25000000E+00     0.70710678E+00    -0.22214416E+01
+   169     0.33333333E+00     0.50000000E+00    -0.27206994E+01
+   177     0.44444444E+00     0.17364818E+00    -0.30938655E+01
+   185     0.55555556E+00    -0.17364818E+00    -0.30938655E+01
+   193     0.66666667E+00    -0.50000000E+00    -0.27206973E+01
+   201     0.74074074E+00    -0.68624164E+00    -0.22851119E+01
+   209     0.82638889E+00    -0.85491187E+00    -0.16297730E+01
+   217     0.88194444E+00    -0.93200787E+00    -0.11386329E+01
+   225     0.94444444E+00    -0.98480775E+00    -0.54553184E+00
+   233     0.98148148E+00    -0.99830816E+00    -0.18266737E+00
+   241     0.99598765E+00    -0.99991747E+00    -0.29835583E-01
+   249     0.99830247E+00    -0.99532263E+00     0.14729424E+02
+   257     0.99938272E+00    -0.85801161E+00     0.44899467E+03
+   265     0.10000000E+01    -0.11102230E-15     0.31622777E+04
+
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+\end{verbatim}}
+
+\noindent Finally, the complete output produced by running the nonlinear example
+is given next.
+{\small
+\begin{verbatim}
+ The Number Of (Nonlinear) Differential Equations Is   2
+ Left Boundary Point =  0.0000E+00, Right Boundary Point =  0.1000E+01
+ Components Of U Requiring Tolerances -        1         2
+ Corresponding Error Tolerances -        0.10E-07  0.10E-03
+ The Initial Value Of Epsilon Is  0.0000E+00
+ The Desired Final Value Of Epsilon Is  0.1000E-06
+
+ **********************************************************************************
+ Continuation Step  1, Epsilon = .5000E+00
+ **********************************************************************************
+ The New Mesh Contains     7 Points.
+ Newton Converged After  4 Iterations.
+ The New Mesh Contains    14 Points.
+ Newton Converged After  2 Iterations.
+
+ **********************************************************************************
+ Continuation Step  2, Epsilon = .1088E+00
+ **********************************************************************************
+ The New Mesh Contains    14 Points.
+ Newton Converged After  4 Iterations.
+ The New Mesh Contains    25 Points.
+ Newton Converged After  2 Iterations.
+
+ **********************************************************************************
+ Continuation Step  3, Epsilon = .1454E-01
+ **********************************************************************************
+ The New Mesh Contains    25 Points.
+ Newton Converged After  5 Iterations.
+ The New Mesh Contains    45 Points.
+ Newton Converged After  3 Iterations.
+
+ **********************************************************************************
+ Continuation Step  4, Epsilon = .1512E-02
+ **********************************************************************************
+ The New Mesh Contains    52 Points.
+ Newton Converged After  5 Iterations.
+ The New Mesh Contains    93 Points.
+ Newton Converged After  3 Iterations.
+
+ **********************************************************************************
+ Continuation Step  5, Epsilon = .6297E-04
+ **********************************************************************************
+ The New Mesh Contains    97 Points.
+ Newton Converged After  7 Iterations.
+ The New Mesh Contains   137 Points.
+ Newton Converged After  4 Iterations.
+
+ **********************************************************************************
+ Continuation Step  6, Epsilon = .4135E-05
+ **********************************************************************************
+ The New Mesh Contains   136 Points.
+ Newton Converged After  7 Iterations.
+ The New Mesh Contains   148 Points.
+ Newton Converged After  4 Iterations.
+
+ **********************************************************************************
+ Continuation Step  7, Epsilon = .2242E-06
+ **********************************************************************************
+ The New Mesh Contains   144 Points.
+ Newton Converged After  8 Iterations.
+ The New Mesh Contains   160 Points.
+ Newton Converged After  4 Iterations.
+
+ **********************************************************************************
+ Continuation Step  8, Epsilon = .1000E-06
+ **********************************************************************************
+ The New Mesh Contains   155 Points.
+ Newton Converged After  5 Iterations.
+ The New Mesh Contains   155 Points.
+ Newton Converged After  2 Iterations.
+
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+ Tolerances Satisfied For Final Problem Epsilon = .1000E-06
+
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+ The Final Mesh And Solution Components Are:
+
+     I          X(I)               U( 1)              U( 2)
+
+     1     0.00000000E+00     0.10000000E+01    -0.50000154E+07
+     6     0.89306127E-07     0.69130828E+00    -0.23895503E+07
+    11     0.23814967E-06     0.45646312E+00    -0.10418068E+07
+    16     0.53583676E-06     0.27179618E+00    -0.36937865E+06
+    21     0.10716735E-05     0.15726784E+00    -0.12367760E+06
+    26     0.21433471E-05     0.85339290E-01    -0.36424475E+05
+    31     0.35722451E-05     0.53005979E-01    -0.14057720E+05
+    36     0.58942044E-05     0.32799257E-01    -0.53875483E+04
+    41     0.96450617E-05     0.20287509E-01    -0.20655486E+04
+    46     0.17361111E-04     0.11346948E-01    -0.65024502E+03
+    51     0.32150206E-04     0.61182743E-02    -0.19243132E+03
+    56     0.64300412E-04     0.30018785E-02    -0.48967751E+02
+    61     0.13503086E-03     0.13337598E-02    -0.11413349E+02
+    66     0.38580247E-03     0.32177274E-03    -0.13882489E+01
+    71     0.96450617E-03     0.39815739E-04    -0.13124727E+00
+    76     0.23148148E-02     0.53445190E-06    -0.16910396E-02
+    81     0.12345679E-01     0.20663484E-10     0.70571492E-07
+    86     0.97916667E+00     0.11100243E-10     0.14394748E-06
+    91     0.99727183E+00    -0.14439046E-06    -0.45667229E-03
+    96     0.99872449E+00    -0.14488910E-04    -0.46520377E-01
+   101     0.99955357E+00    -0.24946212E-03    -0.10085896E+01
+   106     0.99982639E+00    -0.98683605E-03    -0.69413046E+01
+   111     0.99992560E+00    -0.25587118E-02    -0.36355512E+02
+   116     0.99996280E+00    -0.52196620E-02    -0.14118146E+03
+   121     0.99998140E+00    -0.10371396E-01    -0.54413033E+03
+   126     0.99998863E+00    -0.16680517E-01    -0.13984420E+04
+   131     0.99999339E+00    -0.27703369E-01    -0.38456383E+04
+   136     0.99999656E+00    -0.49434327E-01    -0.12228175E+05
+   141     0.99999816E+00    -0.82054068E-01    -0.33674775E+05
+   146     0.99999920E+00    -0.14246979E+00    -0.10149974E+06
+   151     0.99999977E+00    -0.24106495E+00    -0.29057413E+06
+   155     0.10000000E+01    -0.33333333E+00    -0.55556878E+06
+
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+\end{verbatim}}
+
+\begin{thebibliography}{99}
+
+\bibitem{AMR}
+ U.\ Ascher, R.\ M.\ M.\ Mattheij, and R.\ D.\ Russell,
+{\it Numerical Solution of Boundary Value Problems for Ordinary
+Differential Equations},
+Prentice-Hall, Englewood Cliffs, NJ, 1988.
+
+\bibitem{AsRu}
+U.\ Ascher and R.\ D.\ Russell (1981),
+Reformulation of boundary value problems into `standard' form,
+{\sl SIAM Review}\ 23, 238-254.
+
+\bibitem{CW2}
+J.\ R.\ Cash and M.\ H.\ Wright (1991),
+A deferred correction method for nonlinear two-point boundary
+value problems: Implementation and numerical evaluation,
+{\sl SIAM J.\ Sci.\ Stat.\ Comput.}\ 12, 971--989.
+
+\bibitem{CaWr}
+J.\ R.\ Cash and M.\ H.\ Wright (1995),
+{\sl The code {\rm twpbvp.f} under the directory ode of netlib. The code can be 
+down-loaded from} {\tt http://www.netlib.no/netlib/ode/}.
+
+\bibitem{CaMoWr1}
+J.\ R.\ Cash, G.\ Moore and R.\ W.\  Wright (1995),
+An automatic continuation strategy for the solution of singularly perturbed
+linear two-point boundary value problems,
+{\sl J.\ Comp.\ Phys.}\ 122, 266--279.
+
+\bibitem{CaMoWr2}
+J.\ R.\ Cash, G.\ Moore and R.\ W.\  Wright (1996),
+An automatic continuation strategy for the solution of singularly perturbed
+nonlinear two-point boundary value problems,
+{\sl To appear}
+
+\bibitem{Co}
+J.\ D. Cole,
+{\it Perturbation Methods in Applied Mathematics},
+Blaisdell, Waltham, MA, 1968.
+
+\bibitem{Si}
+H.\ H.\ M.\ Silva,
+{\it Iterated Deferred Correction Schemes for the Numerical Solution of 
+Two-Point Boundary Value Problems.}
+PhD thesis, Imperial College, London, 1994.
+
+\end{thebibliography}
+
+\end{document}

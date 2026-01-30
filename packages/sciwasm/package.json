@@ -17,41 +17,42 @@
         "default": "./dist/sciwasm.cjs"
       }
     },
-    "./wasm/sciwasm.wasm": "./dist/wasm/sciwasm.wasm",
-    "./wasm/superlu.wasm": "./dist/wasm/superlu.wasm",
-    "./wasm/arpack.wasm": "./dist/wasm/arpack.wasm",
-    "./wasm/quadpack.wasm": "./dist/wasm/quadpack.wasm",
-    "./wasm/linpack.wasm": "./dist/wasm/linpack.wasm",
-    "./superlu": {
-      "import": {
-        "types": "./dist/superlu-loader.d.ts",
-        "default": "./dist/superlu-loader.mjs"
-      },
-      "require": {
-        "types": "./dist/superlu-loader.d.ts",
-        "default": "./dist/superlu-loader.cjs"
-      }
-    }
+    "./wasm/sciwasm.wasm": "./dist/wasm/sciwasm.wasm"
   },
   "scripts": {
     "build:wasm": "./scripts/build-wasm.sh",
-    "build:superlu": "./scripts/build-superlu.sh",
-    "build:arpack": "./scripts/build-arpack.sh",
-    "build:quadpack": "./scripts/build-quadpack.sh",
-    "build:linpack": "./scripts/build-linpack.sh",
-    "build:wasm-all": "pnpm run build:wasm && pnpm run build:superlu && pnpm run build:arpack && pnpm run build:quadpack && pnpm run build:linpack",
     "build:lib": "vite build",
-    "build": "pnpm run build:wasm-all && pnpm run build:lib",
+    "build": "pnpm run build:wasm && pnpm run build:lib",
     "test": "vitest run",
     "clean": "rm -rf dist/",
     "docs": "typedoc",
     "lint": "eslint src tests --ext .ts"
   },
   "peerDependencies": {
-    "numwasm": ">=0.1.0"
+    "numwasm": ">=0.1.0",
+    "lawasm": ">=0.1.0",
+    "arwasm": ">=0.1.0",
+    "linwasm": ">=0.1.0",
+    "quadwasm": ">=0.1.0",
+    "superluwasm": ">=0.1.0",
+    "xsfwasm": ">=0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "lawasm": { "optional": true },
+    "arwasm": { "optional": true },
+    "linwasm": { "optional": true },
+    "quadwasm": { "optional": true },
+    "superluwasm": { "optional": true },
+    "xsfwasm": { "optional": true }
   },
   "devDependencies": {
     "numwasm": "workspace:*",
+    "lawasm": "workspace:*",
+    "arwasm": "workspace:*",
+    "linwasm": "workspace:*",
+    "quadwasm": "workspace:*",
+    "superluwasm": "workspace:*",
+    "xsfwasm": "workspace:*",
     "@types/node": "^20.10.0",
     "typedoc": "^0.27.0",
     "typescript": "^5.3.0",

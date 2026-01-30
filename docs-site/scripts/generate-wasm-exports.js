@@ -41,8 +41,15 @@ const PACKAGES_DIR = path.resolve(DOCS_SITE_DIR, '..', 'packages');
  * Find all WASM function calls in a code block
  */
 function findWasmCalls(code) {
-  // Patterns: Module._func, wasm._func, ._wasmModule._func, wasm[wasmFn] (dynamic calls)
-  const wasmCallRegex = /(?:Module|wasm|_wasmModule)(?:\._(\w+)|\[(\w+)\])\s*\(/g;
+  // Patterns to match:
+  // - Module._func(  - Emscripten Module
+  // - module._func(  - lowercase module variable
+  // - wasm._func(    - wasm variable
+  // - this._module._func(  - instance module reference
+  // - arr._module._func(   - any variable._module reference
+  // - _wasmModule._func(   - underscore prefixed
+  // - wasm[wasmFn]( or module[funcName]( - dynamic calls
+  const wasmCallRegex = /(?:(?:this\.|[\w]+\.)?_?[mM]odule|wasm|_wasmModule)(?:\._(\w+)|\[['"]?(\w+)['"]?\])\s*\(/g;
   const wasmCalls = new Set();
   let match;
 
@@ -97,13 +104,42 @@ function extractTsToWasmMappings(packageDir) {
 
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    // 1. Find exported functions: export [async] function name(...) { ... }
-    const funcRegex = /export\s+(?:async\s+)?function\s+(\w+)\s*\([^)]*\)[^{]*\{/g;
+    // 1. Find exported functions: export [async] function name(...)
+    // Note: We find the function declaration, then scan forward to find the opening brace
+    // that starts the function body (skipping braces in return type annotations)
+    const funcRegex = /export\s+(?:async\s+)?function\s+(\w+)\s*\(/g;
     let funcMatch;
 
     while ((funcMatch = funcRegex.exec(content)) !== null) {
       const funcName = funcMatch[1];
-      const funcStart = funcMatch.index + funcMatch[0].length;
+      // Find the opening brace of the function body by tracking paren/angle bracket depth
+      let pos = funcMatch.index + funcMatch[0].length;
+      let parenDepth = 1; // We're inside the params already
+      let angleDepth = 0;
+
+      // Skip past parameters
+      while (pos < content.length && parenDepth > 0) {
+        const ch = content[pos];
+        if (ch === '(') parenDepth++;
+        else if (ch === ')') parenDepth--;
+        pos++;
+      }
+
+      // Now find the opening brace, tracking angle brackets for generic types
+      while (pos < content.length) {
+        const ch = content[pos];
+        if (ch === '<') angleDepth++;
+        else if (ch === '>') angleDepth--;
+        else if (ch === '{' && angleDepth === 0) {
+          // Found the function body opening brace
+          break;
+        }
+        pos++;
+      }
+
+      if (pos >= content.length) continue;
+
+      const funcStart = pos + 1;
       const funcEnd = findBlockEnd(content, funcStart);
       const funcBody = content.substring(funcStart, funcEnd);
       const wasmCalls = findWasmCalls(funcBody);
@@ -141,16 +177,17 @@ function extractTsToWasmMappings(packageDir) {
 
       // Find all methods in the class
       // Match: methodName(...) { ... } or async methodName(...) { ... }
-      // Also match: protected/private/public methodName(...)
-      const methodRegex = /(?:(?:public|private|protected)\s+)?(?:async\s+)?(\w+)\s*\([^)]*\)(?:\s*:\s*[^{]+)?\s*\{/g;
+      // Also match: protected/private/public/static methodName(...)
+      const methodRegex = /(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:async\s+)?(\w+)\s*\([^)]*\)(?:\s*:\s*[^{]+)?\s*\{/g;
       let methodMatch;
 
       const classWasmCalls = new Set();
 
       while ((methodMatch = methodRegex.exec(classBody)) !== null) {
         const methodName = methodMatch[1];
-        // Skip constructor and private methods starting with _
-        if (methodName === 'constructor' || methodName.startsWith('_')) {
+        // Skip constructor, private methods starting with _, and JavaScript keywords
+        const jsKeywords = ['if', 'for', 'while', 'switch', 'catch', 'with', 'return', 'throw', 'new', 'delete', 'typeof', 'void', 'function'];
+        if (methodName === 'constructor' || methodName.startsWith('_') || jsKeywords.includes(methodName)) {
           continue;
         }
 
@@ -194,29 +231,6 @@ function extractFromTypeScriptInterface(content) {
     exports.push(match[1]);
   }
   return [...new Set(exports)]; // Deduplicate
-}
-
-/**
- * Extract WASM function names from a build script's EXPORTED_FUNCTIONS
- * Matches strings like: "_functionName_", "_functionName"
- */
-function extractFromBuildScript(content) {
-  const exports = [];
-  // Find EXPORTED_FUNCTIONS block
-  const exportedMatch = content.match(/EXPORTED_FUNCTIONS\s*=\s*'\[([^\]]+)\]'/s);
-  if (exportedMatch) {
-    const functionsStr = exportedMatch[1];
-    // Match quoted function names
-    const regex = /"(_\w+_?)"/g;
-    let match;
-    while ((match = regex.exec(functionsStr)) !== null) {
-      // Skip _malloc and _free as they're utility functions
-      if (match[1] !== '_malloc' && match[1] !== '_free') {
-        exports.push(match[1]);
-      }
-    }
-  }
-  return [...new Set(exports)];
 }
 
 /**
@@ -309,41 +323,8 @@ if (fs.existsSync(sciwasmTypesPath)) {
   console.log(`  sciwasm.wasm: ${exports.length} functions`);
 }
 
-// ARPACK module
-const arpackBuildPath = path.join(PACKAGES_DIR, 'sciwasm', 'scripts', 'build-arpack.sh');
-if (fs.existsSync(arpackBuildPath)) {
-  const content = fs.readFileSync(arpackBuildPath, 'utf-8');
-  const exports = extractFromBuildScript(content);
-  result.packages.sciwasm.arpack = exports;
-  console.log(`  arpack.wasm: ${exports.length} functions`);
-}
-
-// QUADPACK module
-const quadpackBuildPath = path.join(PACKAGES_DIR, 'sciwasm', 'scripts', 'build-quadpack.sh');
-if (fs.existsSync(quadpackBuildPath)) {
-  const content = fs.readFileSync(quadpackBuildPath, 'utf-8');
-  const exports = extractFromBuildScript(content);
-  result.packages.sciwasm.quadpack = exports;
-  console.log(`  quadpack.wasm: ${exports.length} functions`);
-}
-
-// LINPACK module
-const linpackBuildPath = path.join(PACKAGES_DIR, 'sciwasm', 'scripts', 'build-linpack.sh');
-if (fs.existsSync(linpackBuildPath)) {
-  const content = fs.readFileSync(linpackBuildPath, 'utf-8');
-  const exports = extractFromBuildScript(content);
-  result.packages.sciwasm.linpack = exports;
-  console.log(`  linpack.wasm: ${exports.length} functions`);
-}
-
-// SuperLU module
-const superluBuildPath = path.join(PACKAGES_DIR, 'sciwasm', 'scripts', 'build-superlu.sh');
-if (fs.existsSync(superluBuildPath)) {
-  const content = fs.readFileSync(superluBuildPath, 'utf-8');
-  const exports = extractFromBuildScript(content);
-  result.packages.sciwasm.superlu = exports;
-  console.log(`  superlu.wasm: ${exports.length} functions`);
-}
+// Note: ARPACK, QUADPACK, LINPACK, SuperLU modules have been moved to standalone packages
+// (arwasm, quadwasm, linwasm, superluwasm) and are handled in the standalonePackages section below
 
 // sciwasm TypeScript exports
 const sciwasmApiPath = path.join(DOCS_SITE_DIR, 'public', 'api-sciwasm.json');
@@ -376,6 +357,51 @@ console.log(`  TypeScript exports: ${result.typescript.symwasm.length}`);
 const symwasmDir = path.join(PACKAGES_DIR, 'symwasm');
 result.tsToWasm.symwasm = extractTsToWasmMappings(symwasmDir);
 console.log(`  TS→WASM mappings: ${Object.keys(result.tsToWasm.symwasm).length} functions`);
+
+// New standalone WASM packages (arwasm, lawasm, linwasm, quadwasm, superluwasm, xsfwasm, odewasm)
+const standalonePackages = [
+  { name: 'arwasm', wasmName: 'arpack' },
+  { name: 'lawasm', wasmName: 'lapack' },
+  { name: 'linwasm', wasmName: 'linpack' },
+  { name: 'quadwasm', wasmName: 'quadpack' },
+  { name: 'superluwasm', wasmName: 'superlu' },
+  { name: 'xsfwasm', wasmName: 'xsf' },
+  { name: 'odewasm', wasmName: 'ode' },
+];
+
+for (const pkg of standalonePackages) {
+  console.log(`\nProcessing ${pkg.name}...`);
+
+  // Try multiple possible locations for types.ts
+  const possiblePaths = [
+    path.join(PACKAGES_DIR, pkg.name, 'src', 'types.ts'),
+    path.join(PACKAGES_DIR, pkg.name, 'src', 'ts', 'types.ts'),
+  ];
+
+  let typesPath = possiblePaths.find(p => fs.existsSync(p));
+
+  if (typesPath) {
+    const content = fs.readFileSync(typesPath, 'utf-8');
+    const exports = extractFromTypeScriptInterface(content);
+    result.packages[pkg.name] = {
+      [pkg.wasmName]: exports
+    };
+    console.log(`  ${pkg.wasmName}.wasm: ${exports.length} functions`);
+  } else {
+    console.warn(`  Warning: types.ts not found in ${pkg.name}`);
+    result.packages[pkg.name] = {};
+  }
+
+  // TypeScript exports (if api-*.json exists)
+  const apiPath = path.join(DOCS_SITE_DIR, 'public', `api-${pkg.name}.json`);
+  result.typescript[pkg.name] = extractTypeScriptExports(apiPath);
+  console.log(`  TypeScript exports: ${result.typescript[pkg.name].length}`);
+
+  // TS→WASM mappings
+  const pkgDir = path.join(PACKAGES_DIR, pkg.name);
+  result.tsToWasm[pkg.name] = extractTsToWasmMappings(pkgDir);
+  console.log(`  TS→WASM mappings: ${Object.keys(result.tsToWasm[pkg.name]).length} functions`);
+}
 
 // Write output
 const outputPath = path.join(DOCS_SITE_DIR, 'public', 'wasm-exports.json');

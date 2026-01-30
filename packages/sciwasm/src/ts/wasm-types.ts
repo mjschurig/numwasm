@@ -53,33 +53,8 @@ export interface SciWasmModule {
     maxls: number, lnTaskPtr: number
   ): void;
 
-  // QUADPACK adaptive quadrature
-  _wasm_dqagse(
-    fcn: number, a: number, b: number,
-    epsabs: number, epsrel: number, limit: number,
-    result: number, abserr: number, neval: number, ier: number,
-    alist: number, blist: number, rlist: number, elist: number,
-    iord: number, last: number,
-  ): void;
-
-  _wasm_dqagie(
-    fcn: number, bound: number, inf: number,
-    epsabs: number, epsrel: number, limit: number,
-    result: number, abserr: number, neval: number, ier: number,
-    alist: number, blist: number, rlist: number, elist: number,
-    iord: number, last: number,
-  ): void;
-
-  // Special functions (gamma)
-  _wasm_gamma(x: number): number;
-  _wasm_gammaln(x: number): number;
-  _wasm_rgamma(x: number): number;
-
-  // Special functions (combinatorial)
-  _wasm_binom(n: number, k: number): number;
-  _wasm_binom_exact(n: number, k: number): number;
-  _wasm_poch(x: number, m: number): number;
-  _wasm_perm_exact(n: number, k: number): number;
+  // Note: Special functions (gamma, binom, poch, perm) moved to xsf.wasm (separate module)
+  // Note: QUADPACK functions moved to quadpack.wasm (separate module)
 
   // Sparse matrix operations (sparsetools)
   _sp_csr_matvec_f64(n_row: number, n_col: number, Ap: number, Aj: number, Ax: number, Xx: number, Yx: number): void;
