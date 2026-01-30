@@ -7,6 +7,7 @@ import Demo from "./pages/Demo";
 import Docs from "./pages/Docs";
 import Benchmarks from "./pages/Benchmarks";
 import MCP from "./pages/MCP";
+import Overview from "./pages/Overview";
 import { Background } from "./components/background";
 
 // GitHub icon from Simple Icons (https://simpleicons.org)
@@ -67,6 +68,9 @@ function Navigation() {
           </NavLink>
           <NavLink to="/mcp" className={navLinkClass}>
             MCP
+          </NavLink>
+          <NavLink to="/overview" className={navLinkClass}>
+            Overview
           </NavLink>
           <Link
             href="https://github.com/mjschurig/numwasm"
@@ -132,6 +136,13 @@ function Navigation() {
           >
             MCP
           </NavLink>
+          <NavLink
+            to="/overview"
+            className={mobileNavLinkClass}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Overview
+          </NavLink>
           <Link
             href="https://github.com/mjschurig/numwasm"
             target="_blank"
@@ -162,6 +173,7 @@ export default function App() {
             <Route path="/docs/*" element={<Docs />} />
             <Route path="/benchmarks/*" element={<Benchmarks />} />
             <Route path="/mcp" element={<MCP />} />
+            <Route path="/overview" element={<Overview />} />
           </Routes>
           {/* Docs routes are handled inside Docs component via wildcard:
               /docs           → package picker landing

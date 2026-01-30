@@ -62,3 +62,134 @@ export interface LinearOperator {
   /** Transpose matrix-vector product: y = A.T @ x */
   rmatvec(x: Float64Array): Float64Array;
 }
+
+// ============================================================
+// Eigenvalue Solver Types
+// ============================================================
+
+/**
+ * Options for eigsh (symmetric eigenvalue solver)
+ */
+export interface EigshOptions {
+  /** Number of eigenvalues to compute (default: 6) */
+  k?: number;
+  /** Which eigenvalues: 'LA' (largest algebraic), 'SA' (smallest algebraic),
+   *  'LM' (largest magnitude), 'SM' (smallest magnitude), 'BE' (both ends) */
+  which?: 'LA' | 'SA' | 'LM' | 'SM' | 'BE';
+  /** Shift for shift-invert mode */
+  sigma?: number;
+  /** Relative tolerance (default: 0 = machine precision) */
+  tol?: number;
+  /** Maximum iterations (default: n*10) */
+  maxiter?: number;
+  /** Number of Lanczos vectors (default: min(n, max(2*k+1, 20))) */
+  ncv?: number;
+  /** Starting vector */
+  v0?: Float64Array;
+  /** Return eigenvectors (default: true) */
+  return_eigenvectors?: boolean;
+}
+
+/**
+ * Options for eigs (general eigenvalue solver)
+ */
+export interface EigsOptions {
+  /** Number of eigenvalues to compute (default: 6) */
+  k?: number;
+  /** Which eigenvalues: 'LM', 'SM', 'LR', 'SR', 'LI', 'SI' */
+  which?: 'LM' | 'SM' | 'LR' | 'SR' | 'LI' | 'SI';
+  /** Shift for shift-invert mode */
+  sigma?: number | { real: number; imag: number };
+  /** Relative tolerance (default: 0 = machine precision) */
+  tol?: number;
+  /** Maximum iterations (default: n*10) */
+  maxiter?: number;
+  /** Number of Arnoldi vectors (default: min(n, max(2*k+1, 20))) */
+  ncv?: number;
+  /** Starting vector */
+  v0?: Float64Array;
+  /** Return eigenvectors (default: true) */
+  return_eigenvectors?: boolean;
+}
+
+/**
+ * Result from eigenvalue solvers
+ */
+export interface EigsResult {
+  /** Eigenvalues (real part for non-symmetric) */
+  values: Float64Array;
+  /** Imaginary parts of eigenvalues (only for non-symmetric, may be undefined) */
+  valuesImag?: Float64Array;
+  /** Eigenvectors as columns (n x nconv), flattened column-major */
+  vectors?: Float64Array;
+  /** Number of converged eigenvalues */
+  nconv: number;
+  /** Number of iterations performed */
+  iterations: number;
+}
+
+/**
+ * Options for svds (truncated SVD)
+ */
+export interface SvdsOptions {
+  /** Number of singular values to compute (default: 6) */
+  k?: number;
+  /** Relative tolerance */
+  tol?: number;
+  /** Maximum iterations */
+  maxiter?: number;
+  /** Number of Lanczos vectors */
+  ncv?: number;
+  /** Starting vector */
+  v0?: Float64Array;
+  /** Return singular vectors: true (both), 'u', 'vh', or false */
+  return_singular_vectors?: boolean | 'u' | 'vh';
+}
+
+/**
+ * Result from truncated SVD
+ */
+export interface SvdsResult {
+  /** Left singular vectors (m x k), column-major (optional) */
+  u?: Float64Array;
+  /** Singular values (k) */
+  s: Float64Array;
+  /** Right singular vectors transposed (k x n), row-major (optional) */
+  vt?: Float64Array;
+}
+
+// ============================================================
+// Matrix Exponential Types
+// ============================================================
+
+/**
+ * Options for matrix exponential
+ */
+export interface ExpmOptions {
+  /** Maximum Pade approximation order (default: 13) */
+  padeOrder?: number;
+}
+
+/**
+ * Options for expm_multiply
+ */
+export interface ExpmMultiplyOptions {
+  /** Krylov subspace dimension (default: min(30, n)) */
+  krylovDim?: number;
+  /** Tolerance for happy breakdown detection (default: 1e-12) */
+  tol?: number;
+  /** Time parameter t for exp(t*A)*v (default: 1.0) */
+  t?: number;
+}
+
+/**
+ * Result from expm_multiply
+ */
+export interface ExpmMultiplyResult {
+  /** The result vector exp(t*A) * v */
+  result: Float64Array;
+  /** Number of Krylov iterations used */
+  iterations: number;
+  /** Estimated error bound */
+  errorEstimate: number;
+}

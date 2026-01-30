@@ -1,0 +1,4739 @@
+{
+  "packages": {
+    "numwasm": {
+      "numjs": [
+        "_ndarray_create",
+        "_ndarray_from_data",
+        "_ndarray_empty",
+        "_ndarray_full",
+        "_ndarray_scalar",
+        "_ndarray_free",
+        "_ndarray_copy",
+        "_ndarray_astype",
+        "_ndarray_flat_index",
+        "_ndarray_check_bounds",
+        "_ndarray_get_item",
+        "_ndarray_set_item",
+        "_ndarray_get_flat",
+        "_ndarray_set_flat",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex",
+        "_ndarray_sum",
+        "_ndarray_fill",
+        "_ndarray_get_ndim",
+        "_ndarray_get_shape",
+        "_ndarray_get_strides",
+        "_ndarray_get_data",
+        "_ndarray_get_size",
+        "_ndarray_get_dtype",
+        "_ndarray_get_flags",
+        "_ndarray_get_base",
+        "_ndarray_is_c_contiguous",
+        "_ndarray_is_f_contiguous",
+        "_ndarray_view",
+        "_ndarray_view_with_offset",
+        "_ndarray_reshape",
+        "_ndarray_transpose",
+        "_ndarray_ravel",
+        "_ndarray_flatten",
+        "_ndarray_squeeze",
+        "_ndarray_expand_dims",
+        "_ndarray_swapaxes",
+        "_ndarray_slice",
+        "_ndarray_get_subarray",
+        "_ndarray_view_dtype",
+        "_ndarray_ascontiguousarray",
+        "_ndarray_asfortranarray",
+        "_broadcast_shapes",
+        "_broadcast_shapes_multi",
+        "_broadcast_strides",
+        "_ndarray_broadcast_to",
+        "_shapes_are_broadcastable",
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal",
+        "_dtype_size",
+        "_dtype_is_integer",
+        "_dtype_is_floating",
+        "_dtype_is_complex",
+        "_dtype_is_signed",
+        "_dtype_is_bool",
+        "_dtype_promote",
+        "_dtype_can_cast",
+        "_ndarray_isfinite",
+        "_ndarray_isinf",
+        "_ndarray_isnan",
+        "_ndarray_isneginf",
+        "_ndarray_isposinf",
+        "_ndarray_iscomplex_elem",
+        "_ndarray_isreal_elem",
+        "_ndarray_all",
+        "_ndarray_all_axis",
+        "_ndarray_any",
+        "_ndarray_any_axis",
+        "_ndarray_isclose",
+        "_ndarray_allclose",
+        "_ndarray_array_equal",
+        "_ndarray_array_equiv",
+        "_ndarray_concatenate",
+        "_ufunc_negative",
+        "_ufunc_positive",
+        "_ufunc_absolute",
+        "_ufunc_abs",
+        "_ufunc_sign",
+        "_ufunc_sqrt",
+        "_ufunc_square",
+        "_ufunc_cbrt",
+        "_ufunc_reciprocal",
+        "_ufunc_exp",
+        "_ufunc_exp2",
+        "_ufunc_expm1",
+        "_ufunc_log",
+        "_ufunc_log2",
+        "_ufunc_log10",
+        "_ufunc_log1p",
+        "_ufunc_sin",
+        "_ufunc_cos",
+        "_ufunc_tan",
+        "_ufunc_arcsin",
+        "_ufunc_arccos",
+        "_ufunc_arctan",
+        "_ufunc_sinh",
+        "_ufunc_cosh",
+        "_ufunc_tanh",
+        "_ufunc_arcsinh",
+        "_ufunc_arccosh",
+        "_ufunc_arctanh",
+        "_ufunc_floor",
+        "_ufunc_ceil",
+        "_ufunc_trunc",
+        "_ufunc_rint",
+        "_ufunc_round",
+        "_ufunc_degrees",
+        "_ufunc_radians",
+        "_ufunc_rad2deg",
+        "_ufunc_deg2rad",
+        "_ufunc_logical_not",
+        "_ufunc_invert",
+        "_ufunc_bitwise_not",
+        "_ufunc_add",
+        "_ufunc_subtract",
+        "_ufunc_multiply",
+        "_ufunc_divide",
+        "_ufunc_true_divide",
+        "_ufunc_floor_divide",
+        "_ufunc_remainder",
+        "_ufunc_mod",
+        "_ufunc_fmod",
+        "_ufunc_power",
+        "_ufunc_equal",
+        "_ufunc_not_equal",
+        "_ufunc_less",
+        "_ufunc_less_equal",
+        "_ufunc_greater",
+        "_ufunc_greater_equal",
+        "_ufunc_maximum",
+        "_ufunc_minimum",
+        "_ufunc_fmax",
+        "_ufunc_fmin",
+        "_ufunc_logical_and",
+        "_ufunc_logical_or",
+        "_ufunc_logical_xor",
+        "_ufunc_bitwise_and",
+        "_ufunc_bitwise_or",
+        "_ufunc_bitwise_xor",
+        "_ufunc_left_shift",
+        "_ufunc_right_shift",
+        "_ufunc_arctan2",
+        "_ufunc_hypot",
+        "_ufunc_copysign",
+        "_ufunc_signbit",
+        "_ufunc_logaddexp",
+        "_ufunc_logaddexp2",
+        "_ufunc_frexp",
+        "_ufunc_ldexp",
+        "_ufunc_nextafter",
+        "_ufunc_spacing",
+        "_ufunc_modf",
+        "_ufunc_gcd",
+        "_ufunc_lcm",
+        "_ufunc_sinc",
+        "_ufunc_heaviside",
+        "_ufunc_divmod",
+        "_ufunc_bitwise_count",
+        "_ufunc_tuple_result_free",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ndarray_sort",
+        "_ndarray_sort_copy",
+        "_ndarray_argsort",
+        "_ndarray_partition",
+        "_ndarray_argpartition",
+        "_ndarray_argmax",
+        "_ndarray_argmin",
+        "_ndarray_searchsorted",
+        "_ndarray_sum_axis",
+        "_ndarray_mean_axis",
+        "_ndarray_var_axis",
+        "_ndarray_std_axis",
+        "_ndarray_min_axis",
+        "_ndarray_max_axis",
+        "_ndarray_median",
+        "_ndarray_percentile",
+        "_ndarray_quantile",
+        "_ndarray_nansum",
+        "_ndarray_nanmean",
+        "_ndarray_nanvar",
+        "_ndarray_nanstd",
+        "_ndarray_cumsum_axis",
+        "_ndarray_cumprod_axis",
+        "_ndarray_nancumsum_axis",
+        "_ndarray_nancumprod_axis",
+        "_ndarray_unique",
+        "_ndarray_unique_values",
+        "_unique_result_free",
+        "_ndarray_union1d",
+        "_ndarray_intersect1d",
+        "_ndarray_setdiff1d",
+        "_ndarray_setxor1d",
+        "_ndarray_isin",
+        "_ndarray_in1d",
+        "_wasm_malloc",
+        "_wasm_free",
+        "_malloc",
+        "_free",
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_linalg_det",
+        "_linalg_cholesky",
+        "_linalg_norm",
+        "_linalg_qr",
+        "_linalg_qr_free",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_eig",
+        "_linalg_eig_free",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_svd",
+        "_linalg_svd_free",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_fft_is_power_of_2",
+        "_fft_next_power_of_2",
+        "_fft_radix2",
+        "_fft_bluestein",
+        "_fft_complex",
+        "_fft_rfft",
+        "_fft_irfft",
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft",
+        "_pcg64_create",
+        "_pcg64_free",
+        "_pcg64_seed",
+        "_pcg64_seed_parts",
+        "_pcg64_next64",
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_init_bitgen",
+        "_pcg64_create_seeded",
+        "_pcg64_fill_uint64",
+        "_pcg64_fill_double",
+        "_mt19937_create",
+        "_mt19937_free",
+        "_mt19937_seed",
+        "_mt19937_seed_array",
+        "_mt19937_next32",
+        "_mt19937_next64",
+        "_mt19937_next64_parts",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_init_bitgen",
+        "_mt19937_fill_uint32",
+        "_mt19937_fill_uint64",
+        "_mt19937_fill_double",
+        "_philox_create",
+        "_philox_free",
+        "_philox_seed",
+        "_philox_seed_parts",
+        "_philox_set_counter",
+        "_philox_next64",
+        "_philox_next32",
+        "_philox_next64_parts",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_advance64",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_init_bitgen",
+        "_philox_fill_uint64",
+        "_philox_fill_double",
+        "_sfc64_create",
+        "_sfc64_free",
+        "_sfc64_seed",
+        "_sfc64_seed_parts",
+        "_sfc64_next64",
+        "_sfc64_next32",
+        "_sfc64_next64_parts",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_init_bitgen",
+        "_sfc64_fill_uint64",
+        "_sfc64_fill_double",
+        "_seed_seq_init",
+        "_seed_seq_generate",
+        "_seed_seq_free",
+        "_seed_seq_generate_words",
+        "_seed_seq_mix64",
+        "_seed_seq_from_time",
+        "_random_standard_uniform",
+        "_random_standard_uniform_f",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_standard_normal",
+        "_random_standard_normal_f",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_normal",
+        "_random_standard_exponential",
+        "_random_standard_exponential_f",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_fill_f",
+        "_random_standard_exponential_inv_fill",
+        "_random_exponential",
+        "_random_standard_gamma",
+        "_random_standard_gamma_f",
+        "_random_standard_gamma_fill",
+        "_random_gamma",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_chisquare",
+        "_random_noncentral_chisquare",
+        "_random_f",
+        "_random_noncentral_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_power",
+        "_random_laplace",
+        "_random_gumbel",
+        "_random_logistic",
+        "_random_lognormal",
+        "_random_rayleigh",
+        "_random_wald",
+        "_random_triangular",
+        "_random_vonmises",
+        "_random_binomial",
+        "_random_binomial32",
+        "_random_binomial_btpe",
+        "_random_binomial_inversion",
+        "_random_negative_binomial",
+        "_random_negative_binomial32",
+        "_random_poisson",
+        "_random_poisson32",
+        "_random_geometric",
+        "_random_geometric32",
+        "_random_hypergeometric",
+        "_random_hypergeometric32",
+        "_random_logseries",
+        "_random_logseries32",
+        "_random_zipf",
+        "_random_zipf32",
+        "_random_bounded_uint64",
+        "_random_bounded_uint32",
+        "_random_integers",
+        "_random_integers32",
+        "_random_integers_fill",
+        "_random_integers32_fill"
+      ]
+    },
+    "sciwasm": {
+      "sciwasm": [
+        "_nelder_mead_minimize",
+        "_bfgs_minimize",
+        "_setulb",
+        "_wasm_dqagse",
+        "_wasm_dqagie",
+        "_wasm_gamma",
+        "_wasm_gammaln",
+        "_wasm_rgamma",
+        "_wasm_binom",
+        "_wasm_binom_exact",
+        "_wasm_poch",
+        "_wasm_perm_exact",
+        "_sp_csr_matvec_f64",
+        "_sp_csr_matvecs_f64",
+        "_sp_csr_tocsc_f64",
+        "_sp_csr_todense_f64",
+        "_sp_csr_diagonal_f64",
+        "_sp_csr_sort_indices_f64",
+        "_sp_csr_has_sorted_indices",
+        "_sp_csr_has_canonical_format",
+        "_sp_csr_sum_duplicates_f64",
+        "_sp_csr_eliminate_zeros_f64",
+        "_sp_csr_matmat_maxnnz",
+        "_sp_csr_matmat_f64",
+        "_sp_csr_plus_csr_f64",
+        "_sp_csr_minus_csr_f64",
+        "_sp_csr_elmul_csr_f64",
+        "_sp_csr_eldiv_csr_f64",
+        "_sp_csr_scale_rows_f64",
+        "_sp_csr_scale_columns_f64",
+        "_sp_expandptr",
+        "_sp_csr_row_index_f64",
+        "_sp_csr_row_slice_f64",
+        "_sp_csr_column_index1",
+        "_sp_csr_column_index2_f64",
+        "_sp_csr_sample_offsets",
+        "_sp_csr_sample_values_f64",
+        "_sp_get_csr_submatrix_nnz",
+        "_sp_get_csr_submatrix_f64",
+        "_sp_csc_matvec_f64",
+        "_sp_csc_matvecs_f64",
+        "_sp_coo_tocsr_f64",
+        "_sp_coo_todense_f64",
+        "_sp_coo_matvec_f64",
+        "_sp_dia_matvec_f64",
+        "_sp_dia_tocsr_f64",
+        "_sp_bsr_matvec_f64",
+        "_sp_bsr_tocsr_f64",
+        "_sp_bsr_transpose_f64",
+        "_sp_bsr_diagonal_f64",
+        "_sp_coo_tril_f64_entry",
+        "_sp_coo_triu_f64_entry",
+        "_sp_csr_hstack_f64_entry",
+        "_sp_coo_vstack_f64_entry",
+        "_sp_coo_hstack_f64_entry",
+        "_sp_coo_block_diag_f64_entry",
+        "_sp_coo_kron_f64_entry",
+        "_sp_coo_random_f64_entry",
+        "_sp_malloc",
+        "_sp_free",
+        "_kdtree_build",
+        "_kdtree_query_knn",
+        "_kdtree_query_ball_point",
+        "_kdtree_free",
+        "_malloc",
+        "_free"
+      ],
+      "arpack": [
+        "_dsaupd_",
+        "_dseupd_",
+        "_dnaupd_",
+        "_dneupd_",
+        "_ssaupd_",
+        "_sseupd_",
+        "_snaupd_",
+        "_sneupd_",
+        "_cnaupd_",
+        "_cneupd_",
+        "_znaupd_",
+        "_zneupd_"
+      ],
+      "quadpack": [
+        "_dqagse_",
+        "_dqagie_",
+        "_dqags_",
+        "_dqagi_",
+        "_dqag_",
+        "_dqage_",
+        "_dqng_",
+        "_dqawoe_",
+        "_dqawfe_",
+        "_dqawo_",
+        "_dqawf_",
+        "_dqawse_",
+        "_dqawce_",
+        "_dqaws_",
+        "_dqawc_",
+        "_dqagpe_",
+        "_dqagp_",
+        "_dqk15_",
+        "_dqk21_",
+        "_dqk31_",
+        "_dqk41_",
+        "_dqk51_",
+        "_dqk61_",
+        "_dqk15i_",
+        "_dqk15w_",
+        "_qagse_",
+        "_qagie_",
+        "_qags_",
+        "_qagi_",
+        "_qag_",
+        "_qage_",
+        "_qng_",
+        "_qawoe_",
+        "_qawfe_",
+        "_qawo_",
+        "_qawf_",
+        "_qawse_",
+        "_qawce_",
+        "_qaws_",
+        "_qawc_",
+        "_qagpe_",
+        "_qagp_",
+        "_qk15_",
+        "_qk21_",
+        "_qk31_",
+        "_qk41_",
+        "_qk51_",
+        "_qk61_",
+        "_qk15i_",
+        "_qk15w_"
+      ],
+      "linpack": [
+        "_dgefa_",
+        "_dgesl_",
+        "_dgeco_",
+        "_dgedi_",
+        "_dgbfa_",
+        "_dgbsl_",
+        "_dgbco_",
+        "_dgbdi_",
+        "_dpofa_",
+        "_dposl_",
+        "_dpoco_",
+        "_dpodi_",
+        "_dppfa_",
+        "_dppsl_",
+        "_dppco_",
+        "_dppdi_",
+        "_dpbfa_",
+        "_dpbsl_",
+        "_dpbco_",
+        "_dpbdi_",
+        "_dsifa_",
+        "_dsisl_",
+        "_dsico_",
+        "_dsidi_",
+        "_dspfa_",
+        "_dspsl_",
+        "_dspco_",
+        "_dspdi_",
+        "_dtrco_",
+        "_dtrdi_",
+        "_dtrsl_",
+        "_dgtsl_",
+        "_dptsl_",
+        "_dqrdc_",
+        "_dqrsl_",
+        "_dsvdc_",
+        "_dchdc_",
+        "_dchdd_",
+        "_dchex_",
+        "_dchud_",
+        "_sgefa_",
+        "_sgesl_",
+        "_sgeco_",
+        "_sgedi_",
+        "_sgbfa_",
+        "_sgbsl_",
+        "_sgbco_",
+        "_sgbdi_",
+        "_spofa_",
+        "_sposl_",
+        "_spoco_",
+        "_spodi_",
+        "_sppfa_",
+        "_sppsl_",
+        "_sppco_",
+        "_sppdi_",
+        "_spbfa_",
+        "_spbsl_",
+        "_spbco_",
+        "_spbdi_",
+        "_ssifa_",
+        "_ssisl_",
+        "_ssico_",
+        "_ssidi_",
+        "_sspfa_",
+        "_sspsl_",
+        "_sspco_",
+        "_sspdi_",
+        "_strco_",
+        "_strdi_",
+        "_strsl_",
+        "_sgtsl_",
+        "_sptsl_",
+        "_sqrdc_",
+        "_sqrsl_",
+        "_ssvdc_",
+        "_schdc_",
+        "_schdd_",
+        "_schex_",
+        "_schud_",
+        "_cgefa_",
+        "_cgesl_",
+        "_cgeco_",
+        "_cgedi_",
+        "_cgbfa_",
+        "_cgbsl_",
+        "_cgbco_",
+        "_cgbdi_",
+        "_cpofa_",
+        "_cposl_",
+        "_cpoco_",
+        "_cpodi_",
+        "_cppfa_",
+        "_cppsl_",
+        "_cppco_",
+        "_cppdi_",
+        "_cpbfa_",
+        "_cpbsl_",
+        "_cpbco_",
+        "_cpbdi_",
+        "_chifa_",
+        "_chisl_",
+        "_chico_",
+        "_chidi_",
+        "_chpfa_",
+        "_chpsl_",
+        "_chpco_",
+        "_chpdi_",
+        "_csifa_",
+        "_csisl_",
+        "_csico_",
+        "_csidi_",
+        "_cspfa_",
+        "_cspsl_",
+        "_cspco_",
+        "_cspdi_",
+        "_ctrco_",
+        "_ctrdi_",
+        "_ctrsl_",
+        "_cgtsl_",
+        "_cptsl_",
+        "_cqrdc_",
+        "_cqrsl_",
+        "_csvdc_",
+        "_cchdc_",
+        "_cchdd_",
+        "_cchex_",
+        "_cchud_",
+        "_zgefa_",
+        "_zgesl_",
+        "_zgeco_",
+        "_zgedi_",
+        "_zgbfa_",
+        "_zgbsl_",
+        "_zgbco_",
+        "_zgbdi_",
+        "_zpofa_",
+        "_zposl_",
+        "_zpoco_",
+        "_zpodi_",
+        "_zppfa_",
+        "_zppsl_",
+        "_zppco_",
+        "_zppdi_",
+        "_zpbfa_",
+        "_zpbsl_",
+        "_zpbco_",
+        "_zpbdi_",
+        "_zhifa_",
+        "_zhisl_",
+        "_zhico_",
+        "_zhidi_",
+        "_zhpfa_",
+        "_zhpsl_",
+        "_zhpco_",
+        "_zhpdi_",
+        "_zsifa_",
+        "_zsisl_",
+        "_zsico_",
+        "_zsidi_",
+        "_zspfa_",
+        "_zspsl_",
+        "_zspco_",
+        "_zspdi_",
+        "_ztrco_",
+        "_ztrdi_",
+        "_ztrsl_",
+        "_zgtsl_",
+        "_zptsl_",
+        "_zqrdc_",
+        "_zqrsl_",
+        "_zsvdc_",
+        "_zchdc_",
+        "_zchdd_",
+        "_zchex_",
+        "_zchud_",
+        "_daxpy_",
+        "_dcopy_",
+        "_dscal_",
+        "_dswap_",
+        "_ddot_",
+        "_dasum_",
+        "_drot_",
+        "_dnrm2_",
+        "_drotg_",
+        "_saxpy_",
+        "_scopy_",
+        "_sscal_",
+        "_sswap_",
+        "_sdot_",
+        "_sasum_",
+        "_srot_",
+        "_snrm2_",
+        "_srotg_",
+        "_caxpy_",
+        "_ccopy_",
+        "_cscal_",
+        "_cswap_",
+        "_cdotc_",
+        "_cdotu_",
+        "_csrot_",
+        "_csscal_",
+        "_scnrm2_",
+        "_crotg_",
+        "_zaxpy_",
+        "_zcopy_",
+        "_zscal_",
+        "_zswap_",
+        "_zdotc_",
+        "_zdotu_",
+        "_zdrot_",
+        "_zdscal_",
+        "_dznrm2_",
+        "_zrotg_",
+        "_idamax_",
+        "_isamax_",
+        "_icamax_",
+        "_izamax_",
+        "_dzasum_",
+        "_scasum_",
+        "_scabs1_",
+        "_dcabs1_"
+      ],
+      "superlu": [
+        "_sgssv",
+        "_sgstrf",
+        "_sgstrs",
+        "_sgssvx",
+        "_sgsisx",
+        "_sgsitrf",
+        "_sgscon",
+        "_sgsequ",
+        "_sgsrfs",
+        "_slaqgs",
+        "_sCreate_CompCol_Matrix",
+        "_sCreate_CompRow_Matrix",
+        "_sCreate_Dense_Matrix",
+        "_sCopy_CompCol_Matrix",
+        "_sCopy_Dense_Matrix",
+        "_sCompRow_to_CompCol",
+        "_sallocateA",
+        "_sPrint_CompCol_Matrix",
+        "_sPrint_Dense_Matrix",
+        "_sGenXtrue",
+        "_sFillRHS",
+        "_sinf_norm_error",
+        "_sQuerySpace",
+        "_smemory_usage",
+        "_dgssv",
+        "_dgstrf",
+        "_dgstrs",
+        "_dgssvx",
+        "_dgsisx",
+        "_dgsitrf",
+        "_dgscon",
+        "_dgsequ",
+        "_dgsrfs",
+        "_dlaqgs",
+        "_dCreate_CompCol_Matrix",
+        "_dCreate_CompRow_Matrix",
+        "_dCreate_Dense_Matrix",
+        "_dCopy_CompCol_Matrix",
+        "_dCopy_Dense_Matrix",
+        "_dCompRow_to_CompCol",
+        "_dallocateA",
+        "_dPrint_CompCol_Matrix",
+        "_dPrint_Dense_Matrix",
+        "_dGenXtrue",
+        "_dFillRHS",
+        "_dinf_norm_error",
+        "_dQuerySpace",
+        "_dmemory_usage",
+        "_cgssv",
+        "_cgstrf",
+        "_cgstrs",
+        "_cgssvx",
+        "_cgsisx",
+        "_cgsitrf",
+        "_cgscon",
+        "_cgsequ",
+        "_cgsrfs",
+        "_claqgs",
+        "_cCreate_CompCol_Matrix",
+        "_cCreate_CompRow_Matrix",
+        "_cCreate_Dense_Matrix",
+        "_cCopy_CompCol_Matrix",
+        "_cCopy_Dense_Matrix",
+        "_cCompRow_to_CompCol",
+        "_callocateA",
+        "_cPrint_CompCol_Matrix",
+        "_cPrint_Dense_Matrix",
+        "_cGenXtrue",
+        "_cFillRHS",
+        "_cinf_norm_error",
+        "_cQuerySpace",
+        "_cmemory_usage",
+        "_zgssv",
+        "_zgstrf",
+        "_zgstrs",
+        "_zgssvx",
+        "_zgsisx",
+        "_zgsitrf",
+        "_zgscon",
+        "_zgsequ",
+        "_zgsrfs",
+        "_zlaqgs",
+        "_zCreate_CompCol_Matrix",
+        "_zCreate_CompRow_Matrix",
+        "_zCreate_Dense_Matrix",
+        "_zCopy_CompCol_Matrix",
+        "_zCopy_Dense_Matrix",
+        "_zCompRow_to_CompCol",
+        "_zallocateA",
+        "_zPrint_CompCol_Matrix",
+        "_zPrint_Dense_Matrix",
+        "_zGenXtrue",
+        "_zFillRHS",
+        "_zinf_norm_error",
+        "_zQuerySpace",
+        "_zmemory_usage",
+        "_set_default_options",
+        "_StatInit",
+        "_StatFree",
+        "_Destroy_CompCol_Matrix",
+        "_Destroy_CompRow_Matrix",
+        "_Destroy_Dense_Matrix",
+        "_Destroy_SuperNode_Matrix",
+        "_Destroy_SuperMatrix_Store",
+        "_get_perm_c",
+        "_sp_preorder",
+        "_sp_ienv",
+        "_input_error",
+        "_superlu_abort_and_exit",
+        "_intMalloc",
+        "_intCalloc",
+        "_floatMalloc",
+        "_floatCalloc",
+        "_doubleMalloc",
+        "_doubleCalloc",
+        "_singlecomplexMalloc",
+        "_singlecomplexCalloc",
+        "_doublecomplexMalloc",
+        "_doublecomplexCalloc",
+        "_superlu_malloc",
+        "_superlu_free"
+      ]
+    },
+    "symwasm": {
+      "symwasm": [
+        "_malloc",
+        "_free",
+        "_basic_new_stack",
+        "_basic_free_stack",
+        "_basic_new_heap",
+        "_basic_free_heap",
+        "_symbol_set",
+        "_integer_set_si",
+        "_integer_set_ui",
+        "_rational_set",
+        "_rational_set_si",
+        "_rational_set_ui",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_basic_get_args",
+        "_vecbasic_new",
+        "_vecbasic_free",
+        "_vecbasic_size",
+        "_vecbasic_get",
+        "_vecbasic_push_back",
+        "_basic_const_zero",
+        "_basic_const_one",
+        "_basic_const_minus_one",
+        "_basic_const_I",
+        "_basic_const_pi",
+        "_basic_const_E",
+        "_basic_const_infinity",
+        "_basic_const_neginfinity",
+        "_basic_const_complex_infinity",
+        "_basic_const_EulerGamma",
+        "_basic_const_Catalan",
+        "_basic_const_GoldenRatio",
+        "_basic_const_nan",
+        "_basic_subs2",
+        "_basic_subs",
+        "_mapbasicbasic_new",
+        "_mapbasicbasic_free",
+        "_mapbasicbasic_insert",
+        "_mapbasicbasic_size",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_sin",
+        "_basic_cos",
+        "_basic_tan",
+        "_basic_cot",
+        "_basic_sec",
+        "_basic_csc",
+        "_basic_asin",
+        "_basic_acos",
+        "_basic_atan",
+        "_basic_acot",
+        "_basic_asec",
+        "_basic_acsc",
+        "_basic_sinh",
+        "_basic_cosh",
+        "_basic_tanh",
+        "_basic_coth",
+        "_basic_sech",
+        "_basic_csch",
+        "_basic_asinh",
+        "_basic_acosh",
+        "_basic_atanh",
+        "_basic_acoth",
+        "_basic_asech",
+        "_basic_acsch",
+        "_basic_exp",
+        "_basic_log",
+        "_basic_sqrt",
+        "_basic_cbrt",
+        "_basic_lambertw",
+        "_basic_abs",
+        "_basic_sign",
+        "_basic_floor",
+        "_basic_ceiling",
+        "_basic_gamma",
+        "_basic_loggamma",
+        "_basic_erf",
+        "_basic_erfc",
+        "_basic_zeta",
+        "_basic_dirichlet_eta",
+        "_basic_atan2",
+        "_basic_beta",
+        "_basic_lowergamma",
+        "_basic_uppergamma",
+        "_basic_polygamma",
+        "_basic_kronecker_delta",
+        "_basic_max",
+        "_basic_min",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_basic_digamma",
+        "_basic_conjugate",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag",
+        "_basic_get_type",
+        "_basic_eq",
+        "_basic_hash",
+        "_basic_str",
+        "_basic_free_symbols",
+        "_setbasic_new",
+        "_setbasic_free",
+        "_setbasic_get",
+        "_setbasic_size",
+        "_dense_matrix_new",
+        "_dense_matrix_new_rows_cols",
+        "_dense_matrix_new_vec",
+        "_dense_matrix_free",
+        "_dense_matrix_rows",
+        "_dense_matrix_cols",
+        "_dense_matrix_str",
+        "_dense_matrix_eq",
+        "_dense_matrix_get_basic",
+        "_dense_matrix_set_basic",
+        "_dense_matrix_eye",
+        "_dense_matrix_zeros",
+        "_dense_matrix_ones",
+        "_dense_matrix_diag"
+      ]
+    }
+  },
+  "typescript": {
+    "numwasm": [
+      {
+        "name": "AssertionError",
+        "kind": "class"
+      },
+      {
+        "name": "KnownFailureException",
+        "kind": "class"
+      },
+      {
+        "name": "SkipTest",
+        "kind": "class"
+      },
+      {
+        "name": "assert_",
+        "kind": "function"
+      },
+      {
+        "name": "assert_allclose",
+        "kind": "function"
+      },
+      {
+        "name": "assert_almost_equal",
+        "kind": "function"
+      },
+      {
+        "name": "assert_approx_equal",
+        "kind": "function"
+      },
+      {
+        "name": "assert_array_almost_equal",
+        "kind": "function"
+      },
+      {
+        "name": "assert_array_compare",
+        "kind": "function"
+      },
+      {
+        "name": "assert_array_equal",
+        "kind": "function"
+      },
+      {
+        "name": "assert_array_less",
+        "kind": "function"
+      },
+      {
+        "name": "assert_array_max_ulp",
+        "kind": "function"
+      },
+      {
+        "name": "assert_equal",
+        "kind": "function"
+      },
+      {
+        "name": "assert_no_warnings",
+        "kind": "function"
+      },
+      {
+        "name": "assert_raises",
+        "kind": "function"
+      },
+      {
+        "name": "assert_raises_regex",
+        "kind": "function"
+      },
+      {
+        "name": "assert_string_equal",
+        "kind": "function"
+      },
+      {
+        "name": "assert_warns",
+        "kind": "function"
+      },
+      {
+        "name": "measure",
+        "kind": "function"
+      },
+      {
+        "name": "print_assert_equal",
+        "kind": "function"
+      },
+      {
+        "name": "ABCPolyBase",
+        "kind": "class"
+      },
+      {
+        "name": "BitGenerator",
+        "kind": "class"
+      },
+      {
+        "name": "Chebyshev",
+        "kind": "class"
+      },
+      {
+        "name": "finfo",
+        "kind": "class"
+      },
+      {
+        "name": "FlatIterator",
+        "kind": "class"
+      },
+      {
+        "name": "format_parser",
+        "kind": "class"
+      },
+      {
+        "name": "Generator",
+        "kind": "class"
+      },
+      {
+        "name": "Hermite",
+        "kind": "class"
+      },
+      {
+        "name": "HermiteE",
+        "kind": "class"
+      },
+      {
+        "name": "HistogramError",
+        "kind": "class"
+      },
+      {
+        "name": "iinfo",
+        "kind": "class"
+      },
+      {
+        "name": "KeyError",
+        "kind": "class"
+      },
+      {
+        "name": "Laguerre",
+        "kind": "class"
+      },
+      {
+        "name": "Legendre",
+        "kind": "class"
+      },
+      {
+        "name": "LinAlgError",
+        "kind": "class"
+      },
+      {
+        "name": "MaskedArray",
+        "kind": "class"
+      },
+      {
+        "name": "Memmap",
+        "kind": "class"
+      },
+      {
+        "name": "MT19937",
+        "kind": "class"
+      },
+      {
+        "name": "NDArray",
+        "kind": "class"
+      },
+      {
+        "name": "PCG64",
+        "kind": "class"
+      },
+      {
+        "name": "Philox",
+        "kind": "class"
+      },
+      {
+        "name": "PolyDomainWarning",
+        "kind": "class"
+      },
+      {
+        "name": "PolyError",
+        "kind": "class"
+      },
+      {
+        "name": "Polynomial",
+        "kind": "class"
+      },
+      {
+        "name": "recarray",
+        "kind": "class"
+      },
+      {
+        "name": "RecIndexError",
+        "kind": "class"
+      },
+      {
+        "name": "record",
+        "kind": "class"
+      },
+      {
+        "name": "SeedSequence",
+        "kind": "class"
+      },
+      {
+        "name": "SFC64",
+        "kind": "class"
+      },
+      {
+        "name": "Slice",
+        "kind": "class"
+      },
+      {
+        "name": "ValueError",
+        "kind": "class"
+      },
+      {
+        "name": "Vectorize",
+        "kind": "class"
+      },
+      {
+        "name": "BinMethod",
+        "kind": "type"
+      },
+      {
+        "name": "ClipMode",
+        "kind": "type"
+      },
+      {
+        "name": "Ellipsis",
+        "kind": "type"
+      },
+      {
+        "name": "FFTNorm",
+        "kind": "type"
+      },
+      {
+        "name": "IndexElement",
+        "kind": "type"
+      },
+      {
+        "name": "IsinKind",
+        "kind": "type"
+      },
+      {
+        "name": "MaskedConstant",
+        "kind": "type"
+      },
+      {
+        "name": "MaskType",
+        "kind": "type"
+      },
+      {
+        "name": "MemmapMode",
+        "kind": "type"
+      },
+      {
+        "name": "Newaxis",
+        "kind": "type"
+      },
+      {
+        "name": "SizeType",
+        "kind": "type"
+      },
+      {
+        "name": "SortKind",
+        "kind": "type"
+      },
+      {
+        "name": "TypedArrayType",
+        "kind": "type"
+      },
+      {
+        "name": "CLIP_CLIP",
+        "kind": "variable"
+      },
+      {
+        "name": "CLIP_RAISE",
+        "kind": "variable"
+      },
+      {
+        "name": "CLIP_WRAP",
+        "kind": "variable"
+      },
+      {
+        "name": "DTYPE_NAMES",
+        "kind": "variable"
+      },
+      {
+        "name": "DTYPE_SIZES",
+        "kind": "variable"
+      },
+      {
+        "name": "e",
+        "kind": "variable"
+      },
+      {
+        "name": "ellipsis",
+        "kind": "variable"
+      },
+      {
+        "name": "euler_gamma",
+        "kind": "variable"
+      },
+      {
+        "name": "fftModule",
+        "kind": "variable"
+      },
+      {
+        "name": "INDEX_TYPE_ELLIPSIS",
+        "kind": "variable"
+      },
+      {
+        "name": "INDEX_TYPE_INTEGER",
+        "kind": "variable"
+      },
+      {
+        "name": "INDEX_TYPE_NEWAXIS",
+        "kind": "variable"
+      },
+      {
+        "name": "INDEX_TYPE_SLICE",
+        "kind": "variable"
+      },
+      {
+        "name": "inf",
+        "kind": "variable"
+      },
+      {
+        "name": "ISIN_AUTO",
+        "kind": "variable"
+      },
+      {
+        "name": "ISIN_SORT",
+        "kind": "variable"
+      },
+      {
+        "name": "ISIN_TABLE",
+        "kind": "variable"
+      },
+      {
+        "name": "linalg",
+        "kind": "variable"
+      },
+      {
+        "name": "ma",
+        "kind": "variable"
+      },
+      {
+        "name": "maxpower",
+        "kind": "variable"
+      },
+      {
+        "name": "nan",
+        "kind": "variable"
+      },
+      {
+        "name": "NAN",
+        "kind": "variable"
+      },
+      {
+        "name": "NDARRAY_ALIGNED",
+        "kind": "variable"
+      },
+      {
+        "name": "NDARRAY_C_CONTIGUOUS",
+        "kind": "variable"
+      },
+      {
+        "name": "NDARRAY_F_CONTIGUOUS",
+        "kind": "variable"
+      },
+      {
+        "name": "NDARRAY_OWNDATA",
+        "kind": "variable"
+      },
+      {
+        "name": "NDARRAY_WRITEABLE",
+        "kind": "variable"
+      },
+      {
+        "name": "newaxis",
+        "kind": "variable"
+      },
+      {
+        "name": "NINF",
+        "kind": "variable"
+      },
+      {
+        "name": "NZERO",
+        "kind": "variable"
+      },
+      {
+        "name": "pi",
+        "kind": "variable"
+      },
+      {
+        "name": "PINF",
+        "kind": "variable"
+      },
+      {
+        "name": "PZERO",
+        "kind": "variable"
+      },
+      {
+        "name": "rec",
+        "kind": "variable"
+      },
+      {
+        "name": "strings",
+        "kind": "variable"
+      },
+      {
+        "name": "abs",
+        "kind": "function"
+      },
+      {
+        "name": "absolute",
+        "kind": "function"
+      },
+      {
+        "name": "add",
+        "kind": "function"
+      },
+      {
+        "name": "all",
+        "kind": "function"
+      },
+      {
+        "name": "allclose",
+        "kind": "function"
+      },
+      {
+        "name": "angle",
+        "kind": "function"
+      },
+      {
+        "name": "any",
+        "kind": "function"
+      },
+      {
+        "name": "append",
+        "kind": "function"
+      },
+      {
+        "name": "applyAlongAxis",
+        "kind": "function"
+      },
+      {
+        "name": "applyOverAxes",
+        "kind": "function"
+      },
+      {
+        "name": "arange",
+        "kind": "function"
+      },
+      {
+        "name": "arccos",
+        "kind": "function"
+      },
+      {
+        "name": "arccosh",
+        "kind": "function"
+      },
+      {
+        "name": "arcsin",
+        "kind": "function"
+      },
+      {
+        "name": "arcsinh",
+        "kind": "function"
+      },
+      {
+        "name": "arctan",
+        "kind": "function"
+      },
+      {
+        "name": "arctan2",
+        "kind": "function"
+      },
+      {
+        "name": "arctanh",
+        "kind": "function"
+      },
+      {
+        "name": "argmax",
+        "kind": "function"
+      },
+      {
+        "name": "argmin",
+        "kind": "function"
+      },
+      {
+        "name": "argpartition",
+        "kind": "function"
+      },
+      {
+        "name": "argsort",
+        "kind": "function"
+      },
+      {
+        "name": "argwhere",
+        "kind": "function"
+      },
+      {
+        "name": "array",
+        "kind": "function"
+      },
+      {
+        "name": "array_equal",
+        "kind": "function"
+      },
+      {
+        "name": "array_equiv",
+        "kind": "function"
+      },
+      {
+        "name": "array_split",
+        "kind": "function"
+      },
+      {
+        "name": "array2string",
+        "kind": "function"
+      },
+      {
+        "name": "arrayRepr",
+        "kind": "function"
+      },
+      {
+        "name": "arrayStr",
+        "kind": "function"
+      },
+      {
+        "name": "as_series",
+        "kind": "function"
+      },
+      {
+        "name": "asarray",
+        "kind": "function"
+      },
+      {
+        "name": "atleast_1d",
+        "kind": "function"
+      },
+      {
+        "name": "atleast_2d",
+        "kind": "function"
+      },
+      {
+        "name": "atleast_3d",
+        "kind": "function"
+      },
+      {
+        "name": "bartlett",
+        "kind": "function"
+      },
+      {
+        "name": "baseRepr",
+        "kind": "function"
+      },
+      {
+        "name": "baseReprArray",
+        "kind": "function"
+      },
+      {
+        "name": "binaryRepr",
+        "kind": "function"
+      },
+      {
+        "name": "binaryReprArray",
+        "kind": "function"
+      },
+      {
+        "name": "bincount",
+        "kind": "function"
+      },
+      {
+        "name": "bitwise_and",
+        "kind": "function"
+      },
+      {
+        "name": "bitwise_count",
+        "kind": "function"
+      },
+      {
+        "name": "bitwise_not",
+        "kind": "function"
+      },
+      {
+        "name": "bitwise_or",
+        "kind": "function"
+      },
+      {
+        "name": "bitwise_xor",
+        "kind": "function"
+      },
+      {
+        "name": "blackman",
+        "kind": "function"
+      },
+      {
+        "name": "block",
+        "kind": "function"
+      },
+      {
+        "name": "broadcastArrays",
+        "kind": "function"
+      },
+      {
+        "name": "broadcastShapes",
+        "kind": "function"
+      },
+      {
+        "name": "broadcastShapesMulti",
+        "kind": "function"
+      },
+      {
+        "name": "broadcastTo",
+        "kind": "function"
+      },
+      {
+        "name": "buildIndexSpecs",
+        "kind": "function"
+      },
+      {
+        "name": "cbrt",
+        "kind": "function"
+      },
+      {
+        "name": "ceil",
+        "kind": "function"
+      },
+      {
+        "name": "cheb2poly",
+        "kind": "function"
+      },
+      {
+        "name": "chebadd",
+        "kind": "function"
+      },
+      {
+        "name": "chebcompanion",
+        "kind": "function"
+      },
+      {
+        "name": "chebder",
+        "kind": "function"
+      },
+      {
+        "name": "chebdiv",
+        "kind": "function"
+      },
+      {
+        "name": "chebfit",
+        "kind": "function"
+      },
+      {
+        "name": "chebfromroots",
+        "kind": "function"
+      },
+      {
+        "name": "chebint",
+        "kind": "function"
+      },
+      {
+        "name": "chebinterpolate",
+        "kind": "function"
+      },
+      {
+        "name": "chebmul",
+        "kind": "function"
+      },
+      {
+        "name": "chebpow",
+        "kind": "function"
+      },
+      {
+        "name": "chebroots",
+        "kind": "function"
+      },
+      {
+        "name": "chebsub",
+        "kind": "function"
+      },
+      {
+        "name": "chebval",
+        "kind": "function"
+      },
+      {
+        "name": "chebval2d",
+        "kind": "function"
+      },
+      {
+        "name": "chebvander",
+        "kind": "function"
+      },
+      {
+        "name": "choose",
+        "kind": "function"
+      },
+      {
+        "name": "column_stack",
+        "kind": "function"
+      },
+      {
+        "name": "commonType",
+        "kind": "function"
+      },
+      {
+        "name": "compare_chararrays",
+        "kind": "function"
+      },
+      {
+        "name": "compress",
+        "kind": "function"
+      },
+      {
+        "name": "computeBroadcastStrides",
+        "kind": "function"
+      },
+      {
+        "name": "computeResultShape",
+        "kind": "function"
+      },
+      {
+        "name": "concatenate",
+        "kind": "function"
+      },
+      {
+        "name": "configureWasm",
+        "kind": "function"
+      },
+      {
+        "name": "conj",
+        "kind": "function"
+      },
+      {
+        "name": "conjugate",
+        "kind": "function"
+      },
+      {
+        "name": "copysign",
+        "kind": "function"
+      },
+      {
+        "name": "copyto",
+        "kind": "function"
+      },
+      {
+        "name": "cos",
+        "kind": "function"
+      },
+      {
+        "name": "cosh",
+        "kind": "function"
+      },
+      {
+        "name": "countNonzero",
+        "kind": "function"
+      },
+      {
+        "name": "cumprod",
+        "kind": "function"
+      },
+      {
+        "name": "cumsum",
+        "kind": "function"
+      },
+      {
+        "name": "decode",
+        "kind": "function"
+      },
+      {
+        "name": "default_rng",
+        "kind": "function"
+      },
+      {
+        "name": "deg2rad",
+        "kind": "function"
+      },
+      {
+        "name": "degrees",
+        "kind": "function"
+      },
+      {
+        "name": "deleteArr",
+        "kind": "function"
+      },
+      {
+        "name": "descrToDtype",
+        "kind": "function"
+      },
+      {
+        "name": "diag",
+        "kind": "function"
+      },
+      {
+        "name": "diag_indices",
+        "kind": "function"
+      },
+      {
+        "name": "diagonal",
+        "kind": "function"
+      },
+      {
+        "name": "digitize",
+        "kind": "function"
+      },
+      {
+        "name": "divide",
+        "kind": "function"
+      },
+      {
+        "name": "divmod",
+        "kind": "function"
+      },
+      {
+        "name": "dsplit",
+        "kind": "function"
+      },
+      {
+        "name": "dstack",
+        "kind": "function"
+      },
+      {
+        "name": "dtypeAlignment",
+        "kind": "function"
+      },
+      {
+        "name": "dtypeFromString",
+        "kind": "function"
+      },
+      {
+        "name": "dtypeSize",
+        "kind": "function"
+      },
+      {
+        "name": "dtypeToDescr",
+        "kind": "function"
+      },
+      {
+        "name": "dtypeToString",
+        "kind": "function"
+      },
+      {
+        "name": "dtypeToTypedArrayConstructor",
+        "kind": "function"
+      },
+      {
+        "name": "ediff1d",
+        "kind": "function"
+      },
+      {
+        "name": "einsum",
+        "kind": "function"
+      },
+      {
+        "name": "einsum_path",
+        "kind": "function"
+      },
+      {
+        "name": "empty",
+        "kind": "function"
+      },
+      {
+        "name": "empty_like",
+        "kind": "function"
+      },
+      {
+        "name": "encode",
+        "kind": "function"
+      },
+      {
+        "name": "endswith",
+        "kind": "function"
+      },
+      {
+        "name": "equal",
+        "kind": "function"
+      },
+      {
+        "name": "exp",
+        "kind": "function"
+      },
+      {
+        "name": "exp2",
+        "kind": "function"
+      },
+      {
+        "name": "expandEllipsis",
+        "kind": "function"
+      },
+      {
+        "name": "expandtabs",
+        "kind": "function"
+      },
+      {
+        "name": "expm1",
+        "kind": "function"
+      },
+      {
+        "name": "extract",
+        "kind": "function"
+      },
+      {
+        "name": "eye",
+        "kind": "function"
+      },
+      {
+        "name": "fft",
+        "kind": "function"
+      },
+      {
+        "name": "fft2",
+        "kind": "function"
+      },
+      {
+        "name": "fftfreq",
+        "kind": "function"
+      },
+      {
+        "name": "fftn",
+        "kind": "function"
+      },
+      {
+        "name": "fftshift",
+        "kind": "function"
+      },
+      {
+        "name": "flatnonzero",
+        "kind": "function"
+      },
+      {
+        "name": "flip",
+        "kind": "function"
+      },
+      {
+        "name": "fliplr",
+        "kind": "function"
+      },
+      {
+        "name": "flipud",
+        "kind": "function"
+      },
+      {
+        "name": "floor",
+        "kind": "function"
+      },
+      {
+        "name": "floor_divide",
+        "kind": "function"
+      },
+      {
+        "name": "fmax",
+        "kind": "function"
+      },
+      {
+        "name": "fmin",
+        "kind": "function"
+      },
+      {
+        "name": "fmod",
+        "kind": "function"
+      },
+      {
+        "name": "formatFloatPositional",
+        "kind": "function"
+      },
+      {
+        "name": "formatFloatScientific",
+        "kind": "function"
+      },
+      {
+        "name": "formatValue",
+        "kind": "function"
+      },
+      {
+        "name": "frexp",
+        "kind": "function"
+      },
+      {
+        "name": "fromBaseRepr",
+        "kind": "function"
+      },
+      {
+        "name": "fromBinaryRepr",
+        "kind": "function"
+      },
+      {
+        "name": "frombuffer",
+        "kind": "function"
+      },
+      {
+        "name": "fromfile",
+        "kind": "function"
+      },
+      {
+        "name": "frompyfunc",
+        "kind": "function"
+      },
+      {
+        "name": "fromregex",
+        "kind": "function"
+      },
+      {
+        "name": "full",
+        "kind": "function"
+      },
+      {
+        "name": "full_like",
+        "kind": "function"
+      },
+      {
+        "name": "gcd",
+        "kind": "function"
+      },
+      {
+        "name": "genfromtxt",
+        "kind": "function"
+      },
+      {
+        "name": "geomspace",
+        "kind": "function"
+      },
+      {
+        "name": "getBitGenerator",
+        "kind": "function"
+      },
+      {
+        "name": "getdomain",
+        "kind": "function"
+      },
+      {
+        "name": "getPrintoptions",
+        "kind": "function"
+      },
+      {
+        "name": "getWasmModule",
+        "kind": "function"
+      },
+      {
+        "name": "greater",
+        "kind": "function"
+      },
+      {
+        "name": "greater_equal",
+        "kind": "function"
+      },
+      {
+        "name": "hamming",
+        "kind": "function"
+      },
+      {
+        "name": "hanning",
+        "kind": "function"
+      },
+      {
+        "name": "heaviside",
+        "kind": "function"
+      },
+      {
+        "name": "herm2poly",
+        "kind": "function"
+      },
+      {
+        "name": "hermadd",
+        "kind": "function"
+      },
+      {
+        "name": "hermcompanion",
+        "kind": "function"
+      },
+      {
+        "name": "hermder",
+        "kind": "function"
+      },
+      {
+        "name": "hermdiv",
+        "kind": "function"
+      },
+      {
+        "name": "herme2poly",
+        "kind": "function"
+      },
+      {
+        "name": "hermeadd",
+        "kind": "function"
+      },
+      {
+        "name": "hermecompanion",
+        "kind": "function"
+      },
+      {
+        "name": "hermeder",
+        "kind": "function"
+      },
+      {
+        "name": "hermediv",
+        "kind": "function"
+      },
+      {
+        "name": "hermefit",
+        "kind": "function"
+      },
+      {
+        "name": "hermefromroots",
+        "kind": "function"
+      },
+      {
+        "name": "hermeint",
+        "kind": "function"
+      },
+      {
+        "name": "hermemul",
+        "kind": "function"
+      },
+      {
+        "name": "hermepow",
+        "kind": "function"
+      },
+      {
+        "name": "hermeroots",
+        "kind": "function"
+      },
+      {
+        "name": "hermesub",
+        "kind": "function"
+      },
+      {
+        "name": "hermeval",
+        "kind": "function"
+      },
+      {
+        "name": "hermevander",
+        "kind": "function"
+      },
+      {
+        "name": "hermfit",
+        "kind": "function"
+      },
+      {
+        "name": "hermfromroots",
+        "kind": "function"
+      },
+      {
+        "name": "hermint",
+        "kind": "function"
+      },
+      {
+        "name": "hermmul",
+        "kind": "function"
+      },
+      {
+        "name": "hermpow",
+        "kind": "function"
+      },
+      {
+        "name": "hermroots",
+        "kind": "function"
+      },
+      {
+        "name": "hermsub",
+        "kind": "function"
+      },
+      {
+        "name": "hermval",
+        "kind": "function"
+      },
+      {
+        "name": "hermvander",
+        "kind": "function"
+      },
+      {
+        "name": "hexRepr",
+        "kind": "function"
+      },
+      {
+        "name": "hfft",
+        "kind": "function"
+      },
+      {
+        "name": "histogram",
+        "kind": "function"
+      },
+      {
+        "name": "histogram_bin_edges",
+        "kind": "function"
+      },
+      {
+        "name": "histogram2d",
+        "kind": "function"
+      },
+      {
+        "name": "histogramdd",
+        "kind": "function"
+      },
+      {
+        "name": "hsplit",
+        "kind": "function"
+      },
+      {
+        "name": "hstack",
+        "kind": "function"
+      },
+      {
+        "name": "hypot",
+        "kind": "function"
+      },
+      {
+        "name": "i0",
+        "kind": "function"
+      },
+      {
+        "name": "identity",
+        "kind": "function"
+      },
+      {
+        "name": "ifft",
+        "kind": "function"
+      },
+      {
+        "name": "ifft2",
+        "kind": "function"
+      },
+      {
+        "name": "ifftn",
+        "kind": "function"
+      },
+      {
+        "name": "ifftshift",
+        "kind": "function"
+      },
+      {
+        "name": "ihfft",
+        "kind": "function"
+      },
+      {
+        "name": "imag",
+        "kind": "function"
+      },
+      {
+        "name": "in1d",
+        "kind": "function"
+      },
+      {
+        "name": "indices",
+        "kind": "function"
+      },
+      {
+        "name": "initRandom",
+        "kind": "function"
+      },
+      {
+        "name": "insert",
+        "kind": "function"
+      },
+      {
+        "name": "intersect1d",
+        "kind": "function"
+      },
+      {
+        "name": "invert",
+        "kind": "function"
+      },
+      {
+        "name": "irfft",
+        "kind": "function"
+      },
+      {
+        "name": "irfft2",
+        "kind": "function"
+      },
+      {
+        "name": "irfftn",
+        "kind": "function"
+      },
+      {
+        "name": "isalnum",
+        "kind": "function"
+      },
+      {
+        "name": "isalpha",
+        "kind": "function"
+      },
+      {
+        "name": "isBoolDType",
+        "kind": "function"
+      },
+      {
+        "name": "isclose",
+        "kind": "function"
+      },
+      {
+        "name": "iscomplex",
+        "kind": "function"
+      },
+      {
+        "name": "isComplexDType",
+        "kind": "function"
+      },
+      {
+        "name": "iscomplexobj",
+        "kind": "function"
+      },
+      {
+        "name": "isdecimal",
+        "kind": "function"
+      },
+      {
+        "name": "isdigit",
+        "kind": "function"
+      },
+      {
+        "name": "isfinite",
+        "kind": "function"
+      },
+      {
+        "name": "isFloatDType",
+        "kind": "function"
+      },
+      {
+        "name": "isfortran",
+        "kind": "function"
+      },
+      {
+        "name": "isin",
+        "kind": "function"
+      },
+      {
+        "name": "isinf",
+        "kind": "function"
+      },
+      {
+        "name": "isIntegerDType",
+        "kind": "function"
+      },
+      {
+        "name": "islower",
+        "kind": "function"
+      },
+      {
+        "name": "isnan",
+        "kind": "function"
+      },
+      {
+        "name": "isneginf",
+        "kind": "function"
+      },
+      {
+        "name": "isNode",
+        "kind": "function"
+      },
+      {
+        "name": "isnumeric",
+        "kind": "function"
+      },
+      {
+        "name": "isNumericDType",
+        "kind": "function"
+      },
+      {
+        "name": "isposinf",
+        "kind": "function"
+      },
+      {
+        "name": "isreal",
+        "kind": "function"
+      },
+      {
+        "name": "isrealobj",
+        "kind": "function"
+      },
+      {
+        "name": "isscalar",
+        "kind": "function"
+      },
+      {
+        "name": "isSignedDType",
+        "kind": "function"
+      },
+      {
+        "name": "isspace",
+        "kind": "function"
+      },
+      {
+        "name": "isStructuredDType",
+        "kind": "function"
+      },
+      {
+        "name": "istitle",
+        "kind": "function"
+      },
+      {
+        "name": "isupper",
+        "kind": "function"
+      },
+      {
+        "name": "isWasmLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "ix_",
+        "kind": "function"
+      },
+      {
+        "name": "kaiser",
+        "kind": "function"
+      },
+      {
+        "name": "lag2poly",
+        "kind": "function"
+      },
+      {
+        "name": "lagadd",
+        "kind": "function"
+      },
+      {
+        "name": "lagcompanion",
+        "kind": "function"
+      },
+      {
+        "name": "lagder",
+        "kind": "function"
+      },
+      {
+        "name": "lagdiv",
+        "kind": "function"
+      },
+      {
+        "name": "lagfit",
+        "kind": "function"
+      },
+      {
+        "name": "lagfromroots",
+        "kind": "function"
+      },
+      {
+        "name": "lagint",
+        "kind": "function"
+      },
+      {
+        "name": "lagmul",
+        "kind": "function"
+      },
+      {
+        "name": "lagpow",
+        "kind": "function"
+      },
+      {
+        "name": "lagroots",
+        "kind": "function"
+      },
+      {
+        "name": "lagsub",
+        "kind": "function"
+      },
+      {
+        "name": "lagval",
+        "kind": "function"
+      },
+      {
+        "name": "lagvander",
+        "kind": "function"
+      },
+      {
+        "name": "lcm",
+        "kind": "function"
+      },
+      {
+        "name": "ldexp",
+        "kind": "function"
+      },
+      {
+        "name": "left_shift",
+        "kind": "function"
+      },
+      {
+        "name": "leg2poly",
+        "kind": "function"
+      },
+      {
+        "name": "legadd",
+        "kind": "function"
+      },
+      {
+        "name": "legcompanion",
+        "kind": "function"
+      },
+      {
+        "name": "legder",
+        "kind": "function"
+      },
+      {
+        "name": "legdiv",
+        "kind": "function"
+      },
+      {
+        "name": "legfit",
+        "kind": "function"
+      },
+      {
+        "name": "legfromroots",
+        "kind": "function"
+      },
+      {
+        "name": "legint",
+        "kind": "function"
+      },
+      {
+        "name": "legmul",
+        "kind": "function"
+      },
+      {
+        "name": "legpow",
+        "kind": "function"
+      },
+      {
+        "name": "legroots",
+        "kind": "function"
+      },
+      {
+        "name": "legsub",
+        "kind": "function"
+      },
+      {
+        "name": "legval",
+        "kind": "function"
+      },
+      {
+        "name": "legvander",
+        "kind": "function"
+      },
+      {
+        "name": "less",
+        "kind": "function"
+      },
+      {
+        "name": "less_equal",
+        "kind": "function"
+      },
+      {
+        "name": "linspace",
+        "kind": "function"
+      },
+      {
+        "name": "listBitGenerators",
+        "kind": "function"
+      },
+      {
+        "name": "ljust",
+        "kind": "function"
+      },
+      {
+        "name": "load",
+        "kind": "function"
+      },
+      {
+        "name": "loadtxt",
+        "kind": "function"
+      },
+      {
+        "name": "loadWasmModule",
+        "kind": "function"
+      },
+      {
+        "name": "log",
+        "kind": "function"
+      },
+      {
+        "name": "log10",
+        "kind": "function"
+      },
+      {
+        "name": "log1p",
+        "kind": "function"
+      },
+      {
+        "name": "log2",
+        "kind": "function"
+      },
+      {
+        "name": "logaddexp",
+        "kind": "function"
+      },
+      {
+        "name": "logaddexp2",
+        "kind": "function"
+      },
+      {
+        "name": "logical_and",
+        "kind": "function"
+      },
+      {
+        "name": "logical_not",
+        "kind": "function"
+      },
+      {
+        "name": "logical_or",
+        "kind": "function"
+      },
+      {
+        "name": "logical_xor",
+        "kind": "function"
+      },
+      {
+        "name": "logspace",
+        "kind": "function"
+      },
+      {
+        "name": "lower",
+        "kind": "function"
+      },
+      {
+        "name": "lstrip",
+        "kind": "function"
+      },
+      {
+        "name": "mapdomain",
+        "kind": "function"
+      },
+      {
+        "name": "mapparms",
+        "kind": "function"
+      },
+      {
+        "name": "max",
+        "kind": "function"
+      },
+      {
+        "name": "maximum",
+        "kind": "function"
+      },
+      {
+        "name": "mean",
+        "kind": "function"
+      },
+      {
+        "name": "median",
+        "kind": "function"
+      },
+      {
+        "name": "meshgrid",
+        "kind": "function"
+      },
+      {
+        "name": "min",
+        "kind": "function"
+      },
+      {
+        "name": "minimum",
+        "kind": "function"
+      },
+      {
+        "name": "mod",
+        "kind": "function"
+      },
+      {
+        "name": "modf",
+        "kind": "function"
+      },
+      {
+        "name": "multiply",
+        "kind": "function"
+      },
+      {
+        "name": "nan_to_num",
+        "kind": "function"
+      },
+      {
+        "name": "nanargmax",
+        "kind": "function"
+      },
+      {
+        "name": "nanargmin",
+        "kind": "function"
+      },
+      {
+        "name": "nancumprod",
+        "kind": "function"
+      },
+      {
+        "name": "nancumsum",
+        "kind": "function"
+      },
+      {
+        "name": "nanmax",
+        "kind": "function"
+      },
+      {
+        "name": "nanmean",
+        "kind": "function"
+      },
+      {
+        "name": "nanmedian",
+        "kind": "function"
+      },
+      {
+        "name": "nanmin",
+        "kind": "function"
+      },
+      {
+        "name": "nanpercentile",
+        "kind": "function"
+      },
+      {
+        "name": "nanprod",
+        "kind": "function"
+      },
+      {
+        "name": "nanquantile",
+        "kind": "function"
+      },
+      {
+        "name": "nanstd",
+        "kind": "function"
+      },
+      {
+        "name": "nansum",
+        "kind": "function"
+      },
+      {
+        "name": "nanvar",
+        "kind": "function"
+      },
+      {
+        "name": "ndenumerate",
+        "kind": "function"
+      },
+      {
+        "name": "ndindex",
+        "kind": "function"
+      },
+      {
+        "name": "nditer",
+        "kind": "function"
+      },
+      {
+        "name": "negative",
+        "kind": "function"
+      },
+      {
+        "name": "nextafter",
+        "kind": "function"
+      },
+      {
+        "name": "nonzero",
+        "kind": "function"
+      },
+      {
+        "name": "not_equal",
+        "kind": "function"
+      },
+      {
+        "name": "octalRepr",
+        "kind": "function"
+      },
+      {
+        "name": "ones",
+        "kind": "function"
+      },
+      {
+        "name": "ones_like",
+        "kind": "function"
+      },
+      {
+        "name": "openMemmap",
+        "kind": "function"
+      },
+      {
+        "name": "pad",
+        "kind": "function"
+      },
+      {
+        "name": "partition",
+        "kind": "function"
+      },
+      {
+        "name": "piecewise",
+        "kind": "function"
+      },
+      {
+        "name": "place",
+        "kind": "function"
+      },
+      {
+        "name": "poly2cheb",
+        "kind": "function"
+      },
+      {
+        "name": "poly2herm",
+        "kind": "function"
+      },
+      {
+        "name": "poly2herme",
+        "kind": "function"
+      },
+      {
+        "name": "poly2lag",
+        "kind": "function"
+      },
+      {
+        "name": "poly2leg",
+        "kind": "function"
+      },
+      {
+        "name": "polyadd",
+        "kind": "function"
+      },
+      {
+        "name": "polycompanion",
+        "kind": "function"
+      },
+      {
+        "name": "polyder",
+        "kind": "function"
+      },
+      {
+        "name": "polydiv",
+        "kind": "function"
+      },
+      {
+        "name": "polyfit",
+        "kind": "function"
+      },
+      {
+        "name": "polyfromroots",
+        "kind": "function"
+      },
+      {
+        "name": "polyint",
+        "kind": "function"
+      },
+      {
+        "name": "polymul",
+        "kind": "function"
+      },
+      {
+        "name": "polypow",
+        "kind": "function"
+      },
+      {
+        "name": "polyroots",
+        "kind": "function"
+      },
+      {
+        "name": "polysub",
+        "kind": "function"
+      },
+      {
+        "name": "polyval",
+        "kind": "function"
+      },
+      {
+        "name": "polyval2d",
+        "kind": "function"
+      },
+      {
+        "name": "polyval3d",
+        "kind": "function"
+      },
+      {
+        "name": "polyvander",
+        "kind": "function"
+      },
+      {
+        "name": "polyvander2d",
+        "kind": "function"
+      },
+      {
+        "name": "positive",
+        "kind": "function"
+      },
+      {
+        "name": "power",
+        "kind": "function"
+      },
+      {
+        "name": "promoteTypes",
+        "kind": "function"
+      },
+      {
+        "name": "put",
+        "kind": "function"
+      },
+      {
+        "name": "put_along_axis",
+        "kind": "function"
+      },
+      {
+        "name": "putmask",
+        "kind": "function"
+      },
+      {
+        "name": "rad2deg",
+        "kind": "function"
+      },
+      {
+        "name": "radians",
+        "kind": "function"
+      },
+      {
+        "name": "randint",
+        "kind": "function"
+      },
+      {
+        "name": "randn",
+        "kind": "function"
+      },
+      {
+        "name": "random",
+        "kind": "function"
+      },
+      {
+        "name": "ravelMultiIndex",
+        "kind": "function"
+      },
+      {
+        "name": "real",
+        "kind": "function"
+      },
+      {
+        "name": "real_if_close",
+        "kind": "function"
+      },
+      {
+        "name": "reciprocal",
+        "kind": "function"
+      },
+      {
+        "name": "remainder",
+        "kind": "function"
+      },
+      {
+        "name": "repeat",
+        "kind": "function"
+      },
+      {
+        "name": "resetPrintoptions",
+        "kind": "function"
+      },
+      {
+        "name": "resize",
+        "kind": "function"
+      },
+      {
+        "name": "rfft",
+        "kind": "function"
+      },
+      {
+        "name": "rfft2",
+        "kind": "function"
+      },
+      {
+        "name": "rfftfreq",
+        "kind": "function"
+      },
+      {
+        "name": "rfftn",
+        "kind": "function"
+      },
+      {
+        "name": "rfind",
+        "kind": "function"
+      },
+      {
+        "name": "right_shift",
+        "kind": "function"
+      },
+      {
+        "name": "rindex",
+        "kind": "function"
+      },
+      {
+        "name": "rint",
+        "kind": "function"
+      },
+      {
+        "name": "rjust",
+        "kind": "function"
+      },
+      {
+        "name": "roll",
+        "kind": "function"
+      },
+      {
+        "name": "rot90",
+        "kind": "function"
+      },
+      {
+        "name": "round",
+        "kind": "function"
+      },
+      {
+        "name": "row_stack",
+        "kind": "function"
+      },
+      {
+        "name": "rpartition",
+        "kind": "function"
+      },
+      {
+        "name": "rstrip",
+        "kind": "function"
+      },
+      {
+        "name": "save",
+        "kind": "function"
+      },
+      {
+        "name": "savetxt",
+        "kind": "function"
+      },
+      {
+        "name": "searchsorted",
+        "kind": "function"
+      },
+      {
+        "name": "seed",
+        "kind": "function"
+      },
+      {
+        "name": "select",
+        "kind": "function"
+      },
+      {
+        "name": "setdiff1d",
+        "kind": "function"
+      },
+      {
+        "name": "setPrintoptions",
+        "kind": "function"
+      },
+      {
+        "name": "setxor1d",
+        "kind": "function"
+      },
+      {
+        "name": "shapesAreBroadcastable",
+        "kind": "function"
+      },
+      {
+        "name": "sign",
+        "kind": "function"
+      },
+      {
+        "name": "signbit",
+        "kind": "function"
+      },
+      {
+        "name": "sin",
+        "kind": "function"
+      },
+      {
+        "name": "sinc",
+        "kind": "function"
+      },
+      {
+        "name": "sinh",
+        "kind": "function"
+      },
+      {
+        "name": "slice",
+        "kind": "function"
+      },
+      {
+        "name": "sort",
+        "kind": "function"
+      },
+      {
+        "name": "sort_complex",
+        "kind": "function"
+      },
+      {
+        "name": "spacing",
+        "kind": "function"
+      },
+      {
+        "name": "split",
+        "kind": "function"
+      },
+      {
+        "name": "sqrt",
+        "kind": "function"
+      },
+      {
+        "name": "square",
+        "kind": "function"
+      },
+      {
+        "name": "stack",
+        "kind": "function"
+      },
+      {
+        "name": "startswith",
+        "kind": "function"
+      },
+      {
+        "name": "std",
+        "kind": "function"
+      },
+      {
+        "name": "str_len",
+        "kind": "function"
+      },
+      {
+        "name": "strAdd",
+        "kind": "function"
+      },
+      {
+        "name": "strCapitalize",
+        "kind": "function"
+      },
+      {
+        "name": "strCenter",
+        "kind": "function"
+      },
+      {
+        "name": "strCount",
+        "kind": "function"
+      },
+      {
+        "name": "strEqual",
+        "kind": "function"
+      },
+      {
+        "name": "strFind",
+        "kind": "function"
+      },
+      {
+        "name": "strGreater",
+        "kind": "function"
+      },
+      {
+        "name": "strGreaterEqual",
+        "kind": "function"
+      },
+      {
+        "name": "strIndex",
+        "kind": "function"
+      },
+      {
+        "name": "strip",
+        "kind": "function"
+      },
+      {
+        "name": "strLess",
+        "kind": "function"
+      },
+      {
+        "name": "strLessEqual",
+        "kind": "function"
+      },
+      {
+        "name": "strMultiply",
+        "kind": "function"
+      },
+      {
+        "name": "strNotEqual",
+        "kind": "function"
+      },
+      {
+        "name": "strPartition",
+        "kind": "function"
+      },
+      {
+        "name": "strReplace",
+        "kind": "function"
+      },
+      {
+        "name": "strTitle",
+        "kind": "function"
+      },
+      {
+        "name": "structDtypeSize",
+        "kind": "function"
+      },
+      {
+        "name": "subtract",
+        "kind": "function"
+      },
+      {
+        "name": "sum",
+        "kind": "function"
+      },
+      {
+        "name": "swapcase",
+        "kind": "function"
+      },
+      {
+        "name": "take",
+        "kind": "function"
+      },
+      {
+        "name": "take_along_axis",
+        "kind": "function"
+      },
+      {
+        "name": "takeFlat",
+        "kind": "function"
+      },
+      {
+        "name": "tan",
+        "kind": "function"
+      },
+      {
+        "name": "tanh",
+        "kind": "function"
+      },
+      {
+        "name": "tile",
+        "kind": "function"
+      },
+      {
+        "name": "tril_indices",
+        "kind": "function"
+      },
+      {
+        "name": "trim_zeros",
+        "kind": "function"
+      },
+      {
+        "name": "trimcoef",
+        "kind": "function"
+      },
+      {
+        "name": "trimseq",
+        "kind": "function"
+      },
+      {
+        "name": "triu_indices",
+        "kind": "function"
+      },
+      {
+        "name": "true_divide",
+        "kind": "function"
+      },
+      {
+        "name": "trunc",
+        "kind": "function"
+      },
+      {
+        "name": "typedArrayToDType",
+        "kind": "function"
+      },
+      {
+        "name": "union1d",
+        "kind": "function"
+      },
+      {
+        "name": "unique",
+        "kind": "function"
+      },
+      {
+        "name": "uniqueAll",
+        "kind": "function"
+      },
+      {
+        "name": "uniqueCounts",
+        "kind": "function"
+      },
+      {
+        "name": "uniqueIndex",
+        "kind": "function"
+      },
+      {
+        "name": "uniqueInverse",
+        "kind": "function"
+      },
+      {
+        "name": "uniqueValues",
+        "kind": "function"
+      },
+      {
+        "name": "unravelIndex",
+        "kind": "function"
+      },
+      {
+        "name": "unstack",
+        "kind": "function"
+      },
+      {
+        "name": "upper",
+        "kind": "function"
+      },
+      {
+        "name": "var_",
+        "kind": "function"
+      },
+      {
+        "name": "variance",
+        "kind": "function"
+      },
+      {
+        "name": "vectorize",
+        "kind": "function"
+      },
+      {
+        "name": "vsplit",
+        "kind": "function"
+      },
+      {
+        "name": "vstack",
+        "kind": "function"
+      },
+      {
+        "name": "where",
+        "kind": "function"
+      },
+      {
+        "name": "withPrintoptions",
+        "kind": "function"
+      },
+      {
+        "name": "zeros",
+        "kind": "function"
+      },
+      {
+        "name": "zeros_like",
+        "kind": "function"
+      },
+      {
+        "name": "zfill",
+        "kind": "function"
+      }
+    ],
+    "sciwasm": [
+      {
+        "name": "IntegrandFunction",
+        "kind": "type"
+      },
+      {
+        "name": "QuadFullResult",
+        "kind": "type"
+      },
+      {
+        "name": "QuadFullResultWithMessage",
+        "kind": "type"
+      },
+      {
+        "name": "QuadResult",
+        "kind": "type"
+      },
+      {
+        "name": "quad",
+        "kind": "function"
+      },
+      {
+        "name": "JacobianOption",
+        "kind": "type"
+      },
+      {
+        "name": "MinimizeMethod",
+        "kind": "type"
+      },
+      {
+        "name": "ObjectiveFunction",
+        "kind": "type"
+      },
+      {
+        "name": "minimize",
+        "kind": "function"
+      },
+      {
+        "name": "IdentityOperator",
+        "kind": "class"
+      },
+      {
+        "name": "LinearOperator",
+        "kind": "class"
+      },
+      {
+        "name": "LinearOperatorLike",
+        "kind": "type"
+      },
+      {
+        "name": "aslinearoperator",
+        "kind": "function"
+      },
+      {
+        "name": "bicgstab",
+        "kind": "function"
+      },
+      {
+        "name": "cg",
+        "kind": "function"
+      },
+      {
+        "name": "gmres",
+        "kind": "function"
+      },
+      {
+        "name": "isLinearOperator",
+        "kind": "function"
+      },
+      {
+        "name": "norm",
+        "kind": "function"
+      },
+      {
+        "name": "BSRMatrix",
+        "kind": "class"
+      },
+      {
+        "name": "CompressedSparseMatrix",
+        "kind": "class"
+      },
+      {
+        "name": "COOMatrix",
+        "kind": "class"
+      },
+      {
+        "name": "CSCMatrix",
+        "kind": "class"
+      },
+      {
+        "name": "CSRMatrix",
+        "kind": "class"
+      },
+      {
+        "name": "DIAMatrix",
+        "kind": "class"
+      },
+      {
+        "name": "DOKMatrix",
+        "kind": "class"
+      },
+      {
+        "name": "LILMatrix",
+        "kind": "class"
+      },
+      {
+        "name": "SparseMatrix",
+        "kind": "class"
+      },
+      {
+        "name": "SparseFormat",
+        "kind": "type"
+      },
+      {
+        "name": "block_diag",
+        "kind": "function"
+      },
+      {
+        "name": "bsr_matrix",
+        "kind": "function"
+      },
+      {
+        "name": "coo_matrix",
+        "kind": "function"
+      },
+      {
+        "name": "csc_matrix",
+        "kind": "function"
+      },
+      {
+        "name": "csr_matrix",
+        "kind": "function"
+      },
+      {
+        "name": "dia_matrix",
+        "kind": "function"
+      },
+      {
+        "name": "diags",
+        "kind": "function"
+      },
+      {
+        "name": "dok_matrix",
+        "kind": "function"
+      },
+      {
+        "name": "eye",
+        "kind": "function"
+      },
+      {
+        "name": "hstack",
+        "kind": "function"
+      },
+      {
+        "name": "issparse",
+        "kind": "function"
+      },
+      {
+        "name": "kron",
+        "kind": "function"
+      },
+      {
+        "name": "kronsum",
+        "kind": "function"
+      },
+      {
+        "name": "lil_matrix",
+        "kind": "function"
+      },
+      {
+        "name": "random",
+        "kind": "function"
+      },
+      {
+        "name": "tril",
+        "kind": "function"
+      },
+      {
+        "name": "triu",
+        "kind": "function"
+      },
+      {
+        "name": "vstack",
+        "kind": "function"
+      },
+      {
+        "name": "KDTree",
+        "kind": "class"
+      },
+      {
+        "name": "QueryResult",
+        "kind": "type"
+      },
+      {
+        "name": "comb",
+        "kind": "function"
+      },
+      {
+        "name": "factorial",
+        "kind": "function"
+      },
+      {
+        "name": "factorial2",
+        "kind": "function"
+      },
+      {
+        "name": "factorialk",
+        "kind": "function"
+      },
+      {
+        "name": "gamma",
+        "kind": "function"
+      },
+      {
+        "name": "gammaln",
+        "kind": "function"
+      },
+      {
+        "name": "perm",
+        "kind": "function"
+      },
+      {
+        "name": "rgamma",
+        "kind": "function"
+      },
+      {
+        "name": "describe",
+        "kind": "function"
+      },
+      {
+        "name": "kurtosis",
+        "kind": "function"
+      },
+      {
+        "name": "moment",
+        "kind": "function"
+      },
+      {
+        "name": "skew",
+        "kind": "function"
+      },
+      {
+        "name": "IntegrationWarning",
+        "kind": "class"
+      },
+      {
+        "name": "NotImplementedError",
+        "kind": "class"
+      },
+      {
+        "name": "SuperLUModuleFactory",
+        "kind": "type"
+      },
+      {
+        "name": "configureSuperLU",
+        "kind": "function"
+      },
+      {
+        "name": "configureWasm",
+        "kind": "function"
+      },
+      {
+        "name": "getSuperLUModule",
+        "kind": "function"
+      },
+      {
+        "name": "isSuperLULoaded",
+        "kind": "function"
+      },
+      {
+        "name": "isWasmLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "loadSuperLUModule",
+        "kind": "function"
+      },
+      {
+        "name": "loadWasmModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetSuperLUModule",
+        "kind": "function"
+      },
+      {
+        "name": "resetWasmModule",
+        "kind": "function"
+      }
+    ],
+    "symwasm": [
+      {
+        "name": "integrate",
+        "kind": "function"
+      },
+      {
+        "name": "limit",
+        "kind": "function"
+      },
+      {
+        "name": "summation",
+        "kind": "function"
+      },
+      {
+        "name": "Add",
+        "kind": "class"
+      },
+      {
+        "name": "Complex",
+        "kind": "class"
+      },
+      {
+        "name": "Constant",
+        "kind": "class"
+      },
+      {
+        "name": "Expr",
+        "kind": "class"
+      },
+      {
+        "name": "Float",
+        "kind": "class"
+      },
+      {
+        "name": "ImaginaryUnit",
+        "kind": "class"
+      },
+      {
+        "name": "Infinity_",
+        "kind": "class"
+      },
+      {
+        "name": "Integer",
+        "kind": "class"
+      },
+      {
+        "name": "Mul",
+        "kind": "class"
+      },
+      {
+        "name": "NaN_",
+        "kind": "class"
+      },
+      {
+        "name": "Pow",
+        "kind": "class"
+      },
+      {
+        "name": "Rational",
+        "kind": "class"
+      },
+      {
+        "name": "Symbol",
+        "kind": "class"
+      },
+      {
+        "name": "Catalan",
+        "kind": "variable"
+      },
+      {
+        "name": "E",
+        "kind": "variable"
+      },
+      {
+        "name": "EulerGamma",
+        "kind": "variable"
+      },
+      {
+        "name": "GoldenRatio",
+        "kind": "variable"
+      },
+      {
+        "name": "I",
+        "kind": "variable"
+      },
+      {
+        "name": "oo",
+        "kind": "variable"
+      },
+      {
+        "name": "pi",
+        "kind": "variable"
+      },
+      {
+        "name": "S",
+        "kind": "variable"
+      },
+      {
+        "name": "abs",
+        "kind": "function"
+      },
+      {
+        "name": "acos",
+        "kind": "function"
+      },
+      {
+        "name": "acosh",
+        "kind": "function"
+      },
+      {
+        "name": "acot",
+        "kind": "function"
+      },
+      {
+        "name": "acoth",
+        "kind": "function"
+      },
+      {
+        "name": "acsc",
+        "kind": "function"
+      },
+      {
+        "name": "acsch",
+        "kind": "function"
+      },
+      {
+        "name": "add",
+        "kind": "function"
+      },
+      {
+        "name": "arg",
+        "kind": "function"
+      },
+      {
+        "name": "as_real_imag",
+        "kind": "function"
+      },
+      {
+        "name": "asec",
+        "kind": "function"
+      },
+      {
+        "name": "asech",
+        "kind": "function"
+      },
+      {
+        "name": "asin",
+        "kind": "function"
+      },
+      {
+        "name": "asinh",
+        "kind": "function"
+      },
+      {
+        "name": "atan",
+        "kind": "function"
+      },
+      {
+        "name": "atan2",
+        "kind": "function"
+      },
+      {
+        "name": "atanh",
+        "kind": "function"
+      },
+      {
+        "name": "beta",
+        "kind": "function"
+      },
+      {
+        "name": "cbrt",
+        "kind": "function"
+      },
+      {
+        "name": "ceiling",
+        "kind": "function"
+      },
+      {
+        "name": "conjugate",
+        "kind": "function"
+      },
+      {
+        "name": "cos",
+        "kind": "function"
+      },
+      {
+        "name": "cosh",
+        "kind": "function"
+      },
+      {
+        "name": "cot",
+        "kind": "function"
+      },
+      {
+        "name": "coth",
+        "kind": "function"
+      },
+      {
+        "name": "csc",
+        "kind": "function"
+      },
+      {
+        "name": "csch",
+        "kind": "function"
+      },
+      {
+        "name": "denom",
+        "kind": "function"
+      },
+      {
+        "name": "diff",
+        "kind": "function"
+      },
+      {
+        "name": "digamma",
+        "kind": "function"
+      },
+      {
+        "name": "dirichlet_eta",
+        "kind": "function"
+      },
+      {
+        "name": "div",
+        "kind": "function"
+      },
+      {
+        "name": "erf",
+        "kind": "function"
+      },
+      {
+        "name": "erfc",
+        "kind": "function"
+      },
+      {
+        "name": "exp",
+        "kind": "function"
+      },
+      {
+        "name": "expand",
+        "kind": "function"
+      },
+      {
+        "name": "expand_complex",
+        "kind": "function"
+      },
+      {
+        "name": "expand_trig",
+        "kind": "function"
+      },
+      {
+        "name": "exprFromWasm",
+        "kind": "function"
+      },
+      {
+        "name": "floor",
+        "kind": "function"
+      },
+      {
+        "name": "gamma",
+        "kind": "function"
+      },
+      {
+        "name": "getWasm",
+        "kind": "function"
+      },
+      {
+        "name": "im",
+        "kind": "function"
+      },
+      {
+        "name": "kronecker_delta",
+        "kind": "function"
+      },
+      {
+        "name": "lambertw",
+        "kind": "function"
+      },
+      {
+        "name": "loadWasmModule",
+        "kind": "function"
+      },
+      {
+        "name": "log",
+        "kind": "function"
+      },
+      {
+        "name": "loggamma",
+        "kind": "function"
+      },
+      {
+        "name": "lowergamma",
+        "kind": "function"
+      },
+      {
+        "name": "Max",
+        "kind": "function"
+      },
+      {
+        "name": "Min",
+        "kind": "function"
+      },
+      {
+        "name": "mul",
+        "kind": "function"
+      },
+      {
+        "name": "neg",
+        "kind": "function"
+      },
+      {
+        "name": "numer",
+        "kind": "function"
+      },
+      {
+        "name": "polygamma",
+        "kind": "function"
+      },
+      {
+        "name": "pow",
+        "kind": "function"
+      },
+      {
+        "name": "powsimp",
+        "kind": "function"
+      },
+      {
+        "name": "radsimp",
+        "kind": "function"
+      },
+      {
+        "name": "re",
+        "kind": "function"
+      },
+      {
+        "name": "rewrite_as_cos",
+        "kind": "function"
+      },
+      {
+        "name": "rewrite_as_exp",
+        "kind": "function"
+      },
+      {
+        "name": "rewrite_as_sin",
+        "kind": "function"
+      },
+      {
+        "name": "sec",
+        "kind": "function"
+      },
+      {
+        "name": "sech",
+        "kind": "function"
+      },
+      {
+        "name": "series",
+        "kind": "function"
+      },
+      {
+        "name": "sign",
+        "kind": "function"
+      },
+      {
+        "name": "simplify",
+        "kind": "function"
+      },
+      {
+        "name": "sin",
+        "kind": "function"
+      },
+      {
+        "name": "sinh",
+        "kind": "function"
+      },
+      {
+        "name": "sqrt",
+        "kind": "function"
+      },
+      {
+        "name": "sub",
+        "kind": "function"
+      },
+      {
+        "name": "symbols",
+        "kind": "function"
+      },
+      {
+        "name": "tan",
+        "kind": "function"
+      },
+      {
+        "name": "tanh",
+        "kind": "function"
+      },
+      {
+        "name": "trigsimp",
+        "kind": "function"
+      },
+      {
+        "name": "uppergamma",
+        "kind": "function"
+      },
+      {
+        "name": "zeta",
+        "kind": "function"
+      },
+      {
+        "name": "Matrix",
+        "kind": "class"
+      },
+      {
+        "name": "diag",
+        "kind": "function"
+      },
+      {
+        "name": "eye",
+        "kind": "function"
+      },
+      {
+        "name": "ones",
+        "kind": "function"
+      },
+      {
+        "name": "zeros",
+        "kind": "function"
+      },
+      {
+        "name": "latex",
+        "kind": "function"
+      },
+      {
+        "name": "mathml",
+        "kind": "function"
+      },
+      {
+        "name": "pretty",
+        "kind": "function"
+      },
+      {
+        "name": "sstr",
+        "kind": "function"
+      },
+      {
+        "name": "dsolve",
+        "kind": "function"
+      },
+      {
+        "name": "linsolve",
+        "kind": "function"
+      },
+      {
+        "name": "nonlinsolve",
+        "kind": "function"
+      },
+      {
+        "name": "solve",
+        "kind": "function"
+      },
+      {
+        "name": "solveset",
+        "kind": "function"
+      },
+      {
+        "name": "NotImplementedError",
+        "kind": "class"
+      }
+    ]
+  },
+  "tsToWasm": {
+    "numwasm": {
+      "SeedSequence.generateState": [
+        "_seed_seq_generate_words"
+      ],
+      "SeedSequence": [
+        "_seed_seq_generate_words"
+      ],
+      "PCG64.next_uint64": [
+        "_pcg64_next64_parts"
+      ],
+      "PCG64.next_uint32": [
+        "_pcg64_next32"
+      ],
+      "PCG64.next_double": [
+        "_pcg64_next_double"
+      ],
+      "PCG64.advance": [
+        "_pcg64_advance"
+      ],
+      "PCG64.getState": [
+        "_pcg64_get_state"
+      ],
+      "PCG64.setState": [
+        "_pcg64_set_state"
+      ],
+      "PCG64.dispose": [
+        "_pcg64_free"
+      ],
+      "PCG64.if": [
+        "_pcg64_free"
+      ],
+      "PCG64": [
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_free"
+      ],
+      "SFC64.next_uint64": [
+        "_sfc64_next64_parts"
+      ],
+      "SFC64.next_uint32": [
+        "_sfc64_next32"
+      ],
+      "SFC64.next_double": [
+        "_sfc64_next_double"
+      ],
+      "SFC64.getState": [
+        "_sfc64_get_state"
+      ],
+      "SFC64.setState": [
+        "_sfc64_set_state"
+      ],
+      "SFC64.dispose": [
+        "_sfc64_free"
+      ],
+      "SFC64.if": [
+        "_sfc64_free"
+      ],
+      "SFC64": [
+        "_sfc64_next64_parts",
+        "_sfc64_next32",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_free"
+      ],
+      "MT19937.next_uint64": [
+        "_mt19937_next64_parts"
+      ],
+      "MT19937.next_uint32": [
+        "_mt19937_next32"
+      ],
+      "MT19937.next_double": [
+        "_mt19937_next_double"
+      ],
+      "MT19937.getState": [
+        "_mt19937_get_state"
+      ],
+      "MT19937.setState": [
+        "_mt19937_set_state"
+      ],
+      "MT19937.dispose": [
+        "_mt19937_free"
+      ],
+      "MT19937.if": [
+        "_mt19937_free"
+      ],
+      "MT19937": [
+        "_mt19937_next64_parts",
+        "_mt19937_next32",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_free"
+      ],
+      "Philox.next_uint64": [
+        "_philox_next64_parts"
+      ],
+      "Philox.next_uint32": [
+        "_philox_next32"
+      ],
+      "Philox.next_double": [
+        "_philox_next_double"
+      ],
+      "Philox.jump": [
+        "_philox_jump"
+      ],
+      "Philox.advance": [
+        "_philox_advance"
+      ],
+      "Philox.getState": [
+        "_philox_get_state"
+      ],
+      "Philox.setState": [
+        "_philox_set_state"
+      ],
+      "Philox.dispose": [
+        "_philox_free"
+      ],
+      "Philox.if": [
+        "_philox_free"
+      ],
+      "Philox": [
+        "_philox_next64_parts",
+        "_philox_next32",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_free"
+      ],
+      "Generator.if": [
+        "_random_hypergeometric32"
+      ],
+      "Generator.random": [
+        "_random_uniform_fill",
+        "_random_uniform_fill_f"
+      ],
+      "Generator.integers": [
+        "_random_integers32",
+        "_random_integers32_fill"
+      ],
+      "Generator.standard_normal": [
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f"
+      ],
+      "Generator.standard_exponential": [
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill"
+      ],
+      "Generator.standard_gamma": [
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill"
+      ],
+      "Generator.beta": [
+        "_random_beta",
+        "_random_beta_fill"
+      ],
+      "Generator.f": [
+        "_random_f"
+      ],
+      "Generator.standard_t": [
+        "_random_standard_t"
+      ],
+      "Generator.standard_cauchy": [
+        "_random_standard_cauchy"
+      ],
+      "Generator.pareto": [
+        "_random_pareto"
+      ],
+      "Generator.weibull": [
+        "_random_weibull"
+      ],
+      "Generator.laplace": [
+        "_random_laplace"
+      ],
+      "Generator.rayleigh": [
+        "_random_rayleigh"
+      ],
+      "Generator.binomial": [
+        "_random_binomial32"
+      ],
+      "Generator.for": [
+        "_random_hypergeometric32"
+      ],
+      "Generator.poisson": [
+        "_random_poisson32"
+      ],
+      "Generator.geometric": [
+        "_random_geometric32"
+      ],
+      "Generator.negative_binomial": [
+        "_random_negative_binomial32"
+      ],
+      "Generator.hypergeometric": [
+        "_random_hypergeometric32"
+      ],
+      "Generator": [
+        "_pcg64_init_bitgen",
+        "_sfc64_init_bitgen",
+        "_mt19937_init_bitgen",
+        "_philox_init_bitgen",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_integers32",
+        "_random_integers32_fill",
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill",
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_laplace",
+        "_random_rayleigh",
+        "_random_binomial32",
+        "_random_poisson32",
+        "_random_geometric32",
+        "_random_negative_binomial32",
+        "_random_hypergeometric32"
+      ],
+      "sort": [
+        "_ndarray_sort_copy"
+      ],
+      "argsort": [
+        "_ndarray_argsort"
+      ],
+      "partition": [
+        "_ndarray_partition"
+      ],
+      "argpartition": [
+        "_ndarray_argpartition"
+      ],
+      "sum": [
+        "_ndarray_sum_axis"
+      ],
+      "mean": [
+        "_ndarray_mean_axis"
+      ],
+      "variance": [
+        "_ndarray_var_axis"
+      ],
+      "std": [
+        "_ndarray_std_axis"
+      ],
+      "min": [
+        "_ndarray_min_axis"
+      ],
+      "max": [
+        "_ndarray_max_axis"
+      ],
+      "median": [
+        "_ndarray_median"
+      ],
+      "argmax": [
+        "_ndarray_argmax"
+      ],
+      "argmin": [
+        "_ndarray_argmin"
+      ],
+      "searchsorted": [
+        "_ndarray_searchsorted"
+      ],
+      "cumsum": [
+        "_ndarray_cumsum_axis"
+      ],
+      "cumprod": [
+        "_ndarray_cumprod_axis"
+      ],
+      "nancumsum": [
+        "_ndarray_nancumsum_axis"
+      ],
+      "nancumprod": [
+        "_ndarray_nancumprod_axis"
+      ]
+    },
+    "sciwasm": {
+      "minimizeBFGS": [
+        "_bfgs_minimize"
+      ],
+      "minimizeLBFGSB": [
+        "_setulb"
+      ],
+      "minimizeNelderMead": [
+        "_nelder_mead_minimize"
+      ],
+      "BSRMatrix.dot": [
+        "_sp_bsr_matvec_f64"
+      ],
+      "BSRMatrix.tocsr": [
+        "_sp_bsr_tocsr_f64"
+      ],
+      "BSRMatrix.diagonal": [
+        "_sp_bsr_diagonal_f64"
+      ],
+      "BSRMatrix.transpose": [
+        "_sp_bsr_transpose_f64"
+      ],
+      "BSRMatrix": [
+        "_sp_bsr_matvec_f64",
+        "_sp_bsr_tocsr_f64",
+        "_sp_bsr_diagonal_f64",
+        "_sp_bsr_transpose_f64"
+      ],
+      "CompressedSparseMatrix.toArray": [
+        "_sp_csr_todense_f64"
+      ],
+      "CompressedSparseMatrix.diagonal": [
+        "_sp_csr_diagonal_f64"
+      ],
+      "CompressedSparseMatrix.dot": [
+        "_sp_csr_matvec_f64",
+        "_sp_csc_matvec_f64"
+      ],
+      "CompressedSparseMatrix.if": [
+        "_sp_csr_matvec_f64"
+      ],
+      "CompressedSparseMatrix.matmul": [
+        "_sp_csr_matmat_maxnnz",
+        "_sp_csr_matmat_f64"
+      ],
+      "CompressedSparseMatrix.sortIndices": [
+        "_sp_csr_sort_indices_f64"
+      ],
+      "CompressedSparseMatrix.sumDuplicates": [
+        "_sp_csr_sum_duplicates_f64"
+      ],
+      "CompressedSparseMatrix.eliminateZeros": [
+        "_sp_csr_eliminate_zeros_f64"
+      ],
+      "CompressedSparseMatrix": [
+        "_sp_csr_todense_f64",
+        "_sp_csr_diagonal_f64",
+        "_sp_csr_matvec_f64",
+        "_sp_csc_matvec_f64",
+        "_sp_csr_matmat_maxnnz",
+        "_sp_csr_matmat_f64",
+        "_sp_csr_sort_indices_f64",
+        "_sp_csr_sum_duplicates_f64",
+        "_sp_csr_eliminate_zeros_f64"
+      ],
+      "tril": [
+        "_sp_coo_tril_f64_entry"
+      ],
+      "triu": [
+        "_sp_coo_triu_f64_entry"
+      ],
+      "hstack": [
+        "_sp_coo_hstack_f64_entry"
+      ],
+      "vstack": [
+        "_sp_coo_vstack_f64_entry"
+      ],
+      "block_diag": [
+        "_sp_coo_block_diag_f64_entry"
+      ],
+      "kron": [
+        "_sp_coo_kron_f64_entry"
+      ],
+      "random": [
+        "_sp_coo_random_f64_entry"
+      ],
+      "COOMatrix.tocsr": [
+        "_sp_coo_tocsr_f64"
+      ],
+      "COOMatrix.toArray": [
+        "_sp_coo_todense_f64"
+      ],
+      "COOMatrix.dot": [
+        "_sp_coo_matvec_f64"
+      ],
+      "COOMatrix": [
+        "_sp_coo_tocsr_f64",
+        "_sp_coo_todense_f64",
+        "_sp_coo_matvec_f64"
+      ],
+      "CSCMatrix.tocsr": [
+        "_sp_csr_tocsc_f64"
+      ],
+      "CSCMatrix": [
+        "_sp_csr_tocsc_f64"
+      ],
+      "CSRMatrix.tocsc": [
+        "_sp_csr_tocsc_f64"
+      ],
+      "CSRMatrix": [
+        "_sp_csr_tocsc_f64"
+      ],
+      "DIAMatrix.dot": [
+        "_sp_dia_matvec_f64"
+      ],
+      "DIAMatrix.tocsr": [
+        "_sp_dia_tocsr_f64"
+      ],
+      "DIAMatrix": [
+        "_sp_dia_matvec_f64",
+        "_sp_dia_tocsr_f64"
+      ],
+      "KDTree.query": [
+        "_kdtree_query_knn"
+      ],
+      "KDTree.query_ball_point": [
+        "_kdtree_query_ball_point"
+      ],
+      "KDTree.dispose": [
+        "_kdtree_free"
+      ],
+      "KDTree": [
+        "_kdtree_query_knn",
+        "_kdtree_query_ball_point",
+        "_kdtree_free"
+      ],
+      "comb": [
+        "_wasm_binom",
+        "_wasm_binom_exact"
+      ],
+      "gamma": [
+        "_wasm_gamma"
+      ],
+      "gammaln": [
+        "_wasm_gammaln"
+      ],
+      "rgamma": [
+        "_wasm_rgamma"
+      ],
+      "perm": [
+        "_wasm_perm_exact",
+        "_wasm_poch"
+      ]
+    },
+    "symwasm": {
+      "add": [
+        "_basic_add"
+      ],
+      "sub": [
+        "_basic_sub"
+      ],
+      "mul": [
+        "_basic_mul"
+      ],
+      "div": [
+        "_basic_div"
+      ],
+      "pow": [
+        "_basic_pow"
+      ],
+      "neg": [
+        "_basic_neg"
+      ],
+      "re": [
+        "_complex_base_real_part"
+      ],
+      "im": [
+        "_complex_base_imaginary_part"
+      ],
+      "Max": [
+        "_vecbasic_push_back",
+        "_basic_max"
+      ],
+      "Min": [
+        "_vecbasic_push_back",
+        "_basic_min"
+      ],
+      "diff": [
+        "_basic_diff"
+      ],
+      "series": [
+        "_basic_series"
+      ],
+      "expand": [
+        "_basic_expand"
+      ],
+      "simplify": [
+        "_basic_simplify"
+      ],
+      "numer": [
+        "_basic_as_numer_denom"
+      ],
+      "denom": [
+        "_basic_as_numer_denom"
+      ],
+      "rewrite_as_exp": [
+        "_basic_rewrite_as_exp"
+      ],
+      "rewrite_as_sin": [
+        "_basic_rewrite_as_sin"
+      ],
+      "rewrite_as_cos": [
+        "_basic_rewrite_as_cos"
+      ],
+      "Expr.subs": [
+        "_basic_subs2"
+      ],
+      "Expr.if": [
+        "_real_double_get_d"
+      ],
+      "Expr.Integer": [
+        "_basic_evalf"
+      ],
+      "Expr.evalfNumber": [
+        "_real_double_get_d"
+      ],
+      "Expr.free_symbols": [
+        "_basic_free_symbols"
+      ],
+      "Expr.get_args": [
+        "_basic_get_args"
+      ],
+      "Expr": [
+        "_basic_subs2",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args"
+      ],
+      "eye": [
+        "_dense_matrix_eye"
+      ],
+      "zeros": [
+        "_dense_matrix_zeros"
+      ],
+      "ones": [
+        "_dense_matrix_ones"
+      ],
+      "diag": [
+        "_vecbasic_push_back",
+        "_dense_matrix_diag"
+      ],
+      "Matrix.for": [
+        "_vecbasic_push_back"
+      ],
+      "Matrix.get": [
+        "_dense_matrix_get_basic"
+      ],
+      "Matrix.set": [
+        "_dense_matrix_set_basic"
+      ],
+      "Matrix.equals": [
+        "_dense_matrix_eq"
+      ],
+      "Matrix": [
+        "_vecbasic_push_back",
+        "_dense_matrix_get_basic",
+        "_dense_matrix_set_basic",
+        "_dense_matrix_eq"
+      ],
+      "createBasic": [
+        "_basic_new_heap"
+      ],
+      "createDenseMatrix": [
+        "_dense_matrix_new"
+      ],
+      "createDenseMatrixWithSize": [
+        "_dense_matrix_new_rows_cols"
+      ],
+      "SymEngineObject.free": [
+        "_basic_free_heap"
+      ],
+      "SymEngineObject.if": [
+        "_basic_free_heap"
+      ],
+      "SymEngineObject.toString": [
+        "_basic_str"
+      ],
+      "SymEngineObject.getType": [
+        "_basic_get_type"
+      ],
+      "SymEngineObject.equals": [
+        "_basic_eq"
+      ],
+      "SymEngineObject.hash": [
+        "_basic_hash"
+      ],
+      "SymEngineObject": [
+        "_basic_free_heap",
+        "_basic_str",
+        "_basic_get_type",
+        "_basic_eq",
+        "_basic_hash"
+      ],
+      "SymEngineSet.free": [
+        "_setbasic_free"
+      ],
+      "SymEngineSet.if": [
+        "_setbasic_free"
+      ],
+      "SymEngineSet.size": [
+        "_setbasic_size"
+      ],
+      "SymEngineSet.get": [
+        "_basic_new_heap",
+        "_setbasic_get"
+      ],
+      "SymEngineSet": [
+        "_setbasic_free",
+        "_setbasic_size",
+        "_basic_new_heap",
+        "_setbasic_get"
+      ],
+      "SymEngineVec.free": [
+        "_vecbasic_free"
+      ],
+      "SymEngineVec.if": [
+        "_vecbasic_free"
+      ],
+      "SymEngineVec.size": [
+        "_vecbasic_size"
+      ],
+      "SymEngineVec.get": [
+        "_basic_new_heap",
+        "_vecbasic_get"
+      ],
+      "SymEngineVec.push": [
+        "_vecbasic_push_back"
+      ],
+      "SymEngineVec": [
+        "_vecbasic_free",
+        "_vecbasic_size",
+        "_basic_new_heap",
+        "_vecbasic_get",
+        "_vecbasic_push_back"
+      ],
+      "SymEngineMap.free": [
+        "_mapbasicbasic_free"
+      ],
+      "SymEngineMap.if": [
+        "_mapbasicbasic_free"
+      ],
+      "SymEngineMap.insert": [
+        "_mapbasicbasic_insert"
+      ],
+      "SymEngineMap.size": [
+        "_mapbasicbasic_size"
+      ],
+      "SymEngineMap": [
+        "_mapbasicbasic_free",
+        "_mapbasicbasic_insert",
+        "_mapbasicbasic_size"
+      ],
+      "DenseMatrixObject.free": [
+        "_dense_matrix_free"
+      ],
+      "DenseMatrixObject.if": [
+        "_dense_matrix_free"
+      ],
+      "DenseMatrixObject.toString": [
+        "_dense_matrix_str"
+      ],
+      "DenseMatrixObject.rows": [
+        "_dense_matrix_rows"
+      ],
+      "DenseMatrixObject.cols": [
+        "_dense_matrix_cols"
+      ],
+      "DenseMatrixObject": [
+        "_dense_matrix_free",
+        "_dense_matrix_str",
+        "_dense_matrix_rows",
+        "_dense_matrix_cols"
+      ]
+    }
+  }
+}

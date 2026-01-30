@@ -408,18 +408,19 @@ Each distribution needs: `pdf`/`pmf`, `cdf`, `ppf`, `rvs`, `mean`, `std`, `var`,
 - ✅ `issparse(x)` — Check if sparse
 
 ### Priority Additions — `sparse.linalg`
-- ⬜ `linalg.spsolve(A, b)` — Solve sparse system (requires SuperLU)
-- ⬜ `linalg.eigs(A, k?)` — Eigenvalues (sparse, largest) (requires ARPACK)
-- ⬜ `linalg.eigsh(A, k?)` — Eigenvalues (sparse, symmetric) (requires ARPACK)
-- ⬜ `linalg.svds(A, k?)` — SVD (sparse, truncated) (requires ARPACK)
-- ⬜ `linalg.inv(A)` — Sparse inverse (requires spsolve)
+- ✅ `linalg.spsolve(A, b)` — Solve sparse system (SuperLU)
+- ✅ `linalg.eigs(A, k?)` — Eigenvalues (sparse, largest) (ARPACK)
+- ✅ `linalg.eigsh(A, k?)` — Eigenvalues (sparse, symmetric) (ARPACK)
+- ✅ `linalg.svds(A, k?)` — SVD (sparse, truncated) (ARPACK)
+- ✅ `linalg.inv(A)` — Sparse inverse (via spsolve)
 - ✅ `linalg.norm(x)` — Sparse norm (Frobenius, 1, inf, -1, -inf)
-- ⬜ `linalg.expm(A)` — Sparse matrix exponential
+- ✅ `linalg.expm(A)` — Sparse matrix exponential (Pade approximation)
+- ✅ `linalg.expm_multiply(A, v)` — Action of matrix exponential on vector (Krylov)
 - ✅ `linalg.cg(A, b)` — Conjugate gradient solver
 - ✅ `linalg.gmres(A, b)` — GMRES solver
 - ✅ `linalg.bicgstab(A, b)` — BiCGSTAB solver
-- ⬜ `linalg.splu(A)` — Sparse LU decomposition (requires SuperLU)
-- ⬜ `linalg.spilu(A)` — Sparse incomplete LU (requires SuperLU)
+- ✅ `linalg.splu(A)` — Sparse LU decomposition (SuperLU)
+- ✅ `linalg.spilu(A)` — Sparse incomplete LU (SuperLU)
 - ✅ `linalg.LinearOperator` — Abstract linear operator
 - ✅ `linalg.aslinearoperator(A)` — Convert to LinearOperator
 - ✅ `linalg.IdentityOperator(n)` — Identity operator
