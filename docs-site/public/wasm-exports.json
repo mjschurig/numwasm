@@ -7,6 +7,13 @@
         "_ndarray_empty",
         "_ndarray_full",
         "_ndarray_scalar",
+        "_ndarray_arange",
+        "_ndarray_linspace",
+        "_ndarray_eye",
+        "_ndarray_tri",
+        "_ndarray_tril",
+        "_ndarray_triu",
+        "_ndarray_vander",
         "_ndarray_free",
         "_ndarray_copy",
         "_ndarray_astype",
@@ -1668,7 +1675,23 @@
         "kind": "function"
       },
       {
+        "name": "asanyarray",
+        "kind": "function"
+      },
+      {
         "name": "asarray",
+        "kind": "function"
+      },
+      {
+        "name": "asarray_chkfinite",
+        "kind": "function"
+      },
+      {
+        "name": "ascontiguousarray",
+        "kind": "function"
+      },
+      {
+        "name": "asfortranarray",
         "kind": "function"
       },
       {
@@ -1872,6 +1895,10 @@
         "kind": "function"
       },
       {
+        "name": "copy",
+        "kind": "function"
+      },
+      {
         "name": "copysign",
         "kind": "function"
       },
@@ -1929,6 +1956,10 @@
       },
       {
         "name": "diag_indices",
+        "kind": "function"
+      },
+      {
+        "name": "diagflat",
         "kind": "function"
       },
       {
@@ -2020,6 +2051,10 @@
         "kind": "function"
       },
       {
+        "name": "expand_dims",
+        "kind": "function"
+      },
+      {
         "name": "expandEllipsis",
         "kind": "function"
       },
@@ -2061,6 +2096,10 @@
       },
       {
         "name": "flatnonzero",
+        "kind": "function"
+      },
+      {
+        "name": "flatten",
         "kind": "function"
       },
       {
@@ -2125,6 +2164,14 @@
       },
       {
         "name": "fromfile",
+        "kind": "function"
+      },
+      {
+        "name": "fromfunction",
+        "kind": "function"
+      },
+      {
+        "name": "fromiter",
         "kind": "function"
       },
       {
@@ -2792,6 +2839,10 @@
         "kind": "function"
       },
       {
+        "name": "moveaxis",
+        "kind": "function"
+      },
+      {
         "name": "multiply",
         "kind": "function"
       },
@@ -2905,6 +2956,10 @@
       },
       {
         "name": "partition",
+        "kind": "function"
+      },
+      {
+        "name": "permute_dims",
         "kind": "function"
       },
       {
@@ -3044,6 +3099,10 @@
         "kind": "function"
       },
       {
+        "name": "ravel",
+        "kind": "function"
+      },
+      {
         "name": "ravelMultiIndex",
         "kind": "function"
       },
@@ -3069,6 +3128,10 @@
       },
       {
         "name": "resetPrintoptions",
+        "kind": "function"
+      },
+      {
+        "name": "reshape",
         "kind": "function"
       },
       {
@@ -3113,6 +3176,10 @@
       },
       {
         "name": "roll",
+        "kind": "function"
+      },
+      {
+        "name": "rollaxis",
         "kind": "function"
       },
       {
@@ -3220,6 +3287,10 @@
         "kind": "function"
       },
       {
+        "name": "squeeze",
+        "kind": "function"
+      },
+      {
         "name": "stack",
         "kind": "function"
       },
@@ -3316,6 +3387,10 @@
         "kind": "function"
       },
       {
+        "name": "swapaxes",
+        "kind": "function"
+      },
+      {
         "name": "swapcase",
         "kind": "function"
       },
@@ -3344,6 +3419,18 @@
         "kind": "function"
       },
       {
+        "name": "transpose",
+        "kind": "function"
+      },
+      {
+        "name": "tri",
+        "kind": "function"
+      },
+      {
+        "name": "tril",
+        "kind": "function"
+      },
+      {
         "name": "tril_indices",
         "kind": "function"
       },
@@ -3357,6 +3444,10 @@
       },
       {
         "name": "trimseq",
+        "kind": "function"
+      },
+      {
+        "name": "triu",
         "kind": "function"
       },
       {
@@ -3413,6 +3504,10 @@
       },
       {
         "name": "upper",
+        "kind": "function"
+      },
+      {
+        "name": "vander",
         "kind": "function"
       },
       {
@@ -4462,6 +4557,34 @@
         "kind": "type"
       },
       {
+        "name": "BMatVecFunction",
+        "kind": "type"
+      },
+      {
+        "name": "MatVecFunction",
+        "kind": "type"
+      },
+      {
+        "name": "OperatorFunction",
+        "kind": "type"
+      },
+      {
+        "name": "ProblemType",
+        "kind": "type"
+      },
+      {
+        "name": "RealArray",
+        "kind": "type"
+      },
+      {
+        "name": "WhichNonSymmetric",
+        "kind": "type"
+      },
+      {
+        "name": "WhichSymmetric",
+        "kind": "type"
+      },
+      {
         "name": "DNAUPD_ERRORS",
         "kind": "variable"
       },
@@ -4478,7 +4601,43 @@
         "kind": "variable"
       },
       {
+        "name": "WHICH_NONSYMMETRIC",
+        "kind": "variable"
+      },
+      {
+        "name": "WHICH_SYMMETRIC",
+        "kind": "variable"
+      },
+      {
         "name": "configureARPACK",
+        "kind": "function"
+      },
+      {
+        "name": "defaultNcv",
+        "kind": "function"
+      },
+      {
+        "name": "dnaupdWorklSize",
+        "kind": "function"
+      },
+      {
+        "name": "dneupdWorkevSize",
+        "kind": "function"
+      },
+      {
+        "name": "dsaupdWorklSize",
+        "kind": "function"
+      },
+      {
+        "name": "eign",
+        "kind": "function"
+      },
+      {
+        "name": "eigs",
+        "kind": "function"
+      },
+      {
+        "name": "eigsh",
         "kind": "function"
       },
       {
@@ -4486,7 +4645,31 @@
         "kind": "function"
       },
       {
+        "name": "getDnaupdMessage",
+        "kind": "function"
+      },
+      {
+        "name": "getDneupdMessage",
+        "kind": "function"
+      },
+      {
+        "name": "getDsaupdMessage",
+        "kind": "function"
+      },
+      {
+        "name": "getDseupdMessage",
+        "kind": "function"
+      },
+      {
         "name": "isARPACKLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "isEignResult",
+        "kind": "function"
+      },
+      {
+        "name": "isEigsResult",
         "kind": "function"
       },
       {
@@ -4604,7 +4787,47 @@
         "kind": "type"
       },
       {
+        "name": "beta",
+        "kind": "function"
+      },
+      {
+        "name": "betaln",
+        "kind": "function"
+      },
+      {
+        "name": "binom",
+        "kind": "function"
+      },
+      {
+        "name": "binomExact",
+        "kind": "function"
+      },
+      {
         "name": "configureXSF",
+        "kind": "function"
+      },
+      {
+        "name": "erf",
+        "kind": "function"
+      },
+      {
+        "name": "erfc",
+        "kind": "function"
+      },
+      {
+        "name": "erfcx",
+        "kind": "function"
+      },
+      {
+        "name": "erfi",
+        "kind": "function"
+      },
+      {
+        "name": "gamma",
+        "kind": "function"
+      },
+      {
+        "name": "gammaln",
         "kind": "function"
       },
       {
@@ -4612,7 +4835,39 @@
         "kind": "function"
       },
       {
+        "name": "i0",
+        "kind": "function"
+      },
+      {
+        "name": "i1",
+        "kind": "function"
+      },
+      {
         "name": "isXSFLoaded",
+        "kind": "function"
+      },
+      {
+        "name": "iv",
+        "kind": "function"
+      },
+      {
+        "name": "j0",
+        "kind": "function"
+      },
+      {
+        "name": "j1",
+        "kind": "function"
+      },
+      {
+        "name": "jv",
+        "kind": "function"
+      },
+      {
+        "name": "k0",
+        "kind": "function"
+      },
+      {
+        "name": "k1",
         "kind": "function"
       },
       {
@@ -4620,7 +4875,31 @@
         "kind": "function"
       },
       {
+        "name": "permExact",
+        "kind": "function"
+      },
+      {
+        "name": "poch",
+        "kind": "function"
+      },
+      {
         "name": "resetXSFModule",
+        "kind": "function"
+      },
+      {
+        "name": "rgamma",
+        "kind": "function"
+      },
+      {
+        "name": "y0",
+        "kind": "function"
+      },
+      {
+        "name": "y1",
+        "kind": "function"
+      },
+      {
+        "name": "yv",
         "kind": "function"
       }
     ],
@@ -4658,6 +4937,14 @@
         "kind": "function"
       },
       {
+        "name": "dop853",
+        "kind": "function"
+      },
+      {
+        "name": "dopri5",
+        "kind": "function"
+      },
+      {
         "name": "getODEModule",
         "kind": "function"
       },
@@ -4670,19 +4957,15 @@
         "kind": "function"
       },
       {
+        "name": "radau5",
+        "kind": "function"
+      },
+      {
         "name": "resetODEModule",
         "kind": "function"
       },
       {
         "name": "solve_ivp",
-        "kind": "function"
-      },
-      {
-        "name": "solveExplicit",
-        "kind": "function"
-      },
-      {
-        "name": "solveRadau",
         "kind": "function"
       }
     ]
@@ -4692,9 +4975,6 @@
       "NDArray.zeros": [
         "_ndarray_create"
       ],
-      "NDArray.ones": [
-        "_ndarray_fill"
-      ],
       "NDArray.empty": [
         "_ndarray_empty"
       ],
@@ -4703,6 +4983,27 @@
       ],
       "NDArray.fromArray": [
         "_ndarray_from_data"
+      ],
+      "NDArray.arange": [
+        "_ndarray_arange"
+      ],
+      "NDArray.linspace": [
+        "_ndarray_linspace"
+      ],
+      "NDArray.eye": [
+        "_ndarray_eye"
+      ],
+      "NDArray.tri": [
+        "_ndarray_tri"
+      ],
+      "NDArray.tril": [
+        "_ndarray_tril"
+      ],
+      "NDArray.triu": [
+        "_ndarray_triu"
+      ],
+      "NDArray.vander": [
+        "_ndarray_vander"
       ],
       "NDArray.shape": [
         "_ndarray_get_ndim",
@@ -4821,10 +5122,16 @@
       ],
       "NDArray": [
         "_ndarray_create",
-        "_ndarray_fill",
         "_ndarray_empty",
         "_ndarray_full",
         "_ndarray_from_data",
+        "_ndarray_arange",
+        "_ndarray_linspace",
+        "_ndarray_eye",
+        "_ndarray_tri",
+        "_ndarray_tril",
+        "_ndarray_triu",
+        "_ndarray_vander",
         "_ndarray_get_ndim",
         "_ndarray_get_shape",
         "_ndarray_get_size",
@@ -4843,6 +5150,7 @@
         "_ndarray_get_complex_real",
         "_ndarray_set_complex",
         "_ndarray_sum",
+        "_ndarray_fill",
         "_ndarray_reshape",
         "_ndarray_ravel",
         "_ndarray_flatten",
@@ -4868,6 +5176,21 @@
       "computeBroadcastStrides": [
         "_broadcast_strides"
       ],
+      "broadcastShapesMulti": [
+        "_broadcast_shapes",
+        "_ndarray_broadcast_to",
+        "_broadcast_strides"
+      ],
+      "shapesAreBroadcastable": [
+        "_broadcast_shapes",
+        "_ndarray_broadcast_to",
+        "_broadcast_strides"
+      ],
+      "broadcastArrays": [
+        "_broadcast_shapes",
+        "_ndarray_broadcast_to",
+        "_broadcast_strides"
+      ],
       "fft": [
         "_ndarray_fft"
       ],
@@ -4878,6 +5201,76 @@
         "_ndarray_rfft"
       ],
       "irfft": [
+        "_ndarray_irfft"
+      ],
+      "hfft": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "ihfft": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "fft2": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "ifft2": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "rfft2": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "irfft2": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "fftn": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "ifftn": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "rfftn": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "irfftn": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "fftfreq": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "rfftfreq": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "fftshift": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
+        "_ndarray_irfft"
+      ],
+      "ifftshift": [
+        "_ndarray_fft",
+        "_ndarray_rfft",
         "_ndarray_irfft"
       ],
       "take": [
@@ -4911,6 +5304,227 @@
         "_ndarray_choose"
       ],
       "diagonal": [
+        "_ndarray_diagonal"
+      ],
+      "unravelIndex": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "ravelMultiIndex": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "meshgrid": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "atleast_1d": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "atleast_2d": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "atleast_3d": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "argwhere": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "indices": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "ix_": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "diag_indices": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "tril_indices": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "triu_indices": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "take_along_axis": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "put_along_axis": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "putmask": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "place": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
+        "_ndarray_diagonal"
+      ],
+      "select": [
+        "_ndarray_take",
+        "_ndarray_take_flat",
+        "_ndarray_put",
+        "_ndarray_count_nonzero",
+        "_ndarray_nonzero",
+        "_ndarray_flatnonzero",
+        "_ndarray_where",
+        "_ndarray_compress",
+        "_ndarray_extract",
+        "_ndarray_choose",
         "_ndarray_diagonal"
       ],
       "matmul": [
@@ -4952,6 +5566,468 @@
         "_linalg_inv"
       ],
       "kron": [
+        "_ufunc_multiply"
+      ],
+      "vdot": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "inner": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "outer": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "svdvals": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "eigvals": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "eigh": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "eigvalsh": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "slogdet": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "matrix_rank": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "trace": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "cond": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "pinv": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "lstsq": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "matrix_power": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "tensordot": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "multi_dot": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "cross": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "tensorsolve": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "tensorinv": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "matrix_norm": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "vector_norm": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
+        "_ufunc_multiply"
+      ],
+      "LinAlgError": [
+        "_linalg_matmul",
+        "_linalg_dot",
+        "_linalg_cholesky",
+        "_linalg_qr",
+        "_linalg_qr_get_q",
+        "_linalg_qr_get_r",
+        "_linalg_svd",
+        "_linalg_svd_get_u",
+        "_linalg_svd_get_s",
+        "_linalg_svd_get_vh",
+        "_linalg_eig",
+        "_linalg_eig_get_values",
+        "_linalg_eig_get_values_imag",
+        "_linalg_eig_get_vectors",
+        "_linalg_norm",
+        "_linalg_det",
+        "_linalg_solve",
+        "_linalg_inv",
         "_ufunc_multiply"
       ],
       "isfinite": [
@@ -4998,7 +6074,190 @@
       "real_if_close": [
         "_ndarray_get_flat"
       ],
+      "iscomplexobj": [
+        "_ndarray_isfinite",
+        "_ndarray_isinf",
+        "_ndarray_isnan",
+        "_ndarray_isneginf",
+        "_ndarray_isposinf",
+        "_ndarray_iscomplex_elem",
+        "_ndarray_isreal_elem",
+        "_ndarray_all",
+        "_ndarray_all_axis",
+        "_ndarray_any",
+        "_ndarray_any_axis",
+        "_ndarray_isclose",
+        "_ndarray_allclose",
+        "_ndarray_array_equal",
+        "_ndarray_array_equiv",
+        "_ndarray_get_flat"
+      ],
+      "isrealobj": [
+        "_ndarray_isfinite",
+        "_ndarray_isinf",
+        "_ndarray_isnan",
+        "_ndarray_isneginf",
+        "_ndarray_isposinf",
+        "_ndarray_iscomplex_elem",
+        "_ndarray_isreal_elem",
+        "_ndarray_all",
+        "_ndarray_all_axis",
+        "_ndarray_any",
+        "_ndarray_any_axis",
+        "_ndarray_isclose",
+        "_ndarray_allclose",
+        "_ndarray_array_equal",
+        "_ndarray_array_equiv",
+        "_ndarray_get_flat"
+      ],
+      "isfortran": [
+        "_ndarray_isfinite",
+        "_ndarray_isinf",
+        "_ndarray_isnan",
+        "_ndarray_isneginf",
+        "_ndarray_isposinf",
+        "_ndarray_iscomplex_elem",
+        "_ndarray_isreal_elem",
+        "_ndarray_all",
+        "_ndarray_all_axis",
+        "_ndarray_any",
+        "_ndarray_any_axis",
+        "_ndarray_isclose",
+        "_ndarray_allclose",
+        "_ndarray_array_equal",
+        "_ndarray_array_equiv",
+        "_ndarray_get_flat"
+      ],
+      "isscalar": [
+        "_ndarray_isfinite",
+        "_ndarray_isinf",
+        "_ndarray_isnan",
+        "_ndarray_isneginf",
+        "_ndarray_isposinf",
+        "_ndarray_iscomplex_elem",
+        "_ndarray_isreal_elem",
+        "_ndarray_all",
+        "_ndarray_all_axis",
+        "_ndarray_any",
+        "_ndarray_any_axis",
+        "_ndarray_isclose",
+        "_ndarray_allclose",
+        "_ndarray_array_equal",
+        "_ndarray_array_equiv",
+        "_ndarray_get_flat"
+      ],
       "concatenate": [
+        "_ndarray_concatenate"
+      ],
+      "stack": [
+        "_ndarray_concatenate"
+      ],
+      "vstack": [
+        "_ndarray_concatenate"
+      ],
+      "hstack": [
+        "_ndarray_concatenate"
+      ],
+      "dstack": [
+        "_ndarray_concatenate"
+      ],
+      "column_stack": [
+        "_ndarray_concatenate"
+      ],
+      "block": [
+        "_ndarray_concatenate"
+      ],
+      "append": [
+        "_ndarray_concatenate"
+      ],
+      "array_split": [
+        "_ndarray_concatenate"
+      ],
+      "split": [
+        "_ndarray_concatenate"
+      ],
+      "vsplit": [
+        "_ndarray_concatenate"
+      ],
+      "hsplit": [
+        "_ndarray_concatenate"
+      ],
+      "dsplit": [
+        "_ndarray_concatenate"
+      ],
+      "unstack": [
+        "_ndarray_concatenate"
+      ],
+      "flip": [
+        "_ndarray_concatenate"
+      ],
+      "fliplr": [
+        "_ndarray_concatenate"
+      ],
+      "flipud": [
+        "_ndarray_concatenate"
+      ],
+      "roll": [
+        "_ndarray_concatenate"
+      ],
+      "rot90": [
+        "_ndarray_concatenate"
+      ],
+      "resize": [
+        "_ndarray_concatenate"
+      ],
+      "trim_zeros": [
+        "_ndarray_concatenate"
+      ],
+      "tile": [
+        "_ndarray_concatenate"
+      ],
+      "repeat": [
+        "_ndarray_concatenate"
+      ],
+      "pad": [
+        "_ndarray_concatenate"
+      ],
+      "insert": [
+        "_ndarray_concatenate"
+      ],
+      "deleteArr": [
+        "_ndarray_concatenate"
+      ],
+      "copyto": [
+        "_ndarray_concatenate"
+      ],
+      "asarray": [
+        "_ndarray_concatenate"
+      ],
+      "reshape": [
+        "_ndarray_concatenate"
+      ],
+      "ravel": [
+        "_ndarray_concatenate"
+      ],
+      "flatten": [
+        "_ndarray_concatenate"
+      ],
+      "squeeze": [
+        "_ndarray_concatenate"
+      ],
+      "expand_dims": [
+        "_ndarray_concatenate"
+      ],
+      "transpose": [
+        "_ndarray_concatenate"
+      ],
+      "permute_dims": [
+        "_ndarray_concatenate"
+      ],
+      "swapaxes": [
+        "_ndarray_concatenate"
+      ],
+      "moveaxis": [
+        "_ndarray_concatenate"
+      ],
+      "rollaxis": [
         "_ndarray_concatenate"
       ],
       "SeedSequence.generateState": [
@@ -5213,6 +6472,636 @@
         "_random_negative_binomial32",
         "_random_hypergeometric32"
       ],
+      "getBitGenerator": [
+        "_seed_seq_generate_words",
+        "_pcg64_create",
+        "_pcg64_seed_parts",
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_free",
+        "_sfc64_create",
+        "_sfc64_seed_parts",
+        "_sfc64_next64_parts",
+        "_sfc64_next32",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_free",
+        "_mt19937_create",
+        "_mt19937_seed_array",
+        "_mt19937_next64_parts",
+        "_mt19937_next32",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_free",
+        "_philox_create",
+        "_philox_seed_parts",
+        "_philox_next64_parts",
+        "_philox_next32",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_free",
+        "_pcg64_init_bitgen",
+        "_sfc64_init_bitgen",
+        "_mt19937_init_bitgen",
+        "_philox_init_bitgen",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_integers32",
+        "_random_integers32_fill",
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill",
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_laplace",
+        "_random_rayleigh",
+        "_random_binomial32",
+        "_random_poisson32",
+        "_random_geometric32",
+        "_random_negative_binomial32",
+        "_random_hypergeometric32",
+        "_ndarray_create",
+        "_ndarray_get_data"
+      ],
+      "listBitGenerators": [
+        "_seed_seq_generate_words",
+        "_pcg64_create",
+        "_pcg64_seed_parts",
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_free",
+        "_sfc64_create",
+        "_sfc64_seed_parts",
+        "_sfc64_next64_parts",
+        "_sfc64_next32",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_free",
+        "_mt19937_create",
+        "_mt19937_seed_array",
+        "_mt19937_next64_parts",
+        "_mt19937_next32",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_free",
+        "_philox_create",
+        "_philox_seed_parts",
+        "_philox_next64_parts",
+        "_philox_next32",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_free",
+        "_pcg64_init_bitgen",
+        "_sfc64_init_bitgen",
+        "_mt19937_init_bitgen",
+        "_philox_init_bitgen",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_integers32",
+        "_random_integers32_fill",
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill",
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_laplace",
+        "_random_rayleigh",
+        "_random_binomial32",
+        "_random_poisson32",
+        "_random_geometric32",
+        "_random_negative_binomial32",
+        "_random_hypergeometric32",
+        "_ndarray_create",
+        "_ndarray_get_data"
+      ],
+      "default_rng": [
+        "_seed_seq_generate_words",
+        "_pcg64_create",
+        "_pcg64_seed_parts",
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_free",
+        "_sfc64_create",
+        "_sfc64_seed_parts",
+        "_sfc64_next64_parts",
+        "_sfc64_next32",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_free",
+        "_mt19937_create",
+        "_mt19937_seed_array",
+        "_mt19937_next64_parts",
+        "_mt19937_next32",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_free",
+        "_philox_create",
+        "_philox_seed_parts",
+        "_philox_next64_parts",
+        "_philox_next32",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_free",
+        "_pcg64_init_bitgen",
+        "_sfc64_init_bitgen",
+        "_mt19937_init_bitgen",
+        "_philox_init_bitgen",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_integers32",
+        "_random_integers32_fill",
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill",
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_laplace",
+        "_random_rayleigh",
+        "_random_binomial32",
+        "_random_poisson32",
+        "_random_geometric32",
+        "_random_negative_binomial32",
+        "_random_hypergeometric32",
+        "_ndarray_create",
+        "_ndarray_get_data"
+      ],
+      "seed": [
+        "_seed_seq_generate_words",
+        "_pcg64_create",
+        "_pcg64_seed_parts",
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_free",
+        "_sfc64_create",
+        "_sfc64_seed_parts",
+        "_sfc64_next64_parts",
+        "_sfc64_next32",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_free",
+        "_mt19937_create",
+        "_mt19937_seed_array",
+        "_mt19937_next64_parts",
+        "_mt19937_next32",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_free",
+        "_philox_create",
+        "_philox_seed_parts",
+        "_philox_next64_parts",
+        "_philox_next32",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_free",
+        "_pcg64_init_bitgen",
+        "_sfc64_init_bitgen",
+        "_mt19937_init_bitgen",
+        "_philox_init_bitgen",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_integers32",
+        "_random_integers32_fill",
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill",
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_laplace",
+        "_random_rayleigh",
+        "_random_binomial32",
+        "_random_poisson32",
+        "_random_geometric32",
+        "_random_negative_binomial32",
+        "_random_hypergeometric32",
+        "_ndarray_create",
+        "_ndarray_get_data"
+      ],
+      "random": [
+        "_seed_seq_generate_words",
+        "_pcg64_create",
+        "_pcg64_seed_parts",
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_free",
+        "_sfc64_create",
+        "_sfc64_seed_parts",
+        "_sfc64_next64_parts",
+        "_sfc64_next32",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_free",
+        "_mt19937_create",
+        "_mt19937_seed_array",
+        "_mt19937_next64_parts",
+        "_mt19937_next32",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_free",
+        "_philox_create",
+        "_philox_seed_parts",
+        "_philox_next64_parts",
+        "_philox_next32",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_free",
+        "_pcg64_init_bitgen",
+        "_sfc64_init_bitgen",
+        "_mt19937_init_bitgen",
+        "_philox_init_bitgen",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_integers32",
+        "_random_integers32_fill",
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill",
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_laplace",
+        "_random_rayleigh",
+        "_random_binomial32",
+        "_random_poisson32",
+        "_random_geometric32",
+        "_random_negative_binomial32",
+        "_random_hypergeometric32",
+        "_ndarray_create",
+        "_ndarray_get_data"
+      ],
+      "randn": [
+        "_seed_seq_generate_words",
+        "_pcg64_create",
+        "_pcg64_seed_parts",
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_free",
+        "_sfc64_create",
+        "_sfc64_seed_parts",
+        "_sfc64_next64_parts",
+        "_sfc64_next32",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_free",
+        "_mt19937_create",
+        "_mt19937_seed_array",
+        "_mt19937_next64_parts",
+        "_mt19937_next32",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_free",
+        "_philox_create",
+        "_philox_seed_parts",
+        "_philox_next64_parts",
+        "_philox_next32",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_free",
+        "_pcg64_init_bitgen",
+        "_sfc64_init_bitgen",
+        "_mt19937_init_bitgen",
+        "_philox_init_bitgen",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_integers32",
+        "_random_integers32_fill",
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill",
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_laplace",
+        "_random_rayleigh",
+        "_random_binomial32",
+        "_random_poisson32",
+        "_random_geometric32",
+        "_random_negative_binomial32",
+        "_random_hypergeometric32",
+        "_ndarray_create",
+        "_ndarray_get_data"
+      ],
+      "randint": [
+        "_seed_seq_generate_words",
+        "_pcg64_create",
+        "_pcg64_seed_parts",
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_free",
+        "_sfc64_create",
+        "_sfc64_seed_parts",
+        "_sfc64_next64_parts",
+        "_sfc64_next32",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_free",
+        "_mt19937_create",
+        "_mt19937_seed_array",
+        "_mt19937_next64_parts",
+        "_mt19937_next32",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_free",
+        "_philox_create",
+        "_philox_seed_parts",
+        "_philox_next64_parts",
+        "_philox_next32",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_free",
+        "_pcg64_init_bitgen",
+        "_sfc64_init_bitgen",
+        "_mt19937_init_bitgen",
+        "_philox_init_bitgen",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_integers32",
+        "_random_integers32_fill",
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill",
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_laplace",
+        "_random_rayleigh",
+        "_random_binomial32",
+        "_random_poisson32",
+        "_random_geometric32",
+        "_random_negative_binomial32",
+        "_random_hypergeometric32",
+        "_ndarray_create",
+        "_ndarray_get_data"
+      ],
+      "initRandom": [
+        "_seed_seq_generate_words",
+        "_pcg64_create",
+        "_pcg64_seed_parts",
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_free",
+        "_sfc64_create",
+        "_sfc64_seed_parts",
+        "_sfc64_next64_parts",
+        "_sfc64_next32",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_free",
+        "_mt19937_create",
+        "_mt19937_seed_array",
+        "_mt19937_next64_parts",
+        "_mt19937_next32",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_free",
+        "_philox_create",
+        "_philox_seed_parts",
+        "_philox_next64_parts",
+        "_philox_next32",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_free",
+        "_pcg64_init_bitgen",
+        "_sfc64_init_bitgen",
+        "_mt19937_init_bitgen",
+        "_philox_init_bitgen",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_integers32",
+        "_random_integers32_fill",
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill",
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_laplace",
+        "_random_rayleigh",
+        "_random_binomial32",
+        "_random_poisson32",
+        "_random_geometric32",
+        "_random_negative_binomial32",
+        "_random_hypergeometric32",
+        "_ndarray_create",
+        "_ndarray_get_data"
+      ],
+      "BitGenerator": [
+        "_seed_seq_generate_words",
+        "_pcg64_create",
+        "_pcg64_seed_parts",
+        "_pcg64_next64_parts",
+        "_pcg64_next32",
+        "_pcg64_next_double",
+        "_pcg64_advance",
+        "_pcg64_get_state",
+        "_pcg64_set_state",
+        "_pcg64_free",
+        "_sfc64_create",
+        "_sfc64_seed_parts",
+        "_sfc64_next64_parts",
+        "_sfc64_next32",
+        "_sfc64_next_double",
+        "_sfc64_get_state",
+        "_sfc64_set_state",
+        "_sfc64_free",
+        "_mt19937_create",
+        "_mt19937_seed_array",
+        "_mt19937_next64_parts",
+        "_mt19937_next32",
+        "_mt19937_next_double",
+        "_mt19937_get_state",
+        "_mt19937_set_state",
+        "_mt19937_free",
+        "_philox_create",
+        "_philox_seed_parts",
+        "_philox_next64_parts",
+        "_philox_next32",
+        "_philox_next_double",
+        "_philox_jump",
+        "_philox_advance",
+        "_philox_get_state",
+        "_philox_set_state",
+        "_philox_free",
+        "_pcg64_init_bitgen",
+        "_sfc64_init_bitgen",
+        "_mt19937_init_bitgen",
+        "_philox_init_bitgen",
+        "_random_uniform_fill",
+        "_random_uniform_fill_f",
+        "_random_integers32",
+        "_random_integers32_fill",
+        "_random_standard_normal",
+        "_random_standard_normal_fill",
+        "_random_standard_normal_fill_f",
+        "_random_standard_exponential",
+        "_random_standard_exponential_fill",
+        "_random_standard_exponential_inv_fill",
+        "_random_standard_gamma",
+        "_random_standard_gamma_fill",
+        "_random_beta",
+        "_random_beta_fill",
+        "_random_f",
+        "_random_standard_t",
+        "_random_standard_cauchy",
+        "_random_pareto",
+        "_random_weibull",
+        "_random_laplace",
+        "_random_rayleigh",
+        "_random_binomial32",
+        "_random_poisson32",
+        "_random_geometric32",
+        "_random_negative_binomial32",
+        "_random_hypergeometric32",
+        "_ndarray_create",
+        "_ndarray_get_data"
+      ],
       "unique": [
         "_ndarray_unique",
         "_unique_result_free"
@@ -5236,6 +7125,61 @@
         "_ndarray_isin"
       ],
       "in1d": [
+        "_ndarray_in1d"
+      ],
+      "uniqueIndex": [
+        "_ndarray_unique",
+        "_unique_result_free",
+        "_ndarray_unique_values",
+        "_ndarray_union1d",
+        "_ndarray_intersect1d",
+        "_ndarray_setxor1d",
+        "_ndarray_setdiff1d",
+        "_ndarray_isin",
+        "_ndarray_in1d"
+      ],
+      "uniqueInverse": [
+        "_ndarray_unique",
+        "_unique_result_free",
+        "_ndarray_unique_values",
+        "_ndarray_union1d",
+        "_ndarray_intersect1d",
+        "_ndarray_setxor1d",
+        "_ndarray_setdiff1d",
+        "_ndarray_isin",
+        "_ndarray_in1d"
+      ],
+      "uniqueCounts": [
+        "_ndarray_unique",
+        "_unique_result_free",
+        "_ndarray_unique_values",
+        "_ndarray_union1d",
+        "_ndarray_intersect1d",
+        "_ndarray_setxor1d",
+        "_ndarray_setdiff1d",
+        "_ndarray_isin",
+        "_ndarray_in1d"
+      ],
+      "uniqueAll": [
+        "_ndarray_unique",
+        "_unique_result_free",
+        "_ndarray_unique_values",
+        "_ndarray_union1d",
+        "_ndarray_intersect1d",
+        "_ndarray_setxor1d",
+        "_ndarray_setdiff1d",
+        "_ndarray_isin",
+        "_ndarray_in1d"
+      ],
+      "ediff1d": [
+        "_ndarray_unique",
+        "_unique_result_free",
+        "_ndarray_unique_values",
+        "_ndarray_union1d",
+        "_ndarray_intersect1d",
+        "_ndarray_setxor1d",
+        "_ndarray_setdiff1d",
+        "_ndarray_isin",
         "_ndarray_in1d"
       ],
       "sort": [
@@ -5298,7 +7242,85 @@
       "nancumprod": [
         "_ndarray_nancumprod_axis"
       ],
+      "equal": [
+        "_ndarray_create"
+      ],
+      "not_equal": [
+        "_ndarray_create"
+      ],
+      "less": [
+        "_ndarray_create"
+      ],
+      "less_equal": [
+        "_ndarray_create"
+      ],
+      "greater": [
+        "_ndarray_create"
+      ],
+      "greater_equal": [
+        "_ndarray_create"
+      ],
+      "compare_chararrays": [
+        "_ndarray_create"
+      ],
+      "isalpha": [
+        "_ndarray_create"
+      ],
+      "isdigit": [
+        "_ndarray_create"
+      ],
+      "isalnum": [
+        "_ndarray_create"
+      ],
+      "isspace": [
+        "_ndarray_create"
+      ],
+      "islower": [
+        "_ndarray_create"
+      ],
+      "isupper": [
+        "_ndarray_create"
+      ],
+      "istitle": [
+        "_ndarray_create"
+      ],
+      "isdecimal": [
+        "_ndarray_create"
+      ],
+      "isnumeric": [
+        "_ndarray_create"
+      ],
+      "str_len": [
+        "_ndarray_create"
+      ],
+      "find": [
+        "_ndarray_create"
+      ],
+      "rfind": [
+        "_ndarray_create"
+      ],
+      "index": [
+        "_ndarray_create"
+      ],
+      "rindex": [
+        "_ndarray_create"
+      ],
+      "count": [
+        "_ndarray_create"
+      ],
+      "startswith": [
+        "_ndarray_create"
+      ],
+      "endswith": [
+        "_ndarray_create"
+      ],
       "angle": [
+        "_ndarray_create"
+      ],
+      "real": [
+        "_ndarray_create"
+      ],
+      "imag": [
         "_ndarray_create"
       ],
       "frexp": [
@@ -5323,9 +7345,783 @@
         "_ndarray_get_complex_real",
         "_ndarray_get_complex_imag",
         "_ndarray_set_complex"
+      ],
+      "negative": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "positive": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "absolute": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "sign": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "sqrt": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "square": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "cbrt": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "reciprocal": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "exp": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "exp2": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "expm1": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "log": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "log2": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "log10": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "log1p": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "sin": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "cos": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "tan": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "arcsin": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "arccos": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "arctan": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "sinh": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "cosh": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "tanh": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "arcsinh": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "arccosh": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "arctanh": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "floor": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "ceil": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "trunc": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "rint": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "round": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "degrees": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "radians": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "logical_not": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "invert": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "add": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "subtract": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "multiply": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "divide": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "floor_divide": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "remainder": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "fmod": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "power": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "maximum": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "minimum": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "fmax": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "fmin": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "logical_and": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "logical_or": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "logical_xor": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "bitwise_and": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "bitwise_or": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "bitwise_xor": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "left_shift": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "right_shift": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "arctan2": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "hypot": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "copysign": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "signbit": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "logaddexp": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "logaddexp2": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "ldexp": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "nextafter": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "spacing": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "gcd": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "lcm": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "sinc": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "heaviside": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
+      ],
+      "bitwise_count": [
+        "_ufunc_frexp",
+        "_ufunc_tuple_get_first",
+        "_ufunc_tuple_get_second",
+        "_ufunc_tuple_result_free",
+        "_ufunc_modf",
+        "_ufunc_divmod",
+        "_ndarray_get_complex_real",
+        "_ndarray_get_complex_imag",
+        "_ndarray_set_complex"
       ]
     },
     "sciwasm": {
+      "quad": [
+        "_wasm_dqagse",
+        "_wasm_dqagie"
+      ],
       "minimizeBFGS": [
         "_bfgs_minimize"
       ],
@@ -5348,6 +8144,12 @@
         "_sp_bsr_transpose_f64"
       ],
       "BSRMatrix": [
+        "_sp_bsr_matvec_f64",
+        "_sp_bsr_tocsr_f64",
+        "_sp_bsr_diagonal_f64",
+        "_sp_bsr_transpose_f64"
+      ],
+      "bsr_matrix": [
         "_sp_bsr_matvec_f64",
         "_sp_bsr_tocsr_f64",
         "_sp_bsr_diagonal_f64",
@@ -5408,6 +8210,42 @@
       "random": [
         "_sp_coo_random_f64_entry"
       ],
+      "eye": [
+        "_sp_coo_tril_f64_entry",
+        "_sp_coo_triu_f64_entry",
+        "_sp_coo_hstack_f64_entry",
+        "_sp_coo_vstack_f64_entry",
+        "_sp_coo_block_diag_f64_entry",
+        "_sp_coo_kron_f64_entry",
+        "_sp_coo_random_f64_entry"
+      ],
+      "diags": [
+        "_sp_coo_tril_f64_entry",
+        "_sp_coo_triu_f64_entry",
+        "_sp_coo_hstack_f64_entry",
+        "_sp_coo_vstack_f64_entry",
+        "_sp_coo_block_diag_f64_entry",
+        "_sp_coo_kron_f64_entry",
+        "_sp_coo_random_f64_entry"
+      ],
+      "issparse": [
+        "_sp_coo_tril_f64_entry",
+        "_sp_coo_triu_f64_entry",
+        "_sp_coo_hstack_f64_entry",
+        "_sp_coo_vstack_f64_entry",
+        "_sp_coo_block_diag_f64_entry",
+        "_sp_coo_kron_f64_entry",
+        "_sp_coo_random_f64_entry"
+      ],
+      "kronsum": [
+        "_sp_coo_tril_f64_entry",
+        "_sp_coo_triu_f64_entry",
+        "_sp_coo_hstack_f64_entry",
+        "_sp_coo_vstack_f64_entry",
+        "_sp_coo_block_diag_f64_entry",
+        "_sp_coo_kron_f64_entry",
+        "_sp_coo_random_f64_entry"
+      ],
       "COOMatrix.tocsr": [
         "_sp_coo_tocsr_f64"
       ],
@@ -5422,16 +8260,27 @@
         "_sp_coo_todense_f64",
         "_sp_coo_matvec_f64"
       ],
+      "coo_matrix": [
+        "_sp_coo_tocsr_f64",
+        "_sp_coo_todense_f64",
+        "_sp_coo_matvec_f64"
+      ],
       "CSCMatrix.tocsr": [
         "_sp_csr_tocsc_f64"
       ],
       "CSCMatrix": [
         "_sp_csr_tocsc_f64"
       ],
+      "csc_matrix": [
+        "_sp_csr_tocsc_f64"
+      ],
       "CSRMatrix.tocsc": [
         "_sp_csr_tocsc_f64"
       ],
       "CSRMatrix": [
+        "_sp_csr_tocsc_f64"
+      ],
+      "csr_matrix": [
         "_sp_csr_tocsc_f64"
       ],
       "DIAMatrix.dot": [
@@ -5443,6 +8292,28 @@
       "DIAMatrix": [
         "_sp_dia_matvec_f64",
         "_sp_dia_tocsr_f64"
+      ],
+      "dia_matrix": [
+        "_sp_dia_matvec_f64",
+        "_sp_dia_tocsr_f64"
+      ],
+      "eigsh": [
+        "_dsaupd_",
+        "_dseupd_",
+        "_dnaupd_",
+        "_dneupd_"
+      ],
+      "eigs": [
+        "_dsaupd_",
+        "_dseupd_",
+        "_dnaupd_",
+        "_dneupd_"
+      ],
+      "svds": [
+        "_dsaupd_",
+        "_dseupd_",
+        "_dnaupd_",
+        "_dneupd_"
       ],
       "KDTree.query": [
         "_kdtree_query_knn"
@@ -5609,6 +8480,732 @@
         "_basic_free_symbols",
         "_basic_get_args"
       ],
+      "getWasm": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "symbols": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "exprFromWasm": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "arg": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "trigsimp": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "radsimp": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "powsimp": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "as_real_imag": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "expand_trig": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "expand_complex": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "Symbol": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "Integer": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "Rational": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "Float": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "Complex": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "Add": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "Mul": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "Pow": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "Constant": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "ImaginaryUnit": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "Infinity_": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
+      "NaN_": [
+        "_basic_subs2",
+        "_basic_subs",
+        "_basic_evalf",
+        "_real_double_get_d",
+        "_basic_free_symbols",
+        "_basic_get_args",
+        "_symbol_set",
+        "_integer_set_si",
+        "_rational_set_si",
+        "_real_double_set_d",
+        "_complex_set",
+        "_basic_add",
+        "_basic_sub",
+        "_basic_mul",
+        "_basic_div",
+        "_basic_pow",
+        "_basic_neg",
+        "_complex_base_real_part",
+        "_complex_base_imaginary_part",
+        "_vecbasic_push_back",
+        "_basic_max",
+        "_basic_min",
+        "_basic_diff",
+        "_basic_series",
+        "_basic_expand",
+        "_basic_simplify",
+        "_basic_as_numer_denom",
+        "_basic_rewrite_as_exp",
+        "_basic_rewrite_as_sin",
+        "_basic_rewrite_as_cos",
+        "_basic_as_real_imag"
+      ],
       "eye": [
         "_dense_matrix_eye"
       ],
@@ -5734,26 +9331,220 @@
         "_dense_matrix_str",
         "_dense_matrix_rows",
         "_dense_matrix_cols"
+      ],
+      "checkException": [
+        "_basic_free_heap",
+        "_basic_str",
+        "_basic_get_type",
+        "_basic_eq",
+        "_basic_hash",
+        "_basic_new_heap",
+        "_setbasic_new",
+        "_setbasic_free",
+        "_setbasic_size",
+        "_setbasic_get",
+        "_vecbasic_new",
+        "_vecbasic_free",
+        "_vecbasic_size",
+        "_vecbasic_get",
+        "_vecbasic_push_back",
+        "_mapbasicbasic_new",
+        "_mapbasicbasic_free",
+        "_mapbasicbasic_insert",
+        "_mapbasicbasic_size",
+        "_dense_matrix_free",
+        "_dense_matrix_str",
+        "_dense_matrix_rows",
+        "_dense_matrix_cols",
+        "_dense_matrix_new",
+        "_dense_matrix_new_rows_cols"
+      ],
+      "withExceptionCheck": [
+        "_basic_free_heap",
+        "_basic_str",
+        "_basic_get_type",
+        "_basic_eq",
+        "_basic_hash",
+        "_basic_new_heap",
+        "_setbasic_new",
+        "_setbasic_free",
+        "_setbasic_size",
+        "_setbasic_get",
+        "_vecbasic_new",
+        "_vecbasic_free",
+        "_vecbasic_size",
+        "_vecbasic_get",
+        "_vecbasic_push_back",
+        "_mapbasicbasic_new",
+        "_mapbasicbasic_free",
+        "_mapbasicbasic_insert",
+        "_mapbasicbasic_size",
+        "_dense_matrix_free",
+        "_dense_matrix_str",
+        "_dense_matrix_rows",
+        "_dense_matrix_cols",
+        "_dense_matrix_new",
+        "_dense_matrix_new_rows_cols"
+      ],
+      "allocateString": [
+        "_basic_free_heap",
+        "_basic_str",
+        "_basic_get_type",
+        "_basic_eq",
+        "_basic_hash",
+        "_basic_new_heap",
+        "_setbasic_new",
+        "_setbasic_free",
+        "_setbasic_size",
+        "_setbasic_get",
+        "_vecbasic_new",
+        "_vecbasic_free",
+        "_vecbasic_size",
+        "_vecbasic_get",
+        "_vecbasic_push_back",
+        "_mapbasicbasic_new",
+        "_mapbasicbasic_free",
+        "_mapbasicbasic_insert",
+        "_mapbasicbasic_size",
+        "_dense_matrix_free",
+        "_dense_matrix_str",
+        "_dense_matrix_rows",
+        "_dense_matrix_cols",
+        "_dense_matrix_new",
+        "_dense_matrix_new_rows_cols"
+      ],
+      "freeString": [
+        "_basic_free_heap",
+        "_basic_str",
+        "_basic_get_type",
+        "_basic_eq",
+        "_basic_hash",
+        "_basic_new_heap",
+        "_setbasic_new",
+        "_setbasic_free",
+        "_setbasic_size",
+        "_setbasic_get",
+        "_vecbasic_new",
+        "_vecbasic_free",
+        "_vecbasic_size",
+        "_vecbasic_get",
+        "_vecbasic_push_back",
+        "_mapbasicbasic_new",
+        "_mapbasicbasic_free",
+        "_mapbasicbasic_insert",
+        "_mapbasicbasic_size",
+        "_dense_matrix_free",
+        "_dense_matrix_str",
+        "_dense_matrix_rows",
+        "_dense_matrix_cols",
+        "_dense_matrix_new",
+        "_dense_matrix_new_rows_cols"
       ]
     },
-    "arwasm": {},
+    "arwasm": {
+      "eign": [
+        "_dnaupd_",
+        "_dneupd_"
+      ],
+      "eigs": [
+        "_dsaupd_",
+        "_dseupd_"
+      ]
+    },
     "lawasm": {},
     "linwasm": {},
     "quadwasm": {},
     "superluwasm": {},
-    "xsfwasm": {},
+    "xsfwasm": {
+      "j0": [
+        "_wasm_j0"
+      ],
+      "j1": [
+        "_wasm_j1"
+      ],
+      "jv": [
+        "_wasm_jv"
+      ],
+      "y0": [
+        "_wasm_y0"
+      ],
+      "y1": [
+        "_wasm_y1"
+      ],
+      "yv": [
+        "_wasm_yv"
+      ],
+      "i0": [
+        "_wasm_i0"
+      ],
+      "i1": [
+        "_wasm_i1"
+      ],
+      "iv": [
+        "_wasm_iv"
+      ],
+      "k0": [
+        "_wasm_k0"
+      ],
+      "k1": [
+        "_wasm_k1"
+      ],
+      "beta": [
+        "_wasm_beta"
+      ],
+      "betaln": [
+        "_wasm_betaln"
+      ],
+      "binom": [
+        "_wasm_binom"
+      ],
+      "binomExact": [
+        "_wasm_binom_exact"
+      ],
+      "poch": [
+        "_wasm_poch"
+      ],
+      "permExact": [
+        "_wasm_perm_exact"
+      ],
+      "erf": [
+        "_wasm_erf"
+      ],
+      "erfc": [
+        "_wasm_erfc"
+      ],
+      "erfcx": [
+        "_wasm_erfcx"
+      ],
+      "erfi": [
+        "_wasm_erfi"
+      ],
+      "gamma": [
+        "_wasm_gamma"
+      ],
+      "gammaln": [
+        "_wasm_gammaln"
+      ],
+      "rgamma": [
+        "_wasm_rgamma"
+      ]
+    },
     "odewasm": {
-      "solveExplicit": [
-        "_wasm_dopri5_work_size",
+      "dop853": [
         "_wasm_dop853_work_size",
-        "_wasm_dopri5_iwork_size",
         "_wasm_dop853_iwork_size",
         "_wasm_set_fcn_callback",
         "_wasm_set_solout_callback",
-        "_wasm_dopri5",
         "_wasm_dop853"
       ],
-      "solveRadau": [
+      "dopri5": [
+        "_wasm_dopri5_work_size",
+        "_wasm_dopri5_iwork_size",
+        "_wasm_set_fcn_callback",
+        "_wasm_set_solout_callback",
+        "_wasm_dopri5"
+      ],
+      "radau5": [
         "_wasm_radau5_work_size",
         "_wasm_radau5_iwork_size",
         "_wasm_set_fcn_callback",

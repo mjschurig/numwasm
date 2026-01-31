@@ -5,14 +5,14 @@
  * Compatible with NumPy's numpy.ma module.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
 
 /**
  * Sentinel value indicating no mask.
  * When mask is nomask, all elements are valid.
  */
-export const nomask: unique symbol = Symbol('nomask');
+export const nomask: unique symbol = Symbol("nomask");
 
 /**
  * Type for mask: either a boolean NDArray or nomask sentinel.
@@ -27,7 +27,7 @@ export type MaskType = NDArray | typeof nomask;
 export const masked = Object.freeze({
   __masked__: true as const,
   toString(): string {
-    return '--';
+    return "--";
   },
   valueOf(): number {
     return NaN;
@@ -56,8 +56,8 @@ export type MaskedConstant = typeof masked;
 export function isMaskedConstant(x: unknown): x is MaskedConstant {
   return (
     x !== null &&
-    typeof x === 'object' &&
-    '__masked__' in x &&
+    typeof x === "object" &&
+    "__masked__" in x &&
     (x as Record<string, unknown>).__masked__ === true
   );
 }
@@ -68,7 +68,7 @@ export function isMaskedConstant(x: unknown): x is MaskedConstant {
 export class MaskedArrayError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'MaskedArrayError';
+    this.name = "MaskedArrayError";
   }
 }
 
@@ -78,7 +78,7 @@ export class MaskedArrayError extends Error {
 export class MaskError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'MaskError';
+    this.name = "MaskError";
   }
 }
 
@@ -86,7 +86,9 @@ export class MaskError extends Error {
  * Default fill values for each dtype.
  * Used when masked values need to be filled for operations.
  */
-export const defaultFillValues: Partial<Record<DType, number | boolean | string>> = {
+export const defaultFillValues: Partial<
+  Record<DType, number | boolean | string>
+> = {
   [DType.Bool]: true,
   [DType.Int8]: 999999,
   [DType.Int16]: 999999,
@@ -101,7 +103,7 @@ export const defaultFillValues: Partial<Record<DType, number | boolean | string>
   [DType.Float64]: 1e20,
   [DType.Complex64]: 1e20,
   [DType.Complex128]: 1e20,
-  [DType.String]: 'N/A',
+  [DType.String]: "N/A",
 };
 
 /**

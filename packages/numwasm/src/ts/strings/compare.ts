@@ -8,9 +8,9 @@
  * Call loadWasmModule() before using these functions.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
-import { getWasmModule } from '../wasm-loader.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
+import { getWasmModule } from "../wasm-loader.js";
 
 /**
  * Return (x1 == x2) element-wise for string arrays.
@@ -25,10 +25,7 @@ import { getWasmModule } from '../wasm-loader.js';
  * // returns NDArray with [true, false] (as 1, 0)
  * ```
  */
-export function equal(
-  x1: NDArray | string[],
-  x2: NDArray | string[]
-): NDArray {
+export function equal(x1: NDArray | string[], x2: NDArray | string[]): NDArray {
   const [a1, a2] = _prepareStringArrays(x1, x2);
   const result = _createBoolArray(a1.shape);
 
@@ -48,7 +45,7 @@ export function equal(
  */
 export function not_equal(
   x1: NDArray | string[],
-  x2: NDArray | string[]
+  x2: NDArray | string[],
 ): NDArray {
   const [a1, a2] = _prepareStringArrays(x1, x2);
   const result = _createBoolArray(a1.shape);
@@ -68,10 +65,7 @@ export function not_equal(
  * @param x2 - Second string array
  * @returns Boolean array of comparison results
  */
-export function less(
-  x1: NDArray | string[],
-  x2: NDArray | string[]
-): NDArray {
+export function less(x1: NDArray | string[], x2: NDArray | string[]): NDArray {
   const [a1, a2] = _prepareStringArrays(x1, x2);
   const result = _createBoolArray(a1.shape);
 
@@ -92,7 +86,7 @@ export function less(
  */
 export function less_equal(
   x1: NDArray | string[],
-  x2: NDArray | string[]
+  x2: NDArray | string[],
 ): NDArray {
   const [a1, a2] = _prepareStringArrays(x1, x2);
   const result = _createBoolArray(a1.shape);
@@ -114,7 +108,7 @@ export function less_equal(
  */
 export function greater(
   x1: NDArray | string[],
-  x2: NDArray | string[]
+  x2: NDArray | string[],
 ): NDArray {
   const [a1, a2] = _prepareStringArrays(x1, x2);
   const result = _createBoolArray(a1.shape);
@@ -136,7 +130,7 @@ export function greater(
  */
 export function greater_equal(
   x1: NDArray | string[],
-  x2: NDArray | string[]
+  x2: NDArray | string[],
 ): NDArray {
   const [a1, a2] = _prepareStringArrays(x1, x2);
   const result = _createBoolArray(a1.shape);
@@ -157,7 +151,7 @@ export function greater_equal(
  */
 export function compare_chararrays(
   x1: NDArray | string[],
-  x2: NDArray | string[]
+  x2: NDArray | string[],
 ): NDArray {
   const [a1, a2] = _prepareStringArrays(x1, x2);
   const result = _createInt32Array(a1.shape);
@@ -180,29 +174,29 @@ export function compare_chararrays(
  */
 function _prepareStringArrays(
   x1: NDArray | string[],
-  x2: NDArray | string[]
+  x2: NDArray | string[],
 ): [NDArray, NDArray] {
   const a1 = Array.isArray(x1) ? NDArray.fromStringArray(x1) : x1;
   const a2 = Array.isArray(x2) ? NDArray.fromStringArray(x2) : x2;
 
   // Validate both are string arrays
   if (!a1.isStringArray) {
-    throw new Error('First argument must be a string array');
+    throw new Error("First argument must be a string array");
   }
   if (!a2.isStringArray) {
-    throw new Error('Second argument must be a string array');
+    throw new Error("Second argument must be a string array");
   }
 
   // Check shapes match (no broadcasting for now)
   if (a1.shape.length !== a2.shape.length) {
     throw new Error(
-      `Shape mismatch: ${JSON.stringify(a1.shape)} vs ${JSON.stringify(a2.shape)}`
+      `Shape mismatch: ${JSON.stringify(a1.shape)} vs ${JSON.stringify(a2.shape)}`,
     );
   }
   for (let i = 0; i < a1.shape.length; i++) {
     if (a1.shape[i] !== a2.shape[i]) {
       throw new Error(
-        `Shape mismatch: ${JSON.stringify(a1.shape)} vs ${JSON.stringify(a2.shape)}`
+        `Shape mismatch: ${JSON.stringify(a1.shape)} vs ${JSON.stringify(a2.shape)}`,
       );
     }
   }
@@ -219,14 +213,14 @@ function _createBoolArray(shape: number[]): NDArray {
   // Allocate shape in WASM
   const shapePtr = module._malloc(shape.length * 4);
   for (let i = 0; i < shape.length; i++) {
-    module.setValue(shapePtr + i * 4, shape[i], 'i32');
+    module.setValue(shapePtr + i * 4, shape[i], "i32");
   }
 
   const ptr = module._ndarray_create(shape.length, shapePtr, DType.Bool);
   module._free(shapePtr);
 
   if (ptr === 0) {
-    throw new Error('Failed to create boolean array');
+    throw new Error("Failed to create boolean array");
   }
 
   return NDArray._fromPtr(ptr, module);
@@ -241,14 +235,14 @@ function _createInt32Array(shape: number[]): NDArray {
   // Allocate shape in WASM
   const shapePtr = module._malloc(shape.length * 4);
   for (let i = 0; i < shape.length; i++) {
-    module.setValue(shapePtr + i * 4, shape[i], 'i32');
+    module.setValue(shapePtr + i * 4, shape[i], "i32");
   }
 
   const ptr = module._ndarray_create(shape.length, shapePtr, DType.Int32);
   module._free(shapePtr);
 
   if (ptr === 0) {
-    throw new Error('Failed to create int32 array');
+    throw new Error("Failed to create int32 array");
   }
 
   return NDArray._fromPtr(ptr, module);

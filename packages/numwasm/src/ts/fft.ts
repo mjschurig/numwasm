@@ -8,10 +8,10 @@
  * - Helper functions: fftfreq, rfftfreq, fftshift, ifftshift
  */
 
-import { NDArray } from './NDArray.js';
-import { DType } from './types.js';
-import { getWasmModule } from './wasm-loader.js';
-import { roll } from './manipulation.js';
+import { NDArray } from "./_core/NDArray.js";
+import { DType } from "./types.js";
+import { getWasmModule } from "./wasm-loader.js";
+import { roll } from "./manipulation.js";
 
 /* ============ Types ============ */
 
@@ -21,7 +21,7 @@ import { roll } from './manipulation.js';
  * - "ortho": 1/sqrt(n) on both forward and inverse
  * - "forward": 1/n on forward, no scaling on inverse
  */
-export type FFTNorm = 'backward' | 'ortho' | 'forward' | null;
+export type FFTNorm = "backward" | "ortho" | "forward" | null;
 
 /* ============ Internal Utilities ============ */
 
@@ -29,14 +29,14 @@ export type FFTNorm = 'backward' | 'ortho' | 'forward' | null;
  * Get normalization factor for FFT.
  */
 function _getNormFactor(n: number, norm: FFTNorm, inverse: boolean): number {
-  const effectiveNorm = norm ?? 'backward';
+  const effectiveNorm = norm ?? "backward";
 
   switch (effectiveNorm) {
-    case 'backward':
+    case "backward":
       return inverse ? 1 : 1; // Inverse scaling is done in WASM
-    case 'ortho':
+    case "ortho":
       return 1 / Math.sqrt(n);
-    case 'forward':
+    case "forward":
       return inverse ? n : 1 / n; // Undo WASM scaling for inverse, apply for forward
     default:
       throw new Error(`Unknown normalization mode: ${norm}`);
@@ -48,8 +48,8 @@ function _getNormFactor(n: number, norm: FFTNorm, inverse: boolean): number {
  * WASM always uses "backward" convention (no scaling forward, 1/n inverse).
  */
 function _needsNormAdjustment(norm: FFTNorm): boolean {
-  const effectiveNorm = norm ?? 'backward';
-  if (effectiveNorm === 'backward') return false;
+  const effectiveNorm = norm ?? "backward";
+  if (effectiveNorm === "backward") return false;
   return true;
 }
 
@@ -146,7 +146,9 @@ function _realPart(a: NDArray): NDArray {
 function _normalizeAxis(axis: number, ndim: number): number {
   if (axis < 0) axis += ndim;
   if (axis < 0 || axis >= ndim) {
-    throw new Error(`axis ${axis} is out of bounds for array of dimension ${ndim}`);
+    throw new Error(
+      `axis ${axis} is out of bounds for array of dimension ${ndim}`,
+    );
   }
   return axis;
 }
@@ -176,10 +178,10 @@ export function fft(
   a: NDArray,
   n: number | null = null,
   axis: number = -1,
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   if (a.ndim === 0) {
-    throw new Error('FFT requires at least a 1-D array');
+    throw new Error("FFT requires at least a 1-D array");
   }
 
   const module = getWasmModule();
@@ -189,7 +191,7 @@ export function fft(
   // Call WASM ndarray_fft (inverse=0 for forward)
   const resultPtr = module._ndarray_fft(a._wasmPtr, fftSize, normAxis, 0);
   if (resultPtr === 0) {
-    throw new Error('FFT failed');
+    throw new Error("FFT failed");
   }
 
   let result = NDArray._fromPtr(resultPtr, module);
@@ -223,10 +225,10 @@ export function ifft(
   a: NDArray,
   n: number | null = null,
   axis: number = -1,
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   if (a.ndim === 0) {
-    throw new Error('IFFT requires at least a 1-D array');
+    throw new Error("IFFT requires at least a 1-D array");
   }
 
   const module = getWasmModule();
@@ -236,19 +238,19 @@ export function ifft(
   // Call WASM ndarray_fft (inverse=1 for inverse)
   const resultPtr = module._ndarray_fft(a._wasmPtr, fftSize, normAxis, 1);
   if (resultPtr === 0) {
-    throw new Error('IFFT failed');
+    throw new Error("IFFT failed");
   }
 
   let result = NDArray._fromPtr(resultPtr, module);
 
   // Apply normalization adjustment if needed
   if (_needsNormAdjustment(norm)) {
-    const effectiveNorm = norm ?? 'backward';
+    const effectiveNorm = norm ?? "backward";
     let factor = 1;
-    if (effectiveNorm === 'ortho') {
+    if (effectiveNorm === "ortho") {
       // WASM does 1/n, ortho needs 1/sqrt(n), so multiply by sqrt(n)
       factor = Math.sqrt(fftSize);
-    } else if (effectiveNorm === 'forward') {
+    } else if (effectiveNorm === "forward") {
       // WASM does 1/n, forward needs 1, so multiply by n
       factor = fftSize;
     }
@@ -285,10 +287,10 @@ export function rfft(
   a: NDArray,
   n: number | null = null,
   axis: number = -1,
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   if (a.ndim === 0) {
-    throw new Error('RFFT requires at least a 1-D array');
+    throw new Error("RFFT requires at least a 1-D array");
   }
 
   const module = getWasmModule();
@@ -298,7 +300,7 @@ export function rfft(
   // Call WASM ndarray_rfft
   const resultPtr = module._ndarray_rfft(a._wasmPtr, fftSize, normAxis);
   if (resultPtr === 0) {
-    throw new Error('RFFT failed');
+    throw new Error("RFFT failed");
   }
 
   let result = NDArray._fromPtr(resultPtr, module);
@@ -336,10 +338,10 @@ export function irfft(
   a: NDArray,
   n: number | null = null,
   axis: number = -1,
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   if (a.ndim === 0) {
-    throw new Error('IRFFT requires at least a 1-D array');
+    throw new Error("IRFFT requires at least a 1-D array");
   }
 
   const module = getWasmModule();
@@ -352,7 +354,7 @@ export function irfft(
   // Call WASM ndarray_irfft
   const resultPtr = module._ndarray_irfft(a._wasmPtr, outputSize, normAxis);
   if (resultPtr === 0) {
-    throw new Error('IRFFT failed');
+    throw new Error("IRFFT failed");
   }
 
   let result = NDArray._fromPtr(resultPtr, module);
@@ -360,11 +362,11 @@ export function irfft(
   // Apply normalization adjustment if needed
   // WASM irfft applies 1/n scaling (backward convention)
   if (_needsNormAdjustment(norm)) {
-    const effectiveNorm = norm ?? 'backward';
+    const effectiveNorm = norm ?? "backward";
     let factor = 1;
-    if (effectiveNorm === 'ortho') {
+    if (effectiveNorm === "ortho") {
       factor = Math.sqrt(outputSize);
-    } else if (effectiveNorm === 'forward') {
+    } else if (effectiveNorm === "forward") {
       factor = outputSize;
     }
     if (factor !== 1) {
@@ -390,7 +392,7 @@ export function hfft(
   a: NDArray,
   n: number | null = null,
   axis: number = -1,
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   // hfft(a) = irfft(conj(a))
   // For Hermitian input, the FFT should give real output
@@ -413,7 +415,7 @@ export function ihfft(
   a: NDArray,
   n: number | null = null,
   axis: number = -1,
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   // ihfft(a) = conj(rfft(a))
   const rfft_a = rfft(a, n, axis, norm);
@@ -432,7 +434,7 @@ function _fftn_impl(
   s: number[] | null,
   axes: number[] | null,
   inverse: boolean,
-  norm: FFTNorm
+  norm: FFTNorm,
 ): NDArray {
   const ndim = a.ndim;
 
@@ -440,13 +442,13 @@ function _fftn_impl(
   let effectiveAxes = axes ?? [...Array(ndim).keys()];
 
   // Normalize negative axes
-  effectiveAxes = effectiveAxes.map(ax => _normalizeAxis(ax, ndim));
+  effectiveAxes = effectiveAxes.map((ax) => _normalizeAxis(ax, ndim));
 
   // Default sizes: original shape along axes
-  const effectiveS = s ?? effectiveAxes.map(ax => a.shape[ax]);
+  const effectiveS = s ?? effectiveAxes.map((ax) => a.shape[ax]);
 
   if (effectiveAxes.length !== effectiveS.length) {
-    throw new Error('Shape and axes must have the same length');
+    throw new Error("Shape and axes must have the same length");
   }
 
   if (effectiveAxes.length === 0) {
@@ -496,10 +498,10 @@ export function fft2(
   a: NDArray,
   s: [number, number] | null = null,
   axes: [number, number] = [-2, -1],
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   if (a.ndim < 2) {
-    throw new Error('fft2 requires at least a 2-D array');
+    throw new Error("fft2 requires at least a 2-D array");
   }
   return _fftn_impl(a, s, axes, false, norm);
 }
@@ -511,10 +513,10 @@ export function ifft2(
   a: NDArray,
   s: [number, number] | null = null,
   axes: [number, number] = [-2, -1],
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   if (a.ndim < 2) {
-    throw new Error('ifft2 requires at least a 2-D array');
+    throw new Error("ifft2 requires at least a 2-D array");
   }
   return _fftn_impl(a, s, axes, true, norm);
 }
@@ -526,10 +528,10 @@ export function rfft2(
   a: NDArray,
   s: [number, number] | null = null,
   axes: [number, number] = [-2, -1],
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   if (a.ndim < 2) {
-    throw new Error('rfft2 requires at least a 2-D array');
+    throw new Error("rfft2 requires at least a 2-D array");
   }
   return rfftn(a, s, axes, norm);
 }
@@ -541,10 +543,10 @@ export function irfft2(
   a: NDArray,
   s: [number, number] | null = null,
   axes: [number, number] = [-2, -1],
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   if (a.ndim < 2) {
-    throw new Error('irfft2 requires at least a 2-D array');
+    throw new Error("irfft2 requires at least a 2-D array");
   }
   return irfftn(a, s, axes, norm);
 }
@@ -564,7 +566,7 @@ export function fftn(
   a: NDArray,
   s: number[] | null = null,
   axes: number[] | null = null,
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   return _fftn_impl(a, s, axes, false, norm);
 }
@@ -576,7 +578,7 @@ export function ifftn(
   a: NDArray,
   s: number[] | null = null,
   axes: number[] | null = null,
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   return _fftn_impl(a, s, axes, true, norm);
 }
@@ -591,16 +593,16 @@ export function rfftn(
   a: NDArray,
   s: number[] | null = null,
   axes: number[] | null = null,
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   const ndim = a.ndim;
 
   // Default axes: all axes
   let effectiveAxes = axes ?? [...Array(ndim).keys()];
-  effectiveAxes = effectiveAxes.map(ax => _normalizeAxis(ax, ndim));
+  effectiveAxes = effectiveAxes.map((ax) => _normalizeAxis(ax, ndim));
 
   // Default sizes
-  const effectiveS = s ?? effectiveAxes.map(ax => a.shape[ax]);
+  const effectiveS = s ?? effectiveAxes.map((ax) => a.shape[ax]);
 
   if (effectiveAxes.length === 0) {
     // Convert to complex
@@ -631,13 +633,13 @@ export function irfftn(
   a: NDArray,
   s: number[] | null = null,
   axes: number[] | null = null,
-  norm: FFTNorm = null
+  norm: FFTNorm = null,
 ): NDArray {
   const ndim = a.ndim;
 
   // Default axes: all axes
   let effectiveAxes = axes ?? [...Array(ndim).keys()];
-  effectiveAxes = effectiveAxes.map(ax => _normalizeAxis(ax, ndim));
+  effectiveAxes = effectiveAxes.map((ax) => _normalizeAxis(ax, ndim));
 
   // For irfftn, determine s from input if not provided
   let effectiveS: number[];
@@ -704,7 +706,7 @@ export function irfftn(
  */
 export async function fftfreq(n: number, d: number = 1.0): Promise<NDArray> {
   if (n <= 0) {
-    throw new Error('n must be positive');
+    throw new Error("n must be positive");
   }
 
   const freq = new Float64Array(n);
@@ -742,7 +744,7 @@ export async function fftfreq(n: number, d: number = 1.0): Promise<NDArray> {
  */
 export async function rfftfreq(n: number, d: number = 1.0): Promise<NDArray> {
   if (n <= 0) {
-    throw new Error('n must be positive');
+    throw new Error("n must be positive");
   }
 
   const outSize = Math.floor(n / 2) + 1;
@@ -771,24 +773,27 @@ export async function rfftfreq(n: number, d: number = 1.0): Promise<NDArray> {
  * const shifted = fftshift(freqs);
  * // shifted = [-0.5, -0.25, 0, 0.25]
  */
-export function fftshift(x: NDArray, axes: number | number[] | null = null): NDArray {
+export function fftshift(
+  x: NDArray,
+  axes: number | number[] | null = null,
+): NDArray {
   const ndim = x.ndim;
 
   // Default: all axes
   let effectiveAxes: number[];
   if (axes === null) {
     effectiveAxes = [...Array(ndim).keys()];
-  } else if (typeof axes === 'number') {
+  } else if (typeof axes === "number") {
     effectiveAxes = [axes];
   } else {
     effectiveAxes = axes;
   }
 
   // Normalize negative axes
-  effectiveAxes = effectiveAxes.map(ax => _normalizeAxis(ax, ndim));
+  effectiveAxes = effectiveAxes.map((ax) => _normalizeAxis(ax, ndim));
 
   // Compute shift amounts: n // 2 for each axis
-  const shift = effectiveAxes.map(ax => Math.floor(x.shape[ax] / 2));
+  const shift = effectiveAxes.map((ax) => Math.floor(x.shape[ax] / 2));
 
   // Use roll to perform the shift
   return roll(x, shift, effectiveAxes);
@@ -809,25 +814,28 @@ export function fftshift(x: NDArray, axes: number | number[] | null = null): NDA
  * const z = ifftshift(y);
  * // z approximately equals x
  */
-export function ifftshift(x: NDArray, axes: number | number[] | null = null): NDArray {
+export function ifftshift(
+  x: NDArray,
+  axes: number | number[] | null = null,
+): NDArray {
   const ndim = x.ndim;
 
   // Default: all axes
   let effectiveAxes: number[];
   if (axes === null) {
     effectiveAxes = [...Array(ndim).keys()];
-  } else if (typeof axes === 'number') {
+  } else if (typeof axes === "number") {
     effectiveAxes = [axes];
   } else {
     effectiveAxes = axes;
   }
 
   // Normalize negative axes
-  effectiveAxes = effectiveAxes.map(ax => _normalizeAxis(ax, ndim));
+  effectiveAxes = effectiveAxes.map((ax) => _normalizeAxis(ax, ndim));
 
   // Compute shift amounts: -(n // 2) = (n - n//2) = ceil(n/2) for odd, n/2 for even
   // But we use negative shift which is equivalent to shifting by (n - n//2)
-  const shift = effectiveAxes.map(ax => -Math.floor(x.shape[ax] / 2));
+  const shift = effectiveAxes.map((ax) => -Math.floor(x.shape[ax] / 2));
 
   // Use roll to perform the shift
   return roll(x, shift, effectiveAxes);

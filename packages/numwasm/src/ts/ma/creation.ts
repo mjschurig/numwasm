@@ -5,10 +5,10 @@
  * Compatible with NumPy's numpy.ma module.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
-import { MaskedArray } from './core.js';
-import { nomask, MaskType, getDefaultFillValue } from './types.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
+import { MaskedArray } from "./core.js";
+import { nomask, MaskType, getDefaultFillValue } from "./types.js";
 
 /**
  * Create a masked array (async).
@@ -31,9 +31,16 @@ export async function masked_array(
   mask: MaskType | boolean[] | boolean = nomask,
   dtype: DType = DType.Float64,
   _copy: boolean = false,
-  fill_value: number | null = null
+  fill_value: number | null = null,
 ): Promise<MaskedArray> {
-  return MaskedArray.create(data, mask as boolean[] | MaskType, dtype, fill_value, false, true);
+  return MaskedArray.create(
+    data,
+    mask as boolean[] | MaskType,
+    dtype,
+    fill_value,
+    false,
+    true,
+  );
 }
 
 /**
@@ -44,7 +51,10 @@ export const array = masked_array;
 /**
  * Mask elements equal to a value.
  */
-export async function masked_equal(x: NDArray | number[], value: number): Promise<MaskedArray> {
+export async function masked_equal(
+  x: NDArray | number[],
+  value: number,
+): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   const mask = await NDArray.empty(arr.shape, { dtype: DType.Bool });
 
@@ -58,7 +68,10 @@ export async function masked_equal(x: NDArray | number[], value: number): Promis
 /**
  * Mask elements not equal to a value.
  */
-export async function masked_not_equal(x: NDArray | number[], value: number): Promise<MaskedArray> {
+export async function masked_not_equal(
+  x: NDArray | number[],
+  value: number,
+): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   const mask = await NDArray.empty(arr.shape, { dtype: DType.Bool });
 
@@ -72,7 +85,10 @@ export async function masked_not_equal(x: NDArray | number[], value: number): Pr
 /**
  * Mask elements greater than a value.
  */
-export async function masked_greater(x: NDArray | number[], value: number): Promise<MaskedArray> {
+export async function masked_greater(
+  x: NDArray | number[],
+  value: number,
+): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   const mask = await NDArray.empty(arr.shape, { dtype: DType.Bool });
 
@@ -88,7 +104,7 @@ export async function masked_greater(x: NDArray | number[], value: number): Prom
  */
 export async function masked_greater_equal(
   x: NDArray | number[],
-  value: number
+  value: number,
 ): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   const mask = await NDArray.empty(arr.shape, { dtype: DType.Bool });
@@ -103,7 +119,10 @@ export async function masked_greater_equal(
 /**
  * Mask elements less than a value.
  */
-export async function masked_less(x: NDArray | number[], value: number): Promise<MaskedArray> {
+export async function masked_less(
+  x: NDArray | number[],
+  value: number,
+): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   const mask = await NDArray.empty(arr.shape, { dtype: DType.Bool });
 
@@ -117,7 +136,10 @@ export async function masked_less(x: NDArray | number[], value: number): Promise
 /**
  * Mask elements less than or equal to a value.
  */
-export async function masked_less_equal(x: NDArray | number[], value: number): Promise<MaskedArray> {
+export async function masked_less_equal(
+  x: NDArray | number[],
+  value: number,
+): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   const mask = await NDArray.empty(arr.shape, { dtype: DType.Bool });
 
@@ -134,7 +156,7 @@ export async function masked_less_equal(x: NDArray | number[], value: number): P
 export async function masked_inside(
   x: NDArray | number[],
   v1: number,
-  v2: number
+  v2: number,
 ): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   const mask = await NDArray.empty(arr.shape, { dtype: DType.Bool });
@@ -155,7 +177,7 @@ export async function masked_inside(
 export async function masked_outside(
   x: NDArray | number[],
   v1: number,
-  v2: number
+  v2: number,
 ): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   const mask = await NDArray.empty(arr.shape, { dtype: DType.Bool });
@@ -175,7 +197,7 @@ export async function masked_outside(
  */
 export async function masked_where(
   condition: NDArray | boolean[],
-  x: NDArray | number[]
+  x: NDArray | number[],
 ): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   let cond: NDArray;
@@ -184,10 +206,11 @@ export async function masked_where(
     cond = await NDArray.fromArray(
       condition.map((c) => (c ? 1 : 0)),
       undefined,
-      { dtype: DType.Bool }
+      { dtype: DType.Bool },
     );
   } else {
-    cond = condition.dtype === DType.Bool ? condition : condition.astype(DType.Bool);
+    cond =
+      condition.dtype === DType.Bool ? condition : condition.astype(DType.Bool);
   }
 
   return new MaskedArray(arr, cond);
@@ -196,7 +219,9 @@ export async function masked_where(
 /**
  * Mask NaN and Inf values.
  */
-export async function masked_invalid(x: NDArray | number[]): Promise<MaskedArray> {
+export async function masked_invalid(
+  x: NDArray | number[],
+): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   const mask = await NDArray.empty(arr.shape, { dtype: DType.Bool });
 
@@ -215,7 +240,7 @@ export async function masked_values(
   x: NDArray | number[],
   value: number,
   rtol: number = 1e-5,
-  atol: number = 1e-8
+  atol: number = 1e-8,
 ): Promise<MaskedArray> {
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
   const mask = await NDArray.empty(arr.shape, { dtype: DType.Bool });
@@ -234,9 +259,9 @@ export async function masked_values(
  */
 export async function zeros(
   shape: number | number[],
-  dtype: DType = DType.Float64
+  dtype: DType = DType.Float64,
 ): Promise<MaskedArray> {
-  const shapeArr = typeof shape === 'number' ? [shape] : shape;
+  const shapeArr = typeof shape === "number" ? [shape] : shape;
   const data = await NDArray.zeros(shapeArr, { dtype });
   return new MaskedArray(data);
 }
@@ -246,9 +271,9 @@ export async function zeros(
  */
 export async function ones(
   shape: number | number[],
-  dtype: DType = DType.Float64
+  dtype: DType = DType.Float64,
 ): Promise<MaskedArray> {
-  const shapeArr = typeof shape === 'number' ? [shape] : shape;
+  const shapeArr = typeof shape === "number" ? [shape] : shape;
   const data = await NDArray.ones(shapeArr, { dtype });
   return new MaskedArray(data);
 }
@@ -258,9 +283,9 @@ export async function ones(
  */
 export async function empty(
   shape: number | number[],
-  dtype: DType = DType.Float64
+  dtype: DType = DType.Float64,
 ): Promise<MaskedArray> {
-  const shapeArr = typeof shape === 'number' ? [shape] : shape;
+  const shapeArr = typeof shape === "number" ? [shape] : shape;
   const data = await NDArray.empty(shapeArr, { dtype });
   return new MaskedArray(data);
 }
@@ -270,9 +295,9 @@ export async function empty(
  */
 export async function masked_all(
   shape: number | number[],
-  dtype: DType = DType.Float64
+  dtype: DType = DType.Float64,
 ): Promise<MaskedArray> {
-  const shapeArr = typeof shape === 'number' ? [shape] : shape;
+  const shapeArr = typeof shape === "number" ? [shape] : shape;
   const data = await NDArray.zeros(shapeArr, { dtype });
   const mask = await NDArray.full(shapeArr, 1, { dtype: DType.Bool });
   return new MaskedArray(data, mask);
@@ -281,7 +306,9 @@ export async function masked_all(
 /**
  * Create fully masked array like another.
  */
-export async function masked_all_like(prototype: MaskedArray | NDArray): Promise<MaskedArray> {
+export async function masked_all_like(
+  prototype: MaskedArray | NDArray,
+): Promise<MaskedArray> {
   const shape = prototype.shape;
   const dtype = prototype.dtype;
   const data = await NDArray.zeros(shape, { dtype });
@@ -292,7 +319,9 @@ export async function masked_all_like(prototype: MaskedArray | NDArray): Promise
 /**
  * Create zeros_like masked array.
  */
-export async function zeros_like(prototype: MaskedArray | NDArray): Promise<MaskedArray> {
+export async function zeros_like(
+  prototype: MaskedArray | NDArray,
+): Promise<MaskedArray> {
   const shape = prototype.shape;
   const dtype = prototype.dtype;
   const data = await NDArray.zeros(shape, { dtype });
@@ -302,7 +331,9 @@ export async function zeros_like(prototype: MaskedArray | NDArray): Promise<Mask
 /**
  * Create ones_like masked array.
  */
-export async function ones_like(prototype: MaskedArray | NDArray): Promise<MaskedArray> {
+export async function ones_like(
+  prototype: MaskedArray | NDArray,
+): Promise<MaskedArray> {
   const shape = prototype.shape;
   const dtype = prototype.dtype;
   const data = await NDArray.ones(shape, { dtype });
@@ -312,7 +343,9 @@ export async function ones_like(prototype: MaskedArray | NDArray): Promise<Maske
 /**
  * Create empty_like masked array.
  */
-export async function empty_like(prototype: MaskedArray | NDArray): Promise<MaskedArray> {
+export async function empty_like(
+  prototype: MaskedArray | NDArray,
+): Promise<MaskedArray> {
   const shape = prototype.shape;
   const dtype = prototype.dtype;
   const data = await NDArray.empty(shape, { dtype });
@@ -325,7 +358,7 @@ export async function empty_like(prototype: MaskedArray | NDArray): Promise<Mask
 export async function fromfunction(
   shape: number[],
   fn: (...indices: number[]) => [number, boolean],
-  dtype: DType = DType.Float64
+  dtype: DType = DType.Float64,
 ): Promise<MaskedArray> {
   const data = await NDArray.empty(shape, { dtype });
   const mask = await NDArray.zeros(shape, { dtype: DType.Bool });

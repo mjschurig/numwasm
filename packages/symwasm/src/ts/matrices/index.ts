@@ -12,7 +12,6 @@ import {
   createBasic,
   checkException,
 } from '../wasm-memory.js';
-import { NotImplementedError } from '../errors.js';
 
 /**
  * Helper to convert a value to an Expr
@@ -245,22 +244,580 @@ export class Matrix {
   }
 
   // ============================================================================
-  // Stubs for Phase 3.1 Part 2 (Basic Operations)
+  // Submatrix Operations
   // ============================================================================
 
-  /** Compute the determinant. */
+  /**
+   * Extract a submatrix from this matrix.
+   * @param r1 Starting row index (inclusive)
+   * @param c1 Starting column index (inclusive)
+   * @param r2 Ending row index (inclusive)
+   * @param c2 Ending column index (inclusive)
+   * @param rStep Row step size (default 1)
+   * @param cStep Column step size (default 1)
+   * @returns A new Matrix containing the extracted submatrix
+   *
+   * @example
+   * const m = new Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
+   * m.submatrix(0, 0, 1, 1);  // Returns [[1, 2], [4, 5]]
+   */
+  submatrix(
+    r1: number,
+    c1: number,
+    r2: number,
+    c2: number,
+    rStep: number = 1,
+    cStep: number = 1
+  ): Matrix {
+    if (r1 < 0 || r1 >= this.rows || r2 < 0 || r2 >= this.rows) {
+      throw new RangeError(
+        `Row indices (${r1}, ${r2}) out of bounds for matrix with ${this.rows} rows`
+      );
+    }
+    if (c1 < 0 || c1 >= this.cols || c2 < 0 || c2 >= this.cols) {
+      throw new RangeError(
+        `Column indices (${c1}, ${c2}) out of bounds for matrix with ${this.cols} columns`
+      );
+    }
+    if (rStep <= 0 || cStep <= 0) {
+      throw new Error('Step sizes must be positive');
+    }
+
+    const wasm = getWasmModule();
+    const resultObj = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_submatrix(
+        resultObj.getPtr(),
+        this._obj.getPtr(),
+        r1,
+        c1,
+        r2,
+        c2,
+        rStep,
+        cStep
+      );
+      checkException(code);
+      return Matrix._fromDenseMatrixObject(resultObj);
+    } catch (e) {
+      resultObj.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Horizontally stack another matrix to the right of this one.
+   * Both matrices must have the same number of rows.
+   * @param other The matrix to append horizontally
+   * @returns A new Matrix with columns from both matrices
+   *
+   * @example
+   * const a = new Matrix([[1, 2], [3, 4]]);
+   * const b = new Matrix([[5], [6]]);
+   * a.rowJoin(b);  // Returns [[1, 2, 5], [3, 4, 6]]
+   */
+  rowJoin(other: Matrix): Matrix {
+    if (this.rows !== other.rows) {
+      throw new Error(
+        `Cannot row_join matrices with different row counts: ${this.rows} vs ${other.rows}`
+      );
+    }
+
+    const wasm = getWasmModule();
+    const resultObj = createDenseMatrix();
+
+    try {
+      // Copy this matrix to result first (indices are inclusive)
+      const code1 = wasm._dense_matrix_submatrix(
+        resultObj.getPtr(),
+        this._obj.getPtr(),
+        0,
+        0,
+        this.rows - 1,
+        this.cols - 1,
+        1,
+        1
+      );
+      checkException(code1);
+
+      // Join with other
+      const code2 = wasm._dense_matrix_row_join(resultObj.getPtr(), other._obj.getPtr());
+      checkException(code2);
+
+      return Matrix._fromDenseMatrixObject(resultObj);
+    } catch (e) {
+      resultObj.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Vertically stack another matrix below this one.
+   * Both matrices must have the same number of columns.
+   * @param other The matrix to append vertically
+   * @returns A new Matrix with rows from both matrices
+   *
+   * @example
+   * const a = new Matrix([[1, 2], [3, 4]]);
+   * const b = new Matrix([[5, 6]]);
+   * a.colJoin(b);  // Returns [[1, 2], [3, 4], [5, 6]]
+   */
+  colJoin(other: Matrix): Matrix {
+    if (this.cols !== other.cols) {
+      throw new Error(
+        `Cannot col_join matrices with different column counts: ${this.cols} vs ${other.cols}`
+      );
+    }
+
+    const wasm = getWasmModule();
+    const resultObj = createDenseMatrix();
+
+    try {
+      // Copy this matrix to result first (indices are inclusive)
+      const code1 = wasm._dense_matrix_submatrix(
+        resultObj.getPtr(),
+        this._obj.getPtr(),
+        0,
+        0,
+        this.rows - 1,
+        this.cols - 1,
+        1,
+        1
+      );
+      checkException(code1);
+
+      // Join with other
+      const code2 = wasm._dense_matrix_col_join(resultObj.getPtr(), other._obj.getPtr());
+      checkException(code2);
+
+      return Matrix._fromDenseMatrixObject(resultObj);
+    } catch (e) {
+      resultObj.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Delete a row from this matrix (in-place).
+   * @param k The row index to delete (0-based)
+   *
+   * @example
+   * const m = new Matrix([[1, 2], [3, 4], [5, 6]]);
+   * m.rowDel(1);  // m becomes [[1, 2], [5, 6]]
+   */
+  rowDel(k: number): void {
+    if (k < 0 || k >= this.rows) {
+      throw new RangeError(
+        `Row index ${k} out of bounds for matrix with ${this.rows} rows`
+      );
+    }
+
+    const wasm = getWasmModule();
+    const code = wasm._dense_matrix_row_del(this._obj.getPtr(), k);
+    checkException(code);
+  }
+
+  /**
+   * Delete a column from this matrix (in-place).
+   * @param k The column index to delete (0-based)
+   *
+   * @example
+   * const m = new Matrix([[1, 2, 3], [4, 5, 6]]);
+   * m.colDel(1);  // m becomes [[1, 3], [4, 6]]
+   */
+  colDel(k: number): void {
+    if (k < 0 || k >= this.cols) {
+      throw new RangeError(
+        `Column index ${k} out of bounds for matrix with ${this.cols} columns`
+      );
+    }
+
+    const wasm = getWasmModule();
+    const code = wasm._dense_matrix_col_del(this._obj.getPtr(), k);
+    checkException(code);
+  }
+
+  // ============================================================================
+  // Basic Operations (Phase 3.1 Part 2)
+  // ============================================================================
+
+  /**
+   * Compute the determinant.
+   * Only valid for square matrices.
+   * @returns The determinant as a symbolic expression
+   *
+   * @example
+   * const m = new Matrix([[1, 2], [3, 4]]);
+   * m.det();  // Returns Integer(-2)
+   */
   det(): Expr {
-    throw new NotImplementedError('symwasm.matrices.Matrix.det');
+    if (this.rows !== this.cols) {
+      throw new Error(
+        `Determinant requires square matrix, got (${this.rows}, ${this.cols})`
+      );
+    }
+
+    const wasm = getWasmModule();
+    const result = createBasic();
+
+    try {
+      const code = wasm._dense_matrix_det(result.getPtr(), this._obj.getPtr());
+      checkException(code);
+      return exprFromWasm(result);
+    } catch (e) {
+      result.free();
+      throw e;
+    }
   }
 
-  /** Compute the inverse. */
+  /**
+   * Compute the inverse.
+   * Only valid for square matrices with non-zero determinant.
+   * @returns The inverse matrix
+   *
+   * @example
+   * const m = new Matrix([[1, 2], [3, 4]]);
+   * m.inv();  // Returns inverse matrix
+   */
   inv(): Matrix {
-    throw new NotImplementedError('symwasm.matrices.Matrix.inv');
+    if (this.rows !== this.cols) {
+      throw new Error(
+        `Inverse requires square matrix, got (${this.rows}, ${this.cols})`
+      );
+    }
+
+    const wasm = getWasmModule();
+    const result = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_inv(result.getPtr(), this._obj.getPtr());
+      checkException(code);
+      return Matrix._fromDenseMatrixObject(result);
+    } catch (e) {
+      result.free();
+      throw e;
+    }
   }
 
-  /** Compute the transpose. */
+  /**
+   * Compute the transpose.
+   * @returns The transposed matrix
+   *
+   * @example
+   * const m = new Matrix([[1, 2, 3], [4, 5, 6]]);
+   * m.transpose();  // Returns 3x2 matrix [[1, 4], [2, 5], [3, 6]]
+   */
   transpose(): Matrix {
-    throw new NotImplementedError('symwasm.matrices.Matrix.transpose');
+    const wasm = getWasmModule();
+    const result = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_transpose(
+        result.getPtr(),
+        this._obj.getPtr()
+      );
+      checkException(code);
+      return Matrix._fromDenseMatrixObject(result);
+    } catch (e) {
+      result.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Add another matrix.
+   * Both matrices must have the same dimensions.
+   * @param other The matrix to add
+   * @returns The sum of the two matrices
+   *
+   * @example
+   * const a = new Matrix([[1, 2], [3, 4]]);
+   * const b = new Matrix([[5, 6], [7, 8]]);
+   * a.add(b);  // Returns [[6, 8], [10, 12]]
+   */
+  add(other: Matrix): Matrix {
+    if (this.rows !== other.rows || this.cols !== other.cols) {
+      throw new Error(
+        `Matrix dimensions must match for addition: (${this.rows}, ${this.cols}) vs (${other.rows}, ${other.cols})`
+      );
+    }
+
+    const wasm = getWasmModule();
+    const result = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_add_matrix(
+        result.getPtr(),
+        this._obj.getPtr(),
+        other._obj.getPtr()
+      );
+      checkException(code);
+      return Matrix._fromDenseMatrixObject(result);
+    } catch (e) {
+      result.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Multiply by another matrix.
+   * The number of columns in this matrix must equal the number of rows in other.
+   * @param other The matrix to multiply by
+   * @returns The product matrix
+   *
+   * @example
+   * const a = new Matrix([[1, 2], [3, 4]]);
+   * const b = new Matrix([[5, 6], [7, 8]]);
+   * a.mul(b);  // Returns [[19, 22], [43, 50]]
+   */
+  mul(other: Matrix): Matrix {
+    if (this.cols !== other.rows) {
+      throw new Error(
+        `Matrix dimensions incompatible for multiplication: (${this.rows}, ${this.cols}) x (${other.rows}, ${other.cols})`
+      );
+    }
+
+    const wasm = getWasmModule();
+    const result = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_mul_matrix(
+        result.getPtr(),
+        this._obj.getPtr(),
+        other._obj.getPtr()
+      );
+      checkException(code);
+      return Matrix._fromDenseMatrixObject(result);
+    } catch (e) {
+      result.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Add a scalar to every element.
+   * @param k The scalar to add (expression or number)
+   * @returns New matrix with scalar added to each element
+   *
+   * @example
+   * const m = new Matrix([[1, 2], [3, 4]]);
+   * m.addScalar(10);  // Returns [[11, 12], [13, 14]]
+   */
+  addScalar(k: Expr | number): Matrix {
+    const wasm = getWasmModule();
+    const result = createDenseMatrix();
+    const scalar = toExpr(k);
+
+    try {
+      const code = wasm._dense_matrix_add_scalar(
+        result.getPtr(),
+        this._obj.getPtr(),
+        scalar.getWasmPtr()
+      );
+      checkException(code);
+      return Matrix._fromDenseMatrixObject(result);
+    } catch (e) {
+      result.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Multiply every element by a scalar.
+   * @param k The scalar to multiply by (expression or number)
+   * @returns New matrix with each element multiplied by scalar
+   *
+   * @example
+   * const m = new Matrix([[1, 2], [3, 4]]);
+   * m.mulScalar(2);  // Returns [[2, 4], [6, 8]]
+   */
+  mulScalar(k: Expr | number): Matrix {
+    const wasm = getWasmModule();
+    const result = createDenseMatrix();
+    const scalar = toExpr(k);
+
+    try {
+      const code = wasm._dense_matrix_mul_scalar(
+        result.getPtr(),
+        this._obj.getPtr(),
+        scalar.getWasmPtr()
+      );
+      checkException(code);
+      return Matrix._fromDenseMatrixObject(result);
+    } catch (e) {
+      result.free();
+      throw e;
+    }
+  }
+
+  // ============================================================================
+  // Factorizations
+  // ============================================================================
+
+  /**
+   * LU factorization of the matrix.
+   * Decomposes matrix A into lower triangular (L) and upper triangular (U) matrices.
+   * A = L*U
+   *
+   * @returns Tuple [L, U] where L is lower triangular, U is upper triangular
+   * @throws Error if decomposition fails
+   *
+   * @example
+   * const A = new Matrix([[1, 2], [3, 4]]);
+   * const [L, U] = A.lu();
+   */
+  lu(): [Matrix, Matrix] {
+    const wasm = getWasmModule();
+    const lObj = createDenseMatrix();
+    const uObj = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_LU(
+        lObj.getPtr(),
+        uObj.getPtr(),
+        this._obj.getPtr()
+      );
+      checkException(code);
+      return [
+        Matrix._fromDenseMatrixObject(lObj),
+        Matrix._fromDenseMatrixObject(uObj),
+      ];
+    } catch (e) {
+      lObj.free();
+      uObj.free();
+      throw e;
+    }
+  }
+
+  /**
+   * LDL factorization of the matrix.
+   * Decomposes a symmetric matrix A into L*D*L^T where L is lower triangular
+   * and D is diagonal.
+   *
+   * @returns Tuple [L, D] where L is lower triangular, D is diagonal
+   * @throws Error if decomposition fails (matrix must be symmetric)
+   *
+   * @example
+   * const A = new Matrix([[4, 2], [2, 5]]);
+   * const [L, D] = A.ldl();
+   */
+  ldl(): [Matrix, Matrix] {
+    const wasm = getWasmModule();
+    const lObj = createDenseMatrix();
+    const dObj = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_LDL(
+        lObj.getPtr(),
+        dObj.getPtr(),
+        this._obj.getPtr()
+      );
+      checkException(code);
+      return [
+        Matrix._fromDenseMatrixObject(lObj),
+        Matrix._fromDenseMatrixObject(dObj),
+      ];
+    } catch (e) {
+      lObj.free();
+      dObj.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Fraction-free LU factorization of the matrix.
+   * Returns a single matrix containing the LU decomposition without fractions.
+   * Useful for symbolic computation to avoid expression swell.
+   *
+   * @returns Matrix containing the fraction-free LU decomposition
+   * @throws Error if decomposition fails
+   *
+   * @example
+   * const A = new Matrix([[1, 2], [3, 4]]);
+   * const LU = A.fflu();
+   */
+  fflu(): Matrix {
+    const wasm = getWasmModule();
+    const luObj = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_FFLU(luObj.getPtr(), this._obj.getPtr());
+      checkException(code);
+      return Matrix._fromDenseMatrixObject(luObj);
+    } catch (e) {
+      luObj.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Fraction-free LDU factorization of the matrix.
+   * Decomposes matrix A into L*D*U where L is lower triangular,
+   * D is diagonal, and U is upper triangular, all without fractions.
+   *
+   * @returns Tuple [L, D, U] where L is lower triangular, D is diagonal, U is upper triangular
+   * @throws Error if decomposition fails
+   *
+   * @example
+   * const A = new Matrix([[1, 2], [3, 4]]);
+   * const [L, D, U] = A.ffldu();
+   */
+  ffldu(): [Matrix, Matrix, Matrix] {
+    const wasm = getWasmModule();
+    const lObj = createDenseMatrix();
+    const dObj = createDenseMatrix();
+    const uObj = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_FFLDU(
+        lObj.getPtr(),
+        dObj.getPtr(),
+        uObj.getPtr(),
+        this._obj.getPtr()
+      );
+      checkException(code);
+      return [
+        Matrix._fromDenseMatrixObject(lObj),
+        Matrix._fromDenseMatrixObject(dObj),
+        Matrix._fromDenseMatrixObject(uObj),
+      ];
+    } catch (e) {
+      lObj.free();
+      dObj.free();
+      uObj.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Solve the linear system Ax = b using LU decomposition.
+   * This matrix (A) is the coefficient matrix, b is the right-hand side.
+   *
+   * @param b Right-hand side matrix or vector
+   * @returns Solution matrix x such that A*x = b
+   * @throws Error if the system cannot be solved
+   *
+   * @example
+   * const A = new Matrix([[2, 1], [1, 3]]);
+   * const b = new Matrix([[1], [2]]);
+   * const x = A.luSolve(b);  // Solves Ax = b
+   */
+  luSolve(b: Matrix): Matrix {
+    const wasm = getWasmModule();
+    const xObj = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_LU_solve(
+        xObj.getPtr(),
+        this._obj.getPtr(),
+        b._obj.getPtr()
+      );
+      checkException(code);
+      return Matrix._fromDenseMatrixObject(xObj);
+    } catch (e) {
+      xObj.free();
+      throw e;
+    }
   }
 }
 

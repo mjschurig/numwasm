@@ -511,6 +511,235 @@ export interface XSFModule {
   _wasm_perm_exact(n: number, k: number): number;
 
   // ============================================================================
+  // AIRY FUNCTIONS
+  // ============================================================================
+
+  /**
+   * Computes Airy functions Ai(x), Ai'(x), Bi(x), Bi'(x).
+   * Results are written to the provided pointers.
+   */
+  _wasm_airy(x: number, ai: number, aip: number, bi: number, bip: number): void;
+
+  // ============================================================================
+  // DIGAMMA (PSI) FUNCTION
+  // ============================================================================
+
+  /**
+   * Computes the digamma function ψ(x) = d/dx ln(Γ(x)).
+   */
+  _wasm_digamma(x: number): number;
+
+  // ============================================================================
+  // ELLIPTIC INTEGRALS
+  // ============================================================================
+
+  /** Complete elliptic integral of the first kind K(m). */
+  _wasm_ellipk(m: number): number;
+
+  /** Complete elliptic integral of the second kind E(m). */
+  _wasm_ellipe(m: number): number;
+
+  /** Incomplete elliptic integral of the first kind F(φ|m). */
+  _wasm_ellipkinc(phi: number, m: number): number;
+
+  /** Incomplete elliptic integral of the second kind E(φ|m). */
+  _wasm_ellipeinc(phi: number, m: number): number;
+
+  /** Jacobi elliptic functions sn, cn, dn, ph. */
+  _wasm_ellipj(u: number, m: number, sn: number, cn: number, dn: number, ph: number): void;
+
+  // ============================================================================
+  // EXPONENTIAL INTEGRALS
+  // ============================================================================
+
+  /** Exponential integral E₁(x). */
+  _wasm_exp1(x: number): number;
+
+  /** Exponential integral Ei(x). */
+  _wasm_expi(x: number): number;
+
+  // ============================================================================
+  // FRESNEL INTEGRALS
+  // ============================================================================
+
+  /** Fresnel integrals S(x) and C(x). */
+  _wasm_fresnel(x: number, s: number, c: number): void;
+
+  // ============================================================================
+  // HYPERGEOMETRIC FUNCTION
+  // ============================================================================
+
+  /** Gauss hypergeometric function ₂F₁(a, b; c; x). */
+  _wasm_hyp2f1(a: number, b: number, c: number, x: number): number;
+
+  // ============================================================================
+  // KELVIN FUNCTIONS
+  // ============================================================================
+
+  /** Kelvin function ber(x). */
+  _wasm_ber(x: number): number;
+
+  /** Kelvin function bei(x). */
+  _wasm_bei(x: number): number;
+
+  /** Kelvin function ker(x). */
+  _wasm_ker(x: number): number;
+
+  /** Kelvin function kei(x). */
+  _wasm_kei(x: number): number;
+
+  /** Derivative of Kelvin function ber'(x). */
+  _wasm_berp(x: number): number;
+
+  /** Derivative of Kelvin function bei'(x). */
+  _wasm_beip(x: number): number;
+
+  /** Derivative of Kelvin function ker'(x). */
+  _wasm_kerp(x: number): number;
+
+  /** Derivative of Kelvin function kei'(x). */
+  _wasm_keip(x: number): number;
+
+  // ============================================================================
+  // LAMBERT W FUNCTION
+  // ============================================================================
+
+  /** Lambert W function W(x, k) for branch k. */
+  _wasm_lambertw(x: number, k: number): number;
+
+  // ============================================================================
+  // SINE AND COSINE INTEGRALS
+  // ============================================================================
+
+  /** Sine and cosine integrals Si(x) and Ci(x). */
+  _wasm_sici(x: number, si: number, ci: number): void;
+
+  /** Hyperbolic sine and cosine integrals Shi(x) and Chi(x). */
+  _wasm_shichi(x: number, shi: number, chi: number): void;
+
+  // ============================================================================
+  // SPHERICAL BESSEL FUNCTIONS
+  // ============================================================================
+
+  /** Spherical Bessel function of the first kind j_n(x). */
+  _wasm_spherical_jn(n: number, x: number): number;
+
+  /** Spherical Bessel function of the second kind y_n(x). */
+  _wasm_spherical_yn(n: number, x: number): number;
+
+  /** Modified spherical Bessel function of the first kind i_n(x). */
+  _wasm_spherical_in(n: number, x: number): number;
+
+  /** Modified spherical Bessel function of the second kind k_n(x). */
+  _wasm_spherical_kn(n: number, x: number): number;
+
+  // ============================================================================
+  // STRUVE FUNCTIONS
+  // ============================================================================
+
+  /** Struve function H_v(x). */
+  _wasm_struve_h(v: number, x: number): number;
+
+  /** Modified Struve function L_v(x). */
+  _wasm_struve_l(v: number, x: number): number;
+
+  // ============================================================================
+  // RIEMANN ZETA FUNCTION
+  // ============================================================================
+
+  /** Riemann zeta function ζ(x). */
+  _wasm_zeta(x: number): number;
+
+  /** Riemann zeta complement ζ(x) - 1. */
+  _wasm_zetac(x: number): number;
+
+  // ============================================================================
+  // LEGENDRE POLYNOMIALS
+  // ============================================================================
+
+  /** Legendre polynomial P_n(x). */
+  _wasm_legendre_p(n: number, x: number): number;
+
+  // ============================================================================
+  // STATISTICAL DISTRIBUTIONS
+  // ============================================================================
+
+  /** Normal distribution CDF. */
+  _wasm_ndtr(x: number): number;
+
+  /** Normal distribution inverse CDF (quantile function). */
+  _wasm_ndtri(p: number): number;
+
+  /** Log of normal distribution CDF. */
+  _wasm_log_ndtr(x: number): number;
+
+  /** Chi-square distribution CDF. */
+  _wasm_chdtr(df: number, x: number): number;
+
+  /** Chi-square distribution complement (survival function). */
+  _wasm_chdtrc(df: number, x: number): number;
+
+  /** Chi-square distribution inverse CDF. */
+  _wasm_chdtri(df: number, p: number): number;
+
+  /** F-distribution CDF. */
+  _wasm_fdtr(dfn: number, dfd: number, x: number): number;
+
+  /** F-distribution complement (survival function). */
+  _wasm_fdtrc(dfn: number, dfd: number, x: number): number;
+
+  /** F-distribution inverse CDF. */
+  _wasm_fdtri(dfn: number, dfd: number, p: number): number;
+
+  /** Gamma distribution CDF. */
+  _wasm_gdtr(a: number, b: number, x: number): number;
+
+  /** Gamma distribution complement (survival function). */
+  _wasm_gdtrc(a: number, b: number, x: number): number;
+
+  /** Poisson distribution CDF. */
+  _wasm_pdtr(k: number, m: number): number;
+
+  /** Poisson distribution complement. */
+  _wasm_pdtrc(k: number, m: number): number;
+
+  /** Poisson distribution inverse. */
+  _wasm_pdtri(k: number, p: number): number;
+
+  /** Binomial distribution CDF. */
+  _wasm_bdtr(k: number, n: number, p: number): number;
+
+  /** Binomial distribution complement. */
+  _wasm_bdtrc(k: number, n: number, p: number): number;
+
+  /** Binomial distribution inverse. */
+  _wasm_bdtri(k: number, n: number, y: number): number;
+
+  /** Negative binomial distribution CDF. */
+  _wasm_nbdtr(k: number, n: number, p: number): number;
+
+  /** Negative binomial distribution complement. */
+  _wasm_nbdtrc(k: number, n: number, p: number): number;
+
+  /** Negative binomial distribution inverse. */
+  _wasm_nbdtri(k: number, n: number, p: number): number;
+
+  /** Kolmogorov distribution CDF. */
+  _wasm_kolmogorov(x: number): number;
+
+  /** Kolmogorov distribution inverse CDF. */
+  _wasm_kolmogi(p: number): number;
+
+  /** Smirnov distribution CDF. */
+  _wasm_smirnov(n: number, x: number): number;
+
+  /** Smirnov distribution inverse CDF. */
+  _wasm_smirnovi(n: number, p: number): number;
+
+  /** Owen's T function. */
+  _wasm_owens_t(h: number, a: number): number;
+
+  // ============================================================================
   // MEMORY MANAGEMENT
   // ============================================================================
 

@@ -326,18 +326,18 @@ For each function/module, follow these steps in order:
 - ⬜ `Matrix.mulScalar(k)` — Multiply by scalar (`dense_matrix_mul_scalar`)
 
 ##### Dense Matrix — Submatrix Operations
-- ⬜ `Matrix.submatrix(r1, c1, r2, c2)` — Extract submatrix (`dense_matrix_submatrix`)
-- ⬜ `Matrix.rowJoin(other)` — Horizontal stack (`dense_matrix_row_join`)
-- ⬜ `Matrix.colJoin(other)` — Vertical stack (`dense_matrix_col_join`)
-- ⬜ `Matrix.rowDel(k)` — Delete row (`dense_matrix_row_del`)
-- ⬜ `Matrix.colDel(k)` — Delete column (`dense_matrix_col_del`)
+- ✅ `Matrix.submatrix(r1, c1, r2, c2)` — Extract submatrix (`dense_matrix_submatrix`)
+- ✅ `Matrix.rowJoin(other)` — Horizontal stack (`dense_matrix_row_join`)
+- ✅ `Matrix.colJoin(other)` — Vertical stack (`dense_matrix_col_join`)
+- ✅ `Matrix.rowDel(k)` — Delete row (`dense_matrix_row_del`)
+- ✅ `Matrix.colDel(k)` — Delete column (`dense_matrix_col_del`)
 
 ##### Dense Matrix — Factorizations
-- ⬜ `Matrix.LU()` — LU decomposition (`dense_matrix_LU`)
-- ⬜ `Matrix.LDL()` — LDL decomposition (`dense_matrix_LDL`)
-- ⬜ `Matrix.FFLU()` — Fraction-free LU (`dense_matrix_FFLU`)
-- ⬜ `Matrix.FFLDU()` — Fraction-free LDU (`dense_matrix_FFLDU`)
-- ⬜ `Matrix.LUSolve(b)` — Solve Ax=b using LU (`dense_matrix_LU_solve`)
+- ✅ `Matrix.lu()` — LU decomposition (`dense_matrix_LU`)
+- ✅ `Matrix.ldl()` — LDL decomposition (`dense_matrix_LDL`)
+- ✅ `Matrix.fflu()` — Fraction-free LU (`dense_matrix_FFLU`)
+- ✅ `Matrix.ffldu()` — Fraction-free LDU (`dense_matrix_FFLDU`)
+- ✅ `Matrix.luSolve(b)` — Solve Ax=b using LU (`dense_matrix_LU_solve`)
 
 ##### Dense Matrix — Calculus
 - ⬜ `Matrix.diff(x)` — Differentiate elements (`dense_matrix_diff`)

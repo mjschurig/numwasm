@@ -6,16 +6,16 @@
  * Legendre, Hermite, HermiteE, and Laguerre polynomial classes.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
-import { lstsq, eigvals } from '../linalg.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
+import { lstsq, eigvals } from "../linalg.js";
 import {
   PolyError,
   trimcoef,
   mapparms,
   mapdomain,
   getdomain,
-} from './polyutils.js';
+} from "./polyutils.js";
 
 /**
  * Maximum allowed polynomial degree.
@@ -58,7 +58,7 @@ export abstract class ABCPolyBase {
   static defaultWindow: [number, number] = [-1, 1];
 
   /** Name of the basis (for display) */
-  static basisName: string = 'P';
+  static basisName: string = "P";
 
   /* ============ Abstract Static Methods ============ */
   /* These must be implemented by each polynomial type */
@@ -67,21 +67,21 @@ export abstract class ABCPolyBase {
    * Add two coefficient arrays in this basis.
    */
   protected static _add(_c1: number[], _c2: number[]): number[] {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
    * Subtract two coefficient arrays in this basis.
    */
   protected static _sub(_c1: number[], _c2: number[]): number[] {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
    * Multiply two coefficient arrays in this basis.
    */
   protected static _mul(_c1: number[], _c2: number[]): number[] {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
@@ -89,21 +89,24 @@ export abstract class ABCPolyBase {
    * @returns [quotient, remainder]
    */
   protected static _div(_c1: number[], _c2: number[]): [number[], number[]] {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
    * Raise coefficient array to integer power.
    */
   protected static _pow(_c: number[], _n: number, _maxpow: number): number[] {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
    * Evaluate polynomial at x.
    */
-  protected static _val(_x: number | number[], _c: number[]): number | number[] {
-    throw new Error('Must be implemented by subclass');
+  protected static _val(
+    _x: number | number[],
+    _c: number[],
+  ): number | number[] {
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
@@ -113,7 +116,7 @@ export abstract class ABCPolyBase {
    * @param scl - Scale factor for the derivative
    */
   protected static _der(_c: number[], _m: number, _scl: number): number[] {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
@@ -129,9 +132,9 @@ export abstract class ABCPolyBase {
     _m: number,
     _k: number[],
     _lbnd: number,
-    _scl: number
+    _scl: number,
   ): number[] {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
@@ -139,28 +142,28 @@ export abstract class ABCPolyBase {
    * Default implementation uses companion matrix eigenvalues.
    */
   protected static async _roots(_c: number[]): Promise<number[]> {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
    * Generate Vandermonde matrix for given x values and degree.
    */
   protected static _vander(_x: number[], _deg: number): number[][] {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
    * Generate companion matrix for root finding.
    */
   protected static _companion(_c: number[]): number[][] {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /**
    * Construct polynomial coefficients from roots.
    */
   protected static _fromroots(_roots: number[]): number[] {
-    throw new Error('Must be implemented by subclass');
+    throw new Error("Must be implemented by subclass");
   }
 
   /* ============ Constructor ============ */
@@ -177,12 +180,12 @@ export abstract class ABCPolyBase {
     coef: number[] | NDArray,
     domain: [number, number] | null = null,
     window: [number, number] | null = null,
-    symbol: string = 'x'
+    symbol: string = "x",
   ) {
     // Convert and validate coefficients
     if (coef instanceof NDArray) {
       if (coef.ndim !== 1) {
-        throw new PolyError('Coefficient array must be 1-D');
+        throw new PolyError("Coefficient array must be 1-D");
       }
       this._coef = coef.toArray() as number[];
     } else {
@@ -253,7 +256,7 @@ export abstract class ABCPolyBase {
   add(other: ABCPolyBase | number): this {
     const ctor = this.constructor as typeof ABCPolyBase;
 
-    if (typeof other === 'number') {
+    if (typeof other === "number") {
       const newCoef = [...this._coef];
       newCoef[0] = (newCoef[0] || 0) + other;
       return this._createNew(newCoef);
@@ -270,7 +273,7 @@ export abstract class ABCPolyBase {
   sub(other: ABCPolyBase | number): this {
     const ctor = this.constructor as typeof ABCPolyBase;
 
-    if (typeof other === 'number') {
+    if (typeof other === "number") {
       const newCoef = [...this._coef];
       newCoef[0] = (newCoef[0] || 0) - other;
       return this._createNew(newCoef);
@@ -287,8 +290,8 @@ export abstract class ABCPolyBase {
   mul(other: ABCPolyBase | number): this {
     const ctor = this.constructor as typeof ABCPolyBase;
 
-    if (typeof other === 'number') {
-      const newCoef = this._coef.map(c => c * other);
+    if (typeof other === "number") {
+      const newCoef = this._coef.map((c) => c * other);
       return this._createNew(newCoef);
     }
 
@@ -328,7 +331,7 @@ export abstract class ABCPolyBase {
    */
   pow(n: number): this {
     if (!Number.isInteger(n) || n < 0) {
-      throw new PolyError('Power must be a non-negative integer');
+      throw new PolyError("Power must be a non-negative integer");
     }
 
     const ctor = this.constructor as typeof ABCPolyBase;
@@ -340,7 +343,7 @@ export abstract class ABCPolyBase {
    * Negate polynomial.
    */
   neg(): this {
-    return this._createNew(this._coef.map(c => -c));
+    return this._createNew(this._coef.map((c) => -c));
   }
 
   /* ============ Evaluation ============ */
@@ -392,7 +395,7 @@ export abstract class ABCPolyBase {
    */
   deriv(m: number = 1): this {
     if (!Number.isInteger(m) || m < 0) {
-      throw new PolyError('Derivative order must be a non-negative integer');
+      throw new PolyError("Derivative order must be a non-negative integer");
     }
 
     if (m === 0) {
@@ -416,7 +419,7 @@ export abstract class ABCPolyBase {
    */
   integ(m: number = 1, k: number[] = [], lbnd: number | null = null): this {
     if (!Number.isInteger(m) || m < 0) {
-      throw new PolyError('Integration order must be a non-negative integer');
+      throw new PolyError("Integration order must be a non-negative integer");
     }
 
     if (m === 0) {
@@ -473,7 +476,7 @@ export abstract class ABCPolyBase {
    */
   truncate(size: number): this {
     if (size < 1) {
-      throw new PolyError('Size must be at least 1');
+      throw new PolyError("Size must be at least 1");
     }
     return this._createNew(this._coef.slice(0, size));
   }
@@ -525,14 +528,14 @@ export abstract class ABCPolyBase {
     this: new (
       coef: number[],
       domain?: [number, number] | null,
-      window?: [number, number] | null
+      window?: [number, number] | null,
     ) => T,
     deg: number,
     domain: [number, number] | null = null,
-    window: [number, number] | null = null
+    window: [number, number] | null = null,
   ): T {
     if (!Number.isInteger(deg) || deg < 0) {
-      throw new PolyError('Degree must be a non-negative integer');
+      throw new PolyError("Degree must be a non-negative integer");
     }
 
     const coef = new Array(deg + 1).fill(0);
@@ -551,10 +554,10 @@ export abstract class ABCPolyBase {
     this: new (
       coef: number[],
       domain?: [number, number] | null,
-      window?: [number, number] | null
+      window?: [number, number] | null,
     ) => T,
     domain: [number, number] | null = null,
-    window: [number, number] | null = null
+    window: [number, number] | null = null,
   ): T {
     return new this([0, 1], domain, window);
   }
@@ -571,13 +574,13 @@ export abstract class ABCPolyBase {
       new (
         coef: number[],
         domain?: [number, number] | null,
-        window?: [number, number] | null
+        window?: [number, number] | null,
       ): T;
       _fromroots(roots: number[]): number[];
     },
     roots: number[],
     domain: [number, number] | null = null,
-    window: [number, number] | null = null
+    window: [number, number] | null = null,
   ): T {
     const coef = this._fromroots(roots);
     return new this(coef, domain, window);
@@ -599,7 +602,7 @@ export abstract class ABCPolyBase {
     this: (new (
       coef: number[],
       domain?: [number, number] | null,
-      window?: [number, number] | null
+      window?: [number, number] | null,
     ) => T) & {
       defaultDomain: [number, number];
       defaultWindow: [number, number];
@@ -610,36 +613,46 @@ export abstract class ABCPolyBase {
     domain: [number, number] | null = null,
     rcond: number | null = null,
     full: boolean = false,
-    w: number[] | null = null
-  ): Promise<T | [T, { residuals: number[]; rank: number; sv: number[]; rcond: number }]> {
+    w: number[] | null = null,
+  ): Promise<
+    T | [T, { residuals: number[]; rank: number; sv: number[]; rcond: number }]
+  > {
     const xArr = x instanceof NDArray ? (x.toArray() as number[]) : x;
     const yArr = y instanceof NDArray ? (y.toArray() as number[]) : y;
 
     if (xArr.length !== yArr.length) {
-      throw new PolyError('x and y must have same length');
+      throw new PolyError("x and y must have same length");
     }
 
     if (xArr.length === 0) {
-      throw new PolyError('x and y must have at least one element');
+      throw new PolyError("x and y must have at least one element");
     }
 
     // Determine domain from data if not provided
     const effectiveDomain = domain ?? getdomain(xArr);
 
     // Map x to window
-    const xMapped = mapdomain(xArr, effectiveDomain, this.defaultWindow) as number[];
+    const xMapped = mapdomain(
+      xArr,
+      effectiveDomain,
+      this.defaultWindow,
+    ) as number[];
 
     // Build Vandermonde matrix (access via the concrete class)
-    const vander = (this as unknown as { _vander(x: number[], deg: number): number[][] })._vander(xMapped, deg);
+    const vander = (
+      this as unknown as { _vander(x: number[], deg: number): number[][] }
+    )._vander(xMapped, deg);
 
     // Apply weights if provided
     let weightedVander = vander;
     let weightedY = yArr;
     if (w !== null) {
       if (w.length !== xArr.length) {
-        throw new PolyError('Weights must have same length as x');
+        throw new PolyError("Weights must have same length as x");
       }
-      weightedVander = vander.map((row, i) => row.map(v => v * Math.sqrt(w[i])));
+      weightedVander = vander.map((row, i) =>
+        row.map((v) => v * Math.sqrt(w[i])),
+      );
       weightedY = yArr.map((v, i) => v * Math.sqrt(w[i]));
     }
 
@@ -650,12 +663,12 @@ export abstract class ABCPolyBase {
     const vanderArr = await NDArray.fromTypedArray(
       new Float64Array(flatVander),
       [m, n],
-      DType.Float64
+      DType.Float64,
     );
     const yNDArr = await NDArray.fromTypedArray(
       new Float64Array(weightedY),
       [m],
-      DType.Float64
+      DType.Float64,
     );
 
     // Solve least squares using linalg module
@@ -699,14 +712,20 @@ export abstract class ABCPolyBase {
    * Check if same domain as other.
    */
   hassamedomain(other: ABCPolyBase): boolean {
-    return this._domain[0] === other._domain[0] && this._domain[1] === other._domain[1];
+    return (
+      this._domain[0] === other._domain[0] &&
+      this._domain[1] === other._domain[1]
+    );
   }
 
   /**
    * Check if same window as other.
    */
   hassamewindow(other: ABCPolyBase): boolean {
-    return this._window[0] === other._window[0] && this._window[1] === other._window[1];
+    return (
+      this._window[0] === other._window[0] &&
+      this._window[1] === other._window[1]
+    );
   }
 
   /**
@@ -735,8 +754,8 @@ export abstract class ABCPolyBase {
         term = formatCoef(c);
       } else {
         const absC = Math.abs(c);
-        const sign = c < 0 ? '-' : '+';
-        const coefStr = absC === 1 ? '' : formatCoef(absC) + '*';
+        const sign = c < 0 ? "-" : "+";
+        const coefStr = absC === 1 ? "" : formatCoef(absC) + "*";
         const basisStr =
           i === 1 ? this._symbol : `${ctor.basisName}_${i}(${this._symbol})`;
         term = `${sign} ${coefStr}${basisStr}`;
@@ -745,12 +764,12 @@ export abstract class ABCPolyBase {
     }
 
     if (terms.length === 0) {
-      return '0';
+      return "0";
     }
 
     let result = terms[0];
     for (let i = 1; i < terms.length; i++) {
-      result += ' ' + terms[i];
+      result += " " + terms[i];
     }
     return result;
   }
@@ -765,7 +784,7 @@ export abstract class ABCPolyBase {
       coef: number[],
       domain?: [number, number] | null,
       window?: [number, number] | null,
-      symbol?: string
+      symbol?: string,
     ) => this;
 
     return new ctor(coef, this._domain, this._window, this._symbol);
@@ -776,13 +795,13 @@ export abstract class ABCPolyBase {
    */
   protected _checkCompatible(other: ABCPolyBase): void {
     if (!this.hassametype(other)) {
-      throw new PolyError('Polynomial types do not match');
+      throw new PolyError("Polynomial types do not match");
     }
     if (!this.hassamedomain(other)) {
-      throw new PolyError('Polynomial domains do not match');
+      throw new PolyError("Polynomial domains do not match");
     }
     if (!this.hassamewindow(other)) {
-      throw new PolyError('Polynomial windows do not match');
+      throw new PolyError("Polynomial windows do not match");
     }
   }
 }
@@ -797,20 +816,26 @@ function formatCoef(c: number): string {
     return String(c);
   }
   // Remove trailing zeros
-  return c.toFixed(6).replace(/\.?0+$/, '');
+  return c.toFixed(6).replace(/\.?0+$/, "");
 }
 
 /**
  * Find eigenvalues of a companion matrix.
  * Used for root finding in polynomial classes.
  */
-export async function companionEigenvalues(companion: number[][]): Promise<number[]> {
+export async function companionEigenvalues(
+  companion: number[][],
+): Promise<number[]> {
   const n = companion.length;
   if (n === 0) return [];
 
   // Convert to NDArray
   const flat = companion.flat();
-  const mat = await NDArray.fromTypedArray(new Float64Array(flat), [n, n], DType.Float64);
+  const mat = await NDArray.fromTypedArray(
+    new Float64Array(flat),
+    [n, n],
+    DType.Float64,
+  );
 
   // Get eigenvalues
   const eigenNDArray = await eigvals(mat);

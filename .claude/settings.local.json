@@ -41,7 +41,10 @@
       "Bash(pnpm build:*)",
       "Bash(python3:*)",
       "Bash(chmod:*)",
-      "Bash(pnpm exec tsc:*)"
+      "Bash(pnpm exec tsc:*)",
+      "Bash(echo:*)",
+      "Bash(f2c:*)",
+      "Bash(pnpm exec vitest:*)"
     ]
   }
 }

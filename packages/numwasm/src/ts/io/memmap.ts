@@ -8,14 +8,14 @@
  * Reference: numpy/core/memmap.py
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType, DTYPE_SIZES } from '../types.js';
-import { isNode } from './format.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType, DTYPE_SIZES } from "../types.js";
+import { isNode } from "./format.js";
 
 /**
  * Memory mapping modes.
  */
-export type MemmapMode = 'r' | 'r+' | 'w+' | 'c';
+export type MemmapMode = "r" | "r+" | "w+" | "c";
 
 /**
  * Options for creating/opening a memmap.
@@ -30,7 +30,7 @@ export interface MemmapOptions {
   /** Array shape (required for new files) */
   shape?: number[];
   /** Storage order: 'C' (row-major) or 'F' (column-major) */
-  order?: 'C' | 'F';
+  order?: "C" | "F";
 }
 
 /**
@@ -71,7 +71,7 @@ export class Memmap extends NDArray {
   private _offset: number = 0;
 
   /** Access mode */
-  private _mode: MemmapMode = 'r';
+  private _mode: MemmapMode = "r";
 
   /** Whether data has been modified */
   private _dirty: boolean = false;
@@ -85,18 +85,18 @@ export class Memmap extends NDArray {
    */
   static async create(
     file: string,
-    options: MemmapOptions = {}
+    options: MemmapOptions = {},
   ): Promise<Memmap> {
     const {
       dtype = DType.Float64,
-      mode = 'w+',
+      mode = "w+",
       offset = 0,
       shape = [],
-      order: _order = 'C',
+      order: _order = "C",
     } = options;
 
     if (shape.length === 0) {
-      throw new Error('Shape must be specified for new memmap');
+      throw new Error("Shape must be specified for new memmap");
     }
 
     const size = shape.reduce((a, b) => a * b, 1);
@@ -121,7 +121,7 @@ export class Memmap extends NDArray {
     mmap._dirty = false;
 
     // Write initial file if in Node.js
-    if (isNode() && (mode === 'w+' || mode === 'r+')) {
+    if (isNode() && (mode === "w+" || mode === "r+")) {
       await mmap.flush();
     }
 
@@ -137,14 +137,14 @@ export class Memmap extends NDArray {
    */
   static async open(
     file: string | ArrayBuffer,
-    options: MemmapOptions = {}
+    options: MemmapOptions = {},
   ): Promise<Memmap> {
     const {
       dtype = DType.Float64,
-      mode = 'r',
+      mode = "r",
       offset = 0,
       shape,
-      order: _order = 'C',
+      order: _order = "C",
     } = options;
 
     let buffer: ArrayBuffer;
@@ -152,21 +152,21 @@ export class Memmap extends NDArray {
 
     if (file instanceof ArrayBuffer) {
       buffer = file;
-    } else if (typeof file === 'string') {
+    } else if (typeof file === "string") {
       filePath = file;
 
       if (isNode()) {
-        const fs = await import('fs/promises');
+        const fs = await import("fs/promises");
         const fileBuffer = await fs.readFile(file);
         buffer = fileBuffer.buffer.slice(
           fileBuffer.byteOffset,
-          fileBuffer.byteOffset + fileBuffer.byteLength
+          fileBuffer.byteOffset + fileBuffer.byteLength,
         );
       } else {
-        throw new Error('String file paths only supported in Node.js');
+        throw new Error("String file paths only supported in Node.js");
       }
     } else {
-      throw new Error('Unsupported file source');
+      throw new Error("Unsupported file source");
     }
 
     // Determine shape from file size if not provided
@@ -180,13 +180,17 @@ export class Memmap extends NDArray {
     if (size > maxElements) {
       throw new Error(
         `Shape ${actualShape} requires ${size} elements, ` +
-        `but file only has ${maxElements} available`
+          `but file only has ${maxElements} available`,
       );
     }
 
     // Create typed array view
     const typedArray = createTypedArrayForDtype(dtype, buffer, offset, size);
-    const baseArr = await NDArray.fromTypedArray(typedArray, actualShape, dtype);
+    const baseArr = await NDArray.fromTypedArray(
+      typedArray,
+      actualShape,
+      dtype,
+    );
 
     // Create Memmap instance
     const mmap = Object.create(Memmap.prototype) as Memmap;
@@ -207,26 +211,26 @@ export class Memmap extends NDArray {
    * Only works in Node.js with 'r+' or 'w+' mode.
    */
   async flush(): Promise<void> {
-    if (this._mode === 'r' || this._mode === 'c') {
+    if (this._mode === "r" || this._mode === "c") {
       return; // Read-only or copy-on-write, nothing to flush
     }
 
     if (!this._filePath) {
-      throw new Error('Cannot flush: no file path associated');
+      throw new Error("Cannot flush: no file path associated");
     }
 
     if (!isNode()) {
-      throw new Error('File flushing only supported in Node.js');
+      throw new Error("File flushing only supported in Node.js");
     }
 
-    const fs = await import('fs/promises');
+    const fs = await import("fs/promises");
 
     // Get the current data
     const typedArray = this.toTypedArray();
     const dataBuffer = new Uint8Array(
       typedArray.buffer,
       typedArray.byteOffset,
-      typedArray.byteLength
+      typedArray.byteLength,
     );
 
     // If offset is 0, write entire buffer
@@ -281,8 +285,8 @@ export class Memmap extends NDArray {
    * Override set to track modifications.
    */
   set(value: number, ...indices: number[]): void {
-    if (this._mode === 'r') {
-      throw new Error('Cannot modify read-only memmap');
+    if (this._mode === "r") {
+      throw new Error("Cannot modify read-only memmap");
     }
     super.set(value, ...indices);
     this._dirty = true;
@@ -292,8 +296,8 @@ export class Memmap extends NDArray {
    * Override setFlat to track modifications.
    */
   setFlat(index: number, value: number): void {
-    if (this._mode === 'r') {
-      throw new Error('Cannot modify read-only memmap');
+    if (this._mode === "r") {
+      throw new Error("Cannot modify read-only memmap");
     }
     super.setFlat(index, value);
     this._dirty = true;
@@ -323,7 +327,7 @@ export class Memmap extends NDArray {
  */
 export async function openMemmap(
   file: string | ArrayBuffer,
-  options: MemmapOptions = {}
+  options: MemmapOptions = {},
 ): Promise<Memmap> {
   return Memmap.open(file, options);
 }
@@ -335,8 +339,18 @@ function createTypedArrayForDtype(
   dtype: DType,
   buffer: ArrayBuffer,
   byteOffset: number,
-  length: number
-): Float64Array | Float32Array | Int32Array | Int16Array | Int8Array | Uint32Array | Uint16Array | Uint8Array | BigInt64Array | BigUint64Array {
+  length: number,
+):
+  | Float64Array
+  | Float32Array
+  | Int32Array
+  | Int16Array
+  | Int8Array
+  | Uint32Array
+  | Uint16Array
+  | Uint8Array
+  | BigInt64Array
+  | BigUint64Array {
   switch (dtype) {
     case DType.Float64:
       return new Float64Array(buffer, byteOffset, length);

@@ -7,9 +7,9 @@
  * Reference: numpy/_core/fromnumeric.py, numpy/_core/numeric.py
  */
 
-import { NDArray } from './NDArray.js';
-import { DType } from './types.js';
-import { absolute } from './ufunc.js';
+import { NDArray } from "./_core/NDArray.js";
+import { DType } from "./types.js";
+import { absolute } from "./ufunc.js";
 
 /* ============ Element-wise Predicates ============ */
 
@@ -29,7 +29,7 @@ export async function isfinite(x: NDArray): Promise<NDArray> {
   const module = x._wasmModule;
   const resultPtr = module._ndarray_isfinite(x._wasmPtr);
   if (resultPtr === 0) {
-    throw new Error('isfinite failed');
+    throw new Error("isfinite failed");
   }
   return NDArray._fromPtr(resultPtr, module);
 }
@@ -50,7 +50,7 @@ export async function isinf(x: NDArray): Promise<NDArray> {
   const module = x._wasmModule;
   const resultPtr = module._ndarray_isinf(x._wasmPtr);
   if (resultPtr === 0) {
-    throw new Error('isinf failed');
+    throw new Error("isinf failed");
   }
   return NDArray._fromPtr(resultPtr, module);
 }
@@ -71,7 +71,7 @@ export async function isnan(x: NDArray): Promise<NDArray> {
   const module = x._wasmModule;
   const resultPtr = module._ndarray_isnan(x._wasmPtr);
   if (resultPtr === 0) {
-    throw new Error('isnan failed');
+    throw new Error("isnan failed");
   }
   return NDArray._fromPtr(resultPtr, module);
 }
@@ -92,7 +92,7 @@ export async function isneginf(x: NDArray): Promise<NDArray> {
   const module = x._wasmModule;
   const resultPtr = module._ndarray_isneginf(x._wasmPtr);
   if (resultPtr === 0) {
-    throw new Error('isneginf failed');
+    throw new Error("isneginf failed");
   }
   return NDArray._fromPtr(resultPtr, module);
 }
@@ -113,7 +113,7 @@ export async function isposinf(x: NDArray): Promise<NDArray> {
   const module = x._wasmModule;
   const resultPtr = module._ndarray_isposinf(x._wasmPtr);
   if (resultPtr === 0) {
-    throw new Error('isposinf failed');
+    throw new Error("isposinf failed");
   }
   return NDArray._fromPtr(resultPtr, module);
 }
@@ -135,7 +135,7 @@ export async function iscomplex(x: NDArray): Promise<NDArray> {
   const module = x._wasmModule;
   const resultPtr = module._ndarray_iscomplex_elem(x._wasmPtr);
   if (resultPtr === 0) {
-    throw new Error('iscomplex failed');
+    throw new Error("iscomplex failed");
   }
   return NDArray._fromPtr(resultPtr, module);
 }
@@ -157,7 +157,7 @@ export async function isreal(x: NDArray): Promise<NDArray> {
   const module = x._wasmModule;
   const resultPtr = module._ndarray_isreal_elem(x._wasmPtr);
   if (resultPtr === 0) {
-    throw new Error('isreal failed');
+    throw new Error("isreal failed");
   }
   return NDArray._fromPtr(resultPtr, module);
 }
@@ -230,9 +230,9 @@ export function isfortran(a: NDArray): boolean {
  */
 export function isscalar(element: unknown): boolean {
   return (
-    typeof element === 'number' ||
-    typeof element === 'boolean' ||
-    typeof element === 'bigint'
+    typeof element === "number" ||
+    typeof element === "boolean" ||
+    typeof element === "bigint"
   );
 }
 
@@ -257,7 +257,7 @@ export function isscalar(element: unknown): boolean {
 export async function all(
   a: NDArray,
   axis?: number,
-  keepdims: boolean = false
+  keepdims: boolean = false,
 ): Promise<NDArray | boolean> {
   const module = a._wasmModule;
 
@@ -270,7 +270,7 @@ export async function all(
   }
 
   if (resultPtr === 0) {
-    throw new Error('all failed');
+    throw new Error("all failed");
   }
 
   const result = NDArray._fromPtr(resultPtr, module);
@@ -304,7 +304,7 @@ export async function all(
 export async function any(
   a: NDArray,
   axis?: number,
-  keepdims: boolean = false
+  keepdims: boolean = false,
 ): Promise<NDArray | boolean> {
   const module = a._wasmModule;
 
@@ -317,7 +317,7 @@ export async function any(
   }
 
   if (resultPtr === 0) {
-    throw new Error('any failed');
+    throw new Error("any failed");
   }
 
   const result = NDArray._fromPtr(resultPtr, module);
@@ -358,7 +358,7 @@ export async function isclose(
   b: NDArray,
   rtol: number = 1e-5,
   atol: number = 1e-8,
-  equal_nan: boolean = false
+  equal_nan: boolean = false,
 ): Promise<NDArray> {
   const module = a._wasmModule;
 
@@ -367,11 +367,11 @@ export async function isclose(
     b._wasmPtr,
     rtol,
     atol,
-    equal_nan ? 1 : 0
+    equal_nan ? 1 : 0,
   );
 
   if (resultPtr === 0) {
-    throw new Error('isclose failed: shapes may not be broadcast-compatible');
+    throw new Error("isclose failed: shapes may not be broadcast-compatible");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -399,7 +399,7 @@ export async function allclose(
   b: NDArray,
   rtol: number = 1e-5,
   atol: number = 1e-8,
-  equal_nan: boolean = false
+  equal_nan: boolean = false,
 ): Promise<boolean> {
   const module = a._wasmModule;
 
@@ -408,7 +408,7 @@ export async function allclose(
     b._wasmPtr,
     rtol,
     atol,
-    equal_nan ? 1 : 0
+    equal_nan ? 1 : 0,
   );
 
   return result !== 0;
@@ -432,14 +432,14 @@ export async function allclose(
 export async function array_equal(
   a1: NDArray,
   a2: NDArray,
-  equal_nan: boolean = false
+  equal_nan: boolean = false,
 ): Promise<boolean> {
   const module = a1._wasmModule;
 
   const result = module._ndarray_array_equal(
     a1._wasmPtr,
     a2._wasmPtr,
-    equal_nan ? 1 : 0
+    equal_nan ? 1 : 0,
   );
 
   return result !== 0;
@@ -493,7 +493,7 @@ export async function array_equiv(a1: NDArray, a2: NDArray): Promise<boolean> {
  */
 export async function real_if_close(
   a: NDArray,
-  tol: number = 100
+  tol: number = 100,
 ): Promise<NDArray> {
   // For non-complex arrays, return as-is
   if (!iscomplexobj(a)) {

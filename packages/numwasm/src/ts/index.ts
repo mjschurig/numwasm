@@ -8,9 +8,9 @@
  */
 
 // Main array class
-export { NDArray } from './NDArray.js';
+export { NDArray } from "./_core/NDArray.js";
 
-// Type definitions
+// Type definitions (from _core)
 export {
   DType,
   DTYPE_SIZES,
@@ -27,16 +27,16 @@ export {
   INDEX_TYPE_SLICE,
   INDEX_TYPE_NEWAXIS,
   INDEX_TYPE_ELLIPSIS,
-} from './types.js';
+} from "./_core/types.js";
 export type {
   NDArrayOptions,
   TypedArrayType,
   WasmModule,
   Complex,
   NDArrayFlags,
-} from './types.js';
+} from "./_core/types.js";
 
-// DType utilities
+// DType utilities (from _core)
 export {
   dtypeFromString,
   dtypeToString,
@@ -52,19 +52,19 @@ export {
   promoteTypes,
   commonType,
   CastingKind,
-} from './dtype.js';
+} from "./_core/dtype.js";
 
-// Iterators
-export { FlatIterator, nditer, ndenumerate, ndindex } from './iterators.js';
+// Iterators (from _lib)
+export { FlatIterator, nditer, ndenumerate, ndindex } from "./_lib/iterators.js";
 
-// WASM module management
+// WASM module management (from _core)
 export {
   loadWasmModule,
   isWasmLoaded,
   getWasmModule,
   configureWasm,
-} from './wasm-loader.js';
-export type { WasmLoadConfig } from './wasm-loader.js';
+} from "./_core/wasm-loader.js";
+export type { WasmLoadConfig } from "./_core/wasm-loader.js";
 
 // Array creation functions
 export {
@@ -84,9 +84,26 @@ export {
   ones_like,
   empty_like,
   full_like,
-} from './creation.js';
+  // Triangular arrays
+  tri,
+  tril,
+  triu,
+  // Diagonal utilities
+  diagflat,
+  // Matrix construction
+  vander,
+  // Function-based creation
+  fromfunction,
+  fromiter,
+  // Conversion functions
+  asanyarray,
+  asarray_chkfinite,
+  copy,
+  ascontiguousarray,
+  asfortranarray,
+} from "./creation/index.js";
 
-// Slice utilities (Level 2)
+// Slice utilities (from _core)
 export {
   Slice,
   slice,
@@ -95,10 +112,10 @@ export {
   expandEllipsis,
   buildIndexSpecs,
   computeResultShape,
-} from './slice.js';
-export type { IndexElement, IndexSpec, Ellipsis, Newaxis } from './slice.js';
+} from "./_core/slice.js";
+export type { IndexElement, IndexSpec, Ellipsis, Newaxis } from "./_core/slice.js";
 
-// Broadcasting functions (Level 2)
+// Broadcasting functions (from _core)
 export {
   broadcastShapes,
   broadcastShapesMulti,
@@ -106,7 +123,7 @@ export {
   broadcastTo,
   broadcastArrays,
   computeBroadcastStrides,
-} from './broadcast.js';
+} from "./_core/broadcast.js";
 
 // Index functions (Level 2)
 export {
@@ -141,12 +158,18 @@ export {
   putmask,
   place,
   select,
-} from './indexing.js';
-export type { ClipMode } from './indexing.js';
+} from "./indexing.js";
+export type { ClipMode } from "./indexing.js";
 
 // Sorting functions (Phase 6)
-export { sort, argsort, partition, argpartition, sort_complex } from './sorting.js';
-export type { SortKind } from './sorting.js';
+export {
+  sort,
+  argsort,
+  partition,
+  argpartition,
+  sort_complex,
+} from "./sorting.js";
+export type { SortKind } from "./sorting.js";
 
 // Statistics functions (Phase 6)
 export {
@@ -166,7 +189,7 @@ export {
   cumprod,
   nancumsum,
   nancumprod,
-} from './statistics.js';
+} from "./statistics.js";
 
 // NaN-handling functions (Phase 23)
 export {
@@ -183,12 +206,13 @@ export {
   nanquantile,
   nanpercentile,
   nan_to_num,
-} from './nanfunctions.js';
+} from "./nanfunctions.js";
 
 // Manipulation functions (Phase 5)
 export {
   // Joining
   concatenate,
+  concat,
   stack,
   vstack,
   row_stack,
@@ -222,7 +246,18 @@ export {
   // Copying
   copyto,
   asarray,
-} from './manipulation.js';
+  // Shape manipulation
+  reshape,
+  ravel,
+  flatten,
+  squeeze,
+  expand_dims,
+  transpose,
+  permute_dims,
+  swapaxes,
+  moveaxis,
+  rollaxis,
+} from "./manipulation.js";
 
 // Logic & comparison functions (Phase 7)
 export {
@@ -249,7 +284,7 @@ export {
   array_equiv,
   // Complex utilities
   real_if_close,
-} from './logic.js';
+} from "./logic.js";
 
 // Universal functions (Ufuncs) - Level 3
 export {
@@ -258,6 +293,7 @@ export {
   positive,
   absolute,
   abs,
+  fabs,
   sign,
   // Powers and roots
   sqrt,
@@ -280,6 +316,9 @@ export {
   arcsin,
   arccos,
   arctan,
+  asin,
+  acos,
+  atan,
   // Hyperbolic
   sinh,
   cosh,
@@ -287,12 +326,17 @@ export {
   arcsinh,
   arccosh,
   arctanh,
+  asinh,
+  acosh,
+  atanh,
   // Rounding
   floor,
   ceil,
   trunc,
   rint,
   round,
+  around,
+  fix,
   // Angle conversion
   degrees,
   rad2deg,
@@ -314,6 +358,8 @@ export {
   mod,
   fmod,
   power,
+  pow,
+  float_power,
   // Comparison
   equal,
   not_equal,
@@ -338,6 +384,7 @@ export {
   right_shift,
   // Special math
   arctan2,
+  atan2,
   hypot,
   copysign,
   signbit,
@@ -358,9 +405,9 @@ export {
   // Complex number operations
   conjugate,
   conj,
-} from './ufunc.js';
+} from "./ufunc.js";
 
-// Functional programming (Level 10)
+// Functional programming (from _lib)
 export {
   applyAlongAxis,
   applyOverAxes,
@@ -368,8 +415,8 @@ export {
   vectorize,
   frompyfunc,
   piecewise,
-} from './functional.js';
-export type { VectorizeOptions, UfuncLike } from './functional.js';
+} from "./_lib/functional.js";
+export type { VectorizeOptions, UfuncLike } from "./_lib/functional.js";
 
 // Set operations (Phase 8)
 export {
@@ -394,7 +441,7 @@ export {
   ISIN_AUTO,
   ISIN_SORT,
   ISIN_TABLE,
-} from './setops.js';
+} from "./setops.js";
 export type {
   UniqueResult,
   UniqueOptions,
@@ -404,7 +451,7 @@ export type {
   SetDiffOptions,
   SetXorOptions,
   Ediff1dOptions,
-} from './setops.js';
+} from "./setops.js";
 
 // Histogram functions (Phase 24)
 export {
@@ -415,13 +462,13 @@ export {
   histogram2d,
   histogramdd,
   HistogramError,
-} from './histogram.js';
+} from "./histogram.js";
 export type {
   BinMethod,
   HistogramResult,
   Histogram2DResult,
   HistogramDDResult,
-} from './histogram.js';
+} from "./histogram.js";
 
 // I/O operations (Phase 9)
 export {
@@ -463,7 +510,7 @@ export {
   dtypeToDescr,
   descrToDtype,
   isNode,
-} from './io/index.js';
+} from "./io/index.js";
 export type {
   SaveOptions,
   LoadOptions,
@@ -476,17 +523,10 @@ export type {
   PrintOptions,
   MemmapMode,
   MemmapOptions,
-} from './io/index.js';
+} from "./io/index.js";
 
 // Window functions (Phase 11)
-export {
-  blackman,
-  bartlett,
-  hanning,
-  hamming,
-  kaiser,
-  i0,
-} from './window.js';
+export { blackman, bartlett, hanning, hamming, kaiser, i0 } from "./window.js";
 
 // Constants (Phase 12)
 export {
@@ -502,10 +542,10 @@ export {
   NAN,
   PZERO,
   NZERO,
-} from './constants.js';
+} from "./constants.js";
 
 // Type information classes (Phase 12)
-export { finfo, iinfo } from './typeinfo.js';
+export { finfo, iinfo } from "./_lib/typeinfo.js";
 
 // Linear algebra (Phase 13)
 export {
@@ -544,17 +584,17 @@ export {
   tensorinv,
   matrix_norm,
   vector_norm,
-} from './linalg.js';
+} from "./linalg.js";
 export type {
   EigResult,
   SVDResult,
   QRResult,
   LstsqResult,
   SlogdetResult,
-} from './linalg.js';
+} from "./linalg.js";
 
 // Einstein summation (Phase 25)
-export { einsum, einsum_path } from './einsum.js';
+export { einsum, einsum_path } from "./einsum.js";
 
 // FFT (Phase 14)
 export {
@@ -582,8 +622,8 @@ export {
   ifftshift,
   // Module object
   fftModule,
-} from './fft.js';
-export type { FFTNorm } from './fft.js';
+} from "./fft.js";
+export type { FFTNorm } from "./fft.js";
 
 // Random module (Phase 15 + Phase 27 BitGenerators)
 export {
@@ -608,9 +648,14 @@ export {
   randint,
   // Initialization
   initRandom,
-} from './random.js';
-export type { SizeType, PCG64State, MT19937State, PhiloxState, SFC64State } from './random.js';
-
+} from "./random.js";
+export type {
+  SizeType,
+  PCG64State,
+  MT19937State,
+  PhiloxState,
+  SFC64State,
+} from "./random.js";
 
 // String operations (Phase 16a)
 export {
@@ -666,7 +711,7 @@ export {
   decode,
   // Namespace object
   strings,
-} from './strings/index.js';
+} from "./strings/index.js";
 
 // Polynomial module (Phase 16c)
 export {
@@ -787,15 +832,15 @@ export {
   lagmul,
   lagdiv,
   lagpow,
-} from './polynomial/index.js';
+} from "./polynomial/index.js";
 
 // Testing module (Phase 16e)
-export * as testing from './testing/index.js';
+export * as testing from "./testing/index.js";
 export {
   AssertionError,
   SkipTest,
   KnownFailureException,
-} from './testing/index.js';
+} from "./testing/index.js";
 
 // Record arrays module (Phase 16b)
 export {
@@ -811,24 +856,19 @@ export {
   find_duplicate,
   KeyError,
   IndexError as RecIndexError,
-} from './rec/index.js';
-export type {
-  RecArrayOptions,
-} from './rec/index.js';
-export type {
-  StructuredDType,
-  FieldDescriptor,
-} from './types.js';
+} from "./rec/index.js";
+export type { RecArrayOptions } from "./rec/index.js";
+export type { StructuredDType, FieldDescriptor } from "./_core/types.js";
 export {
   isStructuredDType,
   dtypeSize as structDtypeSize,
   dtypeAlignment,
-} from './types.js';
+} from "./_core/types.js";
 
 // Masked arrays module (Phase 16d)
-export { ma } from './ma/index.js';
-export { MaskedArray } from './ma/core.js';
-export type { MaskType, MaskedConstant, SliceInfo } from './ma/index.js';
+export { ma } from "./ma/index.js";
+export { MaskedArray } from "./ma/core.js";
+export type { MaskType, MaskedConstant, SliceInfo } from "./ma/index.js";
 
-// Type checking and complex utilities
-export { angle, real, imag } from './type_check.js';
+// Type checking and complex utilities (from _lib)
+export { angle, real, imag } from "./_lib/type_check.js";

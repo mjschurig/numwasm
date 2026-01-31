@@ -5,8 +5,8 @@
  * Compatible with NumPy's numpy.ma.MaskedArray.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
 import {
   nomask,
   masked,
@@ -16,7 +16,7 @@ import {
   MaskError,
   isMaskedConstant,
   getDefaultFillValue,
-} from './types.js';
+} from "./types.js";
 
 /**
  * Array with masked (invalid) elements.
@@ -70,13 +70,16 @@ export class MaskedArray {
     data: NDArray | MaskedArray,
     mask: MaskType = nomask,
     fill_value: number | string | boolean | null = null,
-    hard_mask: boolean = false
+    hard_mask: boolean = false,
   ) {
     if (data instanceof MaskedArray) {
       this._data = data._data;
       // Combine masks if both exist
       if (mask !== nomask && data._mask !== nomask) {
-        this._mask = this._combineMasksSync(data._mask as NDArray, mask as NDArray);
+        this._mask = this._combineMasksSync(
+          data._mask as NDArray,
+          mask as NDArray,
+        );
       } else if (mask !== nomask) {
         this._mask = mask;
       } else {
@@ -110,20 +113,32 @@ export class MaskedArray {
     dtype: DType = DType.Float64,
     fill_value: number | string | boolean | null = null,
     hard_mask: boolean = false,
-    shrink: boolean = true
+    shrink: boolean = true,
   ): Promise<MaskedArray> {
     // Handle MaskedArray input
     if (data instanceof MaskedArray) {
       let finalMask = data._mask;
       if (mask !== nomask) {
-        const newMask = await MaskedArray._processMaskAsync(mask, data.shape, shrink);
+        const newMask = await MaskedArray._processMaskAsync(
+          mask,
+          data.shape,
+          shrink,
+        );
         if (newMask !== nomask && finalMask !== nomask) {
-          finalMask = await MaskedArray._combineMasksAsync(finalMask as NDArray, newMask as NDArray);
+          finalMask = await MaskedArray._combineMasksAsync(
+            finalMask as NDArray,
+            newMask as NDArray,
+          );
         } else if (newMask !== nomask) {
           finalMask = newMask;
         }
       }
-      return new MaskedArray(data._data, finalMask, fill_value ?? data._fill_value, hard_mask || data._hardmask);
+      return new MaskedArray(
+        data._data,
+        finalMask,
+        fill_value ?? data._fill_value,
+        hard_mask || data._hardmask,
+      );
     }
 
     // Convert data to NDArray
@@ -135,7 +150,11 @@ export class MaskedArray {
     }
 
     // Process mask
-    const finalMask = await MaskedArray._processMaskAsync(mask, ndData.shape, shrink);
+    const finalMask = await MaskedArray._processMaskAsync(
+      mask,
+      ndData.shape,
+      shrink,
+    );
 
     return new MaskedArray(ndData, finalMask, fill_value, hard_mask);
   }
@@ -146,13 +165,13 @@ export class MaskedArray {
   private static async _processMaskAsync(
     mask: MaskType | boolean[],
     shape: number[],
-    shrink: boolean
+    shrink: boolean,
   ): Promise<MaskType> {
     if (mask === nomask) {
       return nomask;
     }
 
-    if (typeof mask === 'boolean') {
+    if (typeof mask === "boolean") {
       if (!mask && shrink) {
         return nomask;
       }
@@ -166,7 +185,9 @@ export class MaskedArray {
     let maskArr: NDArray;
     if (Array.isArray(mask)) {
       const boolData = mask.map((m) => (m ? 1 : 0));
-      maskArr = await NDArray.fromArray(boolData, undefined, { dtype: DType.Bool });
+      maskArr = await NDArray.fromArray(boolData, undefined, {
+        dtype: DType.Bool,
+      });
     } else {
       maskArr = mask.dtype === DType.Bool ? mask : mask.astype(DType.Bool);
     }
@@ -187,7 +208,10 @@ export class MaskedArray {
   /**
    * Broadcast mask to target shape (async).
    */
-  private static async _broadcastMaskAsync(mask: NDArray, targetShape: number[]): Promise<NDArray> {
+  private static async _broadcastMaskAsync(
+    mask: NDArray,
+    targetShape: number[],
+  ): Promise<NDArray> {
     const result = await NDArray.zeros(targetShape, { dtype: DType.Bool });
     const maskShape = mask.shape;
     const maskNdim = maskShape.length;
@@ -200,7 +224,9 @@ export class MaskedArray {
 
     for (let i = 0; i < targetNdim; i++) {
       if (paddedMaskShape[i] !== 1 && paddedMaskShape[i] !== targetShape[i]) {
-        throw new MaskError(`Cannot broadcast mask shape ${maskShape} to ${targetShape}`);
+        throw new MaskError(
+          `Cannot broadcast mask shape ${maskShape} to ${targetShape}`,
+        );
       }
     }
 
@@ -221,7 +247,10 @@ export class MaskedArray {
   /**
    * Combine two masks with OR (async).
    */
-  private static async _combineMasksAsync(m1: NDArray, m2: NDArray): Promise<NDArray> {
+  private static async _combineMasksAsync(
+    m1: NDArray,
+    m2: NDArray,
+  ): Promise<NDArray> {
     if (!MaskedArray._shapesEqual(m1.shape, m2.shape)) {
       throw new MaskError(`Mask shapes must match: ${m1.shape} vs ${m2.shape}`);
     }
@@ -316,10 +345,15 @@ export class MaskedArray {
    * @param index - Flat index
    * @param value - Value to set (or masked to mask the element)
    */
-  async setFlatAsync(index: number, value: number | MaskedConstant): Promise<void> {
+  async setFlatAsync(
+    index: number,
+    value: number | MaskedConstant,
+  ): Promise<void> {
     if (value === masked || isMaskedConstant(value)) {
       if (this._mask === nomask) {
-        this._mask = await NDArray.zeros(this._data.shape, { dtype: DType.Bool });
+        this._mask = await NDArray.zeros(this._data.shape, {
+          dtype: DType.Bool,
+        });
       }
       (this._mask as NDArray).setFlat(index, 1);
     } else {
@@ -336,7 +370,9 @@ export class MaskedArray {
   setFlat(index: number, value: number | MaskedConstant): void {
     if (value === masked || isMaskedConstant(value)) {
       if (this._mask === nomask) {
-        throw new MaskedArrayError('Cannot set masked value when mask is nomask. Use setFlatAsync instead.');
+        throw new MaskedArrayError(
+          "Cannot set masked value when mask is nomask. Use setFlatAsync instead.",
+        );
       }
       (this._mask as NDArray).setFlat(index, 1);
     } else {
@@ -354,7 +390,7 @@ export class MaskedArray {
    */
   count(axis: number | null = null): number {
     if (axis !== null) {
-      throw new MaskedArrayError('count with axis not yet implemented');
+      throw new MaskedArrayError("count with axis not yet implemented");
     }
 
     if (this._mask === nomask) {
@@ -410,7 +446,9 @@ export class MaskedArray {
       }
     }
 
-    return await NDArray.fromArray(values, undefined, { dtype: this._data.dtype });
+    return await NDArray.fromArray(values, undefined, {
+      dtype: this._data.dtype,
+    });
   }
 
   /**
@@ -468,21 +506,33 @@ export class MaskedArray {
    * Divide by another array or scalar (async).
    */
   async divide(other: MaskedArray | NDArray | number): Promise<MaskedArray> {
-    return this._binaryOpAsync(other, (a, b) => a / b, (_a, b) => b === 0);
+    return this._binaryOpAsync(
+      other,
+      (a, b) => a / b,
+      (_a, b) => b === 0,
+    );
   }
 
   /**
    * True divide (async).
    */
-  async true_divide(other: MaskedArray | NDArray | number): Promise<MaskedArray> {
+  async true_divide(
+    other: MaskedArray | NDArray | number,
+  ): Promise<MaskedArray> {
     return this.divide(other);
   }
 
   /**
    * Floor divide (async).
    */
-  async floor_divide(other: MaskedArray | NDArray | number): Promise<MaskedArray> {
-    return this._binaryOpAsync(other, (a, b) => Math.floor(a / b), (_a, b) => b === 0);
+  async floor_divide(
+    other: MaskedArray | NDArray | number,
+  ): Promise<MaskedArray> {
+    return this._binaryOpAsync(
+      other,
+      (a, b) => Math.floor(a / b),
+      (_a, b) => b === 0,
+    );
   }
 
   /**
@@ -496,7 +546,11 @@ export class MaskedArray {
    * Modulo (async).
    */
   async mod(other: MaskedArray | NDArray | number): Promise<MaskedArray> {
-    return this._binaryOpAsync(other, (a, b) => a % b, (_a, b) => b === 0);
+    return this._binaryOpAsync(
+      other,
+      (a, b) => a % b,
+      (_a, b) => b === 0,
+    );
   }
 
   /**
@@ -527,7 +581,9 @@ export class MaskedArray {
     return this._binaryOpAsync(other, (a, b) => (a < b ? 1 : 0));
   }
 
-  async less_equal(other: MaskedArray | NDArray | number): Promise<MaskedArray> {
+  async less_equal(
+    other: MaskedArray | NDArray | number,
+  ): Promise<MaskedArray> {
     return this._binaryOpAsync(other, (a, b) => (a <= b ? 1 : 0));
   }
 
@@ -535,7 +591,9 @@ export class MaskedArray {
     return this._binaryOpAsync(other, (a, b) => (a > b ? 1 : 0));
   }
 
-  async greater_equal(other: MaskedArray | NDArray | number): Promise<MaskedArray> {
+  async greater_equal(
+    other: MaskedArray | NDArray | number,
+  ): Promise<MaskedArray> {
     return this._binaryOpAsync(other, (a, b) => (a >= b ? 1 : 0));
   }
 
@@ -619,7 +677,7 @@ export class MaskedArray {
    */
   sum(axis: number | null = null): number {
     if (axis !== null) {
-      throw new MaskedArrayError('sum with axis not yet implemented');
+      throw new MaskedArrayError("sum with axis not yet implemented");
     }
 
     let result = 0;
@@ -638,7 +696,7 @@ export class MaskedArray {
    */
   prod(axis: number | null = null): number {
     if (axis !== null) {
-      throw new MaskedArrayError('prod with axis not yet implemented');
+      throw new MaskedArrayError("prod with axis not yet implemented");
     }
 
     let result = 1;
@@ -657,7 +715,7 @@ export class MaskedArray {
    */
   mean(axis: number | null = null): number {
     if (axis !== null) {
-      throw new MaskedArrayError('mean with axis not yet implemented');
+      throw new MaskedArrayError("mean with axis not yet implemented");
     }
 
     const s = this.sum();
@@ -670,7 +728,7 @@ export class MaskedArray {
    */
   var(axis: number | null = null, ddof: number = 0): number {
     if (axis !== null) {
-      throw new MaskedArrayError('var with axis not yet implemented');
+      throw new MaskedArrayError("var with axis not yet implemented");
     }
 
     const m = this.mean();
@@ -700,7 +758,7 @@ export class MaskedArray {
    */
   min(axis: number | null = null): number {
     if (axis !== null) {
-      throw new MaskedArrayError('min with axis not yet implemented');
+      throw new MaskedArrayError("min with axis not yet implemented");
     }
 
     let result = Infinity;
@@ -719,7 +777,7 @@ export class MaskedArray {
    */
   max(axis: number | null = null): number {
     if (axis !== null) {
-      throw new MaskedArrayError('max with axis not yet implemented');
+      throw new MaskedArrayError("max with axis not yet implemented");
     }
 
     let result = -Infinity;
@@ -745,7 +803,7 @@ export class MaskedArray {
    */
   argmin(axis: number | null = null): number {
     if (axis !== null) {
-      throw new MaskedArrayError('argmin with axis not yet implemented');
+      throw new MaskedArrayError("argmin with axis not yet implemented");
     }
 
     let bestIdx = -1;
@@ -770,7 +828,7 @@ export class MaskedArray {
    */
   argmax(axis: number | null = null): number {
     if (axis !== null) {
-      throw new MaskedArrayError('argmax with axis not yet implemented');
+      throw new MaskedArrayError("argmax with axis not yet implemented");
     }
 
     let bestIdx = -1;
@@ -795,7 +853,7 @@ export class MaskedArray {
    */
   all(axis: number | null = null): boolean {
     if (axis !== null) {
-      throw new MaskedArrayError('all with axis not yet implemented');
+      throw new MaskedArrayError("all with axis not yet implemented");
     }
 
     for (let i = 0; i < this._data.size; i++) {
@@ -815,7 +873,7 @@ export class MaskedArray {
    */
   any(axis: number | null = null): boolean {
     if (axis !== null) {
-      throw new MaskedArrayError('any with axis not yet implemented');
+      throw new MaskedArrayError("any with axis not yet implemented");
     }
 
     for (let i = 0; i < this._data.size; i++) {
@@ -838,7 +896,9 @@ export class MaskedArray {
   reshape(newshape: number[]): MaskedArray {
     const newData = this._data.reshape(newshape);
     const newMask =
-      this._mask === nomask ? nomask : (this._mask as NDArray).reshape(newshape);
+      this._mask === nomask
+        ? nomask
+        : (this._mask as NDArray).reshape(newshape);
 
     return new MaskedArray(newData, newMask, this._fill_value, this._hardmask);
   }
@@ -858,7 +918,7 @@ export class MaskedArray {
       this._data.flatten(),
       this._mask === nomask ? nomask : (this._mask as NDArray).flatten(),
       this._fill_value,
-      this._hardmask
+      this._hardmask,
     );
   }
 
@@ -916,7 +976,7 @@ export class MaskedArray {
       this._data.copy(),
       this._mask === nomask ? nomask : (this._mask as NDArray).copy(),
       this._fill_value,
-      this._hardmask
+      this._hardmask,
     );
   }
 
@@ -928,7 +988,7 @@ export class MaskedArray {
       this._data.astype(dtype),
       this._mask,
       this._fill_value,
-      this._hardmask
+      this._hardmask,
     );
   }
 
@@ -956,14 +1016,14 @@ export class MaskedArray {
 
     for (let i = 0; i < numToShow; i++) {
       const val = this.getFlat(i);
-      lines.push(val === masked ? '--' : String(val));
+      lines.push(val === masked ? "--" : String(val));
     }
 
     if (this._data.size > maxShow) {
-      lines.push('...');
+      lines.push("...");
     }
 
-    return `masked_array([${lines.join(', ')}], fill_value=${this._fill_value})`;
+    return `masked_array([${lines.join(", ")}], fill_value=${this._fill_value})`;
   }
 
   /* ============ Private Helpers ============ */
@@ -974,13 +1034,15 @@ export class MaskedArray {
   protected async _binaryOpAsync(
     other: MaskedArray | NDArray | number,
     op: (a: number, b: number) => number,
-    extraMask?: (a: number, b: number) => boolean
+    extraMask?: (a: number, b: number) => boolean,
   ): Promise<MaskedArray> {
     let otherData: NDArray;
     let otherMask: MaskType;
 
-    if (typeof other === 'number') {
-      otherData = await NDArray.full(this._data.shape, other, { dtype: this._data.dtype });
+    if (typeof other === "number") {
+      otherData = await NDArray.full(this._data.shape, other, {
+        dtype: this._data.dtype,
+      });
       otherMask = nomask;
     } else if (other instanceof MaskedArray) {
       otherData = other._data;
@@ -993,12 +1055,14 @@ export class MaskedArray {
     // Check shapes match
     if (!MaskedArray._shapesEqual(this._data.shape, otherData.shape)) {
       throw new MaskedArrayError(
-        `Shape mismatch: ${this._data.shape} vs ${otherData.shape}`
+        `Shape mismatch: ${this._data.shape} vs ${otherData.shape}`,
       );
     }
 
     // Compute result
-    const resultData = await NDArray.empty(this._data.shape, { dtype: this._data.dtype });
+    const resultData = await NDArray.empty(this._data.shape, {
+      dtype: this._data.dtype,
+    });
     let extraMaskArr: NDArray | null = null;
 
     for (let i = 0; i < resultData.size; i++) {
@@ -1008,7 +1072,9 @@ export class MaskedArray {
 
       if (extraMask && extraMask(a, b)) {
         if (extraMaskArr === null) {
-          extraMaskArr = await NDArray.zeros(this._data.shape, { dtype: DType.Bool });
+          extraMaskArr = await NDArray.zeros(this._data.shape, {
+            dtype: DType.Bool,
+          });
         }
         extraMaskArr.setFlat(i, 1);
       }
@@ -1026,7 +1092,10 @@ export class MaskedArray {
   /**
    * Combine two optional masks.
    */
-  private async _combineMasksOptional(m1: MaskType, m2: MaskType): Promise<MaskType> {
+  private async _combineMasksOptional(
+    m1: MaskType,
+    m2: MaskType,
+  ): Promise<MaskType> {
     if (m1 === nomask && m2 === nomask) return nomask;
     if (m1 === nomask) return m2;
     if (m2 === nomask) return m1;
@@ -1038,9 +1107,11 @@ export class MaskedArray {
    */
   protected async _unaryOpAsync(
     op: (x: number) => number,
-    shouldMask?: (x: number) => boolean
+    shouldMask?: (x: number) => boolean,
   ): Promise<MaskedArray> {
-    const resultData = await NDArray.empty(this._data.shape, { dtype: this._data.dtype });
+    const resultData = await NDArray.empty(this._data.shape, {
+      dtype: this._data.dtype,
+    });
     let resultMask: MaskType =
       this._mask === nomask ? nomask : (this._mask as NDArray).copy();
 
@@ -1050,7 +1121,9 @@ export class MaskedArray {
 
       if (shouldMask && shouldMask(x)) {
         if (resultMask === nomask) {
-          resultMask = await NDArray.zeros(this._data.shape, { dtype: DType.Bool });
+          resultMask = await NDArray.zeros(this._data.shape, {
+            dtype: DType.Bool,
+          });
         }
         (resultMask as NDArray).setFlat(i, 1);
       }

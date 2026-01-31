@@ -4,8 +4,8 @@
  * Provides NumPy-compatible assertion functions for testing numerical code.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
 
 /* ============ Exception Classes ============ */
 
@@ -16,7 +16,7 @@ import { DType } from '../types.js';
 export class AssertionError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'AssertionError';
+    this.name = "AssertionError";
   }
 }
 
@@ -25,9 +25,9 @@ export class AssertionError extends Error {
  * Thrown when test prerequisites are not met.
  */
 export class SkipTest extends Error {
-  constructor(message: string = 'Test skipped') {
+  constructor(message: string = "Test skipped") {
     super(message);
-    this.name = 'SkipTest';
+    this.name = "SkipTest";
   }
 }
 
@@ -36,9 +36,9 @@ export class SkipTest extends Error {
  * Used to mark tests that are expected to fail.
  */
 export class KnownFailureException extends Error {
-  constructor(message: string = 'Known failure') {
+  constructor(message: string = "Known failure") {
     super(message);
-    this.name = 'KnownFailureException';
+    this.name = "KnownFailureException";
   }
 }
 
@@ -58,9 +58,9 @@ export class KnownFailureException extends Error {
  * assert_(x > 0, "x must be positive");
  * assert_(array.size > 0);
  */
-export function assert_(val: unknown, msg: string = ''): void {
+export function assert_(val: unknown, msg: string = ""): void {
   if (!val) {
-    throw new AssertionError(msg || 'Assertion failed');
+    throw new AssertionError(msg || "Assertion failed");
   }
 }
 
@@ -91,8 +91,8 @@ export function assert_(val: unknown, msg: string = ''): void {
 export function assert_equal(
   actual: unknown,
   desired: unknown,
-  err_msg: string = '',
-  verbose: boolean = true
+  err_msg: string = "",
+  verbose: boolean = true,
 ): void {
   if (actual instanceof NDArray && desired instanceof NDArray) {
     assert_array_equal(actual, desired, err_msg, verbose);
@@ -102,7 +102,12 @@ export function assert_equal(
   if (Array.isArray(actual) && Array.isArray(desired)) {
     if (actual.length !== desired.length) {
       throw new AssertionError(
-        buildErrorMessage(actual, desired, 'Arrays have different lengths', verbose)
+        buildErrorMessage(
+          actual,
+          desired,
+          "Arrays have different lengths",
+          verbose,
+        ),
       );
     }
     for (let i = 0; i < actual.length; i++) {
@@ -113,13 +118,22 @@ export function assert_equal(
 
   if (!Object.is(actual, desired)) {
     // Handle NaN comparison (NaN == NaN for testing)
-    if (typeof actual === 'number' && typeof desired === 'number' &&
-        Number.isNaN(actual) && Number.isNaN(desired)) {
+    if (
+      typeof actual === "number" &&
+      typeof desired === "number" &&
+      Number.isNaN(actual) &&
+      Number.isNaN(desired)
+    ) {
       return;
     }
 
     throw new AssertionError(
-      buildErrorMessage(actual, desired, err_msg || 'Values are not equal', verbose)
+      buildErrorMessage(
+        actual,
+        desired,
+        err_msg || "Values are not equal",
+        verbose,
+      ),
     );
   }
 }
@@ -144,8 +158,8 @@ export function assert_equal(
 export function assert_array_equal(
   x: NDArray | number[] | number,
   y: NDArray | number[] | number,
-  err_msg: string = '',
-  verbose: boolean = true
+  err_msg: string = "",
+  verbose: boolean = true,
 ): void {
   const arr1 = toNDArray(x);
   const arr2 = toNDArray(y);
@@ -153,7 +167,7 @@ export function assert_array_equal(
   // Check shapes
   if (!arraysEqual(arr1.shape, arr2.shape)) {
     throw new AssertionError(
-      `Arrays have different shapes: [${arr1.shape}] vs [${arr2.shape}]`
+      `Arrays have different shapes: [${arr1.shape}] vs [${arr2.shape}]`,
     );
   }
 
@@ -169,7 +183,12 @@ export function assert_array_equal(
 
     if (v1 !== v2) {
       throw new AssertionError(
-        buildErrorMessage(arr1, arr2, err_msg || `Arrays differ at index ${i}`, verbose)
+        buildErrorMessage(
+          arr1,
+          arr2,
+          err_msg || `Arrays differ at index ${i}`,
+          verbose,
+        ),
       );
     }
   }
@@ -210,8 +229,8 @@ export function assert_allclose(
   rtol: number = 1e-7,
   atol: number = 0,
   equal_nan: boolean = true,
-  err_msg: string = '',
-  _verbose: boolean = true
+  err_msg: string = "",
+  _verbose: boolean = true,
 ): void {
   const arr1 = toNDArray(actual);
   const arr2 = toNDArray(desired);
@@ -219,7 +238,7 @@ export function assert_allclose(
   // Check shapes
   if (!arraysEqual(arr1.shape, arr2.shape)) {
     throw new AssertionError(
-      `Arrays have different shapes: [${arr1.shape}] vs [${arr2.shape}]`
+      `Arrays have different shapes: [${arr1.shape}] vs [${arr2.shape}]`,
     );
   }
 
@@ -260,10 +279,10 @@ export function assert_allclose(
 
     throw new AssertionError(
       `Arrays are not close within tolerance.\n` +
-      `Max absolute difference: ${maxDiff}\n` +
-      `rtol: ${rtol}, atol: ${atol}\n` +
-      `Number of mismatches: ${mismatches.length} / ${arr1.size}` +
-      (err_msg ? `\n${err_msg}` : '')
+        `Max absolute difference: ${maxDiff}\n` +
+        `rtol: ${rtol}, atol: ${atol}\n` +
+        `Number of mismatches: ${mismatches.length} / ${arr1.size}` +
+        (err_msg ? `\n${err_msg}` : ""),
     );
   }
 }
@@ -290,12 +309,12 @@ export function assert_almost_equal(
   actual: number | NDArray,
   desired: number | NDArray,
   decimal: number = 7,
-  err_msg: string = '',
-  verbose: boolean = true
+  err_msg: string = "",
+  verbose: boolean = true,
 ): void {
   const atol = Math.pow(10, -decimal);
 
-  if (typeof actual === 'number' && typeof desired === 'number') {
+  if (typeof actual === "number" && typeof desired === "number") {
     // Handle NaN
     if (Number.isNaN(actual) && Number.isNaN(desired)) {
       return;
@@ -303,7 +322,7 @@ export function assert_almost_equal(
     if (Math.abs(actual - desired) >= atol) {
       throw new AssertionError(
         `Values differ by more than ${decimal} decimal places: ` +
-        `${actual} vs ${desired}`
+          `${actual} vs ${desired}`,
       );
     }
     return;
@@ -332,8 +351,8 @@ export function assert_approx_equal(
   actual: number,
   desired: number,
   significant: number = 7,
-  err_msg: string = '',
-  verbose: boolean = true
+  err_msg: string = "",
+  verbose: boolean = true,
 ): void {
   // err_msg and verbose are kept for API compatibility but not used in scalar comparison
   void err_msg;
@@ -356,7 +375,7 @@ export function assert_approx_equal(
   if (Math.abs(actual - desired) > rtol) {
     throw new AssertionError(
       `Values differ by more than ${significant} significant figures: ` +
-      `${actual} vs ${desired}`
+        `${actual} vs ${desired}`,
     );
   }
 }
@@ -383,8 +402,8 @@ export function assert_array_almost_equal(
   x: NDArray | number[],
   y: NDArray | number[],
   decimal: number = 6,
-  err_msg: string = '',
-  verbose: boolean = true
+  err_msg: string = "",
+  verbose: boolean = true,
 ): void {
   const atol = Math.pow(10, -decimal);
   assert_allclose(x, y, 0, atol, true, err_msg, verbose);
@@ -408,8 +427,8 @@ export function assert_array_almost_equal(
 export function assert_array_less(
   x: NDArray | number[] | number,
   y: NDArray | number[] | number,
-  err_msg: string = '',
-  verbose: boolean = true
+  err_msg: string = "",
+  verbose: boolean = true,
 ): void {
   // verbose is kept for API compatibility
   void verbose;
@@ -419,7 +438,7 @@ export function assert_array_less(
   // Check shapes
   if (!arraysEqual(arr1.shape, arr2.shape)) {
     throw new AssertionError(
-      `Arrays have different shapes: [${arr1.shape}] vs [${arr2.shape}]`
+      `Arrays have different shapes: [${arr1.shape}] vs [${arr2.shape}]`,
     );
   }
 
@@ -430,7 +449,7 @@ export function assert_array_less(
     if (!(v1 < v2)) {
       throw new AssertionError(
         `Arrays are not less: x[${i}] = ${v1} >= y[${i}] = ${v2}` +
-        (err_msg ? `\n${err_msg}` : '')
+          (err_msg ? `\n${err_msg}` : ""),
       );
     }
   }
@@ -458,7 +477,7 @@ export function assert_array_max_ulp(
   a: NDArray | number[],
   b: NDArray | number[],
   maxulp: number = 1,
-  dtype: DType = DType.Float64
+  dtype: DType = DType.Float64,
 ): number {
   // dtype is kept for API compatibility (future: use for Float32 ULP calculation)
   void dtype;
@@ -468,7 +487,7 @@ export function assert_array_max_ulp(
   // Check shapes
   if (!arraysEqual(arr1.shape, arr2.shape)) {
     throw new AssertionError(
-      `Arrays have different shapes: [${arr1.shape}] vs [${arr2.shape}]`
+      `Arrays have different shapes: [${arr1.shape}] vs [${arr2.shape}]`,
     );
   }
 
@@ -484,7 +503,7 @@ export function assert_array_max_ulp(
     if (ulpDiff > maxulp) {
       throw new AssertionError(
         `Arrays differ by more than ${maxulp} ULPs at index ${i}: ` +
-        `${v1} vs ${v2} (${ulpDiff} ULPs)`
+          `${v1} vs ${v2} (${ulpDiff} ULPs)`,
       );
     }
   }
@@ -516,8 +535,8 @@ export function assert_array_compare(
   comparison: (a: number, b: number) => boolean,
   x: NDArray | number[],
   y: NDArray | number[],
-  header: string = 'Arrays do not satisfy comparison',
-  precision: number = 6
+  header: string = "Arrays do not satisfy comparison",
+  precision: number = 6,
 ): void {
   const arr1 = toNDArray(x);
   const arr2 = toNDArray(y);
@@ -525,7 +544,7 @@ export function assert_array_compare(
   // Check shapes
   if (!arraysEqual(arr1.shape, arr2.shape)) {
     throw new AssertionError(
-      `Arrays have different shapes: [${arr1.shape}] vs [${arr2.shape}]`
+      `Arrays have different shapes: [${arr1.shape}] vs [${arr2.shape}]`,
     );
   }
 
@@ -535,7 +554,7 @@ export function assert_array_compare(
 
     if (!comparison(v1, v2)) {
       throw new AssertionError(
-        `${header}\nFailed at index ${i}: ${v1.toPrecision(precision)} vs ${v2.toPrecision(precision)}`
+        `${header}\nFailed at index ${i}: ${v1.toPrecision(precision)} vs ${v2.toPrecision(precision)}`,
       );
     }
   }
@@ -574,12 +593,12 @@ export function assert_raises<T extends Error>(
       return;
     }
     throw new AssertionError(
-      `Expected ${exception_class.name}, but got ${(e as Error).constructor.name}: ${(e as Error).message}`
+      `Expected ${exception_class.name}, but got ${(e as Error).constructor.name}: ${(e as Error).message}`,
     );
   }
 
   throw new AssertionError(
-    `Expected ${exception_class.name} to be raised, but no exception was thrown`
+    `Expected ${exception_class.name} to be raised, but no exception was thrown`,
   );
 }
 
@@ -607,9 +626,10 @@ export function assert_raises_regex<T extends Error>(
   callable: (...args: unknown[]) => unknown,
   ...args: unknown[]
 ): void {
-  const regex = typeof expected_regexp === 'string'
-    ? new RegExp(expected_regexp)
-    : expected_regexp;
+  const regex =
+    typeof expected_regexp === "string"
+      ? new RegExp(expected_regexp)
+      : expected_regexp;
 
   try {
     callable(...args);
@@ -619,16 +639,16 @@ export function assert_raises_regex<T extends Error>(
         return;
       }
       throw new AssertionError(
-        `Exception message "${(e as Error).message}" does not match pattern "${regex}"`
+        `Exception message "${(e as Error).message}" does not match pattern "${regex}"`,
       );
     }
     throw new AssertionError(
-      `Expected ${exception_class.name}, but got ${(e as Error).constructor.name}`
+      `Expected ${exception_class.name}, but got ${(e as Error).constructor.name}`,
     );
   }
 
   throw new AssertionError(
-    `Expected ${exception_class.name} to be raised, but no exception was thrown`
+    `Expected ${exception_class.name} to be raised, but no exception was thrown`,
   );
 }
 
@@ -674,22 +694,22 @@ export function assert_warns(
  * assert_string_equal("hello", "hello");  // Pass
  * assert_string_equal("hello", "world");  // Fail with diff
  */
-export function assert_string_equal(
-  actual: string,
-  desired: string
-): void {
+export function assert_string_equal(actual: string, desired: string): void {
   if (actual !== desired) {
     // Find first difference for helpful output
     let diffIndex = 0;
-    while (diffIndex < actual.length && diffIndex < desired.length &&
-           actual[diffIndex] === desired[diffIndex]) {
+    while (
+      diffIndex < actual.length &&
+      diffIndex < desired.length &&
+      actual[diffIndex] === desired[diffIndex]
+    ) {
       diffIndex++;
     }
 
     throw new AssertionError(
       `Strings differ at position ${diffIndex}:\n` +
-      `  actual: "${actual.slice(Math.max(0, diffIndex - 10), diffIndex + 20)}"\n` +
-      `  desired: "${desired.slice(Math.max(0, diffIndex - 10), diffIndex + 20)}"`
+        `  actual: "${actual.slice(Math.max(0, diffIndex - 10), diffIndex + 20)}"\n` +
+        `  desired: "${desired.slice(Math.max(0, diffIndex - 10), diffIndex + 20)}"`,
     );
   }
 }
@@ -729,10 +749,7 @@ export function assert_no_warnings(
  * }, 100);
  * console.log(`Average: ${time}ms`);
  */
-export function measure(
-  code: () => void,
-  times: number = 1
-): number {
+export function measure(code: () => void, times: number = 1): number {
   const start = performance.now();
   for (let i = 0; i < times; i++) {
     code();
@@ -759,7 +776,7 @@ export function measure(
 export function print_assert_equal(
   test_string: string,
   actual: unknown,
-  desired: unknown
+  desired: unknown,
 ): void {
   const match = deepEqual(actual, desired);
   console.log(`${test_string}`);
@@ -806,7 +823,7 @@ function createSyncNDArray(data: number[]): NDArray {
     },
     toString(): string {
       return JSON.stringify(data);
-    }
+    },
   } as NDArray;
 }
 
@@ -830,13 +847,13 @@ function inferShape(data: number | number[]): number[] {
  * Flatten nested array.
  */
 function flattenArray(data: number | number[]): number[] {
-  if (typeof data === 'number') {
+  if (typeof data === "number") {
     return [data];
   }
 
   const result: number[] = [];
   for (const item of data) {
-    if (typeof item === 'number') {
+    if (typeof item === "number") {
       result.push(item);
     } else {
       result.push(...flattenArray(item));
@@ -860,15 +877,17 @@ function buildErrorMessage(
   actual: unknown,
   desired: unknown,
   header: string,
-  verbose: boolean
+  verbose: boolean,
 ): string {
   if (!verbose) {
     return header;
   }
 
-  return `${header}\n` +
+  return (
+    `${header}\n` +
     `Actual:\n${formatValue(actual)}\n` +
-    `Desired:\n${formatValue(desired)}`;
+    `Desired:\n${formatValue(desired)}`
+  );
 }
 
 /**
@@ -890,8 +909,13 @@ function formatValue(val: unknown): string {
 function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (typeof a !== typeof b) return false;
-  if (typeof a === 'number' && typeof b === 'number' &&
-      Number.isNaN(a) && Number.isNaN(b)) return true;
+  if (
+    typeof a === "number" &&
+    typeof b === "number" &&
+    Number.isNaN(a) &&
+    Number.isNaN(b)
+  )
+    return true;
 
   if (a instanceof NDArray && b instanceof NDArray) {
     if (!arraysEqual(a.shape, b.shape)) return false;
@@ -931,7 +955,7 @@ function computeUlpDiff(a: number, b: number): number {
   const bInt = intView[0];
 
   // Handle sign differences
-  if ((aInt < 0n) !== (bInt < 0n)) {
+  if (aInt < 0n !== bInt < 0n) {
     return Number(abs64(aInt) + abs64(bInt));
   }
 

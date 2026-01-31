@@ -4,10 +4,10 @@
  * Provides NumPy-compatible einsum and einsum_path operations.
  */
 
-import { NDArray } from './NDArray.js';
-import { DType } from './types.js';
-import { tensordot } from './linalg.js';
-import { diagonal as diagonalFn } from './indexing.js';
+import { NDArray } from "./_core/NDArray.js";
+import { DType } from "./types.js";
+import { tensordot } from "./linalg.js";
+import { diagonal as diagonalFn } from "./indexing.js";
 
 /**
  * Error for einsum-specific validation errors.
@@ -15,7 +15,7 @@ import { diagonal as diagonalFn } from './indexing.js';
 class EinsumError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'EinsumError';
+    this.name = "EinsumError";
   }
 }
 
@@ -32,10 +32,10 @@ interface ParsedEinsum {
  */
 function parseEinsum(subscripts: string): ParsedEinsum {
   // Remove whitespace
-  const clean = subscripts.replace(/\s/g, '');
+  const clean = subscripts.replace(/\s/g, "");
 
   // Split on '->'
-  const parts = clean.split('->');
+  const parts = clean.split("->");
 
   if (parts.length > 2) {
     throw new EinsumError(`Invalid subscripts: more than one '->' found`);
@@ -43,7 +43,7 @@ function parseEinsum(subscripts: string): ParsedEinsum {
 
   // Parse input subscripts
   const inputPart = parts[0];
-  const inputSubs = inputPart.split(',');
+  const inputSubs = inputPart.split(",");
 
   // Parse output subscripts
   const outputSubs = parts.length === 2 ? parts[1] : null;
@@ -52,12 +52,16 @@ function parseEinsum(subscripts: string): ParsedEinsum {
   const validChars = /^[a-zA-Z]*$/;
   for (const sub of inputSubs) {
     if (!validChars.test(sub)) {
-      throw new EinsumError(`Invalid subscript character in '${sub}'. Only letters a-zA-Z are allowed.`);
+      throw new EinsumError(
+        `Invalid subscript character in '${sub}'. Only letters a-zA-Z are allowed.`,
+      );
     }
   }
 
   if (outputSubs !== null && !validChars.test(outputSubs)) {
-    throw new EinsumError(`Invalid output subscript character in '${outputSubs}'. Only letters a-zA-Z are allowed.`);
+    throw new EinsumError(
+      `Invalid output subscript character in '${outputSubs}'. Only letters a-zA-Z are allowed.`,
+    );
   }
 
   return { inputSubs, outputSubs };
@@ -80,13 +84,16 @@ function implicitOutput(inputSubs: string[]): string {
     .filter(([_, count]) => count === 1)
     .map(([label, _]) => label)
     .sort()
-    .join('');
+    .join("");
 }
 
 /**
  * Build dimension map from operands and subscripts.
  */
-function buildDimMap(inputSubs: string[], operands: NDArray[]): Map<string, number> {
+function buildDimMap(
+  inputSubs: string[],
+  operands: NDArray[],
+): Map<string, number> {
   const dimMap = new Map<string, number>();
 
   for (let i = 0; i < inputSubs.length; i++) {
@@ -95,7 +102,7 @@ function buildDimMap(inputSubs: string[], operands: NDArray[]): Map<string, numb
 
     if (subs.length !== arr.ndim) {
       throw new EinsumError(
-        `Operand ${i} has ${arr.ndim} dimensions but subscripts specify ${subs.length}`
+        `Operand ${i} has ${arr.ndim} dimensions but subscripts specify ${subs.length}`,
       );
     }
 
@@ -106,7 +113,7 @@ function buildDimMap(inputSubs: string[], operands: NDArray[]): Map<string, numb
       if (dimMap.has(label)) {
         if (dimMap.get(label) !== size) {
           throw new EinsumError(
-            `Dimension mismatch for label '${label}': ${dimMap.get(label)} vs ${size}`
+            `Dimension mismatch for label '${label}': ${dimMap.get(label)} vs ${size}`,
           );
         }
       } else {
@@ -125,7 +132,7 @@ async function einsumSingle(
   arr: NDArray,
   inputSub: string,
   outputSub: string,
-  _dimMap: Map<string, number>
+  _dimMap: Map<string, number>,
 ): Promise<NDArray> {
   // Find label positions
   const labelPositions = new Map<string, number[]>();
@@ -154,9 +161,11 @@ async function einsumSingle(
           const sum = diagData.reduce((a, b) => a + b, 0);
           result = await NDArray.fromArray([sum]);
           result = result.reshape([]);
-          currentSub = '';
+          currentSub = "";
         } else {
-          throw new EinsumError(`Complex trace not yet supported for indices at positions ${positions}`);
+          throw new EinsumError(
+            `Complex trace not yet supported for indices at positions ${positions}`,
+          );
         }
       } else {
         // Diagonal: extract diagonal
@@ -209,15 +218,19 @@ async function einsumSingle(
           resultData[i] = sum;
         }
 
-        result = await NDArray.fromTypedArray(resultData, newShape, DType.Float64);
+        result = await NDArray.fromTypedArray(
+          resultData,
+          newShape,
+          DType.Float64,
+        );
       }
-      currentSub = currentSub.replace(label, '');
+      currentSub = currentSub.replace(label, "");
     }
   }
 
   // Handle transpose if needed
   if (currentSub.length > 0 && currentSub !== outputSub) {
-    const order = outputSub.split('').map((l) => currentSub.indexOf(l));
+    const order = outputSub.split("").map((l) => currentSub.indexOf(l));
     if (order.some((i) => i === -1)) {
       throw new EinsumError(`Output label not found in remaining input labels`);
     }
@@ -236,14 +249,14 @@ async function einsumPair(
   b: NDArray,
   bSub: string,
   outputSub: string,
-  _dimMap: Map<string, number>
+  _dimMap: Map<string, number>,
 ): Promise<NDArray> {
-  const aLabels = new Set(aSub.split(''));
-  const bLabels = new Set(bSub.split(''));
+  const aLabels = new Set(aSub.split(""));
+  const bLabels = new Set(bSub.split(""));
 
   // Find contracted indices (in both inputs, not in output)
   const contracted = Array.from(aLabels).filter(
-    (l) => bLabels.has(l) && !outputSub.includes(l)
+    (l) => bLabels.has(l) && !outputSub.includes(l),
   );
 
   // Find contraction axes
@@ -261,15 +274,17 @@ async function einsumPair(
   }
 
   // Build result subscripts after tensordot
-  const remainingA = aSub.split('').filter((l) => !contracted.includes(l));
-  const remainingB = bSub.split('').filter((l) => !contracted.includes(l));
-  const resultSub = [...remainingA, ...remainingB].join('');
+  const remainingA = aSub.split("").filter((l) => !contracted.includes(l));
+  const remainingB = bSub.split("").filter((l) => !contracted.includes(l));
+  const resultSub = [...remainingA, ...remainingB].join("");
 
   // Transpose if needed
   if (resultSub !== outputSub && resultSub.length > 0) {
-    const order = outputSub.split('').map((l) => resultSub.indexOf(l));
+    const order = outputSub.split("").map((l) => resultSub.indexOf(l));
     if (order.some((i) => i === -1)) {
-      throw new EinsumError(`Output label '${outputSub}' contains labels not in result '${resultSub}'`);
+      throw new EinsumError(
+        `Output label '${outputSub}' contains labels not in result '${resultSub}'`,
+      );
     }
     result = result.transpose(order);
   }
@@ -280,15 +295,19 @@ async function einsumPair(
 /**
  * Compute intermediate output subscripts during pairwise reduction.
  */
-function intermediateOutput(sub1: string, sub2: string, finalOutput: string): string {
-  const allLabels = new Set([...sub1.split(''), ...sub2.split('')]);
-  const finalLabels = new Set(finalOutput.split(''));
+function intermediateOutput(
+  sub1: string,
+  sub2: string,
+  finalOutput: string,
+): string {
+  const allLabels = new Set([...sub1.split(""), ...sub2.split("")]);
+  const finalLabels = new Set(finalOutput.split(""));
 
   // Keep labels needed for final output or that appear in sub2 (for next contraction)
   return Array.from(allLabels)
     .filter((l) => finalLabels.has(l) || sub2.includes(l))
     .sort()
-    .join('');
+    .join("");
 }
 
 /**
@@ -331,7 +350,7 @@ export async function einsum(
   if (operands.length !== inputSubs.length) {
     throw new EinsumError(
       `Number of operands (${operands.length}) doesn't match ` +
-        `number of subscript groups (${inputSubs.length})`
+        `number of subscript groups (${inputSubs.length})`,
     );
   }
 
@@ -342,10 +361,12 @@ export async function einsum(
   const outputSub = parsedOutput ?? implicitOutput(inputSubs);
 
   // Validate output subscripts
-  const allInputLabels = new Set(inputSubs.join('').split(''));
+  const allInputLabels = new Set(inputSubs.join("").split(""));
   for (const label of outputSub) {
     if (!allInputLabels.has(label)) {
-      throw new EinsumError(`Output label '${label}' not found in input subscripts`);
+      throw new EinsumError(
+        `Output label '${label}' not found in input subscripts`,
+      );
     }
   }
 
@@ -355,7 +376,14 @@ export async function einsum(
   }
 
   if (operands.length === 2) {
-    return einsumPair(operands[0], inputSubs[0], operands[1], inputSubs[1], outputSub, dimMap);
+    return einsumPair(
+      operands[0],
+      inputSubs[0],
+      operands[1],
+      inputSubs[1],
+      outputSub,
+      dimMap,
+    );
   }
 
   // Multiple operands: reduce pairwise
@@ -365,9 +393,18 @@ export async function einsum(
   for (let i = 1; i < operands.length; i++) {
     // Compute intermediate output subscripts
     const intermediateSubs =
-      i < operands.length - 1 ? intermediateOutput(resultSubs, inputSubs[i], outputSub) : outputSub;
+      i < operands.length - 1
+        ? intermediateOutput(resultSubs, inputSubs[i], outputSub)
+        : outputSub;
 
-    result = await einsumPair(result, resultSubs, operands[i], inputSubs[i], intermediateSubs, dimMap);
+    result = await einsumPair(
+      result,
+      resultSubs,
+      operands[i],
+      inputSubs[i],
+      intermediateSubs,
+      dimMap,
+    );
     resultSubs = intermediateSubs;
   }
 
@@ -377,8 +414,12 @@ export async function einsum(
 /**
  * Estimate contraction cost (product of all involved dimensions).
  */
-function contractionCost(sub1: string, sub2: string, dimMap: Map<string, number>): number {
-  const allLabels = new Set([...sub1.split(''), ...sub2.split('')]);
+function contractionCost(
+  sub1: string,
+  sub2: string,
+  dimMap: Map<string, number>,
+): number {
+  const allLabels = new Set([...sub1.split(""), ...sub2.split("")]);
   let cost = 1;
 
   for (const label of allLabels) {
@@ -391,16 +432,22 @@ function contractionCost(sub1: string, sub2: string, dimMap: Map<string, number>
 /**
  * Compute result subscripts after contracting two operands.
  */
-function resultSubscripts(sub1: string, sub2: string, finalOutput: string): string {
-  const labels1 = sub1.split('');
-  const labels2 = sub2.split('');
+function resultSubscripts(
+  sub1: string,
+  sub2: string,
+  finalOutput: string,
+): string {
+  const labels1 = sub1.split("");
+  const labels2 = sub2.split("");
 
   // Labels in both (contracted) and not in final output
-  const contracted = labels1.filter((l) => labels2.includes(l) && !finalOutput.includes(l));
+  const contracted = labels1.filter(
+    (l) => labels2.includes(l) && !finalOutput.includes(l),
+  );
 
   // Remaining labels (either not contracted or kept in output)
   const remaining = [...labels1, ...labels2].filter(
-    (l) => !contracted.includes(l) || finalOutput.includes(l)
+    (l) => !contracted.includes(l) || finalOutput.includes(l),
   );
 
   // Remove duplicates, keep order
@@ -413,7 +460,7 @@ function resultSubscripts(sub1: string, sub2: string, finalOutput: string): stri
     }
   }
 
-  return unique.sort().join('');
+  return unique.sort().join("");
 }
 
 /**
@@ -436,7 +483,7 @@ export function einsum_path(
   if (operands.length !== inputSubs.length) {
     throw new EinsumError(
       `Number of operands (${operands.length}) doesn't match ` +
-        `number of subscript groups (${inputSubs.length})`
+        `number of subscript groups (${inputSubs.length})`,
     );
   }
 
@@ -470,7 +517,11 @@ export function einsum_path(
     path.push([indices[bestPair[0]], indices[bestPair[1]]]);
 
     // Update subscripts and indices
-    const newSub = resultSubscripts(subs[bestPair[0]], subs[bestPair[1]], outputSub);
+    const newSub = resultSubscripts(
+      subs[bestPair[0]],
+      subs[bestPair[1]],
+      outputSub,
+    );
     const newIdx = Math.max(...indices) + 1;
 
     // Remove contracted (higher index first to preserve lower index)
@@ -487,12 +538,12 @@ export function einsum_path(
   // Generate info string
   const info = [
     `  Complete contraction:  ${subscripts}`,
-    `         Naive scaling:  ${new Set(subscripts.replace(/[^a-zA-Z]/g, '')).size}`,
+    `         Naive scaling:  ${new Set(subscripts.replace(/[^a-zA-Z]/g, "")).size}`,
     `     Optimized scaling:  ${path.length}`,
     ``,
     `  Contraction path:`,
     ...path.map((p, i) => `    ${i}: ${JSON.stringify(p)}`),
-  ].join('\n');
+  ].join("\n");
 
   return [path, info];
 }

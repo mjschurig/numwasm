@@ -8,9 +8,9 @@
  * Call loadWasmModule() before using these functions.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
-import { getWasmModule } from '../wasm-loader.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
+import { getWasmModule } from "../wasm-loader.js";
 
 /**
  * Return true for each element if all characters are alphabetic.
@@ -185,7 +185,7 @@ export function str_len(a: NDArray | string[]): NDArray {
   const arr = Array.isArray(a) ? NDArray.fromStringArray(a) : a;
 
   if (!arr.isStringArray) {
-    throw new Error('Input must be a string array');
+    throw new Error("Input must be a string array");
   }
 
   const result = _createInt32Array(arr.shape);
@@ -204,12 +204,12 @@ export function str_len(a: NDArray | string[]): NDArray {
  */
 function _applyStringTest(
   a: NDArray | string[],
-  test: (s: string) => boolean
+  test: (s: string) => boolean,
 ): NDArray {
   const arr = Array.isArray(a) ? NDArray.fromStringArray(a) : a;
 
   if (!arr.isStringArray) {
-    throw new Error('Input must be a string array');
+    throw new Error("Input must be a string array");
   }
 
   const result = _createBoolArray(arr.shape);
@@ -229,14 +229,14 @@ function _createBoolArray(shape: number[]): NDArray {
 
   const shapePtr = module._malloc(shape.length * 4);
   for (let i = 0; i < shape.length; i++) {
-    module.setValue(shapePtr + i * 4, shape[i], 'i32');
+    module.setValue(shapePtr + i * 4, shape[i], "i32");
   }
 
   const ptr = module._ndarray_create(shape.length, shapePtr, DType.Bool);
   module._free(shapePtr);
 
   if (ptr === 0) {
-    throw new Error('Failed to create boolean array');
+    throw new Error("Failed to create boolean array");
   }
 
   return NDArray._fromPtr(ptr, module);
@@ -250,14 +250,14 @@ function _createInt32Array(shape: number[]): NDArray {
 
   const shapePtr = module._malloc(shape.length * 4);
   for (let i = 0; i < shape.length; i++) {
-    module.setValue(shapePtr + i * 4, shape[i], 'i32');
+    module.setValue(shapePtr + i * 4, shape[i], "i32");
   }
 
   const ptr = module._ndarray_create(shape.length, shapePtr, DType.Int32);
   module._free(shapePtr);
 
   if (ptr === 0) {
-    throw new Error('Failed to create int32 array');
+    throw new Error("Failed to create int32 array");
   }
 
   return NDArray._fromPtr(ptr, module);

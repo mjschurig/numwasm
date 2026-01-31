@@ -5,10 +5,10 @@
  * Uses columnar storage where each field is stored as a separate NDArray.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType, type StructuredDType } from '../types.js';
-import { format_parser, ValueError } from './format_parser.js';
-import { record, createRecord, type RecArrayLike, KeyError } from './record.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType, type StructuredDType } from "../types.js";
+import { format_parser, ValueError } from "./format_parser.js";
+import { record, createRecord, type RecArrayLike, KeyError } from "./record.js";
 
 /* ============ Error Classes ============ */
 
@@ -18,7 +18,7 @@ import { record, createRecord, type RecArrayLike, KeyError } from './record.js';
 export class IndexError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'IndexError';
+    this.name = "IndexError";
   }
 }
 
@@ -59,7 +59,7 @@ export class recarray implements RecArrayLike {
   private constructor(
     dtype: StructuredDType,
     shape: number[],
-    fields: Map<string, NDArray>
+    fields: Map<string, NDArray>,
   ) {
     this._dtype = dtype;
     this._shape = shape;
@@ -129,7 +129,7 @@ export class recarray implements RecArrayLike {
 
     // Handle numeric index
     let fieldName: string;
-    if (typeof attr === 'number') {
+    if (typeof attr === "number") {
       if (attr < 0 || attr >= this._dtype.fieldList.length) {
         throw new IndexError(`Field index ${attr} out of bounds`);
       }
@@ -153,7 +153,10 @@ export class recarray implements RecArrayLike {
   /**
    * Set a field array.
    */
-  private _setFieldArray(name: string, value: NDArray | number[] | string[]): void {
+  private _setFieldArray(
+    name: string,
+    value: NDArray | number[] | string[],
+  ): void {
     const fieldArr = this._fields.get(name)!;
     const descriptor = this._dtype.fields.get(name)!;
 
@@ -239,7 +242,9 @@ export class recarray implements RecArrayLike {
     // Handle negative indexing
     if (index < 0) index += this.size;
     if (index < 0 || index >= this.size) {
-      throw new IndexError(`Index ${index} out of bounds for size ${this.size}`);
+      throw new IndexError(
+        `Index ${index} out of bounds for size ${this.size}`,
+      );
     }
 
     return createRecord(this, index);
@@ -257,12 +262,18 @@ export class recarray implements RecArrayLike {
     // Handle negative indexing
     if (index < 0) index += this.size;
     if (index < 0 || index >= this.size) {
-      throw new IndexError(`Index ${index} out of bounds for size ${this.size}`);
+      throw new IndexError(
+        `Index ${index} out of bounds for size ${this.size}`,
+      );
     }
 
     if (Array.isArray(values)) {
       // Set by position
-      for (let i = 0; i < values.length && i < this._dtype.fieldList.length; i++) {
+      for (
+        let i = 0;
+        i < values.length && i < this._dtype.fieldList.length;
+        i++
+      ) {
         this.setFieldValue(this._dtype.fieldList[i].name, index, values[i]);
       }
     } else {
@@ -360,9 +371,9 @@ export class recarray implements RecArrayLike {
    * String representation.
    */
   toString(): string {
-    if (this._disposed) return 'recarray(disposed)';
+    if (this._disposed) return "recarray(disposed)";
 
-    const lines: string[] = ['recarray(['];
+    const lines: string[] = ["recarray(["];
 
     const maxShow = 10;
     const numToShow = Math.min(this.size, maxShow);
@@ -373,19 +384,21 @@ export class recarray implements RecArrayLike {
     }
 
     if (this.size > maxShow) {
-      lines.push('  ...');
+      lines.push("  ...");
     }
 
-    lines.push(`], dtype=[${this._dtype.names.map(n => `'${n}'`).join(', ')}])`);
+    lines.push(
+      `], dtype=[${this._dtype.names.map((n) => `'${n}'`).join(", ")}])`,
+    );
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /* ============ Private Methods ============ */
 
   private ensureNotDisposed(): void {
     if (this._disposed) {
-      throw new Error('recarray has been disposed');
+      throw new Error("recarray has been disposed");
     }
   }
 
@@ -401,7 +414,7 @@ export class recarray implements RecArrayLike {
     names: string | string[] | null = null,
     titles: string | string[] | null = null,
     aligned: boolean = false,
-    byteorder: string | null = null
+    byteorder: string | null = null,
   ): recarray {
     // Determine structured dtype
     let structDtype: StructuredDType;
@@ -409,14 +422,20 @@ export class recarray implements RecArrayLike {
     if (dtype !== null) {
       structDtype = dtype;
     } else if (formats !== null) {
-      const parser = new format_parser(formats, names, titles, aligned, byteorder);
+      const parser = new format_parser(
+        formats,
+        names,
+        titles,
+        aligned,
+        byteorder,
+      );
       structDtype = parser.dtype;
     } else {
-      throw new TypeError('Must specify either dtype or formats');
+      throw new TypeError("Must specify either dtype or formats");
     }
 
     // Normalize shape
-    const shapeArr = typeof shape === 'number' ? [shape] : [...shape];
+    const shapeArr = typeof shape === "number" ? [shape] : [...shape];
     const size = shapeArr.reduce((a, b) => a * b, 1);
 
     // Create field arrays
@@ -429,7 +448,7 @@ export class recarray implements RecArrayLike {
       } else {
         // Numeric field - use zeros for initialization
         // Note: This is synchronous using the pre-loaded module
-        const arr = NDArray.fromStringArray(Array(size).fill(''));
+        const arr = NDArray.fromStringArray(Array(size).fill(""));
         // Actually we need async zeros, but for now use string placeholder
         // We'll fix this in the index.ts with proper async factory
         fields.set(field.name, arr);
@@ -444,15 +463,15 @@ export class recarray implements RecArrayLike {
    */
   static _fromArraysSync(
     arrayList: NDArray[],
-    dtype: StructuredDType
+    dtype: StructuredDType,
   ): recarray {
     if (arrayList.length === 0) {
-      throw new ValueError('arrayList must contain at least one array');
+      throw new ValueError("arrayList must contain at least one array");
     }
 
     if (arrayList.length !== dtype.fieldList.length) {
       throw new ValueError(
-        `Number of arrays (${arrayList.length}) must match number of fields (${dtype.fieldList.length})`
+        `Number of arrays (${arrayList.length}) must match number of fields (${dtype.fieldList.length})`,
       );
     }
 
@@ -464,7 +483,7 @@ export class recarray implements RecArrayLike {
       const arr = arrayList[i];
       if (arr.size !== arrayList[0].size) {
         throw new ValueError(
-          `Array ${i} has size ${arr.size}, expected ${arrayList[0].size}`
+          `Array ${i} has size ${arr.size}, expected ${arrayList[0].size}`,
         );
       }
     }
@@ -489,7 +508,7 @@ export class recarray implements RecArrayLike {
 export function createRecarray(
   dtype: StructuredDType,
   shape: number[],
-  fields: Map<string, NDArray>
+  fields: Map<string, NDArray>,
 ): recarray {
   // We need to use a factory that can access the private constructor
   // For now, return a Proxy-wrapped recarray using the static method
@@ -498,18 +517,18 @@ export function createRecarray(
   return new Proxy(arr, {
     get(target, prop) {
       // Handle symbol properties
-      if (typeof prop === 'symbol') {
+      if (typeof prop === "symbol") {
         return (target as any)[prop];
       }
 
       // Allow access to isDisposed even after disposal
-      if (prop === 'isDisposed') {
+      if (prop === "isDisposed") {
         return target.isDisposed;
       }
 
       // Check if it's a field name (and not a method/property)
       if (
-        typeof prop === 'string' &&
+        typeof prop === "string" &&
         !target.isDisposed &&
         target.dtype.fields.has(prop) &&
         !(prop in target)
@@ -523,13 +542,13 @@ export function createRecarray(
 
     set(target, prop, value) {
       // Handle symbol properties
-      if (typeof prop === 'symbol') {
+      if (typeof prop === "symbol") {
         (target as any)[prop] = value;
         return true;
       }
 
       // Check if it's a field name
-      if (typeof prop === 'string' && target.dtype.fields.has(prop)) {
+      if (typeof prop === "string" && target.dtype.fields.has(prop)) {
         target.field(prop, value);
         return true;
       }
@@ -540,21 +559,21 @@ export function createRecarray(
     },
 
     has(target, prop) {
-      if (typeof prop === 'string' && target.dtype.fields.has(prop)) {
+      if (typeof prop === "string" && target.dtype.fields.has(prop)) {
         return true;
       }
       return prop in target;
-    }
+    },
   });
 }
 
 // Add internal factory to recarray
-(recarray as any)._createInternal = function(
+(recarray as any)._createInternal = function (
   dtype: StructuredDType,
   shape: number[],
-  fields: Map<string, NDArray>
+  fields: Map<string, NDArray>,
 ): recarray {
   return new (recarray as any)(dtype, shape, fields);
 };
 
-export { KeyError } from './record.js';
+export { KeyError } from "./record.js";

@@ -5,9 +5,9 @@
  * Compatible with NumPy's numpy.ma module.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
-import { nomask, MaskType, isMaskedConstant } from './types.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
+import { nomask, MaskType, isMaskedConstant } from "./types.js";
 
 // Forward declaration - MaskedArray is imported dynamically to avoid circular deps
 type MaskedArrayLike = {
@@ -35,7 +35,7 @@ type MaskedArrayLike = {
 export async function make_mask(
   m: MaskType | boolean[] | boolean | NDArray | number[],
   copy: boolean = false,
-  shrink: boolean = true
+  shrink: boolean = true,
 ): Promise<MaskType> {
   // nomask passes through
   if (m === nomask) {
@@ -43,7 +43,7 @@ export async function make_mask(
   }
 
   // Boolean scalar
-  if (typeof m === 'boolean') {
+  if (typeof m === "boolean") {
     if (!m && shrink) {
       return nomask;
     }
@@ -66,7 +66,9 @@ export async function make_mask(
   } else if (Array.isArray(m)) {
     // Convert boolean/number array to NDArray
     const boolData = m.map((v) => (v ? 1 : 0));
-    maskArr = await NDArray.fromArray(boolData, undefined, { dtype: DType.Bool });
+    maskArr = await NDArray.fromArray(boolData, undefined, {
+      dtype: DType.Bool,
+    });
   } else {
     return nomask;
   }
@@ -86,7 +88,7 @@ export async function make_mask(
 export function make_mask_sync(
   m: MaskType | NDArray,
   copy: boolean = false,
-  shrink: boolean = true
+  shrink: boolean = true,
 ): MaskType {
   // nomask passes through
   if (m === nomask) {
@@ -94,7 +96,9 @@ export function make_mask_sync(
   }
 
   if (!(m instanceof NDArray)) {
-    throw new Error('make_mask_sync requires NDArray input, use make_mask for arrays');
+    throw new Error(
+      "make_mask_sync requires NDArray input, use make_mask for arrays",
+    );
   }
 
   let maskArr: NDArray;
@@ -102,7 +106,9 @@ export function make_mask_sync(
     maskArr = copy ? m.copy() : m;
   } else {
     // Need async to create new array - can't do this sync
-    throw new Error('Converting non-bool array to mask requires async make_mask');
+    throw new Error(
+      "Converting non-bool array to mask requires async make_mask",
+    );
   }
 
   // Shrink to nomask if all False
@@ -148,9 +154,9 @@ export function getmask(a: unknown): MaskType {
   // Check if it's a MaskedArray-like object
   if (
     a !== null &&
-    typeof a === 'object' &&
-    '_mask' in a &&
-    ('_data' in a || 'data' in a)
+    typeof a === "object" &&
+    "_mask" in a &&
+    ("_data" in a || "data" in a)
   ) {
     return (a as MaskedArrayLike)._mask;
   }
@@ -181,8 +187,8 @@ export async function getmaskarray(a: unknown): Promise<NDArray> {
       shape = a.shape;
     } else if (
       a !== null &&
-      typeof a === 'object' &&
-      '_data' in a &&
+      typeof a === "object" &&
+      "_data" in a &&
       (a as MaskedArrayLike)._data instanceof NDArray
     ) {
       shape = (a as MaskedArrayLike)._data.shape;
@@ -209,8 +215,8 @@ export function getdata(a: unknown): NDArray {
   // Check if it's a MaskedArray-like object
   if (
     a !== null &&
-    typeof a === 'object' &&
-    '_data' in a &&
+    typeof a === "object" &&
+    "_data" in a &&
     (a as MaskedArrayLike)._data instanceof NDArray
   ) {
     return (a as MaskedArrayLike)._data;
@@ -221,7 +227,7 @@ export function getdata(a: unknown): NDArray {
     return a;
   }
 
-  throw new Error('Cannot get data from non-array object');
+  throw new Error("Cannot get data from non-array object");
 }
 
 /**
@@ -295,7 +301,7 @@ export function is_masked(x: unknown): boolean {
 export async function mask_or(
   m1: MaskType,
   m2: MaskType,
-  shrink: boolean = true
+  shrink: boolean = true,
 ): Promise<MaskType> {
   // Handle nomask cases
   if (m1 === nomask && m2 === nomask) {
@@ -315,9 +321,7 @@ export async function mask_or(
   // Shapes must be compatible (broadcasting would be needed for different shapes)
   // For simplicity, we require same shape
   if (!shapesEqual(arr1.shape, arr2.shape)) {
-    throw new Error(
-      `Mask shapes must match: ${arr1.shape} vs ${arr2.shape}`
-    );
+    throw new Error(`Mask shapes must match: ${arr1.shape} vs ${arr2.shape}`);
   }
 
   const result = await NDArray.zeros(arr1.shape, { dtype: DType.Bool });
@@ -341,7 +345,7 @@ export function mask_or_sync(
   m1: MaskType,
   m2: MaskType,
   result: NDArray,
-  shrink: boolean = true
+  shrink: boolean = true,
 ): MaskType {
   // Handle nomask cases
   if (m1 === nomask && m2 === nomask) {
@@ -409,7 +413,10 @@ export function reshape_mask(mask: MaskType, shape: number[]): MaskType {
  * @param targetShape - Shape to broadcast to
  * @returns Promise resolving to broadcast mask
  */
-export async function broadcast_mask(mask: MaskType, targetShape: number[]): Promise<MaskType> {
+export async function broadcast_mask(
+  mask: MaskType,
+  targetShape: number[],
+): Promise<MaskType> {
   if (mask === nomask) {
     return nomask;
   }
@@ -439,7 +446,7 @@ export async function broadcast_mask(mask: MaskType, targetShape: number[]): Pro
   for (let i = 0; i < targetNdim; i++) {
     if (paddedMaskShape[i] !== 1 && paddedMaskShape[i] !== targetShape[i]) {
       throw new Error(
-        `Cannot broadcast mask shape ${maskShape} to ${targetShape}`
+        `Cannot broadcast mask shape ${maskShape} to ${targetShape}`,
       );
     }
   }
@@ -453,8 +460,7 @@ export async function broadcast_mask(mask: MaskType, targetShape: number[]): Pro
     const maskIndices = new Array(maskNdim);
     for (let j = 0; j < maskNdim; j++) {
       const targetIdx = targetNdim - maskNdim + j;
-      maskIndices[j] =
-        maskShape[j] === 1 ? 0 : indices[targetIdx];
+      maskIndices[j] = maskShape[j] === 1 ? 0 : indices[targetIdx];
     }
 
     const maskFlatIdx = multiToFlatIndex(maskIndices, maskShape);
@@ -467,7 +473,11 @@ export async function broadcast_mask(mask: MaskType, targetShape: number[]): Pro
 /**
  * Broadcast a mask to a target shape (sync version, result pre-allocated).
  */
-export function broadcast_mask_sync(mask: MaskType, targetShape: number[], result: NDArray): MaskType {
+export function broadcast_mask_sync(
+  mask: MaskType,
+  targetShape: number[],
+  result: NDArray,
+): MaskType {
   if (mask === nomask) {
     return nomask;
   }
@@ -489,7 +499,9 @@ export function broadcast_mask_sync(mask: MaskType, targetShape: number[], resul
 
   for (let i = 0; i < targetNdim; i++) {
     if (paddedMaskShape[i] !== 1 && paddedMaskShape[i] !== targetShape[i]) {
-      throw new Error(`Cannot broadcast mask shape ${maskShape} to ${targetShape}`);
+      throw new Error(
+        `Cannot broadcast mask shape ${maskShape} to ${targetShape}`,
+      );
     }
   }
 

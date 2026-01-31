@@ -6,9 +6,9 @@
  * Reference: numpy/lib/_npyio_impl.py
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
-import { isNode } from './format.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
+import { isNode } from "./format.js";
 
 /**
  * Options for loadtxt()
@@ -108,18 +108,18 @@ export interface FromregexOptions {
  */
 export async function loadtxt(
   file: string | File | URL,
-  options: LoadtxtOptions = {}
+  options: LoadtxtOptions = {},
 ): Promise<NDArray> {
   const {
     dtype = DType.Float64,
-    comments = '#',
+    comments = "#",
     delimiter,
     converters = {},
     skiprows = 0,
     usecols,
     unpack = false,
     ndmin = 0,
-    encoding = 'utf-8',
+    encoding = "utf-8",
     max_rows,
   } = options;
 
@@ -151,14 +151,10 @@ export async function loadtxt(
     if (line.length === 0) continue;
 
     // Split by delimiter
-    const parts = delimiter
-      ? line.split(delimiter)
-      : line.split(/\s+/);
+    const parts = delimiter ? line.split(delimiter) : line.split(/\s+/);
 
     // Select columns
-    const selectedParts = usecols
-      ? usecols.map(i => parts[i])
-      : parts;
+    const selectedParts = usecols ? usecols.map((i) => parts[i]) : parts;
 
     // Convert values
     const row = selectedParts.map((val, colIdx) => {
@@ -174,14 +170,14 @@ export async function loadtxt(
   }
 
   if (data.length === 0) {
-    throw new Error('No data found in file');
+    throw new Error("No data found in file");
   }
 
   // Create array
   let arr: NDArray;
   if (data[0].length === 1) {
     // Single column - create 1D array
-    const flatData = data.map(row => row[0]);
+    const flatData = data.map((row) => row[0]);
     arr = await NDArray.fromArray(flatData, [flatData.length], { dtype });
   } else {
     arr = await NDArray.fromArray(data, undefined, { dtype });
@@ -225,20 +221,20 @@ export async function loadtxt(
 export async function savetxt(
   file: string | FileSystemFileHandle,
   arr: NDArray,
-  options: SavetxtOptions = {}
+  options: SavetxtOptions = {},
 ): Promise<void> {
   const {
-    fmt = '%.18e',
-    delimiter = ' ',
-    newline = '\n',
-    header = '',
-    footer = '',
-    comments = '# ',
-    encoding = 'utf-8',
+    fmt = "%.18e",
+    delimiter = " ",
+    newline = "\n",
+    header = "",
+    footer = "",
+    comments = "# ",
+    encoding = "utf-8",
   } = options;
 
   if (arr.ndim > 2) {
-    throw new Error('savetxt only supports 1D and 2D arrays');
+    throw new Error("savetxt only supports 1D and 2D arrays");
   }
 
   // Ensure 2D
@@ -248,7 +244,9 @@ export async function savetxt(
   // Parse format specifiers
   const formats = Array.isArray(fmt) ? fmt : Array(ncols).fill(fmt);
   if (formats.length !== ncols) {
-    throw new Error(`Number of formats (${formats.length}) doesn't match columns (${ncols})`);
+    throw new Error(
+      `Number of formats (${formats.length}) doesn't match columns (${ncols})`,
+    );
   }
 
   // Build output
@@ -256,7 +254,7 @@ export async function savetxt(
 
   // Header
   if (header) {
-    const headerLines = header.split('\n');
+    const headerLines = header.split("\n");
     for (const line of headerLines) {
       lines.push(comments + line);
     }
@@ -274,7 +272,7 @@ export async function savetxt(
 
   // Footer
   if (footer) {
-    const footerLines = footer.split('\n');
+    const footerLines = footer.split("\n");
     for (const line of footerLines) {
       lines.push(comments + line);
     }
@@ -310,20 +308,20 @@ export async function savetxt(
  */
 export async function genfromtxt(
   file: string | File | URL,
-  options: GenfromtxtOptions = {}
+  options: GenfromtxtOptions = {},
 ): Promise<NDArray> {
   const {
     dtype = DType.Float64,
-    comments = '#',
+    comments = "#",
     delimiter,
     skip_header = 0,
     skip_footer = 0,
     converters = {},
-    missing_values = [''],
+    missing_values = [""],
     filling_values = NaN,
     usecols,
     names,
-    encoding = 'utf-8',
+    encoding = "utf-8",
     max_rows,
     invalid_raise = true,
   } = options;
@@ -332,9 +330,7 @@ export async function genfromtxt(
   const allLines = text.split(/\r?\n/);
 
   // Remove footer lines
-  const lines = skip_footer > 0
-    ? allLines.slice(0, -skip_footer)
-    : allLines;
+  const lines = skip_footer > 0 ? allLines.slice(0, -skip_footer) : allLines;
 
   // Handle names - skip first line if it contains column names
   let dataStart = skip_header;
@@ -343,7 +339,7 @@ export async function genfromtxt(
     // Use first non-comment line as names, skip it for data
     for (let i = skip_header; i < lines.length; i++) {
       const line = lines[i].trim();
-      if (line && !line.startsWith(comments || '')) {
+      if (line && !line.startsWith(comments || "")) {
         // Column names found, data starts on next line
         dataStart = i + 1;
         break;
@@ -363,20 +359,16 @@ export async function genfromtxt(
     let line = lines[i].trim();
     if (!line || (comments && line.startsWith(comments))) continue;
 
-    const parts = delimiter
-      ? line.split(delimiter)
-      : line.split(/\s+/);
+    const parts = delimiter ? line.split(delimiter) : line.split(/\s+/);
 
-    const selectedParts = usecols
-      ? usecols.map(idx => parts[idx])
-      : parts;
+    const selectedParts = usecols ? usecols.map((idx) => parts[idx]) : parts;
 
     const row = selectedParts.map((val, colIdx) => {
       const trimmed = val.trim();
 
       // Check for missing
       if (missingSet.has(trimmed)) {
-        return typeof filling_values === 'number'
+        return typeof filling_values === "number"
           ? filling_values
           : (filling_values[colIdx] ?? NaN);
       }
@@ -389,7 +381,9 @@ export async function genfromtxt(
 
       const num = parseFloat(trimmed);
       if (isNaN(num) && invalid_raise) {
-        throw new Error(`Cannot convert '${trimmed}' to float at row ${i}, column ${colIdx}`);
+        throw new Error(
+          `Cannot convert '${trimmed}' to float at row ${i}, column ${colIdx}`,
+        );
       }
       return num;
     });
@@ -399,7 +393,7 @@ export async function genfromtxt(
   }
 
   if (data.length === 0) {
-    throw new Error('No data found in file');
+    throw new Error("No data found in file");
   }
 
   return NDArray.fromArray(data, undefined, { dtype });
@@ -424,21 +418,21 @@ export async function fromregex(
   file: string | File | URL,
   regexp: RegExp,
   dtype: DType = DType.Float64,
-  options: FromregexOptions = {}
+  options: FromregexOptions = {},
 ): Promise<NDArray> {
-  const { encoding = 'utf-8' } = options;
+  const { encoding = "utf-8" } = options;
 
   const text = await readTextFile(file, encoding);
 
   // Ensure global flag for matchAll
   const globalRegexp = regexp.global
     ? regexp
-    : new RegExp(regexp.source, regexp.flags + 'g');
+    : new RegExp(regexp.source, regexp.flags + "g");
 
   const matches = [...text.matchAll(globalRegexp)];
 
   if (matches.length === 0) {
-    throw new Error('No matches found');
+    throw new Error("No matches found");
   }
 
   // Extract captured groups
@@ -446,18 +440,18 @@ export async function fromregex(
 
   if (numGroups === 0) {
     // No groups, use full match
-    const data = matches.map(m => parseFloat(m[0]));
+    const data = matches.map((m) => parseFloat(m[0]));
     return NDArray.fromArray(data, [data.length], { dtype });
   }
 
   if (numGroups === 1) {
     // Single group, return 1D array
-    const data = matches.map(m => parseFloat(m[1]));
+    const data = matches.map((m) => parseFloat(m[1]));
     return NDArray.fromArray(data, [data.length], { dtype });
   }
 
   // Multiple groups, return 2D array
-  const data = matches.map(m => {
+  const data = matches.map((m) => {
     const row: number[] = [];
     for (let i = 1; i <= numGroups; i++) {
       row.push(parseFloat(m[i]));
@@ -473,7 +467,9 @@ export async function fromregex(
  */
 export function formatValue(value: number, fmt: string): string {
   // Parse format: %[flags][width][.precision]specifier
-  const match = fmt.match(/^%([+\- 0#]*)(\d*)(?:\.(\d+))?([diouxXeEfFgGaAcs%])$/);
+  const match = fmt.match(
+    /^%([+\- 0#]*)(\d*)(?:\.(\d+))?([diouxXeEfFgGaAcs%])$/,
+  );
   if (!match) {
     throw new Error(`Invalid format string: ${fmt}`);
   }
@@ -484,24 +480,24 @@ export function formatValue(value: number, fmt: string): string {
   let result: string;
 
   switch (specifier) {
-    case 'd':
-    case 'i':
+    case "d":
+    case "i":
       result = Math.trunc(value).toString();
       break;
-    case 'e':
+    case "e":
       result = value.toExponential(prec);
       break;
-    case 'E':
+    case "E":
       result = value.toExponential(prec).toUpperCase();
       break;
-    case 'f':
-    case 'F':
+    case "f":
+    case "F":
       result = value.toFixed(prec);
       break;
-    case 'g':
+    case "g":
       result = value.toPrecision(prec || 1);
       break;
-    case 'G':
+    case "G":
       result = value.toPrecision(prec || 1).toUpperCase();
       break;
     default:
@@ -509,20 +505,19 @@ export function formatValue(value: number, fmt: string): string {
   }
 
   // Apply sign
-  if (flags.includes('+') && value >= 0 && !result.startsWith('-')) {
-    result = '+' + result;
-  } else if (flags.includes(' ') && value >= 0 && !result.startsWith('-')) {
-    result = ' ' + result;
+  if (flags.includes("+") && value >= 0 && !result.startsWith("-")) {
+    result = "+" + result;
+  } else if (flags.includes(" ") && value >= 0 && !result.startsWith("-")) {
+    result = " " + result;
   }
 
   // Apply width padding
   if (width) {
     const w = parseInt(width, 10);
-    const pad = flags.includes('-') ? 'end' : 'start';
-    const char = flags.includes('0') && !flags.includes('-') ? '0' : ' ';
-    result = pad === 'start'
-      ? result.padStart(w, char)
-      : result.padEnd(w, char);
+    const pad = flags.includes("-") ? "end" : "start";
+    const char = flags.includes("0") && !flags.includes("-") ? "0" : " ";
+    result =
+      pad === "start" ? result.padStart(w, char) : result.padEnd(w, char);
   }
 
   return result;
@@ -533,28 +528,31 @@ export function formatValue(value: number, fmt: string): string {
  */
 async function readTextFile(
   file: string | File | URL,
-  encoding: string = 'utf-8'
+  encoding: string = "utf-8",
 ): Promise<string> {
   // Check for File in browser
-  if (typeof File !== 'undefined' && file instanceof File) {
+  if (typeof File !== "undefined" && file instanceof File) {
     return file.text();
   }
 
-  if (file instanceof URL || (typeof file === 'string' && file.startsWith('http'))) {
+  if (
+    file instanceof URL ||
+    (typeof file === "string" && file.startsWith("http"))
+  ) {
     const response = await fetch(file.toString());
     return response.text();
   }
 
-  if (typeof file === 'string') {
+  if (typeof file === "string") {
     // Node.js file path
     if (isNode()) {
-      const fs = await import('fs/promises');
+      const fs = await import("fs/promises");
       return fs.readFile(file, { encoding: encoding as BufferEncoding });
     }
-    throw new Error('String file paths only supported in Node.js');
+    throw new Error("String file paths only supported in Node.js");
   }
 
-  throw new Error('Unsupported file source');
+  throw new Error("Unsupported file source");
 }
 
 /**
@@ -563,27 +561,27 @@ async function readTextFile(
 async function writeTextFile(
   file: string | FileSystemFileHandle,
   text: string,
-  encoding: string = 'utf-8'
+  encoding: string = "utf-8",
 ): Promise<void> {
-  if (typeof file === 'string') {
+  if (typeof file === "string") {
     // Node.js file path
     if (isNode()) {
-      const fs = await import('fs/promises');
+      const fs = await import("fs/promises");
       await fs.writeFile(file, text, { encoding: encoding as BufferEncoding });
       return;
     }
-    throw new Error('String file paths only supported in Node.js');
+    throw new Error("String file paths only supported in Node.js");
   }
 
   // FileSystemFileHandle (File System Access API)
-  if ('createWritable' in file) {
+  if ("createWritable" in file) {
     const writable = await (file as FileSystemFileHandle).createWritable();
     await writable.write(text);
     await writable.close();
     return;
   }
 
-  throw new Error('Unsupported file target');
+  throw new Error("Unsupported file target");
 }
 
 // Type declaration for FileSystemFileHandle

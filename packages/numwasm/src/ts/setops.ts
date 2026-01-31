@@ -5,7 +5,7 @@
  * Adapted from NumPy's _arraysetops_impl.py
  */
 
-import { NDArray } from './NDArray.js';
+import { NDArray } from "./_core/NDArray.js";
 
 /* ============ Isin Algorithm Kind ============ */
 export const ISIN_AUTO = 0;
@@ -92,7 +92,7 @@ export interface SetXorOptions {
  */
 export async function unique(
   arr: NDArray,
-  options: UniqueOptions = {}
+  options: UniqueOptions = {},
 ): Promise<NDArray | UniqueResult> {
   const module = arr._wasmModule;
   const {
@@ -107,26 +107,26 @@ export async function unique(
     returnIndex,
     returnInverse,
     returnCounts,
-    equalNan
+    equalNan,
   );
 
   if (resultPtr === 0) {
-    throw new Error('unique failed');
+    throw new Error("unique failed");
   }
 
   // Read UniqueResult struct from WASM memory
   // UniqueResult { values, indices, inverse, counts } - 4 pointers (4 bytes each on wasm32)
-  const valuesPtr = module.getValue(resultPtr, 'i32');
-  const indicesPtr = module.getValue(resultPtr + 4, 'i32');
-  const inversePtr = module.getValue(resultPtr + 8, 'i32');
-  const countsPtr = module.getValue(resultPtr + 12, 'i32');
+  const valuesPtr = module.getValue(resultPtr, "i32");
+  const indicesPtr = module.getValue(resultPtr + 4, "i32");
+  const inversePtr = module.getValue(resultPtr + 8, "i32");
+  const countsPtr = module.getValue(resultPtr + 12, "i32");
 
   const values = NDArray._fromPtr(valuesPtr, module);
 
   // If no additional returns requested, free struct and return just values
   if (!returnIndex && !returnInverse && !returnCounts) {
     // Clear pointers in struct to prevent double-free, then free struct
-    module.setValue(resultPtr, 0, 'i32');
+    module.setValue(resultPtr, 0, "i32");
     module._unique_result_free(resultPtr);
     return values;
   }
@@ -135,21 +135,21 @@ export async function unique(
 
   if (returnIndex && indicesPtr !== 0) {
     result.indices = NDArray._fromPtr(indicesPtr, module);
-    module.setValue(resultPtr + 4, 0, 'i32'); // Prevent double-free
+    module.setValue(resultPtr + 4, 0, "i32"); // Prevent double-free
   }
 
   if (returnInverse && inversePtr !== 0) {
     result.inverse = NDArray._fromPtr(inversePtr, module);
-    module.setValue(resultPtr + 8, 0, 'i32');
+    module.setValue(resultPtr + 8, 0, "i32");
   }
 
   if (returnCounts && countsPtr !== 0) {
     result.counts = NDArray._fromPtr(countsPtr, module);
-    module.setValue(resultPtr + 12, 0, 'i32');
+    module.setValue(resultPtr + 12, 0, "i32");
   }
 
   // Clear values pointer and free struct
-  module.setValue(resultPtr, 0, 'i32');
+  module.setValue(resultPtr, 0, "i32");
   module._unique_result_free(resultPtr);
 
   return result;
@@ -166,7 +166,7 @@ export async function uniqueValues(arr: NDArray): Promise<NDArray> {
   const resultPtr = module._ndarray_unique_values(arr._wasmPtr);
 
   if (resultPtr === 0) {
-    throw new Error('uniqueValues failed');
+    throw new Error("uniqueValues failed");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -179,7 +179,7 @@ export async function uniqueValues(arr: NDArray): Promise<NDArray> {
  * @returns Object with values and indices arrays
  */
 export async function uniqueIndex(
-  arr: NDArray
+  arr: NDArray,
 ): Promise<{ values: NDArray; indices: NDArray }> {
   const result = (await unique(arr, { returnIndex: true })) as UniqueResult;
   return { values: result.values, indices: result.indices! };
@@ -192,7 +192,7 @@ export async function uniqueIndex(
  * @returns Object with values and inverse arrays
  */
 export async function uniqueInverse(
-  arr: NDArray
+  arr: NDArray,
 ): Promise<{ values: NDArray; inverse: NDArray }> {
   const result = (await unique(arr, { returnInverse: true })) as UniqueResult;
   return { values: result.values, inverse: result.inverse! };
@@ -205,7 +205,7 @@ export async function uniqueInverse(
  * @returns Object with values and counts arrays
  */
 export async function uniqueCounts(
-  arr: NDArray
+  arr: NDArray,
 ): Promise<{ values: NDArray; counts: NDArray }> {
   const result = (await unique(arr, { returnCounts: true })) as UniqueResult;
   return { values: result.values, counts: result.counts! };
@@ -249,7 +249,7 @@ export async function union1d(ar1: NDArray, ar2: NDArray): Promise<NDArray> {
   const resultPtr = module._ndarray_union1d(ar1._wasmPtr, ar2._wasmPtr);
 
   if (resultPtr === 0) {
-    throw new Error('union1d failed');
+    throw new Error("union1d failed");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -276,8 +276,10 @@ export async function union1d(ar1: NDArray, ar2: NDArray): Promise<NDArray> {
 export async function intersect1d(
   ar1: NDArray,
   ar2: NDArray,
-  options: IntersectOptions = {}
-): Promise<NDArray | { values: NDArray; indices1: NDArray; indices2: NDArray }> {
+  options: IntersectOptions = {},
+): Promise<
+  NDArray | { values: NDArray; indices1: NDArray; indices2: NDArray }
+> {
   const module = ar1._wasmModule;
   const { assumeUnique = false, returnIndices = false } = options;
 
@@ -292,17 +294,17 @@ export async function intersect1d(
       assumeUnique,
       true,
       idx1PtrPtr,
-      idx2PtrPtr
+      idx2PtrPtr,
     );
 
     if (resultPtr === 0) {
       module._free(idx1PtrPtr);
       module._free(idx2PtrPtr);
-      throw new Error('intersect1d failed');
+      throw new Error("intersect1d failed");
     }
 
-    const idx1Ptr = module.getValue(idx1PtrPtr, 'i32');
-    const idx2Ptr = module.getValue(idx2PtrPtr, 'i32');
+    const idx1Ptr = module.getValue(idx1PtrPtr, "i32");
+    const idx2Ptr = module.getValue(idx2PtrPtr, "i32");
 
     module._free(idx1PtrPtr);
     module._free(idx2PtrPtr);
@@ -320,11 +322,11 @@ export async function intersect1d(
     assumeUnique,
     false,
     0,
-    0
+    0,
   );
 
   if (resultPtr === 0) {
-    throw new Error('intersect1d failed');
+    throw new Error("intersect1d failed");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -351,7 +353,7 @@ export async function intersect1d(
 export async function setxor1d(
   ar1: NDArray,
   ar2: NDArray,
-  options: SetXorOptions = {}
+  options: SetXorOptions = {},
 ): Promise<NDArray> {
   const module = ar1._wasmModule;
   const { assumeUnique = false } = options;
@@ -359,11 +361,11 @@ export async function setxor1d(
   const resultPtr = module._ndarray_setxor1d(
     ar1._wasmPtr,
     ar2._wasmPtr,
-    assumeUnique
+    assumeUnique,
   );
 
   if (resultPtr === 0) {
-    throw new Error('setxor1d failed');
+    throw new Error("setxor1d failed");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -390,7 +392,7 @@ export async function setxor1d(
 export async function setdiff1d(
   ar1: NDArray,
   ar2: NDArray,
-  options: SetDiffOptions = {}
+  options: SetDiffOptions = {},
 ): Promise<NDArray> {
   const module = ar1._wasmModule;
   const { assumeUnique = false } = options;
@@ -398,11 +400,11 @@ export async function setdiff1d(
   const resultPtr = module._ndarray_setdiff1d(
     ar1._wasmPtr,
     ar2._wasmPtr,
-    assumeUnique
+    assumeUnique,
   );
 
   if (resultPtr === 0) {
-    throw new Error('setdiff1d failed');
+    throw new Error("setdiff1d failed");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -431,25 +433,21 @@ export async function setdiff1d(
 export async function isin(
   ar1: NDArray,
   ar2: NDArray,
-  options: IsinOptions = {}
+  options: IsinOptions = {},
 ): Promise<NDArray> {
   const module = ar1._wasmModule;
-  const {
-    invert = false,
-    assumeUnique = false,
-    kind = ISIN_AUTO,
-  } = options;
+  const { invert = false, assumeUnique = false, kind = ISIN_AUTO } = options;
 
   const resultPtr = module._ndarray_isin(
     ar1._wasmPtr,
     ar2._wasmPtr,
     invert,
     assumeUnique,
-    kind
+    kind,
   );
 
   if (resultPtr === 0) {
-    throw new Error('isin failed');
+    throw new Error("isin failed");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -466,25 +464,21 @@ export async function isin(
 export async function in1d(
   ar1: NDArray,
   ar2: NDArray,
-  options: IsinOptions = {}
+  options: IsinOptions = {},
 ): Promise<NDArray> {
   const module = ar1._wasmModule;
-  const {
-    invert = false,
-    assumeUnique = false,
-    kind = ISIN_AUTO,
-  } = options;
+  const { invert = false, assumeUnique = false, kind = ISIN_AUTO } = options;
 
   const resultPtr = module._ndarray_in1d(
     ar1._wasmPtr,
     ar2._wasmPtr,
     invert,
     assumeUnique,
-    kind
+    kind,
   );
 
   if (resultPtr === 0) {
-    throw new Error('in1d failed');
+    throw new Error("in1d failed");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -521,7 +515,7 @@ export interface Ediff1dOptions {
  */
 export async function ediff1d(
   arr: NDArray,
-  options: Ediff1dOptions = {}
+  options: Ediff1dOptions = {},
 ): Promise<NDArray> {
   const { toPrepend, toAppend } = options;
 

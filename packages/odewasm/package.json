@@ -1,7 +1,7 @@
 {
   "name": "odewasm",
   "version": "0.1.0",
-  "description": "ODE solvers (DOPRI5, DOP853, RADAU5) compiled to WebAssembly",
+  "description": "ODE solvers compiled to WebAssembly - Hairer (DOPRI5, DOP853, RADAU5) and Netlib (RKF45, DVERK, ODE, VODE, ZVODE, EPSODE, VODPK, RKSUITE, RKC)",
   "type": "module",
   "main": "./dist/odewasm.cjs",
   "module": "./dist/odewasm.mjs",
@@ -41,9 +41,18 @@
   "keywords": [
     "ode",
     "differential-equations",
+    "initial-value-problem",
     "dopri5",
+    "dop853",
     "radau",
+    "rkf45",
+    "dverk",
+    "vode",
+    "zvode",
+    "rksuite",
+    "rkc",
     "runge-kutta",
+    "stiff-ode",
     "wasm",
     "webassembly"
   ],

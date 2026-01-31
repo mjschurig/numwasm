@@ -194,6 +194,171 @@ EXPORT NDArray* ndarray_full(int32_t ndim, int32_t* shape, DType dtype, double v
     return arr;
 }
 
+EXPORT NDArray* ndarray_arange(double start, double stop, double step, DType dtype)
+{
+    if (step == 0.0) return NULL;
+
+    /* Calculate number of elements */
+    int32_t num;
+    if (step > 0) {
+        num = (stop > start) ? (int32_t)ceil((stop - start) / step) : 0;
+    } else {
+        num = (start > stop) ? (int32_t)ceil((start - stop) / (-step)) : 0;
+    }
+
+    if (num <= 0) {
+        int32_t shape[] = {0};
+        return ndarray_empty(1, shape, dtype);
+    }
+
+    int32_t shape[] = {num};
+    NDArray* arr = ndarray_empty(1, shape, dtype);
+    if (!arr) return NULL;
+
+    for (int32_t i = 0; i < num; i++) {
+        ndarray_set_flat(arr, i, start + i * step);
+    }
+
+    return arr;
+}
+
+EXPORT NDArray* ndarray_linspace(double start, double stop, int32_t num, int32_t endpoint, DType dtype)
+{
+    if (num < 0) return NULL;
+
+    if (num == 0) {
+        int32_t shape[] = {0};
+        return ndarray_empty(1, shape, dtype);
+    }
+
+    int32_t shape[] = {num};
+    NDArray* arr = ndarray_empty(1, shape, dtype);
+    if (!arr) return NULL;
+
+    if (num == 1) {
+        ndarray_set_flat(arr, 0, start);
+        return arr;
+    }
+
+    double div = endpoint ? (double)(num - 1) : (double)num;
+    double step = (stop - start) / div;
+
+    for (int32_t i = 0; i < num; i++) {
+        ndarray_set_flat(arr, i, start + i * step);
+    }
+
+    return arr;
+}
+
+EXPORT NDArray* ndarray_eye(int32_t N, int32_t M, int32_t k, DType dtype)
+{
+    if (N < 0 || M < 0) return NULL;
+
+    int32_t shape[] = {N, M};
+    NDArray* arr = ndarray_create(2, shape, dtype);  /* zeros */
+    if (!arr) return NULL;
+
+    /* Fill diagonal with ones */
+    for (int32_t i = 0; i < N; i++) {
+        int32_t j = i + k;
+        if (j >= 0 && j < M) {
+            size_t flat_idx = (size_t)i * M + j;
+            ndarray_set_flat(arr, flat_idx, 1.0);
+        }
+    }
+
+    return arr;
+}
+
+EXPORT NDArray* ndarray_tri(int32_t N, int32_t M, int32_t k, DType dtype)
+{
+    if (N < 0 || M < 0) return NULL;
+
+    int32_t shape[] = {N, M};
+    NDArray* arr = ndarray_create(2, shape, dtype);  /* zeros */
+    if (!arr) return NULL;
+
+    /* Fill lower triangle with ones */
+    for (int32_t i = 0; i < N; i++) {
+        int32_t max_j = i + k + 1;
+        if (max_j > M) max_j = M;
+        for (int32_t j = 0; j < max_j; j++) {
+            size_t flat_idx = (size_t)i * M + j;
+            ndarray_set_flat(arr, flat_idx, 1.0);
+        }
+    }
+
+    return arr;
+}
+
+EXPORT NDArray* ndarray_tril(const NDArray* arr, int32_t k)
+{
+    if (!arr || arr->ndim != 2) return NULL;
+
+    NDArray* result = ndarray_copy(arr);
+    if (!result) return NULL;
+
+    int32_t rows = arr->shape[0];
+    int32_t cols = arr->shape[1];
+
+    /* Zero elements above the k-th diagonal */
+    for (int32_t i = 0; i < rows; i++) {
+        for (int32_t j = i + k + 1; j < cols; j++) {
+            size_t flat_idx = (size_t)i * cols + j;
+            ndarray_set_flat(result, flat_idx, 0.0);
+        }
+    }
+
+    return result;
+}
+
+EXPORT NDArray* ndarray_triu(const NDArray* arr, int32_t k)
+{
+    if (!arr || arr->ndim != 2) return NULL;
+
+    NDArray* result = ndarray_copy(arr);
+    if (!result) return NULL;
+
+    int32_t rows = arr->shape[0];
+    int32_t cols = arr->shape[1];
+
+    /* Zero elements below the k-th diagonal */
+    for (int32_t i = 0; i < rows; i++) {
+        int32_t max_j = i + k;
+        if (max_j > cols) max_j = cols;
+        for (int32_t j = 0; j < max_j; j++) {
+            size_t flat_idx = (size_t)i * cols + j;
+            ndarray_set_flat(result, flat_idx, 0.0);
+        }
+    }
+
+    return result;
+}
+
+EXPORT NDArray* ndarray_vander(const NDArray* x, int32_t N, int32_t increasing)
+{
+    if (!x || x->ndim != 1) return NULL;
+
+    int32_t rows = (int32_t)x->size;
+    if (N <= 0) N = rows;
+
+    int32_t shape[] = {rows, N};
+    NDArray* result = ndarray_empty(2, shape, x->dtype);
+    if (!result) return NULL;
+
+    for (int32_t i = 0; i < rows; i++) {
+        double val = ndarray_get_flat(x, i);
+        for (int32_t j = 0; j < N; j++) {
+            int32_t power = increasing ? j : (N - 1 - j);
+            double elem = pow(val, (double)power);
+            size_t flat_idx = (size_t)i * N + j;
+            ndarray_set_flat(result, flat_idx, elem);
+        }
+    }
+
+    return result;
+}
+
 EXPORT NDArray* ndarray_scalar(double value, DType dtype)
 {
     NDArray* arr = ndarray_empty(0, NULL, dtype);
@@ -258,6 +423,34 @@ EXPORT NDArray* ndarray_copy(const NDArray* arr)
     }
 
     return copy;
+}
+
+EXPORT int32_t ndarray_copyto(NDArray* dst, const NDArray* src, const NDArray* where)
+{
+    if (!dst || !src) return -1;
+    if (dst->size != src->size) return -1;
+    if (where && where->size != dst->size) return -1;
+
+    /* Fast path: both contiguous, same dtype, no mask */
+    if (!where && dst->dtype == src->dtype &&
+        ndarray_is_c_contiguous(dst) && ndarray_is_c_contiguous(src)) {
+        memcpy(dst->data, src->data, dst->size * dtype_size(dst->dtype));
+        return 0;
+    }
+
+    /* General path: element-by-element */
+    for (size_t i = 0; i < dst->size; i++) {
+        /* Check mask if provided */
+        if (where) {
+            double mask_val = ndarray_get_flat(where, i);
+            if (mask_val == 0.0) continue; /* Skip if mask is false */
+        }
+
+        double val = ndarray_get_flat(src, i);
+        ndarray_set_flat(dst, i, val);
+    }
+
+    return 0;
 }
 
 EXPORT NDArray* ndarray_astype(NDArray* arr, DType dtype)

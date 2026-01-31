@@ -21,17 +21,29 @@
  * console.log(arr.getRecord(0)); // record(age=25, name='Alice')
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType, type StructuredDType } from '../types.js';
-import { format_parser, ValueError, find_duplicate, inferFormat, dtypeToFormat } from './format_parser.js';
-import { recarray, IndexError, createRecarray } from './recarray.js';
-import { record, KeyError } from './record.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType, type StructuredDType } from "../types.js";
+import {
+  format_parser,
+  ValueError,
+  find_duplicate,
+  inferFormat,
+  dtypeToFormat,
+} from "./format_parser.js";
+import { recarray, IndexError, createRecarray } from "./recarray.js";
+import { record, KeyError } from "./record.js";
 
 /* ============ Re-exports ============ */
 
-export { format_parser, ValueError, find_duplicate, inferFormat, dtypeToFormat } from './format_parser.js';
-export { recarray, IndexError, createRecarray } from './recarray.js';
-export { record, createRecord, KeyError } from './record.js';
+export {
+  format_parser,
+  ValueError,
+  find_duplicate,
+  inferFormat,
+  dtypeToFormat,
+} from "./format_parser.js";
+export { recarray, IndexError, createRecarray } from "./recarray.js";
+export { record, createRecord, KeyError } from "./record.js";
 
 /* ============ Types ============ */
 
@@ -55,7 +67,7 @@ export interface RecArrayOptions {
   aligned?: boolean;
 
   /** Byte order: '<' little, '>' big, '=' native */
-  byteorder?: '<' | '>' | '=' | '|';
+  byteorder?: "<" | ">" | "=" | "|";
 
   /** Whether to copy input data */
   copy?: boolean;
@@ -82,7 +94,7 @@ export interface RecArrayOptions {
  */
 export async function array(
   data: unknown[][] | NDArray | recarray | null = null,
-  options: RecArrayOptions = {}
+  options: RecArrayOptions = {},
 ): Promise<recarray> {
   const {
     dtype = undefined,
@@ -105,25 +117,37 @@ export async function array(
   if (dtype !== undefined) {
     structDtype = dtype;
   } else if (formats !== undefined) {
-    const parser = new format_parser(formats, names ?? null, titles ?? null, aligned, byteorder ?? null);
+    const parser = new format_parser(
+      formats,
+      names ?? null,
+      titles ?? null,
+      aligned,
+      byteorder ?? null,
+    );
     structDtype = parser.dtype;
   } else if (data !== null && Array.isArray(data) && data.length > 0) {
     // Try to infer from data
     const firstRow = data[0];
     if (Array.isArray(firstRow)) {
       const inferredFormats = firstRow.map((val) => {
-        if (typeof val === 'string') return 'U' + Math.max(1, val.length);
-        if (typeof val === 'number') return Number.isInteger(val) ? 'i4' : 'f8';
-        if (typeof val === 'boolean') return '?';
-        return 'f8';
+        if (typeof val === "string") return "U" + Math.max(1, val.length);
+        if (typeof val === "number") return Number.isInteger(val) ? "i4" : "f8";
+        if (typeof val === "boolean") return "?";
+        return "f8";
       });
-      const parser = new format_parser(inferredFormats, names ?? null, titles ?? null, aligned, byteorder ?? null);
+      const parser = new format_parser(
+        inferredFormats,
+        names ?? null,
+        titles ?? null,
+        aligned,
+        byteorder ?? null,
+      );
       structDtype = parser.dtype;
     } else {
-      throw new TypeError('Cannot infer dtype from data');
+      throw new TypeError("Cannot infer dtype from data");
     }
   } else {
-    throw new TypeError('Must specify either dtype or formats');
+    throw new TypeError("Must specify either dtype or formats");
   }
 
   // Determine shape from data
@@ -145,7 +169,10 @@ export async function array(
     if (field.dtype === DType.String) {
       fields.set(field.name, NDArray.emptyString(shape));
     } else {
-      fields.set(field.name, await NDArray.zeros(shape, { dtype: field.dtype }));
+      fields.set(
+        field.name,
+        await NDArray.zeros(shape, { dtype: field.dtype }),
+      );
     }
   }
 
@@ -187,10 +214,10 @@ export async function array(
  */
 export async function fromarrays(
   arrayList: (NDArray | number[] | string[])[],
-  options: RecArrayOptions = {}
+  options: RecArrayOptions = {},
 ): Promise<recarray> {
   if (arrayList.length === 0) {
-    throw new ValueError('arrayList must contain at least one array');
+    throw new ValueError("arrayList must contain at least one array");
   }
 
   const {
@@ -211,12 +238,13 @@ export async function fromarrays(
     let formatList: string[];
 
     if (formats !== undefined) {
-      formatList = typeof formats === 'string'
-        ? formats.split(',').map(f => f.trim())
-        : formats;
+      formatList =
+        typeof formats === "string"
+          ? formats.split(",").map((f) => f.trim())
+          : formats;
     } else {
       // Infer formats from arrays
-      formatList = arrayList.map(arr => {
+      formatList = arrayList.map((arr) => {
         if (arr instanceof NDArray) {
           return dtypeToFormat(arr.dtype);
         }
@@ -224,13 +252,19 @@ export async function fromarrays(
       });
     }
 
-    const parser = new format_parser(formatList, names ?? null, titles ?? null, aligned, byteorder ?? null);
+    const parser = new format_parser(
+      formatList,
+      names ?? null,
+      titles ?? null,
+      aligned,
+      byteorder ?? null,
+    );
     structDtype = parser.dtype;
   }
 
   if (arrayList.length !== structDtype.fieldList.length) {
     throw new ValueError(
-      `Number of arrays (${arrayList.length}) must match number of fields (${structDtype.fieldList.length})`
+      `Number of arrays (${arrayList.length}) must match number of fields (${structDtype.fieldList.length})`,
     );
   }
 
@@ -244,9 +278,7 @@ export async function fromarrays(
     const arr = arrayList[i];
     const arrLen = Array.isArray(arr) ? arr.length : arr.size;
     if (arrLen !== size) {
-      throw new ValueError(
-        `Array ${i} has length ${arrLen}, expected ${size}`
-      );
+      throw new ValueError(`Array ${i} has length ${arrLen}, expected ${size}`);
     }
   }
 
@@ -265,7 +297,12 @@ export async function fromarrays(
       fields.set(field.name, NDArray.fromStringArray(srcArr as string[]));
     } else {
       // Numeric array from JavaScript array
-      fields.set(field.name, await NDArray.fromArray(srcArr as number[], shape, { dtype: field.dtype }));
+      fields.set(
+        field.name,
+        await NDArray.fromArray(srcArr as number[], shape, {
+          dtype: field.dtype,
+        }),
+      );
     }
   }
 
@@ -289,7 +326,7 @@ export async function fromarrays(
  */
 export async function fromrecords(
   recList: unknown[][],
-  options: RecArrayOptions = {}
+  options: RecArrayOptions = {},
 ): Promise<recarray> {
   return array(recList, options);
 }
@@ -307,7 +344,7 @@ export async function fromstring(
   datastring: ArrayBuffer | Uint8Array,
   dtype: StructuredDType,
   shape: number[] = [],
-  offset: number = 0
+  offset: number = 0,
 ): Promise<recarray> {
   // Get buffer
   let buffer: ArrayBuffer;
@@ -323,9 +360,10 @@ export async function fromstring(
   // Calculate number of records
   const itemsize = dtype.itemsize;
   const availableBytes = buffer.byteLength - bufferOffset;
-  const numRecords = shape.length > 0
-    ? shape.reduce((a, b) => a * b, 1)
-    : Math.floor(availableBytes / itemsize);
+  const numRecords =
+    shape.length > 0
+      ? shape.reduce((a, b) => a * b, 1)
+      : Math.floor(availableBytes / itemsize);
 
   const finalShape = shape.length > 0 ? shape : [numRecords];
 
@@ -336,7 +374,10 @@ export async function fromstring(
     if (field.dtype === DType.String) {
       fields.set(field.name, NDArray.emptyString(finalShape));
     } else {
-      fields.set(field.name, await NDArray.zeros(finalShape, { dtype: field.dtype }));
+      fields.set(
+        field.name,
+        await NDArray.zeros(finalShape, { dtype: field.dtype }),
+      );
     }
   }
 
@@ -347,7 +388,13 @@ export async function fromstring(
   for (let i = 0; i < numRecords; i++) {
     for (const field of dtype.fieldList) {
       const fieldOffset = byteOffset + field.offset;
-      const value = readFieldValue(view, fieldOffset, field.dtype, field.itemsize, field.charType);
+      const value = readFieldValue(
+        view,
+        fieldOffset,
+        field.dtype,
+        field.itemsize,
+        field.charType,
+      );
       const fieldArr = fields.get(field.name)!;
 
       if (field.dtype === DType.String) {
@@ -375,18 +422,21 @@ export async function fromfile(
   file: File | string,
   dtype: StructuredDType,
   shape: number[] = [],
-  offset: number = 0
+  offset: number = 0,
 ): Promise<recarray> {
   let buffer: ArrayBuffer;
 
-  if (typeof file === 'string') {
+  if (typeof file === "string") {
     // Node.js: read from file path
-    if (typeof process !== 'undefined' && process.versions?.node) {
-      const fs = await import('fs/promises');
+    if (typeof process !== "undefined" && process.versions?.node) {
+      const fs = await import("fs/promises");
       const data = await fs.readFile(file);
-      buffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+      buffer = data.buffer.slice(
+        data.byteOffset,
+        data.byteOffset + data.byteLength,
+      );
     } else {
-      throw new Error('File paths only supported in Node.js');
+      throw new Error("File paths only supported in Node.js");
     }
   } else {
     // Browser: read from File object
@@ -406,7 +456,7 @@ function readFieldValue(
   offset: number,
   dtype: DType,
   itemsize: number,
-  charType?: 'S' | 'U'
+  charType?: "S" | "U",
 ): unknown {
   switch (dtype) {
     case DType.Bool:
@@ -437,7 +487,7 @@ function readFieldValue(
       return view.getFloat64(offset, true);
     case DType.String:
       // Read fixed-width string
-      if (charType === 'U') {
+      if (charType === "U") {
         // Unicode: 4 bytes per character
         const chars: string[] = [];
         const numChars = itemsize / 4;
@@ -446,12 +496,16 @@ function readFieldValue(
           if (code === 0) break;
           chars.push(String.fromCodePoint(code));
         }
-        return chars.join('');
+        return chars.join("");
       } else {
         // ASCII: 1 byte per character
-        const bytes = new Uint8Array(view.buffer, view.byteOffset + offset, itemsize);
-        const decoder = new TextDecoder('utf-8');
-        return decoder.decode(bytes).replace(/\0+$/, ''); // Trim null bytes
+        const bytes = new Uint8Array(
+          view.buffer,
+          view.byteOffset + offset,
+          itemsize,
+        );
+        const decoder = new TextDecoder("utf-8");
+        return decoder.decode(bytes).replace(/\0+$/, ""); // Trim null bytes
       }
     default:
       return 0;

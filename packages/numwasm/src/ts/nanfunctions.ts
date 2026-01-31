@@ -7,15 +7,15 @@
  * Reference: numpy/lib/_nanfunctions_impl.py
  */
 
-import { NDArray } from './NDArray.js';
-import { DType } from './types.js';
-import { isnan, isposinf, isneginf, all, any } from './logic.js';
-import { where, extract } from './indexing.js';
-import { sum, min, max, argmin, argmax, median } from './statistics.js';
-import { divide, subtract, multiply, sqrt, equal } from './ufunc.js';
-import { sort } from './sorting.js';
-import { applyAlongAxis } from './functional.js';
-import { finfo } from './typeinfo.js';
+import { NDArray } from "./_core/NDArray.js";
+import { DType } from "./types.js";
+import { isnan, isposinf, isneginf, all, any } from "./logic.js";
+import { where, extract } from "./indexing.js";
+import { sum, min, max, argmin, argmax, median } from "./statistics.js";
+import { divide, subtract, multiply, sqrt, equal } from "./ufunc.js";
+import { sort } from "./sorting.js";
+import { applyAlongAxis } from "./functional.js";
+import { finfo } from "./typeinfo.js";
 
 /* ============ Internal Helpers ============ */
 
@@ -34,7 +34,10 @@ function _getNotNanMask(arr: NDArray): NDArray {
  * Internal: Replace NaN values with a replacement value.
  * Returns the cleaned array (caller must dispose).
  */
-async function _replaceNan(arr: NDArray, replacement: number): Promise<NDArray> {
+async function _replaceNan(
+  arr: NDArray,
+  replacement: number,
+): Promise<NDArray> {
   const mask = await isnan(arr);
   const replacementArr = await NDArray.fromArray([replacement]);
   const result = await where(mask, replacementArr, arr);
@@ -49,7 +52,7 @@ async function _replaceNan(arr: NDArray, replacement: number): Promise<NDArray> 
 async function _countNonNan(
   arr: NDArray,
   axis: number | null,
-  keepdims: boolean
+  keepdims: boolean,
 ): Promise<NDArray | number> {
   const notNanMask = _getNotNanMask(arr);
   const result = await sum(notNanMask, axis, keepdims, DType.Float64);
@@ -60,13 +63,17 @@ async function _countNonNan(
 /**
  * Internal: Check for all-NaN slices and warn.
  */
-async function _warnAllNan(arr: NDArray, axis: number | null, funcName: string): Promise<boolean> {
+async function _warnAllNan(
+  arr: NDArray,
+  axis: number | null,
+  funcName: string,
+): Promise<boolean> {
   const mask = await isnan(arr);
   const allNan = await all(mask, axis === null ? undefined : axis);
   mask.dispose();
 
   let hasAllNanSlice = false;
-  if (typeof allNan === 'boolean') {
+  if (typeof allNan === "boolean") {
     hasAllNanSlice = allNan;
   } else {
     const anyAllNan = await any(allNan);
@@ -104,7 +111,7 @@ export async function nansum(
   a: NDArray,
   axis: number | null = null,
   keepdims: boolean = false,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray | number> {
   const cleaned = await _replaceNan(a, 0);
   const result = await sum(cleaned, axis, keepdims, dtype);
@@ -134,7 +141,7 @@ export async function nanprod(
   a: NDArray,
   axis: number | null = null,
   keepdims: boolean = false,
-  _dtype?: DType
+  _dtype?: DType,
 ): Promise<NDArray | number> {
   // Replace NaN with 1 for product
   const cleaned = await _replaceNan(a, 1);
@@ -165,7 +172,7 @@ export async function nanprod(
       return data.reduce((acc, val) => acc * val, 1);
     },
     normalizedAxis,
-    cleaned
+    cleaned,
   );
 
   cleaned.dispose();
@@ -198,9 +205,9 @@ export async function nanprod(
 export async function nanmin(
   a: NDArray,
   axis: number | null = null,
-  keepdims: boolean = false
+  keepdims: boolean = false,
 ): Promise<NDArray | number> {
-  await _warnAllNan(a, axis, 'nanmin');
+  await _warnAllNan(a, axis, "nanmin");
 
   // Replace NaN with +Infinity for min computation
   const cleaned = await _replaceNan(a, Infinity);
@@ -208,7 +215,7 @@ export async function nanmin(
   cleaned.dispose();
 
   // Handle all-NaN case: Infinity -> NaN
-  if (typeof result === 'number') {
+  if (typeof result === "number") {
     return result === Infinity ? NaN : result;
   }
 
@@ -248,16 +255,16 @@ export async function nanmin(
 export async function nanmax(
   a: NDArray,
   axis: number | null = null,
-  keepdims: boolean = false
+  keepdims: boolean = false,
 ): Promise<NDArray | number> {
-  await _warnAllNan(a, axis, 'nanmax');
+  await _warnAllNan(a, axis, "nanmax");
 
   // Replace NaN with -Infinity for max computation
   const cleaned = await _replaceNan(a, -Infinity);
   const result = await max(cleaned, axis, keepdims);
   cleaned.dispose();
 
-  if (typeof result === 'number') {
+  if (typeof result === "number") {
     return result === -Infinity ? NaN : result;
   }
 
@@ -291,9 +298,9 @@ export async function nanmax(
 export async function nanargmin(
   a: NDArray,
   axis: number | null = null,
-  keepdims: boolean = false
+  keepdims: boolean = false,
 ): Promise<NDArray | number> {
-  await _warnAllNan(a, axis, 'nanargmin');
+  await _warnAllNan(a, axis, "nanargmin");
 
   const cleaned = await _replaceNan(a, Infinity);
   const result = await argmin(cleaned, axis, keepdims);
@@ -319,9 +326,9 @@ export async function nanargmin(
 export async function nanargmax(
   a: NDArray,
   axis: number | null = null,
-  keepdims: boolean = false
+  keepdims: boolean = false,
 ): Promise<NDArray | number> {
-  await _warnAllNan(a, axis, 'nanargmax');
+  await _warnAllNan(a, axis, "nanargmax");
 
   const cleaned = await _replaceNan(a, -Infinity);
   const result = await argmax(cleaned, axis, keepdims);
@@ -354,7 +361,7 @@ export async function nanmean(
   a: NDArray,
   axis: number | null = null,
   keepdims: boolean = false,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray | number> {
   // Sum of non-NaN values
   const nanSum = await nansum(a, axis, keepdims, dtype);
@@ -363,23 +370,21 @@ export async function nanmean(
   const count = await _countNonNan(a, axis, keepdims);
 
   // Mean = sum / count
-  if (typeof nanSum === 'number' && typeof count === 'number') {
+  if (typeof nanSum === "number" && typeof count === "number") {
     return count === 0 ? NaN : nanSum / count;
   }
 
-  const sumArr = typeof nanSum === 'number'
-    ? await NDArray.fromArray([nanSum])
-    : nanSum;
-  const countArr = typeof count === 'number'
-    ? await NDArray.fromArray([count])
-    : count;
+  const sumArr =
+    typeof nanSum === "number" ? await NDArray.fromArray([nanSum]) : nanSum;
+  const countArr =
+    typeof count === "number" ? await NDArray.fromArray([count]) : count;
 
   const result = divide(sumArr, countArr);
 
-  if (typeof nanSum === 'number') sumArr.dispose();
-  if (typeof count === 'number') countArr.dispose();
-  if (typeof nanSum !== 'number') (nanSum as NDArray).dispose();
-  if (typeof count !== 'number') (count as NDArray).dispose();
+  if (typeof nanSum === "number") sumArr.dispose();
+  if (typeof count === "number") countArr.dispose();
+  if (typeof nanSum !== "number") (nanSum as NDArray).dispose();
+  if (typeof count !== "number") (count as NDArray).dispose();
 
   return result;
 }
@@ -405,18 +410,19 @@ export async function nanvar(
   axis: number | null = null,
   ddof: number = 0,
   keepdims: boolean = false,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray | number> {
   // Compute mean (with keepdims=true for broadcasting)
   const meanVal = await nanmean(a, axis, true, dtype);
 
   // Subtract mean from array
-  const meanArr = typeof meanVal === 'number'
-    ? await NDArray.full(a.shape, meanVal)
-    : meanVal;
+  const meanArr =
+    typeof meanVal === "number"
+      ? await NDArray.full(a.shape, meanVal)
+      : meanVal;
 
   const centered = subtract(a, meanArr);
-  if (typeof meanVal === 'number') meanArr.dispose();
+  if (typeof meanVal === "number") meanArr.dispose();
 
   // Square the centered values
   const squared = multiply(centered, centered);
@@ -438,14 +444,16 @@ export async function nanvar(
   const count = await _countNonNan(a, axis, keepdims);
 
   // Variance = sumSq / (count - ddof)
-  if (typeof sumSq === 'number' && typeof count === 'number') {
+  if (typeof sumSq === "number" && typeof count === "number") {
     const divisor = count - ddof;
-    if (typeof meanVal !== 'number') meanVal.dispose();
+    if (typeof meanVal !== "number") meanVal.dispose();
     return divisor <= 0 ? NaN : sumSq / divisor;
   }
 
-  const sumArr = typeof sumSq === 'number' ? await NDArray.fromArray([sumSq]) : sumSq;
-  const countArr = typeof count === 'number' ? await NDArray.fromArray([count]) : count;
+  const sumArr =
+    typeof sumSq === "number" ? await NDArray.fromArray([sumSq]) : sumSq;
+  const countArr =
+    typeof count === "number" ? await NDArray.fromArray([count]) : count;
   const ddofArr = await NDArray.fromArray([ddof]);
   const divisorArr = subtract(countArr, ddofArr);
   ddofArr.dispose();
@@ -453,11 +461,11 @@ export async function nanvar(
   const result = divide(sumArr, divisorArr);
 
   divisorArr.dispose();
-  if (typeof sumSq === 'number') sumArr.dispose();
-  if (typeof count === 'number') countArr.dispose();
-  if (typeof sumSq !== 'number') (sumSq as NDArray).dispose();
-  if (typeof count !== 'number') (count as NDArray).dispose();
-  if (typeof meanVal !== 'number') meanVal.dispose();
+  if (typeof sumSq === "number") sumArr.dispose();
+  if (typeof count === "number") countArr.dispose();
+  if (typeof sumSq !== "number") (sumSq as NDArray).dispose();
+  if (typeof count !== "number") (count as NDArray).dispose();
+  if (typeof meanVal !== "number") meanVal.dispose();
 
   return result;
 }
@@ -483,11 +491,11 @@ export async function nanstd(
   axis: number | null = null,
   ddof: number = 0,
   keepdims: boolean = false,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray | number> {
   const variance = await nanvar(a, axis, ddof, keepdims, dtype);
 
-  if (typeof variance === 'number') {
+  if (typeof variance === "number") {
     return Math.sqrt(variance);
   }
 
@@ -513,7 +521,7 @@ export async function nanstd(
 export async function nanmedian(
   a: NDArray,
   axis: number | null = null,
-  keepdims: boolean = false
+  keepdims: boolean = false,
 ): Promise<NDArray | number> {
   if (axis === null) {
     // Flatten, extract non-NaN, compute median
@@ -537,8 +545,8 @@ export async function nanmedian(
     validValues.dispose();
 
     if (keepdims) {
-      const scalar = typeof result === 'number' ? result : result.item();
-      if (typeof result !== 'number') result.dispose();
+      const scalar = typeof result === "number" ? result : result.item();
+      if (typeof result !== "number") result.dispose();
       const shape = new Array(a.ndim).fill(1);
       return NDArray.full(shape, scalar);
     }
@@ -564,13 +572,13 @@ export async function nanmedian(
       const med = await median(validValues);
       validValues.dispose();
 
-      if (typeof med === 'number') return med;
+      if (typeof med === "number") return med;
       const val = med.item();
       med.dispose();
       return val;
     },
     normalizedAxis,
-    a
+    a,
   );
 
   if (keepdims) {
@@ -588,7 +596,7 @@ export async function nanmedian(
 async function _computeQuantile(
   arr: NDArray,
   quantiles: number[],
-  interpolation: string
+  interpolation: string,
 ): Promise<NDArray | number> {
   const sorted = await sort(arr, null);
   const n = sorted.size;
@@ -605,19 +613,19 @@ async function _computeQuantile(
 
     let value: number;
     switch (interpolation) {
-      case 'lower':
+      case "lower":
         value = lowerVal;
         break;
-      case 'higher':
+      case "higher":
         value = upperVal;
         break;
-      case 'nearest':
+      case "nearest":
         value = frac < 0.5 ? lowerVal : upperVal;
         break;
-      case 'midpoint':
+      case "midpoint":
         value = (lowerVal + upperVal) / 2;
         break;
-      case 'linear':
+      case "linear":
       default:
         value = lowerVal * (1 - frac) + upperVal * frac;
         break;
@@ -654,8 +662,13 @@ export async function nanquantile(
   a: NDArray,
   q: number | number[],
   axis: number | null = null,
-  interpolation: 'linear' | 'lower' | 'higher' | 'midpoint' | 'nearest' = 'linear',
-  keepdims: boolean = false
+  interpolation:
+    | "linear"
+    | "lower"
+    | "higher"
+    | "midpoint"
+    | "nearest" = "linear",
+  keepdims: boolean = false,
 ): Promise<NDArray | number> {
   const qArr = Array.isArray(q) ? q : [q];
 
@@ -690,7 +703,7 @@ export async function nanquantile(
     const result = await _computeQuantile(validValues, qArr, interpolation);
     validValues.dispose();
 
-    if (keepdims && qArr.length === 1 && typeof result === 'number') {
+    if (keepdims && qArr.length === 1 && typeof result === "number") {
       const shape = new Array(a.ndim).fill(1);
       return NDArray.full(shape, result);
     }
@@ -716,12 +729,16 @@ export async function nanquantile(
         return NDArray.full([qArr.length], NaN);
       }
 
-      const quantileResult = await _computeQuantile(validValues, qArr, interpolation);
+      const quantileResult = await _computeQuantile(
+        validValues,
+        qArr,
+        interpolation,
+      );
       validValues.dispose();
       return quantileResult;
     },
     normalizedAxis,
-    a
+    a,
   );
 
   if (keepdims) {
@@ -755,8 +772,13 @@ export async function nanpercentile(
   a: NDArray,
   q: number | number[],
   axis: number | null = null,
-  interpolation: 'linear' | 'lower' | 'higher' | 'midpoint' | 'nearest' = 'linear',
-  keepdims: boolean = false
+  interpolation:
+    | "linear"
+    | "lower"
+    | "higher"
+    | "midpoint"
+    | "nearest" = "linear",
+  keepdims: boolean = false,
 ): Promise<NDArray | number> {
   // Convert percentile to quantile
   const qArr = Array.isArray(q) ? q : [q];
@@ -768,9 +790,15 @@ export async function nanpercentile(
     }
   }
 
-  const quantiles = qArr.map(p => p / 100);
+  const quantiles = qArr.map((p) => p / 100);
 
-  return nanquantile(a, quantiles.length === 1 ? quantiles[0] : quantiles, axis, interpolation, keepdims);
+  return nanquantile(
+    a,
+    quantiles.length === 1 ? quantiles[0] : quantiles,
+    axis,
+    interpolation,
+    keepdims,
+  );
 }
 
 /* ============ 23.4 NaN Utilities ============ */
@@ -798,7 +826,7 @@ export async function nan_to_num(
   x: NDArray,
   nan: number = 0.0,
   posinf: number | null = null,
-  neginf: number | null = null
+  neginf: number | null = null,
 ): Promise<NDArray> {
   // Get dtype-appropriate infinity replacements
   let posinfVal: number;

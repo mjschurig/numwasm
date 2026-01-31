@@ -5,10 +5,10 @@
  * Compatible with NumPy's numpy.ma.extras module.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
-import { MaskedArray } from './core.js';
-import { nomask, MaskedArrayError } from './types.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
+import { MaskedArray } from "./core.js";
+import { nomask, MaskedArrayError } from "./types.js";
 
 /**
  * Weighted average along an axis.
@@ -30,10 +30,12 @@ export async function average(
   a: MaskedArray,
   axis: number | null = null,
   weights: NDArray | number[] | null = null,
-  returned: boolean = false
-): Promise<number | MaskedArray | [number | MaskedArray, number | MaskedArray]> {
+  returned: boolean = false,
+): Promise<
+  number | MaskedArray | [number | MaskedArray, number | MaskedArray]
+> {
   if (axis !== null) {
-    throw new MaskedArrayError('average with axis not yet implemented');
+    throw new MaskedArrayError("average with axis not yet implemented");
   }
 
   // Get weights array
@@ -84,10 +86,10 @@ export async function average(
  */
 export function median(
   a: MaskedArray,
-  axis: number | null = null
+  axis: number | null = null,
 ): number | MaskedArray {
   if (axis !== null) {
-    throw new MaskedArrayError('median with axis not yet implemented');
+    throw new MaskedArrayError("median with axis not yet implemented");
   }
 
   // Get non-masked values
@@ -133,7 +135,7 @@ export async function cov(
   x: MaskedArray,
   _y: MaskedArray | null = null,
   rowvar: boolean = true,
-  ddof: number = 1
+  ddof: number = 1,
 ): Promise<MaskedArray> {
   // For 1D arrays, treat as single variable
   let data: MaskedArray;
@@ -215,7 +217,7 @@ export async function cov(
 export async function corrcoef(
   x: MaskedArray,
   y: MaskedArray | null = null,
-  rowvar: boolean = true
+  rowvar: boolean = true,
 ): Promise<MaskedArray> {
   // Get covariance matrix
   const c = await cov(x, y, rowvar, 1);
@@ -264,10 +266,10 @@ export interface SliceInfo {
  */
 export function notmasked_edges(
   a: MaskedArray,
-  axis: number | null = null
+  axis: number | null = null,
 ): [number, number] | null {
   if (axis !== null) {
-    throw new MaskedArrayError('notmasked_edges with axis not yet implemented');
+    throw new MaskedArrayError("notmasked_edges with axis not yet implemented");
   }
 
   return flatnotmasked_edges(a);
@@ -288,11 +290,11 @@ export function notmasked_edges(
  */
 export function notmasked_contiguous(
   a: MaskedArray,
-  axis: number | null = null
+  axis: number | null = null,
 ): SliceInfo[] {
   if (axis !== null) {
     throw new MaskedArrayError(
-      'notmasked_contiguous with axis not yet implemented'
+      "notmasked_contiguous with axis not yet implemented",
     );
   }
 
@@ -459,7 +461,7 @@ export function clump_unmasked(a: MaskedArray): SliceInfo[] {
 export async function apply_along_axis(
   func1d: (arr: MaskedArray) => number,
   axis: number,
-  arr: MaskedArray
+  arr: MaskedArray,
 ): Promise<MaskedArray> {
   const shape = arr.shape;
   const axisSize = shape[axis];
@@ -510,10 +512,13 @@ export async function apply_along_axis(
       }
     }
 
-    const sliceData = await NDArray.fromArray(sliceValues, undefined, { dtype: arr.dtype });
-    const sliceMaskArr = sliceMask.length > 0
-      ? await NDArray.fromArray(sliceMask, undefined, { dtype: DType.Bool })
-      : nomask;
+    const sliceData = await NDArray.fromArray(sliceValues, undefined, {
+      dtype: arr.dtype,
+    });
+    const sliceMaskArr =
+      sliceMask.length > 0
+        ? await NDArray.fromArray(sliceMask, undefined, { dtype: DType.Bool })
+        : nomask;
     const sliceMA = new MaskedArray(sliceData, sliceMaskArr);
 
     // Apply function

@@ -5,10 +5,10 @@
  * axis support.
  */
 
-import { NDArray } from './NDArray.js';
-import { DType } from './types.js';
+import { NDArray } from "./_core/NDArray.js";
+import { DType } from "./types.js";
 
-export type SortKind = 'quicksort' | 'mergesort' | 'heapsort' | 'stable';
+export type SortKind = "quicksort" | "mergesort" | "heapsort" | "stable";
 
 const KIND_MAP: Record<SortKind, number> = {
   quicksort: 0,
@@ -36,15 +36,15 @@ const KIND_MAP: Record<SortKind, number> = {
 export async function sort(
   a: NDArray,
   axis: number | null = -1,
-  kind: SortKind = 'quicksort'
+  kind: SortKind = "quicksort",
 ): Promise<NDArray> {
   const axisVal = axis === null ? -2147483648 : axis;
   const resultPtr = a._wasmModule._ndarray_sort_copy(
     a._wasmPtr,
     axisVal,
-    KIND_MAP[kind]
+    KIND_MAP[kind],
   );
-  if (resultPtr === 0) throw new Error('sort failed');
+  if (resultPtr === 0) throw new Error("sort failed");
   return NDArray._fromPtr(resultPtr, a._wasmModule);
 }
 
@@ -66,15 +66,15 @@ export async function sort(
 export async function argsort(
   a: NDArray,
   axis: number | null = -1,
-  kind: SortKind = 'quicksort'
+  kind: SortKind = "quicksort",
 ): Promise<NDArray> {
   const axisVal = axis === null ? -2147483648 : axis;
   const resultPtr = a._wasmModule._ndarray_argsort(
     a._wasmPtr,
     axisVal,
-    KIND_MAP[kind]
+    KIND_MAP[kind],
   );
-  if (resultPtr === 0) throw new Error('argsort failed');
+  if (resultPtr === 0) throw new Error("argsort failed");
   return NDArray._fromPtr(resultPtr, a._wasmModule);
 }
 
@@ -99,10 +99,10 @@ export async function argsort(
 export async function partition(
   a: NDArray,
   kth: number,
-  axis: number = -1
+  axis: number = -1,
 ): Promise<NDArray> {
   const resultPtr = a._wasmModule._ndarray_partition(a._wasmPtr, kth, axis);
-  if (resultPtr === 0) throw new Error('partition failed');
+  if (resultPtr === 0) throw new Error("partition failed");
   return NDArray._fromPtr(resultPtr, a._wasmModule);
 }
 
@@ -117,10 +117,10 @@ export async function partition(
 export async function argpartition(
   a: NDArray,
   kth: number,
-  axis: number = -1
+  axis: number = -1,
 ): Promise<NDArray> {
   const resultPtr = a._wasmModule._ndarray_argpartition(a._wasmPtr, kth, axis);
-  if (resultPtr === 0) throw new Error('argpartition failed');
+  if (resultPtr === 0) throw new Error("argpartition failed");
   return NDArray._fromPtr(resultPtr, a._wasmModule);
 }
 
@@ -190,12 +190,12 @@ export function sort_complex(a: NDArray): NDArray {
 
   // Create result array
   const shapePtr = module._malloc(4);
-  module.setValue(shapePtr, size, 'i32');
+  module.setValue(shapePtr, size, "i32");
   const resultPtr = module._ndarray_empty(1, shapePtr, outputDtype);
   module._free(shapePtr);
 
   if (resultPtr === 0) {
-    throw new Error('Failed to create result array for sort_complex');
+    throw new Error("Failed to create result array for sort_complex");
   }
 
   // Fill result array with sorted values

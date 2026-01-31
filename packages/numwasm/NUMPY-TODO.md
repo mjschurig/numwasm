@@ -1,6 +1,6 @@
 # NumWasm NumPy Implementation TODO
 
-This document tracks the implementation status of NumPy functions in NumWasm.
+This document tracks the implementation status of NumPy functions in NumWasm, based on the official NumPy 2.x API.
 
 **Goal:** Export all NumPy package/function names from this package.
 
@@ -8,23 +8,25 @@ This document tracks the implementation status of NumPy functions in NumWasm.
 
 | Symbol | Meaning |
 |--------|---------|
-| ✅ | Implemented (TypeScript API exists) |
-| 🔧 | Has WASM backing (C implementation) |
+| ✅ | TypeScript API implemented |
+| 🔧 | Has WASM/C backing |
 | ⬜ | Not implemented |
 
-## Summary
+---
+
+## Summary by Module
 
 | Module | Implemented | Total | Coverage |
 |--------|-------------|-------|----------|
-| **numpy (main)** | 295 | 484 | 61% |
-| **numpy.linalg** | 30 | 32 | 94% |
+| **numpy (top-level)** | ~280 | ~350 | ~80% |
+| **numpy.linalg** | 28 | 29 | 97% |
 | **numpy.fft** | 18 | 18 | 100% |
-| **numpy.random** | 5 | 50 | 10% |
-| **numpy.ma** | 124 | 224 | 55% |
-| **numpy.polynomial** | 111 | 200 | 56% |
-| **numpy.strings** | 38 | 46 | 83% |
-| **numpy.testing** | 2 | 48 | 4% |
-| **Total** | ~623 | ~1102 | ~57% |
+| **numpy.random** | 15 | 56 | 27% |
+| **numpy.polynomial** | 6 classes + functions | 6 classes | 100% (classes) |
+| **numpy.ma** | Core class | Full module | Partial |
+| **numpy.strings** | 38 | 40 | 95% |
+| **numpy.rec** | Core functions | Full module | Partial |
+| **numpy.testing** | 3 | 30+ | 10% |
 
 ---
 
@@ -40,10 +42,11 @@ This document tracks the implementation status of NumPy functions in NumWasm.
 ┌─────────────────────────────────────────────────────────────────┐
 │                    WASM Binary (numjs.wasm)                      │
 │  Compiled from: packages/numwasm/src/wasm/                      │
+│  Size: ~290KB (standalone, self-contained)                      │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### WASM C Implementation Status
+### WASM C Implementation (Self-Contained)
 
 | Category | Lines | Status |
 |----------|-------|--------|
@@ -66,160 +69,102 @@ This document tracks the implementation status of NumPy functions in NumWasm.
 
 ---
 
-## Priority TODO Items
+## 1. numpy (Top-Level Namespace)
 
-### Priority 1: High-Impact Missing Functions
+Based on NumPy's `__init__.py` exports from `_core` and `lib` modules.
 
-These are commonly-used NumPy functions that should be added:
+### 1.1 Array Creation
 
-| Function | Category | Notes |
-|----------|----------|-------|
-| `prod` | Statistics | Product reduction - common operation |
-| `clip` | Math | Value clipping - very common |
-| `diff` | Math | N-th differences |
-| `gradient` | Math | Numerical gradient |
-| `convolve` | Math | 1D convolution |
-| `correlate` | Math | 1D correlation |
-| `cov` | Statistics | Covariance matrix |
-| `corrcoef` | Statistics | Correlation coefficients |
-| `average` | Statistics | Weighted average |
-| `ptp` | Statistics | Peak-to-peak (max-min) |
-| `percentile` | Statistics | Percentile calculation |
-| `quantile` | Statistics | Quantile calculation |
-
-### Priority 2: numpy.random Module (5/50 implemented)
-
-The random module has WASM backing for most distributions but lacks TypeScript API:
-
-**Already have WASM, need TypeScript API:**
-- `beta`, `binomial`, `chisquare`, `exponential`, `f`
-- `gamma`, `geometric`, `gumbel`, `hypergeometric`, `laplace`
-- `logistic`, `lognormal`, `logseries`, `negative_binomial`
-- `noncentral_chisquare`, `noncentral_f`, `normal`, `pareto`
-- `poisson`, `rayleigh`, `standard_cauchy`, `standard_exponential`
-- `standard_gamma`, `standard_normal`, `standard_t`, `triangular`
-- `uniform`, `vonmises`, `wald`, `weibull`, `zipf`
-
-**Need both WASM and TypeScript:**
-- `choice`, `shuffle`, `permutation`
-- `dirichlet`, `multinomial`, `multivariate_normal`
-
-### Priority 3: Array Manipulation Functions
-
-These functions are marked as not implemented but are commonly used:
-
-| Function | Notes |
-|----------|-------|
-| `reshape` | Top-level function (method exists) |
-| `ravel` | Top-level function (method exists) |
-| `squeeze` | Top-level function (method exists) |
-| `expand_dims` | Top-level function (method exists) |
-| `transpose` | Top-level function (method exists) |
-| `swapaxes` | Top-level function (method exists) |
-| `moveaxis` | Move array axis |
-| `rollaxis` | Roll axis |
-| `copy` | Deep copy |
-
-### Priority 4: Type System Functions
-
-| Function | Notes |
-|----------|-------|
-| `can_cast` | Check type casting |
-| `result_type` | Determine result type |
-| `astype` | Top-level type conversion |
-| `issubdtype` | Check dtype hierarchy |
-
----
-
-## numpy (Main Namespace) - Detailed Status
-
-### Array Creation (20/35)
-
-| Function | Status | WASM | Notes |
-|----------|--------|------|-------|
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
 | `array` | ✅ | 🔧 | |
-| `zeros` | ✅ | ⬜ | |
-| `ones` | ✅ | ⬜ | |
+| `zeros` | ✅ | 🔧 | Uses ndarray_create |
+| `ones` | ✅ | 🔧 | Uses ndarray_full |
 | `empty` | ✅ | 🔧 | |
 | `full` | ✅ | 🔧 | |
-| `arange` | ✅ | ⬜ | |
-| `linspace` | ✅ | ⬜ | |
-| `logspace` | ✅ | ⬜ | |
-| `geomspace` | ✅ | ⬜ | |
-| `eye` | ✅ | ⬜ | |
-| `identity` | ✅ | ⬜ | |
+| `arange` | ✅ | 🔧 | |
+| `linspace` | ✅ | 🔧 | |
+| `logspace` | ✅ | 🔧 | Uses linspace |
+| `geomspace` | ✅ | 🔧 | Uses linspace |
+| `eye` | ✅ | 🔧 | |
+| `identity` | ✅ | 🔧 | Uses eye |
 | `diag` | ✅ | 🔧 | |
-| `diagflat` | ⬜ | ⬜ | TODO |
-| `tri` | ⬜ | 🔧 | Has WASM |
-| `tril` | ⬜ | ⬜ | TODO |
-| `triu` | ⬜ | ⬜ | TODO |
-| `vander` | ⬜ | ⬜ | TODO |
-| `zeros_like` | ✅ | ⬜ | |
-| `ones_like` | ✅ | ⬜ | |
-| `empty_like` | ✅ | ⬜ | |
-| `full_like` | ✅ | ⬜ | |
-| `fromfunction` | ⬜ | ⬜ | TODO |
-| `fromiter` | ⬜ | ⬜ | TODO |
-| `fromstring` | ⬜ | ⬜ | TODO |
-| `frombuffer` | ✅ | ⬜ | |
-| `fromfile` | ✅ | ⬜ | |
-| `fromregex` | ✅ | ⬜ | |
-| `copy` | ⬜ | 🔧 | Has WASM, needs TS |
-| `asarray` | ✅ | ⬜ | |
-| `asanyarray` | ⬜ | ⬜ | TODO |
-| `ascontiguousarray` | ⬜ | 🔧 | Has WASM |
-| `asfortranarray` | ⬜ | 🔧 | Has WASM |
-| `asarray_chkfinite` | ⬜ | ⬜ | TODO |
-| `require` | ⬜ | ⬜ | TODO |
-| `from_dlpack` | ⬜ | ⬜ | Low priority |
+| `diagflat` | ✅ | 🔧 | Uses diag |
+| `tri` | ✅ | 🔧 | |
+| `tril` | ✅ | 🔧 | |
+| `triu` | ✅ | 🔧 | |
+| `vander` | ✅ | 🔧 | |
+| `zeros_like` | ✅ | 🔧 | Uses zeros |
+| `ones_like` | ✅ | 🔧 | Uses ones |
+| `empty_like` | ✅ | 🔧 | Uses empty |
+| `full_like` | ✅ | 🔧 | Uses full |
+| `fromfunction` | ✅ | ⬜ | Requires callback |
+| `fromiter` | ✅ | ⬜ | Requires JS iterator |
+| `fromstring` | ⬜ | ⬜ | Low priority |
+| `frombuffer` | ✅ | 🔧 | |
+| `fromfile` | ✅ | 🔧 | |
+| `fromregex` | ✅ | ⬜ | Requires JS regex |
+| `copy` | ✅ | 🔧 | |
+| `asarray` | ✅ | 🔧 | |
+| `asanyarray` | ✅ | 🔧 | Alias for asarray |
+| `ascontiguousarray` | ✅ | 🔧 | |
+| `asfortranarray` | ✅ | 🔧 | |
+| `asarray_chkfinite` | ✅ | 🔧 | Uses asarray + isfinite |
+| `require` | ⬜ | ⬜ | Low priority |
+| `astype` | ⬜ | ⬜ | Method exists on NDArray |
 
-### Array Manipulation (31/39)
+### 1.2 Array Manipulation
 
-| Function | Status | WASM | Notes |
-|----------|--------|------|-------|
-| `reshape` | ⬜ | 🔧 | Has WASM, needs TS export |
-| `ravel` | ⬜ | 🔧 | Has WASM, needs TS export |
-| `squeeze` | ⬜ | 🔧 | Has WASM, needs TS export |
-| `expand_dims` | ⬜ | 🔧 | Has WASM, needs TS export |
-| `transpose` | ⬜ | 🔧 | Has WASM, needs TS export |
-| `swapaxes` | ⬜ | 🔧 | Has WASM, needs TS export |
-| `moveaxis` | ⬜ | ⬜ | TODO |
-| `rollaxis` | ⬜ | ⬜ | TODO |
-| `atleast_1d` | ✅ | ⬜ | |
-| `atleast_2d` | ✅ | ⬜ | |
-| `atleast_3d` | ✅ | ⬜ | |
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `reshape` | ✅ | 🔧 | |
+| `ravel` | ✅ | 🔧 | |
+| `flatten` | ✅ | 🔧 | |
+| `squeeze` | ✅ | 🔧 | |
+| `expand_dims` | ✅ | 🔧 | |
+| `transpose` | ✅ | 🔧 | |
+| `permute_dims` | ✅ | 🔧 | NumPy 2.0 alias for transpose |
+| `swapaxes` | ✅ | 🔧 | |
+| `moveaxis` | ✅ | 🔧 | Uses transpose |
+| `rollaxis` | ✅ | 🔧 | Uses transpose |
+| `atleast_1d` | ✅ | 🔧 | Uses reshape/expandDims |
+| `atleast_2d` | ✅ | 🔧 | Uses reshape/expandDims |
+| `atleast_3d` | ✅ | 🔧 | Uses reshape/expandDims |
 | `concatenate` | ✅ | 🔧 | |
-| `stack` | ✅ | ⬜ | |
-| `vstack` | ✅ | ⬜ | |
-| `hstack` | ✅ | ⬜ | |
-| `dstack` | ✅ | ⬜ | |
-| `column_stack` | ✅ | ⬜ | |
-| `split` | ✅ | ⬜ | |
-| `array_split` | ✅ | ⬜ | |
-| `vsplit` | ✅ | ⬜ | |
-| `hsplit` | ✅ | ⬜ | |
-| `dsplit` | ✅ | ⬜ | |
-| `unstack` | ✅ | ⬜ | |
-| `tile` | ✅ | ⬜ | |
-| `repeat` | ✅ | ⬜ | |
-| `pad` | ✅ | ⬜ | |
-| `flip` | ✅ | ⬜ | |
-| `fliplr` | ✅ | ⬜ | |
-| `flipud` | ✅ | ⬜ | |
-| `roll` | ✅ | ⬜ | |
-| `rot90` | ✅ | ⬜ | |
-| `resize` | ✅ | ⬜ | |
-| `trim_zeros` | ✅ | ⬜ | |
-| `insert` | ✅ | ⬜ | |
-| `delete` | ⬜ | ⬜ | Exported as `deleteArr` |
-| `append` | ✅ | ⬜ | |
-| `copyto` | ✅ | ⬜ | |
-| `block` | ✅ | ⬜ | |
+| `concat` | ✅ | 🔧 | NumPy 2.0 alias |
+| `stack` | ✅ | 🔧 | Uses expandDims + concatenate |
+| `unstack` | ✅ | 🔧 | Uses slice |
+| `vstack` | ✅ | 🔧 | Uses atleast_2d + concatenate |
+| `hstack` | ✅ | 🔧 | Uses concatenate |
+| `dstack` | ✅ | 🔧 | Uses atleast_3d + concatenate |
+| `column_stack` | ✅ | 🔧 | Uses atleast_2d + concatenate |
+| `block` | ✅ | 🔧 | Uses concatenate |
+| `split` | ✅ | 🔧 | Uses slice + copy |
+| `array_split` | ✅ | 🔧 | Uses slice + copy |
+| `vsplit` | ✅ | 🔧 | Uses split |
+| `hsplit` | ✅ | 🔧 | Uses split |
+| `dsplit` | ✅ | 🔧 | Uses split |
+| `tile` | ✅ | 🔧 | Uses concatenate |
+| `repeat` | ✅ | 🔧 | Uses concatenate |
+| `pad` | ✅ | 🔧 | Uses copy/fill |
+| `flip` | ✅ | 🔧 | Uses slice with negative stride |
+| `fliplr` | ✅ | 🔧 | Uses flip |
+| `flipud` | ✅ | 🔧 | Uses flip |
+| `roll` | ✅ | 🔧 | Uses slice + concatenate |
+| `rot90` | ✅ | 🔧 | Uses flip + swapaxes |
+| `resize` | ✅ | 🔧 | Uses concatenate + slice |
+| `trim_zeros` | ✅ | 🔧 | Uses slice (WASM) |
+| `insert` | ✅ | 🔧 | Uses slice + concatenate |
+| `delete` | ✅ | 🔧 | Exported as `deleteArr`, uses slice + concatenate |
+| `append` | ✅ | 🔧 | Uses concatenate |
+| `copyto` | ✅ | 🔧 | Uses memcpy for contiguous arrays |
 
-### Math - Basic (20/22)
+### 1.3 Mathematical Functions (Ufuncs)
 
-| Function | Status | WASM | Notes |
-|----------|--------|------|-------|
+#### Arithmetic
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
 | `add` | ✅ | 🔧 | |
 | `subtract` | ✅ | 🔧 | |
 | `multiply` | ✅ | 🔧 | |
@@ -229,39 +174,147 @@ These functions are marked as not implemented but are commonly used:
 | `negative` | ✅ | 🔧 | |
 | `positive` | ✅ | 🔧 | |
 | `power` | ✅ | 🔧 | |
-| `pow` | ⬜ | 🔧 | Has WASM, needs TS alias |
+| `pow` | ✅ | 🔧 | Alias for power |
+| `float_power` | ✅ | 🔧 | Same as power (uses float64) |
 | `remainder` | ✅ | 🔧 | |
 | `mod` | ✅ | 🔧 | |
 | `fmod` | ✅ | 🔧 | |
 | `divmod` | ✅ | 🔧 | |
 | `absolute` | ✅ | 🔧 | |
-| `abs` | ✅ | 🔧 | |
-| `fabs` | ⬜ | ⬜ | TODO |
+| `abs` | ✅ | 🔧 | Alias |
+| `fabs` | ✅ | 🔧 | Alias for absolute |
 | `sign` | ✅ | 🔧 | |
 | `reciprocal` | ✅ | 🔧 | |
 | `sqrt` | ✅ | 🔧 | |
 | `square` | ✅ | 🔧 | |
 | `cbrt` | ✅ | 🔧 | |
 
-### Math - Special (3/10) - HIGH PRIORITY
+#### Trigonometric
 
-| Function | Status | WASM | Notes |
-|----------|--------|------|-------|
-| `clip` | ⬜ | ⬜ | **HIGH PRIORITY** |
-| `convolve` | ⬜ | ⬜ | **HIGH PRIORITY** |
-| `correlate` | ⬜ | ⬜ | **HIGH PRIORITY** |
-| `diff` | ⬜ | ⬜ | **HIGH PRIORITY** |
-| `gradient` | ⬜ | ⬜ | **HIGH PRIORITY** |
-| `interp` | ⬜ | ⬜ | TODO |
-| `trapezoid` | ⬜ | ⬜ | TODO |
-| `sinc` | ✅ | 🔧 | |
-| `i0` | ✅ | ⬜ | |
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `sin` | ✅ | 🔧 | |
+| `cos` | ✅ | 🔧 | |
+| `tan` | ✅ | 🔧 | |
+| `arcsin` | ✅ | 🔧 | |
+| `arccos` | ✅ | 🔧 | |
+| `arctan` | ✅ | 🔧 | |
+| `arctan2` | ✅ | 🔧 | |
+| `hypot` | ✅ | 🔧 | |
+| `sinh` | ✅ | 🔧 | |
+| `cosh` | ✅ | 🔧 | |
+| `tanh` | ✅ | 🔧 | |
+| `arcsinh` | ✅ | 🔧 | |
+| `arccosh` | ✅ | 🔧 | |
+| `arctanh` | ✅ | 🔧 | |
+| `degrees` | ✅ | 🔧 | |
+| `radians` | ✅ | 🔧 | |
+| `deg2rad` | ✅ | 🔧 | |
+| `rad2deg` | ✅ | 🔧 | |
+| `asin` | ✅ | 🔧 | NumPy 2.0 alias for arcsin |
+| `acos` | ✅ | 🔧 | NumPy 2.0 alias for arccos |
+| `atan` | ✅ | 🔧 | NumPy 2.0 alias for arctan |
+| `atan2` | ✅ | 🔧 | NumPy 2.0 alias for arctan2 |
+| `asinh` | ✅ | 🔧 | NumPy 2.0 alias for arcsinh |
+| `acosh` | ✅ | 🔧 | NumPy 2.0 alias for arccosh |
+| `atanh` | ✅ | 🔧 | NumPy 2.0 alias for arctanh |
+
+#### Exponential & Logarithmic
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `exp` | ✅ | 🔧 | |
+| `exp2` | ✅ | 🔧 | |
+| `expm1` | ✅ | 🔧 | |
+| `log` | ✅ | 🔧 | |
+| `log2` | ✅ | 🔧 | |
+| `log10` | ✅ | 🔧 | |
+| `log1p` | ✅ | 🔧 | |
+| `logaddexp` | ✅ | 🔧 | |
+| `logaddexp2` | ✅ | 🔧 | |
+
+#### Rounding
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `floor` | ✅ | 🔧 | |
+| `ceil` | ✅ | 🔧 | |
+| `trunc` | ✅ | 🔧 | |
+| `rint` | ✅ | 🔧 | |
+| `round` | ✅ | 🔧 | |
+| `around` | ✅ | 🔧 | Alias for round |
+| `fix` | ✅ | 🔧 | Alias for trunc |
+
+#### Comparison
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `equal` | ✅ | 🔧 | |
+| `not_equal` | ✅ | 🔧 | |
+| `less` | ✅ | 🔧 | |
+| `less_equal` | ✅ | 🔧 | |
+| `greater` | ✅ | 🔧 | |
+| `greater_equal` | ✅ | 🔧 | |
+| `maximum` | ✅ | 🔧 | |
+| `minimum` | ✅ | 🔧 | |
+| `fmax` | ✅ | 🔧 | |
+| `fmin` | ✅ | 🔧 | |
+
+#### Logical
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `logical_and` | ✅ | 🔧 | |
+| `logical_or` | ✅ | 🔧 | |
+| `logical_xor` | ✅ | 🔧 | |
+| `logical_not` | ✅ | 🔧 | |
+
+#### Bitwise
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `bitwise_and` | ✅ | 🔧 | |
+| `bitwise_or` | ✅ | 🔧 | |
+| `bitwise_xor` | ✅ | 🔧 | |
+| `bitwise_not` | ✅ | 🔧 | |
+| `bitwise_invert` | ⬜ | ⬜ | NumPy 2.0 alias |
+| `invert` | ✅ | 🔧 | |
+| `left_shift` | ✅ | 🔧 | |
+| `right_shift` | ✅ | 🔧 | |
+| `bitwise_left_shift` | ⬜ | ⬜ | NumPy 2.0 alias |
+| `bitwise_right_shift` | ⬜ | ⬜ | NumPy 2.0 alias |
+| `bitwise_count` | ✅ | 🔧 | |
+
+#### Special Math
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `copysign` | ✅ | 🔧 | |
+| `signbit` | ✅ | 🔧 | |
 | `heaviside` | ✅ | 🔧 | |
+| `sinc` | ✅ | 🔧 | |
+| `frexp` | ✅ | 🔧 | |
+| `ldexp` | ✅ | 🔧 | |
+| `nextafter` | ✅ | 🔧 | |
+| `spacing` | ✅ | 🔧 | |
+| `modf` | ✅ | 🔧 | |
+| `gcd` | ✅ | 🔧 | |
+| `lcm` | ✅ | 🔧 | |
 
-### Statistics (34/43) - NEEDS WORK
+#### Complex Numbers
 
-| Function | Status | WASM | Notes |
-|----------|--------|------|-------|
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `conj` | ✅ | 🔧 | |
+| `conjugate` | ✅ | 🔧 | |
+| `real` | ✅ | ⬜ | |
+| `imag` | ✅ | ⬜ | |
+| `angle` | ✅ | ⬜ | |
+
+### 1.4 Statistics & Reductions
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
 | `sum` | ✅ | 🔧 | |
 | `prod` | ⬜ | ⬜ | **HIGH PRIORITY** |
 | `mean` | ✅ | 🔧 | |
@@ -269,25 +322,15 @@ These functions are marked as not implemented but are commonly used:
 | `var` | ✅ | 🔧 | Exported as `var_` |
 | `min` | ✅ | 🔧 | |
 | `max` | ✅ | 🔧 | |
+| `amin` | ⬜ | ⬜ | Alias for min |
+| `amax` | ⬜ | ⬜ | Alias for max |
 | `argmin` | ✅ | 🔧 | |
 | `argmax` | ✅ | 🔧 | |
-| `nanmin` | ✅ | ⬜ | |
-| `nanmax` | ✅ | ⬜ | |
-| `nansum` | ✅ | 🔧 | |
-| `nanprod` | ✅ | ⬜ | |
-| `nanmean` | ✅ | 🔧 | |
-| `nanstd` | ✅ | 🔧 | |
-| `nanvar` | ✅ | 🔧 | |
-| `nanargmin` | ✅ | ⬜ | |
-| `nanargmax` | ✅ | ⬜ | |
-| `nanmedian` | ✅ | ⬜ | |
-| `nanpercentile` | ✅ | ⬜ | |
-| `nanquantile` | ✅ | ⬜ | |
+| `ptp` | ⬜ | ⬜ | **HIGH PRIORITY** |
 | `median` | ✅ | 🔧 | |
 | `average` | ⬜ | ⬜ | **HIGH PRIORITY** |
 | `percentile` | ⬜ | 🔧 | Has WASM |
 | `quantile` | ⬜ | 🔧 | Has WASM |
-| `ptp` | ⬜ | ⬜ | **HIGH PRIORITY** |
 | `corrcoef` | ⬜ | ⬜ | **HIGH PRIORITY** |
 | `cov` | ⬜ | ⬜ | **HIGH PRIORITY** |
 | `histogram` | ✅ | ⬜ | |
@@ -297,214 +340,635 @@ These functions are marked as not implemented but are commonly used:
 | `bincount` | ✅ | ⬜ | |
 | `digitize` | ✅ | ⬜ | |
 | `count_nonzero` | ✅ | 🔧 | |
+
+#### Cumulative Operations
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
 | `cumsum` | ✅ | 🔧 | |
 | `cumprod` | ✅ | 🔧 | |
-| `nancumsum` | ✅ | 🔧 | |
-| `nancumprod` | ✅ | 🔧 | |
 | `cumulative_sum` | ⬜ | ⬜ | NumPy 2.0 |
 | `cumulative_prod` | ⬜ | ⬜ | NumPy 2.0 |
 
+#### NaN-handling Functions
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `nansum` | ✅ | 🔧 | |
+| `nanprod` | ✅ | ⬜ | |
+| `nanmin` | ✅ | ⬜ | |
+| `nanmax` | ✅ | ⬜ | |
+| `nanargmin` | ✅ | ⬜ | |
+| `nanargmax` | ✅ | ⬜ | |
+| `nanmean` | ✅ | 🔧 | |
+| `nanstd` | ✅ | 🔧 | |
+| `nanvar` | ✅ | 🔧 | |
+| `nanmedian` | ✅ | ⬜ | |
+| `nanpercentile` | ✅ | ⬜ | |
+| `nanquantile` | ✅ | ⬜ | |
+| `nancumsum` | ✅ | 🔧 | |
+| `nancumprod` | ✅ | 🔧 | |
+| `nan_to_num` | ✅ | ⬜ | |
+
+### 1.5 Sorting & Searching
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `sort` | ✅ | 🔧 | |
+| `argsort` | ✅ | 🔧 | |
+| `lexsort` | ⬜ | ⬜ | TODO |
+| `partition` | ✅ | 🔧 | |
+| `argpartition` | ✅ | 🔧 | |
+| `sort_complex` | ✅ | ⬜ | |
+| `searchsorted` | ✅ | 🔧 | |
+| `extract` | ✅ | ⬜ | |
+
+### 1.6 Logic & Predicates
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `all` | ✅ | 🔧 | |
+| `any` | ✅ | 🔧 | |
+| `isfinite` | ✅ | 🔧 | |
+| `isinf` | ✅ | 🔧 | |
+| `isnan` | ✅ | 🔧 | |
+| `isnat` | ⬜ | ⬜ | datetime64 specific |
+| `isneginf` | ✅ | ⬜ | |
+| `isposinf` | ✅ | ⬜ | |
+| `iscomplex` | ✅ | ⬜ | |
+| `isreal` | ✅ | ⬜ | |
+| `iscomplexobj` | ✅ | ⬜ | |
+| `isrealobj` | ✅ | ⬜ | |
+| `isfortran` | ✅ | ⬜ | |
+| `isscalar` | ✅ | ⬜ | |
+| `isclose` | ✅ | ⬜ | |
+| `allclose` | ✅ | ⬜ | |
+| `array_equal` | ✅ | ⬜ | |
+| `array_equiv` | ✅ | ⬜ | |
+| `real_if_close` | ✅ | ⬜ | |
+
+### 1.7 Set Operations
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `unique` | ✅ | 🔧 | |
+| `unique_all` | ✅ | ⬜ | NumPy 2.0 |
+| `unique_counts` | ✅ | ⬜ | NumPy 2.0 |
+| `unique_inverse` | ✅ | ⬜ | NumPy 2.0 |
+| `unique_values` | ✅ | ⬜ | NumPy 2.0 |
+| `union1d` | ✅ | ⬜ | |
+| `intersect1d` | ✅ | ⬜ | |
+| `setdiff1d` | ✅ | ⬜ | |
+| `setxor1d` | ✅ | ⬜ | |
+| `isin` | ✅ | ⬜ | |
+| `in1d` | ✅ | ⬜ | Deprecated alias |
+| `ediff1d` | ✅ | ⬜ | |
+
+### 1.8 Indexing
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `where` | ✅ | 🔧 | |
+| `nonzero` | ✅ | 🔧 | |
+| `flatnonzero` | ✅ | ⬜ | |
+| `argwhere` | ✅ | ⬜ | |
+| `take` | ✅ | 🔧 | |
+| `take_along_axis` | ✅ | ⬜ | |
+| `put` | ✅ | ⬜ | |
+| `put_along_axis` | ✅ | ⬜ | |
+| `putmask` | ✅ | ⬜ | |
+| `place` | ✅ | ⬜ | |
+| `choose` | ✅ | ⬜ | |
+| `compress` | ✅ | ⬜ | |
+| `select` | ✅ | ⬜ | |
+| `diagonal` | ✅ | 🔧 | |
+| `indices` | ✅ | ⬜ | |
+| `ix_` | ✅ | ⬜ | |
+| `diag_indices` | ✅ | ⬜ | |
+| `diag_indices_from` | ⬜ | ⬜ | TODO |
+| `tril_indices` | ✅ | ⬜ | |
+| `triu_indices` | ✅ | ⬜ | |
+| `tril_indices_from` | ⬜ | ⬜ | TODO |
+| `triu_indices_from` | ⬜ | ⬜ | TODO |
+| `mask_indices` | ⬜ | ⬜ | TODO |
+| `fill_diagonal` | ⬜ | ⬜ | TODO |
+| `unravel_index` | ✅ | ⬜ | |
+| `ravel_multi_index` | ✅ | ⬜ | |
+| `meshgrid` | ✅ | ⬜ | |
+
+### 1.9 Special Functions (lib._function_base_impl)
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `clip` | ⬜ | ⬜ | **HIGH PRIORITY** |
+| `diff` | ⬜ | ⬜ | **HIGH PRIORITY** |
+| `gradient` | ⬜ | ⬜ | **HIGH PRIORITY** |
+| `convolve` | ⬜ | ⬜ | **HIGH PRIORITY** |
+| `correlate` | ⬜ | ⬜ | **HIGH PRIORITY** |
+| `interp` | ⬜ | ⬜ | TODO |
+| `trapezoid` | ⬜ | ⬜ | TODO |
+| `unwrap` | ⬜ | ⬜ | TODO |
+| `i0` | ✅ | ⬜ | Bessel function |
+
+### 1.10 Window Functions
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `bartlett` | ✅ | ⬜ | |
+| `blackman` | ✅ | ⬜ | |
+| `hamming` | ✅ | ⬜ | |
+| `hanning` | ✅ | ⬜ | |
+| `kaiser` | ✅ | ⬜ | |
+
+### 1.11 Functional Programming
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `apply_along_axis` | ✅ | ⬜ | |
+| `apply_over_axes` | ✅ | ⬜ | |
+| `vectorize` | ✅ | ⬜ | |
+| `frompyfunc` | ✅ | ⬜ | |
+| `piecewise` | ✅ | ⬜ | |
+| `iterable` | ⬜ | ⬜ | Low priority |
+
+### 1.12 Broadcasting
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `broadcast_to` | ✅ | ⬜ | |
+| `broadcast_arrays` | ✅ | ⬜ | |
+| `broadcast_shapes` | ✅ | ⬜ | |
+| `broadcast` | ⬜ | ⬜ | Class, low priority |
+
+### 1.13 I/O Functions
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `save` | ✅ | ⬜ | NPY format |
+| `load` | ✅ | ⬜ | NPY format |
+| `savez` | ⬜ | ⬜ | TODO |
+| `savez_compressed` | ⬜ | ⬜ | TODO |
+| `savetxt` | ✅ | ⬜ | |
+| `loadtxt` | ✅ | ⬜ | |
+| `genfromtxt` | ✅ | ⬜ | |
+| `packbits` | ⬜ | ⬜ | Low priority |
+| `unpackbits` | ⬜ | ⬜ | Low priority |
+
+### 1.14 String & Base Representation
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `binary_repr` | ✅ | ⬜ | |
+| `base_repr` | ✅ | ⬜ | |
+| `array2string` | ✅ | ⬜ | |
+| `array_repr` | ✅ | ⬜ | |
+| `array_str` | ✅ | ⬜ | |
+| `format_float_positional` | ✅ | ⬜ | |
+| `format_float_scientific` | ✅ | ⬜ | |
+| `set_printoptions` | ✅ | ⬜ | |
+| `get_printoptions` | ✅ | ⬜ | |
+| `printoptions` | ⬜ | ⬜ | Context manager |
+
+### 1.15 Type Information
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `dtype` | ✅ | ⬜ | Class |
+| `finfo` | ✅ | ⬜ | |
+| `iinfo` | ✅ | ⬜ | |
+| `can_cast` | ⬜ | ⬜ | TODO |
+| `result_type` | ⬜ | ⬜ | TODO |
+| `promote_types` | ✅ | ⬜ | |
+| `min_scalar_type` | ⬜ | ⬜ | Low priority |
+| `issubdtype` | ⬜ | ⬜ | TODO |
+| `isdtype` | ⬜ | ⬜ | NumPy 2.0 |
+| `common_type` | ⬜ | ⬜ | TODO |
+| `mintypecode` | ⬜ | ⬜ | Low priority |
+| `typename` | ⬜ | ⬜ | Low priority |
+
+### 1.16 Constants
+
+| Constant | TS | Notes |
+|----------|:--:|-------|
+| `e` | ✅ | Euler's number |
+| `pi` | ✅ | |
+| `euler_gamma` | ✅ | Euler-Mascheroni constant |
+| `inf` | ✅ | |
+| `nan` | ✅ | |
+| `newaxis` | ✅ | Alias for `None` in indexing |
+| `PINF` | ✅ | |
+| `NINF` | ✅ | |
+| `PZERO` | ✅ | |
+| `NZERO` | ✅ | |
+
+### 1.17 Linear Algebra (Top-Level)
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `dot` | ✅ | 🔧 | |
+| `vdot` | ✅ | 🔧 | |
+| `inner` | ✅ | 🔧 | |
+| `outer` | ✅ | ⬜ | |
+| `matmul` | ✅ | 🔧 | |
+| `tensordot` | ✅ | ⬜ | |
+| `einsum` | ✅ | ⬜ | |
+| `einsum_path` | ✅ | ⬜ | |
+| `kron` | ✅ | ⬜ | |
+| `cross` | ✅ | ⬜ | |
+| `trace` | ✅ | ⬜ | |
+| `vecdot` | ⬜ | ⬜ | NumPy 2.0 |
+| `matvec` | ⬜ | ⬜ | NumPy 2.0 |
+| `vecmat` | ⬜ | ⬜ | NumPy 2.0 |
+| `matrix_transpose` | ⬜ | ⬜ | NumPy 2.0 |
+
+### 1.18 Polynomial (Top-Level Legacy)
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `poly` | ⬜ | ⬜ | TODO |
+| `poly1d` | ⬜ | ⬜ | TODO |
+| `polyadd` | ✅ | ⬜ | |
+| `polyder` | ✅ | ⬜ | |
+| `polydiv` | ✅ | ⬜ | |
+| `polyfit` | ✅ | ⬜ | |
+| `polyint` | ✅ | ⬜ | |
+| `polymul` | ✅ | ⬜ | |
+| `polysub` | ✅ | ⬜ | |
+| `polyval` | ✅ | ⬜ | |
+| `roots` | ⬜ | ⬜ | TODO |
+
 ---
 
-## numpy.linalg (30/32) - Nearly Complete
+## 2. numpy.linalg
 
-| Function | Status | WASM | Notes |
-|----------|--------|------|-------|
-| `LinAlgError` | ✅ | ⬜ | |
-| `cholesky` | ✅ | 🔧 | |
-| `cond` | ✅ | ⬜ | |
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `LinAlgError` | ✅ | ⬜ | Exception class |
+| **Matrix Products** | | | |
 | `cross` | ✅ | ⬜ | |
-| `det` | ✅ | 🔧 | |
-| `diagonal` | ✅ | 🔧 | |
+| `multi_dot` | ✅ | ⬜ | |
+| `matrix_power` | ✅ | ⬜ | |
+| `tensordot` | ✅ | ⬜ | |
+| `matmul` | ✅ | 🔧 | |
+| `outer` | ✅ | ⬜ | |
+| **Decompositions** | | | |
+| `cholesky` | ✅ | 🔧 | |
+| `qr` | ✅ | 🔧 | |
+| `svd` | ✅ | 🔧 | |
+| `svdvals` | ✅ | ⬜ | |
+| **Eigenvalues** | | | |
 | `eig` | ✅ | 🔧 | |
 | `eigh` | ✅ | ⬜ | |
 | `eigvals` | ✅ | ⬜ | |
 | `eigvalsh` | ✅ | ⬜ | |
-| `inv` | ✅ | 🔧 | |
-| `lstsq` | ✅ | ⬜ | |
-| `matmul` | ✅ | 🔧 | |
-| `matrix_norm` | ✅ | ⬜ | |
-| `matrix_power` | ✅ | ⬜ | |
-| `matrix_rank` | ✅ | ⬜ | |
-| `matrix_transpose` | ⬜ | ⬜ | TODO |
-| `multi_dot` | ✅ | ⬜ | |
+| **Norms** | | | |
 | `norm` | ✅ | 🔧 | |
-| `outer` | ✅ | ⬜ | |
-| `pinv` | ✅ | ⬜ | |
-| `qr` | ✅ | 🔧 | |
+| `matrix_norm` | ✅ | ⬜ | NumPy 2.0 |
+| `vector_norm` | ✅ | ⬜ | NumPy 2.0 |
+| `cond` | ✅ | ⬜ | |
+| `det` | ✅ | 🔧 | |
+| `matrix_rank` | ✅ | ⬜ | |
 | `slogdet` | ✅ | ⬜ | |
-| `solve` | ✅ | 🔧 | |
-| `svd` | ✅ | 🔧 | |
-| `svdvals` | ✅ | ⬜ | |
-| `tensordot` | ✅ | ⬜ | |
-| `tensorinv` | ✅ | ⬜ | |
-| `tensorsolve` | ✅ | ⬜ | |
 | `trace` | ✅ | ⬜ | |
-| `vecdot` | ⬜ | ⬜ | TODO |
-| `vector_norm` | ✅ | ⬜ | |
+| **Solving** | | | |
+| `solve` | ✅ | 🔧 | |
+| `tensorsolve` | ✅ | ⬜ | |
+| `lstsq` | ✅ | ⬜ | |
+| `inv` | ✅ | 🔧 | |
+| `pinv` | ✅ | ⬜ | |
+| `tensorinv` | ✅ | ⬜ | |
+| **Other** | | | |
+| `diagonal` | ✅ | 🔧 | |
+| `matrix_transpose` | ⬜ | ⬜ | NumPy 2.0 |
 
 ---
 
-## numpy.fft (18/18) - Complete ✅
+## 3. numpy.fft - Complete ✅
 
-All FFT functions are implemented:
-- `fft`, `ifft`, `fft2`, `ifft2`, `fftn`, `ifftn`
-- `rfft`, `irfft`, `rfft2`, `irfft2`, `rfftn`, `irfftn`
-- `hfft`, `ihfft`
-- `fftfreq`, `rfftfreq`, `fftshift`, `ifftshift`
-
----
-
-## numpy.random (5/50) - Needs Major Work
-
-### Currently Implemented
-- `power`, `randint`, `randn`, `random`, `seed`
-
-### Has WASM, Needs TypeScript API
-| Distribution | WASM Status |
-|--------------|-------------|
-| `beta` | 🔧 |
-| `binomial` | 🔧 |
-| `chisquare` | 🔧 |
-| `exponential` | 🔧 |
-| `f` | 🔧 |
-| `gamma` | 🔧 |
-| `geometric` | 🔧 |
-| `gumbel` | 🔧 |
-| `hypergeometric` | 🔧 |
-| `laplace` | 🔧 |
-| `logistic` | 🔧 |
-| `lognormal` | 🔧 |
-| `logseries` | 🔧 |
-| `negative_binomial` | 🔧 |
-| `noncentral_chisquare` | 🔧 |
-| `noncentral_f` | 🔧 |
-| `normal` | 🔧 |
-| `pareto` | 🔧 |
-| `poisson` | 🔧 |
-| `rayleigh` | 🔧 |
-| `standard_cauchy` | 🔧 |
-| `standard_exponential` | 🔧 |
-| `standard_gamma` | 🔧 |
-| `standard_normal` | 🔧 |
-| `standard_t` | 🔧 |
-| `triangular` | 🔧 |
-| `uniform` | 🔧 |
-| `vonmises` | 🔧 |
-| `wald` | 🔧 |
-| `weibull` | 🔧 |
-| `zipf` | 🔧 |
-
-### Needs Implementation
-- `choice`, `shuffle`, `permutation`
-- `dirichlet`, `multinomial`, `multivariate_normal`
-- `bytes`, `rand`, `random_integers`, `random_sample`, `ranf`, `sample`
-- `get_state`, `set_state`
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| **Standard FFTs** | | | |
+| `fft` | ✅ | 🔧 | |
+| `ifft` | ✅ | 🔧 | |
+| `fft2` | ✅ | 🔧 | |
+| `ifft2` | ✅ | 🔧 | |
+| `fftn` | ✅ | 🔧 | |
+| `ifftn` | ✅ | 🔧 | |
+| **Real FFTs** | | | |
+| `rfft` | ✅ | 🔧 | |
+| `irfft` | ✅ | 🔧 | |
+| `rfft2` | ✅ | 🔧 | |
+| `irfft2` | ✅ | 🔧 | |
+| `rfftn` | ✅ | 🔧 | |
+| `irfftn` | ✅ | 🔧 | |
+| **Hermitian FFTs** | | | |
+| `hfft` | ✅ | 🔧 | |
+| `ihfft` | ✅ | 🔧 | |
+| **Helpers** | | | |
+| `fftfreq` | ✅ | ⬜ | |
+| `rfftfreq` | ✅ | ⬜ | |
+| `fftshift` | ✅ | ⬜ | |
+| `ifftshift` | ✅ | ⬜ | |
 
 ---
 
-## numpy.ma (Masked Arrays) (124/224)
+## 4. numpy.random
 
-Masked array module is ~55% complete. Most math operations are implemented through delegation to the main numpy functions.
+### Classes & Utilities
 
-### Key Missing Functions
-- `anom`, `anomalies`, `average`
-- `clip`, `compressed`, `convolve`, `correlate`, `cov`, `corrcoef`
-- `diff`, `filled`, `fix_invalid`
-- `flatten_mask`, `flatten_structured_array`
-- `getdata`, `getmask`, `getmaskarray`
-- `make_mask`, `make_mask_descr`, `make_mask_none`
-- `masked_*` family (equal, greater, inside, invalid, less, outside, values, where)
-- `notmasked_*` family
-- `prod`, `ptp`
-- `soften_mask`, `harden_mask`
+| Item | TS | Notes |
+|------|:--:|-------|
+| `Generator` | ✅ | Main random class |
+| `RandomState` | ⬜ | Legacy, low priority |
+| `SeedSequence` | ✅ | |
+| `BitGenerator` | ✅ | Base class |
+| `default_rng` | ✅ | Factory function |
+
+### BitGenerators
+
+| BitGenerator | TS | Notes |
+|--------------|:--:|-------|
+| `MT19937` | ✅ | Mersenne Twister |
+| `PCG64` | ✅ | Default |
+| `PCG64DXSM` | ⬜ | TODO |
+| `Philox` | ✅ | |
+| `SFC64` | ✅ | |
+
+### Utility Functions
+
+| Function | TS | WASM | Notes |
+|----------|:--:|:----:|-------|
+| `seed` | ✅ | ⬜ | |
+| `random` | ✅ | 🔧 | |
+| `randn` | ✅ | 🔧 | |
+| `randint` | ✅ | 🔧 | |
+| `rand` | ⬜ | ⬜ | Legacy |
+| `ranf` | ⬜ | ⬜ | Legacy |
+| `random_sample` | ⬜ | ⬜ | Legacy |
+| `random_integers` | ⬜ | ⬜ | Deprecated |
+| `sample` | ⬜ | ⬜ | Legacy |
+| `bytes` | ⬜ | ⬜ | TODO |
+| `choice` | ⬜ | ⬜ | **HIGH PRIORITY** |
+| `shuffle` | ⬜ | ⬜ | **HIGH PRIORITY** |
+| `permutation` | ⬜ | ⬜ | **HIGH PRIORITY** |
+| `get_state` | ⬜ | ⬜ | Legacy |
+| `set_state` | ⬜ | ⬜ | Legacy |
+
+### Distributions (Generator methods)
+
+| Distribution | TS | WASM | Notes |
+|--------------|:--:|:----:|-------|
+| `beta` | ⬜ | 🔧 | Has WASM |
+| `binomial` | ⬜ | 🔧 | Has WASM |
+| `chisquare` | ⬜ | 🔧 | Has WASM |
+| `dirichlet` | ⬜ | ⬜ | TODO |
+| `exponential` | ⬜ | 🔧 | Has WASM |
+| `f` | ⬜ | 🔧 | Has WASM |
+| `gamma` | ⬜ | 🔧 | Has WASM |
+| `geometric` | ⬜ | 🔧 | Has WASM |
+| `gumbel` | ⬜ | 🔧 | Has WASM |
+| `hypergeometric` | ⬜ | 🔧 | Has WASM |
+| `laplace` | ⬜ | 🔧 | Has WASM |
+| `logistic` | ⬜ | 🔧 | Has WASM |
+| `lognormal` | ⬜ | 🔧 | Has WASM |
+| `logseries` | ⬜ | 🔧 | Has WASM |
+| `multinomial` | ⬜ | ⬜ | TODO |
+| `multivariate_normal` | ⬜ | ⬜ | TODO |
+| `negative_binomial` | ⬜ | 🔧 | Has WASM |
+| `noncentral_chisquare` | ⬜ | 🔧 | Has WASM |
+| `noncentral_f` | ⬜ | 🔧 | Has WASM |
+| `normal` | ⬜ | 🔧 | Has WASM |
+| `pareto` | ⬜ | 🔧 | Has WASM |
+| `poisson` | ⬜ | 🔧 | Has WASM |
+| `power` | ✅ | 🔧 | |
+| `rayleigh` | ⬜ | 🔧 | Has WASM |
+| `standard_cauchy` | ⬜ | 🔧 | Has WASM |
+| `standard_exponential` | ⬜ | 🔧 | Has WASM |
+| `standard_gamma` | ⬜ | 🔧 | Has WASM |
+| `standard_normal` | ⬜ | 🔧 | Has WASM |
+| `standard_t` | ⬜ | 🔧 | Has WASM |
+| `triangular` | ⬜ | 🔧 | Has WASM |
+| `uniform` | ⬜ | 🔧 | Has WASM |
+| `vonmises` | ⬜ | 🔧 | Has WASM |
+| `wald` | ⬜ | 🔧 | Has WASM |
+| `weibull` | ⬜ | 🔧 | Has WASM |
+| `zipf` | ⬜ | 🔧 | Has WASM |
 
 ---
 
-## numpy.polynomial (111/200)
+## 5. numpy.polynomial
 
-Polynomial module is ~56% complete. Core polynomial classes and operations are implemented.
+### Classes - All Implemented ✅
 
-### Implemented Classes
-- `Polynomial`, `Chebyshev`, `Hermite`, `HermiteE`, `Laguerre`, `Legendre`
+| Class | TS | Notes |
+|-------|:--:|-------|
+| `Polynomial` | ✅ | Power series |
+| `Chebyshev` | ✅ | Chebyshev series |
+| `Legendre` | ✅ | Legendre series |
+| `Hermite` | ✅ | Hermite (physicist's) |
+| `HermiteE` | ✅ | Hermite (probabilist's) |
+| `Laguerre` | ✅ | Laguerre series |
 
-### Key Missing Functions
-- `*domain`, `*line`, `*one`, `*zero`, `*x` constants for each family
-- `*gauss` (Gaussian quadrature)
-- `*grid2d`, `*grid3d` (grid evaluation)
-- `*vander2d`, `*vander3d` (2D/3D Vandermonde)
-- `*weight` (weight functions)
-- `set_default_printstyle`
+### Utility Functions
 
----
+| Function | TS | Notes |
+|----------|:--:|-------|
+| `set_default_printstyle` | ⬜ | Low priority |
 
-## numpy.strings (38/46)
-
-String operations are ~83% complete.
-
-### Missing
-- `capitalize`, `center`, `count`, `find`, `index`
-- `replace`, `title`, `translate`
+Each polynomial class has associated functions (e.g., `polyval`, `chebval`, `legval`, etc.) which are implemented.
 
 ---
 
-## numpy.testing (2/48)
+## 6. numpy.ma (Masked Arrays)
 
-Testing module is minimally implemented. Most functions are low priority for a runtime library.
+| Item | TS | Notes |
+|------|:--:|-------|
+| `MaskedArray` | ✅ | Core class |
+| `ma` namespace | ✅ | Module object |
+| Core operations | ✅ | Via delegation |
 
-### Implemented
-- `KnownFailureException`, `SkipTest`
+Most mathematical operations are implemented via delegation to the main numpy functions. Full implementation of all `ma` functions is lower priority.
+
+---
+
+## 7. numpy.strings
+
+| Function | TS | Notes |
+|----------|:--:|-------|
+| **Comparison** | | |
+| `equal` | ✅ | |
+| `not_equal` | ✅ | |
+| `less` | ✅ | |
+| `less_equal` | ✅ | |
+| `greater` | ✅ | |
+| `greater_equal` | ✅ | |
+| **Property Testing** | | |
+| `isalpha` | ✅ | |
+| `isdigit` | ✅ | |
+| `isalnum` | ✅ | |
+| `isspace` | ✅ | |
+| `islower` | ✅ | |
+| `isupper` | ✅ | |
+| `istitle` | ✅ | |
+| `isdecimal` | ✅ | |
+| `isnumeric` | ✅ | |
+| `str_len` | ✅ | |
+| **Search** | | |
+| `find` | ✅ | |
+| `rfind` | ✅ | |
+| `index` | ✅ | |
+| `rindex` | ✅ | |
+| `count` | ✅ | |
+| `startswith` | ✅ | |
+| `endswith` | ✅ | |
+| **Manipulation** | | |
+| `add` | ✅ | |
+| `multiply` | ✅ | |
+| `upper` | ✅ | |
+| `lower` | ✅ | |
+| `swapcase` | ✅ | |
+| `capitalize` | ✅ | |
+| `title` | ✅ | |
+| `strip` | ✅ | |
+| `lstrip` | ✅ | |
+| `rstrip` | ✅ | |
+| `replace` | ✅ | |
+| `center` | ✅ | |
+| `ljust` | ✅ | |
+| `rjust` | ✅ | |
+| `zfill` | ✅ | |
+| `expandtabs` | ✅ | |
+| `partition` | ✅ | |
+| `rpartition` | ✅ | |
+| `encode` | ✅ | |
+| `decode` | ✅ | |
+| `mod` | ⬜ | TODO |
+| `translate` | ⬜ | TODO |
+| `slice` | ⬜ | NumPy 2.0 |
+
+---
+
+## 8. numpy.rec (Record Arrays)
+
+| Item | TS | Notes |
+|------|:--:|-------|
+| `recarray` | ✅ | Core class |
+| `record` | ✅ | Record type |
+| `fromarrays` | ✅ | |
+| `fromrecords` | ✅ | |
+| `fromstring` | ✅ | |
+| `fromfile` | ✅ | |
+| `array` | ✅ | |
+| `format_parser` | ✅ | |
+| `find_duplicate` | ✅ | |
+
+---
+
+## 9. numpy.testing
+
+| Item | TS | Notes |
+|------|:--:|-------|
+| `SkipTest` | ✅ | |
+| `KnownFailureException` | ✅ | |
+| `AssertionError` | ✅ | |
+| `assert_equal` | ⬜ | TODO |
+| `assert_almost_equal` | ⬜ | TODO |
+| `assert_array_equal` | ⬜ | TODO |
+| `assert_array_almost_equal` | ⬜ | TODO |
+| `assert_allclose` | ⬜ | TODO |
+| `assert_raises` | ⬜ | TODO |
+| `assert_warns` | ⬜ | TODO |
+| Other assertions | ⬜ | Low priority |
 
 ---
 
 ## Not Planned for NumWasm
 
-These are Python-specific or low-priority items:
+These items are Python-specific, deprecated, or low priority:
 
-### Python-Specific
+### Python/Environment Specific
 - `datetime64`, `timedelta64` - Use JavaScript Date
-- `busday_*`, `busdaycalendar` - Business day functions
-- All `*_` scalar types (`int_`, `float_`, `bool_`, etc.)
-- `matrix` class (deprecated in NumPy)
-- `ufunc` class registration
-
-### Environment-Specific
-- `errstate`, `geterr`, `seterr` - Error state management
+- `busday_count`, `busday_offset`, `busdaycalendar`, `is_busday` - Business day functions
+- `errstate`, `geterr`, `seterr`, `geterrcall`, `seterrcall` - Error state management
 - `getbufsize`, `setbufsize` - Buffer management
-- `show_config`, `show_runtime`, `get_include`
+- `show_config`, `show_runtime`, `get_include` - Environment introspection
 - `may_share_memory`, `shares_memory` - Memory introspection
+- `from_dlpack` - DLPack interop
+- `nested_iters`, `nditer` class - Advanced iteration
+- `flatiter` class - Iterator class
+- `ufunc` class - Cannot create custom ufuncs in TypeScript
+- `memmap` - Memory-mapped files (use browser File API)
+
+### Deprecated/Legacy
+- `matrix` class - Deprecated in NumPy
+- All `*_` scalar types (`int_`, `float_`, `bool_`, etc.) - Use TypeScript types
+- `random.RandomState` - Legacy API
+- `random.rand`, `random.ranf`, `random.sample` - Legacy aliases
 
 ### Low Priority
-- `from_dlpack` - DLPack interop
-- `nested_iters` - Advanced iteration
 - `packbits`, `unpackbits` - Bit packing
-- Most `numpy.testing` functions
+- Most `numpy.testing` functions - Testing utilities
+- `ctypeslib` module - ctypes interop
+- `f2py` module - Fortran-to-Python (not applicable)
+
+---
+
+## Priority TODO Items
+
+### Priority 1: High-Impact Missing Functions
+
+| Function | Category | Notes |
+|----------|----------|-------|
+| `prod` | Statistics | Product reduction |
+| `clip` | Math | Value clipping - very common |
+| `diff` | Math | N-th differences |
+| `gradient` | Math | Numerical gradient |
+| `convolve` | Math | 1D convolution |
+| `correlate` | Math | 1D correlation |
+| `cov` | Statistics | Covariance matrix |
+| `corrcoef` | Statistics | Correlation coefficients |
+| `average` | Statistics | Weighted average |
+| `ptp` | Statistics | Peak-to-peak (max-min) |
+
+### Priority 2: Export Functions with WASM Backing
+
+These have C implementations but need TypeScript exports:
+- `reshape`, `ravel`, `squeeze`, `expand_dims`, `transpose`, `swapaxes`
+- `copy`, `ascontiguousarray`, `asfortranarray`
+- `percentile`, `quantile`
+- `tri`, `tril`, `triu`
+
+### Priority 3: Complete numpy.random
+
+Most distributions have WASM backing but need TypeScript API:
+- All 30+ distributions listed in section 4
+- `choice`, `shuffle`, `permutation`
+- `dirichlet`, `multinomial`, `multivariate_normal`
+
+### Priority 4: NumPy 2.0 Compatibility
+
+Add aliases and new functions from NumPy 2.0:
+- `cumulative_sum`, `cumulative_prod`
+- `matrix_transpose`, `vecdot`, `matvec`, `vecmat`
+- `concat` (alias for `concatenate`)
+- Various trigonometric aliases (`asin`, `acos`, etc.)
 
 ---
 
 ## Action Items Summary
 
 ### Immediate (High Impact)
-1. Add TypeScript exports for functions with WASM backing:
-   - `reshape`, `ravel`, `squeeze`, `expand_dims`, `transpose`, `swapaxes`
-   - `copy`, `ascontiguousarray`, `asfortranarray`
-   - `percentile`, `quantile`
-   - `pow` (alias for `power`)
-
-2. Implement high-priority missing functions:
-   - `prod`, `clip`, `average`, `ptp`
-   - `diff`, `gradient`
-   - `cov`, `corrcoef`
-   - `convolve`, `correlate`
+1. Implement `prod`, `clip`, `average`, `ptp`
+2. Implement `diff`, `gradient`, `convolve`, `correlate`
+3. Implement `cov`, `corrcoef`
+4. Export `reshape`, `transpose`, etc. as top-level functions
 
 ### Short-term
-3. Complete numpy.random TypeScript API for all distributions with WASM backing
-
-4. Add remaining array manipulation functions:
-   - `moveaxis`, `rollaxis`
-   - `diagflat`, `tril`, `triu`, `vander`
+5. Complete numpy.random TypeScript API for all distributions
+6. Add `choice`, `shuffle`, `permutation`
+7. Add `diagflat`, `tril`, `triu`, `vander`
 
 ### Medium-term
-5. Complete numpy.ma module
-6. Complete numpy.polynomial module
-7. Add remaining string functions
+8. Add NumPy 2.0 aliases and new functions
+9. Complete numpy.ma module
+10. Add missing numpy.testing assertions

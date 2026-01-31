@@ -4,198 +4,123 @@ on:
   push:
     branches: [main]
     paths:
-      # numwasm C sources
-      - 'packages/numwasm/src/wasm/**'
-      - 'packages/numwasm/scripts/*.sh'
-      # sciwasm C/C++ sources
-      - 'packages/sciwasm/src/wasm/**'
-      - 'packages/sciwasm/scripts/*.sh'
-      # symwasm C++ sources
-      - 'packages/symwasm/src/wasm/**'
-      - 'packages/symwasm/scripts/*.sh'
-      # This workflow itself
+      - 'packages/*/src/wasm/**'
+      - 'packages/*/scripts/*.sh'
       - '.github/workflows/build-wasm.yml'
   workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force rebuild all packages (ignore cache)'
+        type: boolean
+        default: false
+      packages:
+        description: 'Specific packages to build (comma-separated, or "all")'
+        type: string
+        default: 'all'
 
 permissions:
   contents: read
   actions: write
 
 jobs:
-  build-numwasm:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Standard emcc packages
+          - package: numwasm
+            build_type: emcc
+          - package: sciwasm
+            build_type: emcc
+          - package: symwasm
+            build_type: emcc
+          - package: odewasm
+            build_type: emcc
+          - package: arwasm
+            build_type: emcc
+          - package: linwasm
+            build_type: emcc
+          - package: quadwasm
+            build_type: emcc
+          - package: superluwasm
+            build_type: emcc
+          - package: xsfwasm
+            build_type: emcc
+          - package: mfemwasm
+            build_type: emcc
+          # Docker/Flang package
+          - package: lawasm
+            build_type: docker
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check cache
-        id: cache-check
-        uses: actions/cache/restore@v4
-        with:
-          path: wasm-artifacts/numwasm-dist
-          key: numwasm-dist-${{ hashFiles('packages/numwasm/src/wasm/**', 'packages/numwasm/scripts/*.sh') }}
-          lookup-only: true
-
-      - name: Install pnpm
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Setup Node.js
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install Emscripten
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: '3.1.51'
-
-      - name: Install dependencies
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        run: pnpm install
-
-      - name: Build numwasm
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        run: pnpm --filter numwasm run build
-
-      - name: Prepare artifact
-        if: steps.cache-check.outputs.cache-hit != 'true'
+      - name: Check if package should be built
+        id: should-build
         run: |
-          mkdir -p wasm-artifacts
-          cp -r packages/numwasm/dist wasm-artifacts/numwasm-dist
-
-      - name: Save to cache
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: wasm-artifacts/numwasm-dist
-          key: numwasm-dist-${{ hashFiles('packages/numwasm/src/wasm/**', 'packages/numwasm/scripts/*.sh') }}
-
-  build-sciwasm:
-    runs-on: ubuntu-latest
-    needs: build-numwasm  # sciwasm depends on numwasm
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Check cache
-        id: cache-check
-        uses: actions/cache/restore@v4
-        with:
-          path: wasm-artifacts/sciwasm-dist
-          key: sciwasm-dist-${{ hashFiles('packages/sciwasm/src/wasm/**', 'packages/sciwasm/scripts/*.sh') }}
-          lookup-only: true
-
-      - name: Install pnpm
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Setup Node.js
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install Emscripten
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: '3.1.51'
-
-      - name: Install dependencies
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        run: pnpm install
-
-      # Restore numwasm from cache (needed as peer dependency)
-      - name: Restore numwasm from cache
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        uses: actions/cache/restore@v4
-        with:
-          path: wasm-artifacts/numwasm-dist
-          key: numwasm-dist-${{ hashFiles('packages/numwasm/src/wasm/**', 'packages/numwasm/scripts/*.sh') }}
-
-      - name: Restore numwasm dist
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        run: |
-          if [ -d "wasm-artifacts/numwasm-dist" ]; then
-            cp -r wasm-artifacts/numwasm-dist packages/numwasm/dist
+          PACKAGES="${{ github.event.inputs.packages || 'all' }}"
+          if [ "$PACKAGES" = "all" ]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+          elif echo "$PACKAGES" | grep -q "${{ matrix.package }}"; then
+            echo "build=true" >> $GITHUB_OUTPUT
+          else
+            echo "build=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build sciwasm
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        run: pnpm --filter sciwasm run build
-
-      - name: Prepare artifact
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p wasm-artifacts
-          cp -r packages/sciwasm/dist wasm-artifacts/sciwasm-dist
-
-      - name: Save to cache
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: wasm-artifacts/sciwasm-dist
-          key: sciwasm-dist-${{ hashFiles('packages/sciwasm/src/wasm/**', 'packages/sciwasm/scripts/*.sh') }}
-
-  build-symwasm:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Check cache
+        if: steps.should-build.outputs.build == 'true'
         id: cache-check
         uses: actions/cache/restore@v4
         with:
-          path: wasm-artifacts/symwasm-dist
-          key: symwasm-dist-${{ hashFiles('packages/symwasm/src/wasm/**', 'packages/symwasm/scripts/*.sh') }}
+          path: packages/${{ matrix.package }}/dist
+          key: ${{ matrix.package }}-dist-${{ hashFiles(format('packages/{0}/src/wasm/**', matrix.package), format('packages/{0}/scripts/*.sh', matrix.package)) }}
           lookup-only: true
 
+      - name: Skip if cached
+        if: steps.should-build.outputs.build == 'true' && steps.cache-check.outputs.cache-hit == 'true' && github.event.inputs.force_rebuild != 'true'
+        run: |
+          echo "✅ ${{ matrix.package }} already cached, skipping build"
+
       - name: Install pnpm
-        if: steps.cache-check.outputs.cache-hit != 'true'
+        if: steps.should-build.outputs.build == 'true' && (steps.cache-check.outputs.cache-hit != 'true' || github.event.inputs.force_rebuild == 'true')
         uses: pnpm/action-setup@v4
         with:
           version: 10
 
       - name: Setup Node.js
-        if: steps.cache-check.outputs.cache-hit != 'true'
+        if: steps.should-build.outputs.build == 'true' && (steps.cache-check.outputs.cache-hit != 'true' || github.event.inputs.force_rebuild == 'true')
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
 
+      - name: Install dependencies
+        if: steps.should-build.outputs.build == 'true' && (steps.cache-check.outputs.cache-hit != 'true' || github.event.inputs.force_rebuild == 'true')
+        run: pnpm install
+
+      # === EMCC BUILD ===
       - name: Install Emscripten
-        if: steps.cache-check.outputs.cache-hit != 'true'
+        if: steps.should-build.outputs.build == 'true' && (steps.cache-check.outputs.cache-hit != 'true' || github.event.inputs.force_rebuild == 'true') && matrix.build_type == 'emcc'
         uses: mymindstorm/setup-emsdk@v14
         with:
           version: '3.1.51'
 
-      - name: Install dependencies
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        run: pnpm install
+      - name: Build with emcc
+        if: steps.should-build.outputs.build == 'true' && (steps.cache-check.outputs.cache-hit != 'true' || github.event.inputs.force_rebuild == 'true') && matrix.build_type == 'emcc'
+        run: pnpm --filter ${{ matrix.package }} run build
 
-      - name: Build symwasm
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        run: pnpm --filter symwasm run build
+      # === DOCKER BUILD (lawasm) ===
+      - name: Build with Docker (lawasm)
+        if: steps.should-build.outputs.build == 'true' && (steps.cache-check.outputs.cache-hit != 'true' || github.event.inputs.force_rebuild == 'true') && matrix.build_type == 'docker'
+        run: pnpm --filter ${{ matrix.package }} run build
 
-      - name: Prepare artifact
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p wasm-artifacts
-          cp -r packages/symwasm/dist wasm-artifacts/symwasm-dist
-
+      # === SAVE CACHE ===
       - name: Save to cache
-        if: steps.cache-check.outputs.cache-hit != 'true'
+        if: steps.should-build.outputs.build == 'true' && (steps.cache-check.outputs.cache-hit != 'true' || github.event.inputs.force_rebuild == 'true')
         uses: actions/cache/save@v4
         with:
-          path: wasm-artifacts/symwasm-dist
-          key: symwasm-dist-${{ hashFiles('packages/symwasm/src/wasm/**', 'packages/symwasm/scripts/*.sh') }}
+          path: packages/${{ matrix.package }}/dist
+          key: ${{ matrix.package }}-dist-${{ hashFiles(format('packages/{0}/src/wasm/**', matrix.package), format('packages/{0}/scripts/*.sh', matrix.package)) }}

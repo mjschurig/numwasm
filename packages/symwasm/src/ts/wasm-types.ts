@@ -217,6 +217,38 @@ export interface SymwasmModule extends EmscriptenModule {
   _dense_matrix_zeros(s: number, r: number, c: number): number;
   _dense_matrix_ones(s: number, r: number, c: number): number;
   _dense_matrix_diag(s: number, d: number, k: number): number; // d is CVecBasic*
+
+  // === Dense Matrix — Basic Operations ===
+  _dense_matrix_det(s: number, mat: number): number; // s is Basic*, mat is CDenseMatrix*
+  _dense_matrix_inv(s: number, mat: number): number; // s is CDenseMatrix*, mat is CDenseMatrix*
+  _dense_matrix_transpose(s: number, mat: number): number; // s is CDenseMatrix*, mat is CDenseMatrix*
+  _dense_matrix_add_matrix(s: number, matA: number, matB: number): number; // s = matA + matB
+  _dense_matrix_mul_matrix(s: number, matA: number, matB: number): number; // s = matA * matB
+  _dense_matrix_add_scalar(s: number, matA: number, b: number): number; // s = matA + b (b is Basic*)
+  _dense_matrix_mul_scalar(s: number, matA: number, b: number): number; // s = matA * b (b is Basic*)
+
+  // === Dense Matrix — Submatrix Operations ===
+  _dense_matrix_submatrix(
+    s: number,
+    mat: number,
+    r1: number,
+    c1: number,
+    r2: number,
+    c2: number,
+    r: number,
+    c: number
+  ): number;
+  _dense_matrix_row_join(A: number, B: number): number;
+  _dense_matrix_col_join(A: number, B: number): number;
+  _dense_matrix_row_del(C: number, k: number): number;
+  _dense_matrix_col_del(C: number, k: number): number;
+
+  // === Dense Matrix — Factorizations ===
+  _dense_matrix_LU(l: number, u: number, mat: number): number; // LU factorization: mat = L*U
+  _dense_matrix_LDL(l: number, d: number, mat: number): number; // LDL factorization: mat = L*D*L^T
+  _dense_matrix_FFLU(lu: number, mat: number): number; // Fraction-free LU factorization
+  _dense_matrix_FFLDU(l: number, d: number, u: number, mat: number): number; // Fraction-free LDU factorization
+  _dense_matrix_LU_solve(x: number, A: number, b: number): number; // Solve A*x = b using LU
 }
 
 /**

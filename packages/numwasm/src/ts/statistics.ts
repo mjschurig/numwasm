@@ -5,8 +5,8 @@
  * axis support, keepdims, and dtype parameters.
  */
 
-import { NDArray } from './NDArray.js';
-import { DType } from './types.js';
+import { NDArray } from "./_core/NDArray.js";
+import { DType } from "./types.js";
 
 /**
  * Sum of array elements over a given axis.
@@ -29,16 +29,16 @@ export async function sum(
   a: NDArray,
   axis: number | null = null,
   keepdims = false,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray | number> {
   const axisVal = axis === null ? -2147483648 : axis;
   const resultPtr = a._wasmModule._ndarray_sum_axis(
     a._wasmPtr,
     axisVal,
     keepdims,
-    dtype ?? -1
+    dtype ?? -1,
   );
-  if (resultPtr === 0) throw new Error('sum failed');
+  if (resultPtr === 0) throw new Error("sum failed");
   const result = NDArray._fromPtr(resultPtr, a._wasmModule);
   if (axis === null && !keepdims) {
     const v = result.item();
@@ -67,16 +67,16 @@ export async function mean(
   a: NDArray,
   axis: number | null = null,
   keepdims = false,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray | number> {
   const axisVal = axis === null ? -2147483648 : axis;
   const resultPtr = a._wasmModule._ndarray_mean_axis(
     a._wasmPtr,
     axisVal,
     keepdims,
-    dtype ?? -1
+    dtype ?? -1,
   );
-  if (resultPtr === 0) throw new Error('mean failed');
+  if (resultPtr === 0) throw new Error("mean failed");
   const result = NDArray._fromPtr(resultPtr, a._wasmModule);
   if (axis === null && !keepdims) {
     const v = result.item();
@@ -108,7 +108,7 @@ export async function variance(
   axis: number | null = null,
   ddof = 0,
   keepdims = false,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray | number> {
   const axisVal = axis === null ? -2147483648 : axis;
   const resultPtr = a._wasmModule._ndarray_var_axis(
@@ -116,9 +116,9 @@ export async function variance(
     axisVal,
     keepdims,
     dtype ?? -1,
-    ddof
+    ddof,
   );
-  if (resultPtr === 0) throw new Error('variance failed');
+  if (resultPtr === 0) throw new Error("variance failed");
   const result = NDArray._fromPtr(resultPtr, a._wasmModule);
   if (axis === null && !keepdims) {
     const v = result.item();
@@ -152,7 +152,7 @@ export async function std(
   axis: number | null = null,
   ddof = 0,
   keepdims = false,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray | number> {
   const axisVal = axis === null ? -2147483648 : axis;
   const resultPtr = a._wasmModule._ndarray_std_axis(
@@ -160,9 +160,9 @@ export async function std(
     axisVal,
     keepdims,
     dtype ?? -1,
-    ddof
+    ddof,
   );
-  if (resultPtr === 0) throw new Error('std failed');
+  if (resultPtr === 0) throw new Error("std failed");
   const result = NDArray._fromPtr(resultPtr, a._wasmModule);
   if (axis === null && !keepdims) {
     const v = result.item();
@@ -190,11 +190,15 @@ export async function std(
 export async function min(
   a: NDArray,
   axis: number | null = null,
-  keepdims = false
+  keepdims = false,
 ): Promise<NDArray | number> {
   const axisVal = axis === null ? -2147483648 : axis;
-  const resultPtr = a._wasmModule._ndarray_min_axis(a._wasmPtr, axisVal, keepdims);
-  if (resultPtr === 0) throw new Error('min failed');
+  const resultPtr = a._wasmModule._ndarray_min_axis(
+    a._wasmPtr,
+    axisVal,
+    keepdims,
+  );
+  if (resultPtr === 0) throw new Error("min failed");
   const result = NDArray._fromPtr(resultPtr, a._wasmModule);
   if (axis === null && !keepdims) {
     const v = result.item();
@@ -222,11 +226,15 @@ export async function min(
 export async function max(
   a: NDArray,
   axis: number | null = null,
-  keepdims = false
+  keepdims = false,
 ): Promise<NDArray | number> {
   const axisVal = axis === null ? -2147483648 : axis;
-  const resultPtr = a._wasmModule._ndarray_max_axis(a._wasmPtr, axisVal, keepdims);
-  if (resultPtr === 0) throw new Error('max failed');
+  const resultPtr = a._wasmModule._ndarray_max_axis(
+    a._wasmPtr,
+    axisVal,
+    keepdims,
+  );
+  if (resultPtr === 0) throw new Error("max failed");
   const result = NDArray._fromPtr(resultPtr, a._wasmModule);
   if (axis === null && !keepdims) {
     const v = result.item();
@@ -253,11 +261,15 @@ export async function max(
 export async function median(
   a: NDArray,
   axis: number | null = null,
-  keepdims = false
+  keepdims = false,
 ): Promise<NDArray | number> {
   const axisVal = axis === null ? -2147483648 : axis;
-  const resultPtr = a._wasmModule._ndarray_median(a._wasmPtr, axisVal, keepdims);
-  if (resultPtr === 0) throw new Error('median failed');
+  const resultPtr = a._wasmModule._ndarray_median(
+    a._wasmPtr,
+    axisVal,
+    keepdims,
+  );
+  if (resultPtr === 0) throw new Error("median failed");
   const result = NDArray._fromPtr(resultPtr, a._wasmModule);
   if (axis === null && !keepdims) {
     const v = result.item();
@@ -285,11 +297,15 @@ export async function median(
 export async function argmax(
   a: NDArray,
   axis: number | null = null,
-  keepdims = false
+  keepdims = false,
 ): Promise<NDArray | number> {
   const axisVal = axis === null ? -2147483648 : axis;
-  const resultPtr = a._wasmModule._ndarray_argmax(a._wasmPtr, axisVal, keepdims);
-  if (resultPtr === 0) throw new Error('argmax failed');
+  const resultPtr = a._wasmModule._ndarray_argmax(
+    a._wasmPtr,
+    axisVal,
+    keepdims,
+  );
+  if (resultPtr === 0) throw new Error("argmax failed");
   const result = NDArray._fromPtr(resultPtr, a._wasmModule);
   if (axis === null && !keepdims) {
     const v = result.item();
@@ -317,11 +333,15 @@ export async function argmax(
 export async function argmin(
   a: NDArray,
   axis: number | null = null,
-  keepdims = false
+  keepdims = false,
 ): Promise<NDArray | number> {
   const axisVal = axis === null ? -2147483648 : axis;
-  const resultPtr = a._wasmModule._ndarray_argmin(a._wasmPtr, axisVal, keepdims);
-  if (resultPtr === 0) throw new Error('argmin failed');
+  const resultPtr = a._wasmModule._ndarray_argmin(
+    a._wasmPtr,
+    axisVal,
+    keepdims,
+  );
+  if (resultPtr === 0) throw new Error("argmin failed");
   const result = NDArray._fromPtr(resultPtr, a._wasmModule);
   if (axis === null && !keepdims) {
     const v = result.item();
@@ -348,12 +368,12 @@ export async function argmin(
 export async function searchsorted(
   a: NDArray,
   v: NDArray | number | number[],
-  side: 'left' | 'right' = 'left'
+  side: "left" | "right" = "left",
 ): Promise<NDArray | number> {
   let vArr: NDArray;
   let disposeV = false;
 
-  if (typeof v === 'number') {
+  if (typeof v === "number") {
     vArr = await NDArray.fromArray([v]);
     disposeV = true;
   } else if (Array.isArray(v)) {
@@ -363,19 +383,19 @@ export async function searchsorted(
     vArr = v;
   }
 
-  const sideVal = side === 'right' ? 1 : 0;
+  const sideVal = side === "right" ? 1 : 0;
   const resultPtr = a._wasmModule._ndarray_searchsorted(
     a._wasmPtr,
     vArr._wasmPtr,
     sideVal,
-    0
+    0,
   );
 
   if (disposeV) vArr.dispose();
-  if (resultPtr === 0) throw new Error('searchsorted failed');
+  if (resultPtr === 0) throw new Error("searchsorted failed");
 
   const result = NDArray._fromPtr(resultPtr, a._wasmModule);
-  if (typeof v === 'number') {
+  if (typeof v === "number") {
     const val = result.item();
     result.dispose();
     return val;
@@ -404,15 +424,15 @@ export async function searchsorted(
 export async function cumsum(
   a: NDArray,
   axis: number | null = null,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray> {
   const axisVal = axis === null ? -2147483648 : axis;
   const resultPtr = a._wasmModule._ndarray_cumsum_axis(
     a._wasmPtr,
     axisVal,
-    dtype ?? -1
+    dtype ?? -1,
   );
-  if (resultPtr === 0) throw new Error('cumsum failed');
+  if (resultPtr === 0) throw new Error("cumsum failed");
   return NDArray._fromPtr(resultPtr, a._wasmModule);
 }
 
@@ -437,15 +457,15 @@ export async function cumsum(
 export async function cumprod(
   a: NDArray,
   axis: number | null = null,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray> {
   const axisVal = axis === null ? -2147483648 : axis;
   const resultPtr = a._wasmModule._ndarray_cumprod_axis(
     a._wasmPtr,
     axisVal,
-    dtype ?? -1
+    dtype ?? -1,
   );
-  if (resultPtr === 0) throw new Error('cumprod failed');
+  if (resultPtr === 0) throw new Error("cumprod failed");
   return NDArray._fromPtr(resultPtr, a._wasmModule);
 }
 
@@ -469,15 +489,15 @@ export async function cumprod(
 export async function nancumsum(
   a: NDArray,
   axis: number | null = null,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray> {
   const axisVal = axis === null ? -2147483648 : axis;
   const resultPtr = a._wasmModule._ndarray_nancumsum_axis(
     a._wasmPtr,
     axisVal,
-    dtype ?? -1
+    dtype ?? -1,
   );
-  if (resultPtr === 0) throw new Error('nancumsum failed');
+  if (resultPtr === 0) throw new Error("nancumsum failed");
   return NDArray._fromPtr(resultPtr, a._wasmModule);
 }
 
@@ -501,14 +521,14 @@ export async function nancumsum(
 export async function nancumprod(
   a: NDArray,
   axis: number | null = null,
-  dtype?: DType
+  dtype?: DType,
 ): Promise<NDArray> {
   const axisVal = axis === null ? -2147483648 : axis;
   const resultPtr = a._wasmModule._ndarray_nancumprod_axis(
     a._wasmPtr,
     axisVal,
-    dtype ?? -1
+    dtype ?? -1,
   );
-  if (resultPtr === 0) throw new Error('nancumprod failed');
+  if (resultPtr === 0) throw new Error("nancumprod failed");
   return NDArray._fromPtr(resultPtr, a._wasmModule);
 }

@@ -6,8 +6,8 @@
  * Reference: numpy/lib/_npyio_impl.py
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
 import {
   createHeader,
   parseHeader,
@@ -17,7 +17,7 @@ import {
   getMinVersion,
   isNode,
   type NpyHeader,
-} from './format.js';
+} from "./format.js";
 
 /**
  * Options for save()
@@ -32,7 +32,7 @@ export interface SaveOptions {
  */
 export interface LoadOptions {
   /** Memory mapping mode (not yet supported) */
-  mmap_mode?: 'r+' | 'r' | 'w+' | 'c' | null;
+  mmap_mode?: "r+" | "r" | "w+" | "c" | null;
   /** Allow loading pickled objects (not supported) */
   allow_pickle?: boolean;
   /** Maximum header size */
@@ -61,7 +61,7 @@ export interface LoadOptions {
 export async function save(
   file: string | FileSystemFileHandle | null,
   arr: NDArray,
-  _options: SaveOptions = {}
+  _options: SaveOptions = {},
 ): Promise<ArrayBuffer | void> {
   // Ensure array is contiguous for efficient writing
   const contiguous = arr.flags.c_contiguous ? arr : arr.copy();
@@ -74,12 +74,15 @@ export async function save(
   };
 
   // Calculate header size to determine version
-  const shapeStr = header.shape.length === 0
-    ? '()'
-    : header.shape.length === 1
-    ? `(${header.shape[0]},)`
-    : `(${header.shape.join(', ')})`;
-  const headerStrLen = `{'descr': '${header.descr}', 'fortran_order': False, 'shape': ${shapeStr}, }`.length;
+  const shapeStr =
+    header.shape.length === 0
+      ? "()"
+      : header.shape.length === 1
+        ? `(${header.shape[0]},)`
+        : `(${header.shape.join(", ")})`;
+  const headerStrLen =
+    `{'descr': '${header.descr}', 'fortran_order': False, 'shape': ${shapeStr}, }`
+      .length;
   const version = getMinVersion(headerStrLen);
 
   // Create header bytes
@@ -87,7 +90,11 @@ export async function save(
 
   // Get array data as bytes
   const dataBytes = contiguous.toTypedArray();
-  const dataView = new Uint8Array(dataBytes.buffer, dataBytes.byteOffset, contiguous.size * dtypeSize(contiguous.dtype));
+  const dataView = new Uint8Array(
+    dataBytes.buffer,
+    dataBytes.byteOffset,
+    contiguous.size * dtypeSize(contiguous.dtype),
+  );
 
   // Combine header and data
   const totalSize = headerBytes.length + dataView.length;
@@ -100,25 +107,25 @@ export async function save(
     return result.buffer;
   }
 
-  if (typeof file === 'string') {
+  if (typeof file === "string") {
     // Node.js file path
     if (isNode()) {
-      const fs = await import('fs/promises');
+      const fs = await import("fs/promises");
       await fs.writeFile(file, result);
       return;
     }
-    throw new Error('String file paths only supported in Node.js');
+    throw new Error("String file paths only supported in Node.js");
   }
 
   // FileSystemFileHandle (File System Access API)
-  if ('createWritable' in file) {
+  if ("createWritable" in file) {
     const writable = await (file as FileSystemFileHandle).createWritable();
     await writable.write(result);
     await writable.close();
     return;
   }
 
-  throw new Error('Unsupported file target');
+  throw new Error("Unsupported file target");
 }
 
 /**
@@ -143,7 +150,7 @@ export async function save(
  */
 export async function load(
   file: string | File | ArrayBuffer | URL,
-  _options: LoadOptions = {}
+  _options: LoadOptions = {},
 ): Promise<NDArray> {
   const data = await readFileData(file);
   const bytes = new Uint8Array(data);
@@ -155,19 +162,25 @@ export async function load(
   const dtype = descrToDtype(header.descr);
 
   // Calculate expected size
-  const size = header.shape.length === 0 ? 1 : header.shape.reduce((a, b) => a * b, 1);
+  const size =
+    header.shape.length === 0 ? 1 : header.shape.reduce((a, b) => a * b, 1);
   const expectedBytes = size * dtypeSize(dtype);
 
   if (bytes.length - dataOffset < expectedBytes) {
     throw new Error(
       `NPY file truncated: expected ${expectedBytes} data bytes, ` +
-      `got ${bytes.length - dataOffset}`
+        `got ${bytes.length - dataOffset}`,
     );
   }
 
   // Create array from data
   const dataSlice = bytes.slice(dataOffset, dataOffset + expectedBytes);
-  const typedArray = createTypedArrayFromBuffer(dtype, dataSlice.buffer, dataSlice.byteOffset, size);
+  const typedArray = createTypedArrayFromBuffer(
+    dtype,
+    dataSlice.buffer,
+    dataSlice.byteOffset,
+    size,
+  );
 
   // Handle 0-d arrays (scalars)
   if (header.shape.length === 0) {
@@ -191,36 +204,39 @@ export async function load(
  * Read file data from various sources.
  */
 async function readFileData(
-  file: string | File | ArrayBuffer | URL
+  file: string | File | ArrayBuffer | URL,
 ): Promise<ArrayBuffer> {
   if (file instanceof ArrayBuffer) {
     return file;
   }
 
   // Check for File in browser
-  if (typeof File !== 'undefined' && file instanceof File) {
+  if (typeof File !== "undefined" && file instanceof File) {
     return file.arrayBuffer();
   }
 
-  if (file instanceof URL || (typeof file === 'string' && file.startsWith('http'))) {
+  if (
+    file instanceof URL ||
+    (typeof file === "string" && file.startsWith("http"))
+  ) {
     const response = await fetch(file.toString());
     return response.arrayBuffer();
   }
 
-  if (typeof file === 'string') {
+  if (typeof file === "string") {
     // Node.js file path
     if (isNode()) {
-      const fs = await import('fs/promises');
+      const fs = await import("fs/promises");
       const buffer = await fs.readFile(file);
       return buffer.buffer.slice(
         buffer.byteOffset,
-        buffer.byteOffset + buffer.byteLength
+        buffer.byteOffset + buffer.byteLength,
       );
     }
-    throw new Error('String file paths only supported in Node.js');
+    throw new Error("String file paths only supported in Node.js");
   }
 
-  throw new Error('Unsupported file source');
+  throw new Error("Unsupported file source");
 }
 
 /**
@@ -230,8 +246,18 @@ function createTypedArrayFromBuffer(
   dtype: DType,
   buffer: ArrayBuffer,
   byteOffset: number,
-  length: number
-): Float64Array | Float32Array | Int32Array | Int16Array | Int8Array | Uint32Array | Uint16Array | Uint8Array | BigInt64Array | BigUint64Array {
+  length: number,
+):
+  | Float64Array
+  | Float32Array
+  | Int32Array
+  | Int16Array
+  | Int8Array
+  | Uint32Array
+  | Uint16Array
+  | Uint8Array
+  | BigInt64Array
+  | BigUint64Array {
   switch (dtype) {
     case DType.Float64:
       return new Float64Array(buffer, byteOffset, length);

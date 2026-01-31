@@ -5,12 +5,9 @@
  * Compatible with NumPy's numpy.ma module.
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType } from '../types.js';
-import {
-  getDefaultFillValue,
-  MaskType,
-} from './types.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType } from "../types.js";
+import { getDefaultFillValue, MaskType } from "./types.js";
 
 // Forward declaration to avoid circular dependency
 type MaskedArrayLike = {
@@ -34,16 +31,16 @@ type MaskedArrayLike = {
  * ```
  */
 export function default_fill_value(
-  obj: NDArray | { dtype: DType } | DType
+  obj: NDArray | { dtype: DType } | DType,
 ): number | string | boolean {
   let dtype: DType;
 
-  if (typeof obj === 'number') {
+  if (typeof obj === "number") {
     // Direct DType value
     dtype = obj;
   } else if (obj instanceof NDArray) {
     dtype = obj.dtype;
-  } else if (typeof obj === 'object' && 'dtype' in obj) {
+  } else if (typeof obj === "object" && "dtype" in obj) {
     dtype = obj.dtype;
   } else {
     return 1e20;
@@ -72,7 +69,7 @@ export function default_fill_value(
  */
 export function common_fill_value(
   a: unknown,
-  b: unknown
+  b: unknown,
 ): number | string | boolean | null {
   // Get fill values from both arrays
   const fv1 = getFillValue(a);
@@ -88,7 +85,7 @@ export function common_fill_value(
   }
 
   // For numbers, check with tolerance for floating point
-  if (typeof fv1 === 'number' && typeof fv2 === 'number') {
+  if (typeof fv1 === "number" && typeof fv2 === "number") {
     if (Math.abs(fv1 - fv2) < 1e-10 * Math.max(Math.abs(fv1), Math.abs(fv2))) {
       return fv1;
     }
@@ -111,16 +108,12 @@ export function common_fill_value(
  */
 export function set_fill_value(
   a: unknown,
-  fill_value: number | string | boolean
+  fill_value: number | string | boolean,
 ): void {
-  if (
-    a !== null &&
-    typeof a === 'object' &&
-    '_fill_value' in a
-  ) {
+  if (a !== null && typeof a === "object" && "_fill_value" in a) {
     (a as MaskedArrayLike)._fill_value = fill_value;
   } else {
-    throw new Error('Cannot set fill_value on non-MaskedArray');
+    throw new Error("Cannot set fill_value on non-MaskedArray");
   }
 }
 
@@ -131,11 +124,7 @@ export function set_fill_value(
  * @returns Fill value, or null if not a MaskedArray
  */
 function getFillValue(obj: unknown): number | string | boolean | null {
-  if (
-    obj !== null &&
-    typeof obj === 'object' &&
-    '_fill_value' in obj
-  ) {
+  if (obj !== null && typeof obj === "object" && "_fill_value" in obj) {
     return (obj as MaskedArrayLike)._fill_value;
   }
 
@@ -163,14 +152,14 @@ function getFillValue(obj: unknown): number | string | boolean | null {
  */
 export function getReductionFillValue(
   dtype: DType,
-  operation: 'sum' | 'prod' | 'min' | 'max'
+  operation: "sum" | "prod" | "min" | "max",
 ): number {
   switch (operation) {
-    case 'sum':
+    case "sum":
       return 0;
-    case 'prod':
+    case "prod":
       return 1;
-    case 'min':
+    case "min":
       // Use maximum value so masked elements don't affect min
       switch (dtype) {
         case DType.Int8:
@@ -188,7 +177,7 @@ export function getReductionFillValue(
         default:
           return Number.POSITIVE_INFINITY;
       }
-    case 'max':
+    case "max":
       // Use minimum value so masked elements don't affect max
       switch (dtype) {
         case DType.Int8:

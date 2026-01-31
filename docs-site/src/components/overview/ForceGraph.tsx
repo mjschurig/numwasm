@@ -13,6 +13,7 @@ interface ForceGraphProps {
   isSettled: boolean;
   hoveredNode: SimNode | null;
   onHover: (node: SimNode | null) => void;
+  isMobile?: boolean;
 }
 
 // Colors
@@ -416,11 +417,11 @@ function CenterSun() {
 }
 
 // Background stars - fixed points in space
-function BackgroundStars() {
+function BackgroundStars({ isMobile = false }: { isMobile?: boolean }) {
   const pointsRef = useRef<THREE.Points>(null);
 
   const { geometry, material } = useMemo(() => {
-    const starCount = 2000;
+    const starCount = isMobile ? 500 : 2000;
     const positions = new Float32Array(starCount * 3);
     const sizes = new Float32Array(starCount);
 
@@ -452,7 +453,7 @@ function BackgroundStars() {
     });
 
     return { geometry: geo, material: mat };
-  }, []);
+  }, [isMobile]);
 
   return <points ref={pointsRef} geometry={geometry} material={material} />;
 }
@@ -476,6 +477,7 @@ export function ForceGraph({
   isSettled,
   hoveredNode,
   onHover,
+  isMobile = false,
 }: ForceGraphProps) {
   // Run simulation step each frame until settled
   useFrame(() => {
@@ -498,7 +500,7 @@ export function ForceGraph({
       />
 
       {/* Background stars */}
-      <BackgroundStars />
+      <BackgroundStars isMobile={isMobile} />
 
       {/* Center Sun - light source */}
       <CenterSun />

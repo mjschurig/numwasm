@@ -318,6 +318,221 @@ export interface ODEModule {
   _wasm_radau5_iwork_size(n: number): number;
 
   // ============================================================================
+  // NETLIB SOLVERS
+  // ============================================================================
+
+  /** RKF45 solver entry point */
+  _wasm_rkf45(
+    neqn: number,
+    y: number,
+    t: number,
+    tout: number,
+    relerr: number,
+    abserr: number,
+    iflag: number,
+    work: number,
+    iwork: number,
+  ): void;
+
+  /** DVERK solver entry point */
+  _wasm_dverk(
+    n: number,
+    x: number,
+    y: number,
+    xend: number,
+    tol: number,
+    ind: number,
+    c: number,
+    nw: number,
+    w: number,
+  ): void;
+
+  /** ODE (Adams-Bashforth-Moulton) solver entry point */
+  _wasm_ode(
+    neqn: number,
+    y: number,
+    t: number,
+    tout: number,
+    relerr: number,
+    abserr: number,
+    iflag: number,
+    work: number,
+    iwork: number,
+  ): void;
+
+  /** VODE solver entry point */
+  _wasm_vode(
+    neq: number,
+    y: number,
+    t: number,
+    tout: number,
+    itol: number,
+    rtol: number,
+    atol: number,
+    itask: number,
+    istate: number,
+    iopt: number,
+    rwork: number,
+    lrw: number,
+    iwork: number,
+    liw: number,
+    mf: number,
+  ): void;
+
+  /** ZVODE solver entry point (complex-valued) */
+  _wasm_zvode(
+    neq: number,
+    y: number,
+    t: number,
+    tout: number,
+    itol: number,
+    rtol: number,
+    atol: number,
+    itask: number,
+    istate: number,
+    iopt: number,
+    zwork: number,
+    lzw: number,
+    rwork: number,
+    lrw: number,
+    iwork: number,
+    liw: number,
+    mf: number,
+  ): void;
+
+  /** VODPK solver entry point (Krylov methods) */
+  _wasm_vodpk(
+    neq: number,
+    y: number,
+    t: number,
+    tout: number,
+    itol: number,
+    rtol: number,
+    atol: number,
+    itask: number,
+    istate: number,
+    iopt: number,
+    rwork: number,
+    lrw: number,
+    iwork: number,
+    liw: number,
+    mf: number,
+  ): void;
+
+  /** RKSUITE setup */
+  _wasm_rksuite_setup(
+    neq: number,
+    tstart: number,
+    ystart: number,
+    tend: number,
+    tol: number,
+    thres: number,
+    method: number,
+    task_code: number,
+    errass: number,
+    hstart: number,
+    work: number,
+    lenwrk: number,
+    mesage: number,
+  ): void;
+
+  /** RKSUITE UT mode step */
+  _wasm_rksuite_ut(
+    twant: number,
+    tgot: number,
+    ygot: number,
+    ypgot: number,
+    ymax: number,
+    work: number,
+    uflag: number,
+  ): void;
+
+  /** RKSUITE CT mode step */
+  _wasm_rksuite_ct(
+    tnow: number,
+    ynow: number,
+    ypnow: number,
+    work: number,
+    cflag: number,
+  ): void;
+
+  /** RKSUITE statistics */
+  _wasm_rksuite_stat(
+    totfcn: number,
+    stpcst: number,
+    waste: number,
+    stpsok: number,
+    hnext: number,
+  ): void;
+
+  /** RKC solver entry point */
+  _wasm_rkc(
+    neqn: number,
+    y: number,
+    t: number,
+    tend: number,
+    rtol: number,
+    atol: number,
+    info: number,
+    work: number,
+    idid: number,
+  ): void;
+
+  /** RKC dense output interpolation */
+  _wasm_rkc_int(t: number, yint: number, neqn: number, work: number): void;
+
+  // ============================================================================
+  // NETLIB WORK ARRAY SIZE HELPERS
+  // ============================================================================
+
+  /** RKF45 work array size */
+  _wasm_rkf45_work_size(n: number): number;
+  /** RKF45 iwork array size */
+  _wasm_rkf45_iwork_size(): number;
+
+  /** DVERK c array size */
+  _wasm_dverk_c_size(n: number, error_control: number): number;
+  /** DVERK work array size */
+  _wasm_dverk_work_size(n: number): number;
+
+  /** ODE work array size */
+  _wasm_ode_work_size(n: number): number;
+  /** ODE iwork array size */
+  _wasm_ode_iwork_size(): number;
+
+  /** VODE rwork array size */
+  _wasm_vode_rwork_size(n: number, mf: number): number;
+  /** VODE iwork array size */
+  _wasm_vode_iwork_size(n: number, mf: number): number;
+
+  /** ZVODE zwork array size */
+  _wasm_zvode_zwork_size(n: number, mf: number): number;
+  /** ZVODE rwork array size */
+  _wasm_zvode_rwork_size(n: number, mf: number): number;
+
+  /** VODPK rwork array size */
+  _wasm_vodpk_rwork_size(n: number, maxl: number, maxp: number, lwp: number): number;
+  /** VODPK iwork array size */
+  _wasm_vodpk_iwork_size(n: number, liwp: number): number;
+
+  /** RKSUITE work array size */
+  _wasm_rksuite_work_size(n: number, method: number, errass: number): number;
+
+  /** RKC work array size */
+  _wasm_rkc_work_size(n: number, use_spcrad: number): number;
+
+  // ============================================================================
+  // NETLIB CALLBACK SETTERS
+  // ============================================================================
+
+  /** Set VODE/VODPK Jacobian callback */
+  _wasm_set_jac_vode_callback(ptr: number): void;
+  /** Set VODPK preconditioner solve callback */
+  _wasm_set_psol_callback(ptr: number): void;
+  /** Set RKC spectral radius callback */
+  _wasm_set_spcrad_callback(ptr: number): void;
+
+  // ============================================================================
   // MEMORY MANAGEMENT
   // ============================================================================
 
@@ -481,7 +696,7 @@ export type SoloutCallback = (t: number, y: number[]) => boolean;
  * - 'DOP853': Higher-order explicit RK 8(5,3), more accurate for smooth problems
  * - 'Radau': Implicit Radau IIA order 5, for stiff problems
  */
-export type ODEMethod = ExplicitMethod | ImplicitMethod;
+export type ODEMethod = ExplicitMethod | ImplicitMethod | StabilizedMethod;
 
 /**
  * Options for the solve_ivp function.
@@ -631,12 +846,36 @@ export const STATUS_MESSAGES: Record<number, string> = {
 };
 
 export enum ExplicitMethod {
+  /** DOPRI5 - Dormand-Prince 5(4) explicit Runge-Kutta */
   RK45 = "RK45",
+  /** DOP853 - Dormand-Prince 8(5,3) high-order explicit Runge-Kutta */
   DOP853 = "DOP853",
+  /** RKF45 - Runge-Kutta-Fehlberg 4(5) */
+  RKF45 = "RKF45",
+  /** DVERK - Verner 6(5) Runge-Kutta */
+  DVERK = "DVERK",
+  /** ODE - Adams-Bashforth-Moulton multistep */
+  ODE = "ODE",
+  /** RKSUITE - RK Suite (2,3) pair */
+  RKSUITE23 = "RKSUITE23",
+  /** RKSUITE - RK Suite (4,5) pair */
+  RKSUITE45 = "RKSUITE45",
+  /** RKSUITE - RK Suite (7,8) pair */
+  RKSUITE78 = "RKSUITE78",
 }
 
 export enum ImplicitMethod {
+  /** RADAU5 - Implicit Radau IIA order 5 for stiff systems */
   Radau = "Radau",
+  /** VODE - Variable-coefficient ODE solver with BDF/Adams */
+  VODE = "VODE",
+  /** BDF - Backward Differentiation Formula via VODE */
+  BDF = "BDF",
+}
+
+export enum StabilizedMethod {
+  /** RKC - Runge-Kutta-Chebyshev for mildly stiff problems */
+  RKC = "RKC",
 }
 
 // ============================================================================

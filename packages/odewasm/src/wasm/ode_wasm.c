@@ -1,8 +1,9 @@
 /*
  * ODE WASM Wrapper
  *
- * Provides clean C entry points for the Hairer ODE solvers (DOPRI5, DOP853, RADAU5)
- * compiled from Fortran via f2c.
+ * Provides clean C entry points for ODE solvers compiled from Fortran via f2c:
+ * - Hairer solvers: DOPRI5, DOP853, RADAU5
+ * - Netlib solvers: RKF45, DVERK, ODE, VODE, ZVODE, EPSODE, VODPK, RKSUITE, RKC
  *
  * The key challenge is bridging JavaScript callbacks to Fortran subroutine conventions.
  * We use global function pointers that are set before calling the solver.
@@ -59,6 +60,80 @@ extern doublereal contr5_(integer *ii, doublereal *s, doublereal *cont,
                           integer *lrc);
 
 /* ============================================
+ * External declarations for Netlib solvers
+ * ============================================ */
+
+/* RKF45: Runge-Kutta-Fehlberg 4(5) */
+extern int rkf45_(U_fp f, integer *neqn, doublereal *y, doublereal *t,
+                  doublereal *tout, doublereal *relerr, doublereal *abserr,
+                  integer *iflag, doublereal *work, integer *iwork);
+
+/* DVERK: Verner 6(5) Runge-Kutta */
+extern int dverk_(integer *n, S_fp fcn, doublereal *x, doublereal *y,
+                  doublereal *xend, doublereal *tol, integer *ind,
+                  doublereal *c__, integer *nw, doublereal *w);
+
+/* ODE: Adams-Bashforth-Moulton */
+extern int ode_(U_fp f, integer *neqn, doublereal *y, doublereal *t,
+                doublereal *tout, doublereal *relerr, doublereal *abserr,
+                integer *iflag, doublereal *work, integer *iwork);
+
+/* VODE: Variable-coefficient ODE solver */
+extern int dvode_(S_fp f, integer *neq, doublereal *y, doublereal *t,
+                  doublereal *tout, integer *itol, doublereal *rtol,
+                  doublereal *atol, integer *itask, integer *istate,
+                  integer *iopt, doublereal *rwork, integer *lrw,
+                  integer *iwork, integer *liw, U_fp jac, integer *mf,
+                  doublereal *rpar, integer *ipar);
+
+/* ZVODE: VODE for complex-valued ODEs */
+extern int zvode_(S_fp f, integer *neq, doublecomplex *y, doublereal *t,
+                  doublereal *tout, integer *itol, doublereal *rtol,
+                  doublereal *atol, integer *itask, integer *istate,
+                  integer *iopt, doublecomplex *zwork, integer *lzw,
+                  doublereal *rwork, integer *lrw, integer *iwork,
+                  integer *liw, U_fp jac, integer *mf,
+                  doublereal *rpar, integer *ipar);
+
+/* EPSODE: Episode package for stiff ODEs */
+extern int epsode_(integer *n, doublereal *t0, doublereal *hmax,
+                   doublereal *y, doublereal *tout, doublereal *eps,
+                   integer *mf, integer *index__, doublereal *work);
+
+/* VODPK: VODE with Krylov methods */
+extern int dvodpk_(S_fp f, integer *neq, doublereal *y, doublereal *t,
+                   doublereal *tout, integer *itol, doublereal *rtol,
+                   doublereal *atol, integer *itask, integer *istate,
+                   integer *iopt, doublereal *rwork, integer *lrw,
+                   integer *iwork, integer *liw, U_fp jac, U_fp psol,
+                   integer *mf, doublereal *rpar, integer *ipar);
+
+/* RKSUITE: RK suite functions */
+extern int setup_(integer *neq, doublereal *tstart, doublereal *ystart,
+                  doublereal *tend, doublereal *tol, doublereal *thres,
+                  integer *method, char *task, logical *errass,
+                  doublereal *hstart, doublereal *work, integer *lenwrk,
+                  logical *mesage, ftnlen task_len);
+extern int ut_(U_fp f, doublereal *twant, doublereal *tgot, doublereal *ygot,
+               doublereal *ypgot, doublereal *ymax, doublereal *work,
+               integer *uflag);
+extern int ct_(U_fp f, doublereal *tnow, doublereal *ynow, doublereal *ypnow,
+               doublereal *work, integer *cflag);
+extern int intrp_(doublereal *twant, char *reqest, integer *nwant,
+                  doublereal *ywant, doublereal *ypwant, U_fp f,
+                  doublereal *work, doublereal *wrkint, integer *lenint,
+                  ftnlen reqest_len);
+extern int stat_(integer *totfcn, integer *stpcst, doublereal *waste,
+                 integer *stpsok, doublereal *hnext);
+
+/* RKC: Runge-Kutta-Chebyshev order 2 */
+extern int rkc_(integer *neqn, U_fp f, doublereal *y, doublereal *t,
+                doublereal *tend, doublereal *rtol, doublereal *atol,
+                integer *info, doublereal *work, integer *idid);
+extern int rkcint_(doublereal *t, doublereal *yint, integer *neqn,
+                   doublereal *work);
+
+/* ============================================
  * JavaScript callback function pointers
  * ============================================ */
 
@@ -73,10 +148,27 @@ typedef void (*js_solout_callback_t)(integer nr, doublereal told, doublereal t,
 typedef void (*js_jac_callback_t)(integer n, doublereal t, doublereal *y,
                                   doublereal *dfy, integer ldfy);
 
+/* Callback type for VODE/VODPK Jacobian: jac(n, t, y, ml, mu, pd, nrowpd) */
+typedef void (*js_jac_vode_callback_t)(integer n, doublereal t, doublereal *y,
+                                        integer ml, integer mu, doublereal *pd,
+                                        integer nrowpd);
+
+/* Callback type for VODPK preconditioner solve */
+typedef int (*js_psol_callback_t)(integer n, doublereal t, doublereal *y,
+                                   doublereal *savf, doublereal *wk,
+                                   doublereal hrl1, doublereal *wp,
+                                   integer *iwp, doublereal *b, integer lr);
+
+/* Callback type for spectral radius estimation (RKC) */
+typedef doublereal (*js_spcrad_callback_t)(integer n, doublereal t, doublereal *y);
+
 /* Global callback pointers */
 static js_fcn_callback_t g_fcn_callback = NULL;
 static js_solout_callback_t g_solout_callback = NULL;
 static js_jac_callback_t g_jac_callback = NULL;
+static js_jac_vode_callback_t g_jac_vode_callback = NULL;
+static js_psol_callback_t g_psol_callback = NULL;
+static js_spcrad_callback_t g_spcrad_callback = NULL;
 
 /* ============================================
  * Callback setters (called from JavaScript)
@@ -92,6 +184,18 @@ EXPORT void wasm_set_solout_callback(js_solout_callback_t cb) {
 
 EXPORT void wasm_set_jac_callback(js_jac_callback_t cb) {
     g_jac_callback = cb;
+}
+
+EXPORT void wasm_set_jac_vode_callback(js_jac_vode_callback_t cb) {
+    g_jac_vode_callback = cb;
+}
+
+EXPORT void wasm_set_psol_callback(js_psol_callback_t cb) {
+    g_psol_callback = cb;
+}
+
+EXPORT void wasm_set_spcrad_callback(js_spcrad_callback_t cb) {
+    g_spcrad_callback = cb;
 }
 
 /* ============================================
@@ -165,6 +269,97 @@ static int mas_thunk_(integer *n, doublereal *am, integer *lmas,
     (void)n; (void)am; (void)lmas; (void)rpar; (void)ipar;
     /* Identity mass matrix - nothing to do */
     return 0;
+}
+
+/*
+ * FCN thunk for RKF45/ODE: F(T, Y, YP) - different signature from Hairer solvers
+ * Fortran calls F(T, Y, YP) with T as scalar
+ */
+static int fcn_rkf45_thunk_(doublereal *t, doublereal *y, doublereal *yp) {
+    if (g_fcn_callback) {
+        /* We need to know n, but it's not passed - use a global or extract from work */
+        /* For now, assume n is stored somewhere accessible */
+        g_fcn_callback(0, *t, y, yp);  /* n=0 as placeholder, TS wrapper knows n */
+    }
+    return 0;
+}
+
+/*
+ * FCN thunk for DVERK: FCN(N, X, Y, YP) - needs S_fp signature
+ */
+static int fcn_dverk_thunk_(integer *n, doublereal *x, doublereal *y, doublereal *yp) {
+    if (g_fcn_callback) {
+        g_fcn_callback(*n, *x, y, yp);
+    }
+    return 0;
+}
+
+/*
+ * FCN thunk for VODE: F(NEQ, T, Y, YDOT, RPAR, IPAR)
+ */
+static int fcn_vode_thunk_(integer *neq, doublereal *t, doublereal *y,
+                           doublereal *ydot, doublereal *rpar, integer *ipar) {
+    (void)rpar; (void)ipar;
+    if (g_fcn_callback) {
+        g_fcn_callback(*neq, *t, y, ydot);
+    }
+    return 0;
+}
+
+/*
+ * JAC thunk for VODE: JAC(NEQ, T, Y, ML, MU, PD, NROWPD, RPAR, IPAR)
+ */
+static int jac_vode_thunk_(integer *neq, doublereal *t, doublereal *y,
+                           integer *ml, integer *mu, doublereal *pd,
+                           integer *nrowpd, doublereal *rpar, integer *ipar) {
+    (void)rpar; (void)ipar;
+    if (g_jac_vode_callback) {
+        g_jac_vode_callback(*neq, *t, y, *ml, *mu, pd, *nrowpd);
+    }
+    return 0;
+}
+
+/*
+ * PSOL thunk for VODPK preconditioner solve
+ */
+static int psol_vodpk_thunk_(integer *neq, doublereal *t, doublereal *y,
+                              doublereal *savf, doublereal *wk,
+                              doublereal *hrl1, doublereal *wp, integer *iwp,
+                              doublereal *b, integer *lr, integer *ier) {
+    if (g_psol_callback) {
+        *ier = g_psol_callback(*neq, *t, y, savf, wk, *hrl1, wp, iwp, b, *lr);
+    } else {
+        *ier = 0;
+    }
+    return 0;
+}
+
+/*
+ * Dummy JAC for VODPK (preconditioner setup - often not needed)
+ */
+static int jac_vodpk_thunk_(S_fp f, integer *neq, doublereal *t, doublereal *y,
+                            doublereal *ysv, doublereal *rewt, doublereal *fty,
+                            doublereal *v, doublereal *hrl1, doublereal *wp,
+                            integer *iwp, integer *ier, doublereal *rpar,
+                            integer *ipar) {
+    (void)f; (void)neq; (void)t; (void)y; (void)ysv; (void)rewt;
+    (void)fty; (void)v; (void)hrl1; (void)wp; (void)iwp;
+    (void)rpar; (void)ipar;
+    *ier = 0;  /* Success - use identity preconditioner by default */
+    return 0;
+}
+
+/*
+ * SPCRAD thunk for RKC: Spectral radius estimation
+ * RKC calls SPCRAD(N, T, Y) to get an estimate of the spectral radius.
+ * If user provides callback, use it. Otherwise return 0 (RKC will estimate internally).
+ */
+doublereal spcrad_(integer *n, doublereal *t, doublereal *y) {
+    if (g_spcrad_callback) {
+        return g_spcrad_callback(*n, *t, y);
+    }
+    /* Return 0 to let RKC estimate spectral radius internally */
+    return 0.0;
 }
 
 /* ============================================
@@ -258,6 +453,253 @@ EXPORT void wasm_radau5(
 }
 
 /* ============================================
+ * Netlib Solver Entry Points
+ * ============================================ */
+
+/*
+ * wasm_rkf45 - Solve ODE using RKF45 (Runge-Kutta-Fehlberg 4(5))
+ *
+ * Parameters:
+ *   neqn   - Number of equations
+ *   y      - State vector (modified on output)
+ *   t      - Current time (modified on output)
+ *   tout   - Target end time
+ *   relerr - Relative error tolerance
+ *   abserr - Absolute error tolerance
+ *   iflag  - Status flag (input: 1=first call, output: 2=success)
+ *   work   - Work array (at least 3+6*neqn doubles)
+ *   iwork  - Integer work array (at least 5 integers)
+ */
+EXPORT void wasm_rkf45(
+    integer neqn, doublereal *y, doublereal *t, doublereal tout,
+    doublereal *relerr, doublereal *abserr, integer *iflag,
+    doublereal *work, integer *iwork)
+{
+    rkf45_((U_fp)fcn_thunk_, &neqn, y, t, &tout, relerr, abserr,
+           iflag, work, iwork);
+}
+
+/*
+ * wasm_dverk - Solve ODE using DVERK (Verner 6(5) Runge-Kutta)
+ *
+ * Parameters:
+ *   n      - Number of equations
+ *   x      - Current time (modified on output)
+ *   y      - State vector (modified on output)
+ *   xend   - Target end time
+ *   tol    - Tolerance
+ *   ind    - Indicator (input: 1=first call, output: 3=success)
+ *   c      - Options array (24 or n+30 doubles depending on c[0])
+ *   nw     - Length of w array
+ *   w      - Work array
+ */
+EXPORT void wasm_dverk(
+    integer n, doublereal *x, doublereal *y, doublereal xend,
+    doublereal tol, integer *ind, doublereal *c__, integer nw, doublereal *w)
+{
+    dverk_(&n, (S_fp)fcn_dverk_thunk_, x, y, &xend, &tol, ind, c__, &nw, w);
+}
+
+/*
+ * wasm_ode - Solve ODE using Adams-Bashforth-Moulton
+ *
+ * Same interface as RKF45.
+ */
+EXPORT void wasm_ode(
+    integer neqn, doublereal *y, doublereal *t, doublereal tout,
+    doublereal *relerr, doublereal *abserr, integer *iflag,
+    doublereal *work, integer *iwork)
+{
+    ode_((U_fp)fcn_thunk_, &neqn, y, t, &tout, relerr, abserr,
+         iflag, work, iwork);
+}
+
+/*
+ * wasm_vode - Solve ODE using VODE (Variable-coefficient ODE solver)
+ *
+ * Parameters:
+ *   neq    - Number of equations
+ *   y      - State vector (modified on output)
+ *   t      - Current time (modified on output)
+ *   tout   - Target end time
+ *   itol   - Tolerance type (1=scalar, 2=array)
+ *   rtol   - Relative tolerance
+ *   atol   - Absolute tolerance
+ *   itask  - Task indicator (1=normal, 2=one step)
+ *   istate - State indicator (input: 1=first call, output: 2=success)
+ *   iopt   - Options flag (0=no options, 1=use options in rwork/iwork)
+ *   rwork  - Real work array
+ *   lrw    - Length of rwork
+ *   iwork  - Integer work array
+ *   liw    - Length of iwork
+ *   mf     - Method flag (10=Adams, 21/22=BDF with full/banded Jacobian)
+ */
+EXPORT void wasm_vode(
+    integer neq, doublereal *y, doublereal *t, doublereal tout,
+    integer itol, doublereal *rtol, doublereal *atol,
+    integer itask, integer *istate, integer iopt,
+    doublereal *rwork, integer lrw, integer *iwork, integer liw,
+    integer mf)
+{
+    doublereal rpar = 0;
+    integer ipar = 0;
+
+    dvode_((S_fp)fcn_vode_thunk_, &neq, y, t, &tout, &itol, rtol, atol,
+           &itask, istate, &iopt, rwork, &lrw, iwork, &liw,
+           (U_fp)jac_vode_thunk_, &mf, &rpar, &ipar);
+}
+
+/*
+ * wasm_zvode - Solve complex-valued ODE using ZVODE
+ *
+ * Same as VODE but with complex arrays.
+ * y and zwork are interleaved real/imag pairs.
+ */
+EXPORT void wasm_zvode(
+    integer neq, doublereal *y, doublereal *t, doublereal tout,
+    integer itol, doublereal *rtol, doublereal *atol,
+    integer itask, integer *istate, integer iopt,
+    doublereal *zwork, integer lzw,
+    doublereal *rwork, integer lrw, integer *iwork, integer liw,
+    integer mf)
+{
+    doublereal rpar = 0;
+    integer ipar = 0;
+
+    /* y and zwork are treated as doublecomplex (pairs of doubles) */
+    zvode_((S_fp)fcn_vode_thunk_, &neq, (doublecomplex*)y, t, &tout,
+           &itol, rtol, atol, &itask, istate, &iopt,
+           (doublecomplex*)zwork, &lzw, rwork, &lrw, iwork, &liw,
+           (U_fp)jac_vode_thunk_, &mf, &rpar, &ipar);
+}
+
+/*
+ * wasm_vodpk - Solve ODE using VODPK (VODE with Krylov methods)
+ *
+ * Same interface as VODE but uses preconditioned Krylov methods.
+ */
+EXPORT void wasm_vodpk(
+    integer neq, doublereal *y, doublereal *t, doublereal tout,
+    integer itol, doublereal *rtol, doublereal *atol,
+    integer itask, integer *istate, integer iopt,
+    doublereal *rwork, integer lrw, integer *iwork, integer liw,
+    integer mf)
+{
+    doublereal rpar = 0;
+    integer ipar = 0;
+
+    dvodpk_((S_fp)fcn_vode_thunk_, &neq, y, t, &tout, &itol, rtol, atol,
+            &itask, istate, &iopt, rwork, &lrw, iwork, &liw,
+            (U_fp)jac_vodpk_thunk_, (U_fp)psol_vodpk_thunk_, &mf,
+            &rpar, &ipar);
+}
+
+/*
+ * wasm_rksuite_setup - Initialize RKSUITE solver
+ *
+ * Parameters:
+ *   neq     - Number of equations
+ *   tstart  - Initial time
+ *   ystart  - Initial state vector
+ *   tend    - Target end time
+ *   tol     - Tolerance
+ *   thres   - Threshold array (or scalar pointer)
+ *   method  - Method (1=(2,3), 2=(4,5), 3=(7,8))
+ *   task    - 'U' for UT mode, 'C' for CT mode
+ *   errass  - Enable error assessment (0=no, 1=yes)
+ *   hstart  - Initial step size (0 for automatic)
+ *   work    - Work array
+ *   lenwrk  - Length of work array
+ *   mesage  - Enable messages (0=no, 1=yes)
+ */
+EXPORT void wasm_rksuite_setup(
+    integer neq, doublereal tstart, doublereal *ystart, doublereal tend,
+    doublereal tol, doublereal *thres, integer method,
+    integer task_code, integer errass, doublereal hstart,
+    doublereal *work, integer lenwrk, integer mesage)
+{
+    char task[2];
+    logical errass_log = errass ? TRUE_ : FALSE_;
+    logical mesage_log = mesage ? TRUE_ : FALSE_;
+
+    task[0] = (task_code == 0) ? 'U' : 'C';
+    task[1] = '\0';
+
+    setup_(&neq, &tstart, ystart, &tend, &tol, thres, &method,
+           task, &errass_log, &hstart, work, &lenwrk, &mesage_log, (ftnlen)1);
+}
+
+/*
+ * wasm_rksuite_ut - Advance RKSUITE integration (UT mode)
+ *
+ * Parameters:
+ *   twant  - Desired time (may not be reached exactly)
+ *   tgot   - Time actually reached (output)
+ *   ygot   - Solution at tgot (output)
+ *   ypgot  - Derivative at tgot (output)
+ *   ymax   - Maximum y values seen (output)
+ *   work   - Work array from setup
+ *   uflag  - Status flag (output: 1=success, others=error)
+ */
+EXPORT void wasm_rksuite_ut(
+    doublereal twant, doublereal *tgot, doublereal *ygot,
+    doublereal *ypgot, doublereal *ymax, doublereal *work, integer *uflag)
+{
+    ut_((U_fp)fcn_thunk_, &twant, tgot, ygot, ypgot, ymax, work, uflag);
+}
+
+/*
+ * wasm_rksuite_ct - Advance RKSUITE one step (CT mode)
+ */
+EXPORT void wasm_rksuite_ct(
+    doublereal *tnow, doublereal *ynow, doublereal *ypnow,
+    doublereal *work, integer *cflag)
+{
+    ct_((U_fp)fcn_thunk_, tnow, ynow, ypnow, work, cflag);
+}
+
+/*
+ * wasm_rksuite_stat - Get RKSUITE statistics
+ */
+EXPORT void wasm_rksuite_stat(
+    integer *totfcn, integer *stpcst, doublereal *waste,
+    integer *stpsok, doublereal *hnext)
+{
+    stat_(totfcn, stpcst, waste, stpsok, hnext);
+}
+
+/*
+ * wasm_rkc - Solve ODE using RKC (Runge-Kutta-Chebyshev order 2)
+ *
+ * Parameters:
+ *   neqn  - Number of equations
+ *   y     - State vector (modified on output)
+ *   t     - Current time (modified on output)
+ *   tend  - Target end time
+ *   rtol  - Relative tolerance
+ *   atol  - Absolute tolerance (scalar or array based on info[1])
+ *   info  - Options array (4 integers)
+ *   work  - Work array
+ *   idid  - Status flag (output: 1=success)
+ */
+EXPORT void wasm_rkc(
+    integer neqn, doublereal *y, doublereal *t, doublereal tend,
+    doublereal rtol, doublereal *atol, integer *info,
+    doublereal *work, integer *idid)
+{
+    rkc_(&neqn, (U_fp)fcn_thunk_, y, t, &tend, &rtol, atol, info, work, idid);
+}
+
+/*
+ * wasm_rkc_int - Dense output interpolation for RKC
+ */
+EXPORT void wasm_rkc_int(
+    doublereal t, doublereal *yint, integer neqn, doublereal *work)
+{
+    rkcint_(&t, yint, &neqn, work);
+}
+
+/* ============================================
  * Dense Output Functions
  * ============================================ */
 
@@ -334,6 +776,125 @@ EXPORT integer wasm_radau5_work_size(integer n) {
 EXPORT integer wasm_radau5_iwork_size(integer n) {
     /* For full Jacobian: 3*n + 20 */
     return 3 * n + 20;
+}
+
+/*
+ * Get minimum work array size for RKF45
+ */
+EXPORT integer wasm_rkf45_work_size(integer n) {
+    return 3 + 6 * n;
+}
+
+EXPORT integer wasm_rkf45_iwork_size(void) {
+    return 5;
+}
+
+/*
+ * Get minimum work array size for DVERK
+ * error_control: c[0] value (0-5)
+ */
+EXPORT integer wasm_dverk_c_size(integer n, integer error_control) {
+    /* c array is 24 normally, or n+30 for error_control=4 or 5 */
+    if (error_control == 4 || error_control == 5) {
+        return n + 30;
+    }
+    return 24;
+}
+
+EXPORT integer wasm_dverk_work_size(integer n) {
+    return 9 * n;
+}
+
+/*
+ * Get minimum work array size for ODE (Adams-Bashforth-Moulton)
+ */
+EXPORT integer wasm_ode_work_size(integer n) {
+    return 100 + 21 * n;
+}
+
+EXPORT integer wasm_ode_iwork_size(void) {
+    return 5;
+}
+
+/*
+ * Get minimum work array size for VODE
+ * mf: method flag
+ *   10 = Adams (non-stiff), no Jacobian
+ *   21 = BDF, full Jacobian
+ *   22 = BDF, full Jacobian (internal)
+ *   24 = BDF, banded Jacobian
+ *   25 = BDF, banded Jacobian (internal)
+ */
+EXPORT integer wasm_vode_rwork_size(integer n, integer mf) {
+    if (mf == 10) {
+        return 20 + 16 * n;
+    } else if (mf == 21 || mf == 22) {
+        return 22 + 9 * n + 2 * n * n;
+    } else {
+        /* Banded: 22 + 10*n + (2*ml + mu)*n, use worst case */
+        return 22 + 9 * n + 2 * n * n;
+    }
+}
+
+EXPORT integer wasm_vode_iwork_size(integer n, integer mf) {
+    if (mf == 10) {
+        return 30;
+    } else {
+        return 30 + n;
+    }
+}
+
+/*
+ * Get minimum work array size for ZVODE (complex VODE)
+ */
+EXPORT integer wasm_zvode_zwork_size(integer n, integer mf) {
+    if (mf == 10) {
+        return 15 * n;
+    } else if (mf == 21 || mf == 22) {
+        return 8 * n + 2 * n * n;
+    } else {
+        return 8 * n + 2 * n * n;
+    }
+}
+
+EXPORT integer wasm_zvode_rwork_size(integer n, integer mf) {
+    return 20 + n;
+}
+
+/*
+ * Get minimum work array size for VODPK
+ */
+EXPORT integer wasm_vodpk_rwork_size(integer n, integer maxl, integer maxp, integer lwp) {
+    /* Base: 20 + 16*n + n for SAVF */
+    /* Krylov: maxl*n + (maxp+3)*n + (maxl+3)*maxl + 1 */
+    /* Preconditioner: lwp */
+    return 20 + 17 * n + maxl * n + (maxp + 3) * n + (maxl + 3) * maxl + 1 + lwp;
+}
+
+EXPORT integer wasm_vodpk_iwork_size(integer n, integer liwp) {
+    return 30 + liwp;
+}
+
+/*
+ * Get minimum work array size for RKSUITE
+ * method: 1=(2,3), 2=(4,5), 3=(7,8)
+ */
+EXPORT integer wasm_rksuite_work_size(integer n, integer method, integer errass) {
+    /* Conservative estimate: 32*n covers all cases */
+    (void)method; (void)errass;
+    return 32 * n;
+}
+
+/*
+ * Get minimum work array size for RKC
+ * use_spcrad: 0 if user provides spectral radius function, 1 otherwise
+ */
+EXPORT integer wasm_rkc_work_size(integer n, integer use_spcrad) {
+    if (use_spcrad) {
+        return 8 + 5 * n;  /* RKC estimates spectral radius internally */
+    } else {
+        return 8 + 4 * n;  /* User provides spectral radius */
+    }
 }
 
 /* ============================================

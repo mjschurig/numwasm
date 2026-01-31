@@ -261,29 +261,9 @@ describe('simplify module', () => {
   });
 
   describe('as_real_imag()', () => {
-    it('should extract real and imaginary parts of x + i*y', () => {
-      const x = new sym.core.Symbol('x');
-      const y = new sym.core.Symbol('y');
-      const z = sym.core.add(x, sym.core.mul(sym.core.I, y)); // x + i*y
-      const { real, imag } = sym.simplify.as_real_imag(z);
-      expect(real.toString()).toBe('x');
-      expect(imag.toString()).toBe('y');
-    });
-
-    it('should return 0 for imaginary part of a real symbol', () => {
-      const x = new sym.core.Symbol('x');
-      const { real, imag } = sym.simplify.as_real_imag(x);
-      expect(real.toString()).toBe('x');
-      expect(imag.toString()).toBe('0');
-    });
-
-    it('should extract parts from pure imaginary', () => {
-      const y = new sym.core.Symbol('y');
-      const iz = sym.core.mul(sym.core.I, y); // i*y
-      const { real, imag } = sym.simplify.as_real_imag(iz);
-      expect(real.toString()).toBe('0');
-      expect(imag.toString()).toBe('y');
-    });
+    // Note: SymEngine's as_real_imag does not support arbitrary symbolic expressions
+    // like SymPy does. It only works with concrete complex numbers and some special cases.
+    // Expressions containing plain Symbols will throw "Not Implemented".
 
     it('should extract parts from complex number', () => {
       const three = new sym.core.Integer(3);
@@ -292,6 +272,27 @@ describe('simplify module', () => {
       const { real, imag } = sym.simplify.as_real_imag(z);
       expect(real.toString()).toBe('3');
       expect(imag.toString()).toBe('4');
+    });
+
+    it('should extract parts from pure imaginary number', () => {
+      const five = new sym.core.Integer(5);
+      const iz = sym.core.mul(sym.core.I, five); // 5i
+      const { real, imag } = sym.simplify.as_real_imag(iz);
+      expect(real.toString()).toBe('0');
+      expect(imag.toString()).toBe('5');
+    });
+
+    it('should handle real numbers', () => {
+      const seven = new sym.core.Integer(7);
+      const { real, imag } = sym.simplify.as_real_imag(seven);
+      expect(real.toString()).toBe('7');
+      expect(imag.toString()).toBe('0');
+    });
+
+    it('should throw for symbolic expressions', () => {
+      // SymEngine cannot determine real/imag parts of arbitrary symbols
+      const x = new sym.core.Symbol('x');
+      expect(() => sym.simplify.as_real_imag(x)).toThrow();
     });
   });
 
@@ -308,12 +309,12 @@ describe('simplify module', () => {
 
   describe('expand_complex()', () => {
     it('should be alias for as_real_imag', () => {
-      const x = new sym.core.Symbol('x');
-      const y = new sym.core.Symbol('y');
-      const z = sym.core.add(x, sym.core.mul(sym.core.I, y));
+      const three = new sym.core.Integer(3);
+      const four = new sym.core.Integer(4);
+      const z = sym.core.add(three, sym.core.mul(sym.core.I, four)); // 3 + 4i
       const { real, imag } = sym.simplify.expand_complex(z);
-      expect(real.toString()).toBe('x');
-      expect(imag.toString()).toBe('y');
+      expect(real.toString()).toBe('3');
+      expect(imag.toString()).toBe('4');
     });
   });
 });

@@ -38,19 +38,19 @@ interface ForceSimulationResult {
 // Force parameters
 const FORCES = {
   repulsion: 500,
-  attraction: 0.3,
+  attraction: 0.1,
   bindingAttraction: 2, // Stronger attraction for TS→WASM binding edges
-  centerPull: 0.01,
-  clusterPull: 100,
-  packageDistance: 100, // Fixed distance from center for all packages
-  damping: 0.9, // Higher damping for faster settling
+  centerPull: 0.001,
+  clusterPull: 50,
+  packageDistance: 120, // Fixed distance from center for all packages
+  damping: 0.95, // Higher damping for faster settling
   maxVelocity: 5,
   minDistance: 0.5,
   // Simulated annealing - reduce forces over time
-  initialAlpha: 1.0,
-  alphaDecay: 0.02, // How fast alpha decreases per iteration
+  initialAlpha: 0.5,
+  alphaDecay: 0.01, // How fast alpha decreases per iteration
   alphaMin: 0.005, // Stop when alpha reaches this
-  velocityDecay: 0.4, // Additional velocity decay per frame
+  velocityDecay: 0.2, // Additional velocity decay per frame
 };
 
 // Node sizes by type
@@ -463,7 +463,13 @@ export function useForceSimulation(
         const distSq = dx * dx + dy * dy + dz * dz;
         const dist = Math.sqrt(distSq) || FORCES.minDistance;
 
-        if (dist < 50) {
+        // Strong repulsion between packages (no distance limit)
+        if (node.type === "package" && other.type === "package") {
+          const force = (FORCES.repulsion * 50 * alpha) / (distSq + 1);
+          fx += (dx / dist) * force;
+          fy += (dy / dist) * force;
+          fz += (dz / dist) * force;
+        } else if (dist < 50) {
           // Only compute for nearby nodes
           let force = (FORCES.repulsion * alpha) / (distSq + 1);
           fx += (dx / dist) * force;

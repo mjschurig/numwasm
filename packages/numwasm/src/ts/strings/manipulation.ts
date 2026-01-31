@@ -8,7 +8,7 @@
  * Call loadWasmModule() before using these functions.
  */
 
-import { NDArray } from '../NDArray.js';
+import { NDArray } from "../_core/NDArray.js";
 
 /* ============ Case Conversion ============ */
 
@@ -41,7 +41,7 @@ export function lower(a: NDArray | string[]): NDArray {
 export function swapcase(a: NDArray | string[]): NDArray {
   return _applyTransform(a, (s) => {
     return s
-      .split('')
+      .split("")
       .map((c) => {
         if (c === c.toLowerCase() && c !== c.toUpperCase()) {
           return c.toUpperCase();
@@ -51,7 +51,7 @@ export function swapcase(a: NDArray | string[]): NDArray {
         }
         return c;
       })
-      .join('');
+      .join("");
   });
 }
 
@@ -77,7 +77,9 @@ export function capitalize(a: NDArray | string[]): NDArray {
  */
 export function title(a: NDArray | string[]): NDArray {
   return _applyTransform(a, (s) => {
-    return s.replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\B\w/g, (c) => c.toLowerCase());
+    return s
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .replace(/\B\w/g, (c) => c.toLowerCase());
   });
 }
 
@@ -101,7 +103,7 @@ export function add(x1: NDArray | string[], x2: NDArray | string[]): NDArray {
   const a2 = Array.isArray(x2) ? NDArray.fromStringArray(x2) : x2;
 
   if (!a1.isStringArray || !a2.isStringArray) {
-    throw new Error('Both arguments must be string arrays');
+    throw new Error("Both arguments must be string arrays");
   }
 
   // Check shapes match
@@ -133,7 +135,7 @@ export function multiply(a: NDArray | string[], i: number | number[]): NDArray {
   const arr = Array.isArray(a) ? NDArray.fromStringArray(a) : a;
 
   if (!arr.isStringArray) {
-    throw new Error('First argument must be a string array');
+    throw new Error("First argument must be a string array");
   }
 
   const result = NDArray.emptyString(arr.shape);
@@ -142,7 +144,7 @@ export function multiply(a: NDArray | string[], i: number | number[]): NDArray {
   for (let j = 0; j < arr.size; j++) {
     const s = arr.getStringFlat(j);
     const count = counts ? counts[j % counts.length] : (i as number);
-    result.setStringFlat(j, count > 0 ? s.repeat(count) : '');
+    result.setStringFlat(j, count > 0 ? s.repeat(count) : "");
   }
 
   return result;
@@ -157,11 +159,17 @@ export function multiply(a: NDArray | string[], i: number | number[]): NDArray {
  * @param chars - Characters to remove (default: whitespace)
  * @returns String array with stripped strings
  */
-export function strip(a: NDArray | string[], chars: string | null = null): NDArray {
+export function strip(
+  a: NDArray | string[],
+  chars: string | null = null,
+): NDArray {
   return _applyTransform(a, (s) => {
     if (chars === null) return s.trim();
-    const regex = new RegExp(`^[${_escapeRegex(chars)}]+|[${_escapeRegex(chars)}]+$`, 'g');
-    return s.replace(regex, '');
+    const regex = new RegExp(
+      `^[${_escapeRegex(chars)}]+|[${_escapeRegex(chars)}]+$`,
+      "g",
+    );
+    return s.replace(regex, "");
   });
 }
 
@@ -172,11 +180,14 @@ export function strip(a: NDArray | string[], chars: string | null = null): NDArr
  * @param chars - Characters to remove (default: whitespace)
  * @returns String array with left-stripped strings
  */
-export function lstrip(a: NDArray | string[], chars: string | null = null): NDArray {
+export function lstrip(
+  a: NDArray | string[],
+  chars: string | null = null,
+): NDArray {
   return _applyTransform(a, (s) => {
     if (chars === null) return s.trimStart();
     const regex = new RegExp(`^[${_escapeRegex(chars)}]+`);
-    return s.replace(regex, '');
+    return s.replace(regex, "");
   });
 }
 
@@ -187,11 +198,14 @@ export function lstrip(a: NDArray | string[], chars: string | null = null): NDAr
  * @param chars - Characters to remove (default: whitespace)
  * @returns String array with right-stripped strings
  */
-export function rstrip(a: NDArray | string[], chars: string | null = null): NDArray {
+export function rstrip(
+  a: NDArray | string[],
+  chars: string | null = null,
+): NDArray {
   return _applyTransform(a, (s) => {
     if (chars === null) return s.trimEnd();
     const regex = new RegExp(`[${_escapeRegex(chars)}]+$`);
-    return s.replace(regex, '');
+    return s.replace(regex, "");
   });
 }
 
@@ -202,17 +216,20 @@ export function rstrip(a: NDArray | string[], chars: string | null = null): NDAr
  * @param tabsize - Tab stop spacing (default 8)
  * @returns String array with expanded tabs
  */
-export function expandtabs(a: NDArray | string[], tabsize: number = 8): NDArray {
+export function expandtabs(
+  a: NDArray | string[],
+  tabsize: number = 8,
+): NDArray {
   return _applyTransform(a, (s) => {
-    let result = '';
+    let result = "";
     let col = 0;
 
     for (const char of s) {
-      if (char === '\t') {
+      if (char === "\t") {
         const spaces = tabsize - (col % tabsize);
-        result += ' '.repeat(spaces);
+        result += " ".repeat(spaces);
         col += spaces;
-      } else if (char === '\n' || char === '\r') {
+      } else if (char === "\n" || char === "\r") {
         result += char;
         col = 0;
       } else {
@@ -239,7 +256,7 @@ export function replace(
   a: NDArray | string[],
   old: string,
   new_: string,
-  count: number = -1
+  count: number = -1,
 ): NDArray {
   return _applyTransform(a, (s) => {
     if (count === 0) return s;
@@ -265,9 +282,13 @@ export function replace(
  * @param fillchar - Padding character (default space)
  * @returns String array with centered strings
  */
-export function center(a: NDArray | string[], width: number, fillchar: string = ' '): NDArray {
+export function center(
+  a: NDArray | string[],
+  width: number,
+  fillchar: string = " ",
+): NDArray {
   if (fillchar.length !== 1) {
-    throw new TypeError('fillchar must be exactly one character');
+    throw new TypeError("fillchar must be exactly one character");
   }
 
   return _applyTransform(a, (s) => {
@@ -287,9 +308,13 @@ export function center(a: NDArray | string[], width: number, fillchar: string = 
  * @param fillchar - Padding character (default space)
  * @returns String array with left-justified strings
  */
-export function ljust(a: NDArray | string[], width: number, fillchar: string = ' '): NDArray {
+export function ljust(
+  a: NDArray | string[],
+  width: number,
+  fillchar: string = " ",
+): NDArray {
   if (fillchar.length !== 1) {
-    throw new TypeError('fillchar must be exactly one character');
+    throw new TypeError("fillchar must be exactly one character");
   }
 
   return _applyTransform(a, (s) => {
@@ -306,9 +331,13 @@ export function ljust(a: NDArray | string[], width: number, fillchar: string = '
  * @param fillchar - Padding character (default space)
  * @returns String array with right-justified strings
  */
-export function rjust(a: NDArray | string[], width: number, fillchar: string = ' '): NDArray {
+export function rjust(
+  a: NDArray | string[],
+  width: number,
+  fillchar: string = " ",
+): NDArray {
   if (fillchar.length !== 1) {
-    throw new TypeError('fillchar must be exactly one character');
+    throw new TypeError("fillchar must be exactly one character");
   }
 
   return _applyTransform(a, (s) => {
@@ -335,11 +364,11 @@ export function zfill(a: NDArray | string[], width: number): NDArray {
   return _applyTransform(a, (s) => {
     if (s.length >= width) return s;
 
-    const sign = s[0] === '+' || s[0] === '-' ? s[0] : '';
+    const sign = s[0] === "+" || s[0] === "-" ? s[0] : "";
     const rest = sign ? s.slice(1) : s;
     const padLength = width - s.length;
 
-    return sign + '0'.repeat(padLength) + rest;
+    return sign + "0".repeat(padLength) + rest;
   });
 }
 
@@ -362,7 +391,7 @@ export function partition(a: NDArray | string[], sep: string): NDArray {
   const arr = Array.isArray(a) ? NDArray.fromStringArray(a) : a;
 
   if (!arr.isStringArray) {
-    throw new Error('Input must be a string array');
+    throw new Error("Input must be a string array");
   }
 
   const newShape = [...arr.shape, 3];
@@ -375,8 +404,8 @@ export function partition(a: NDArray | string[], sep: string): NDArray {
 
     if (idx === -1) {
       result.setStringFlat(base, s);
-      result.setStringFlat(base + 1, '');
-      result.setStringFlat(base + 2, '');
+      result.setStringFlat(base + 1, "");
+      result.setStringFlat(base + 2, "");
     } else {
       result.setStringFlat(base, s.slice(0, idx));
       result.setStringFlat(base + 1, sep);
@@ -398,7 +427,7 @@ export function rpartition(a: NDArray | string[], sep: string): NDArray {
   const arr = Array.isArray(a) ? NDArray.fromStringArray(a) : a;
 
   if (!arr.isStringArray) {
-    throw new Error('Input must be a string array');
+    throw new Error("Input must be a string array");
   }
 
   const newShape = [...arr.shape, 3];
@@ -410,8 +439,8 @@ export function rpartition(a: NDArray | string[], sep: string): NDArray {
     const base = i * 3;
 
     if (idx === -1) {
-      result.setStringFlat(base, '');
-      result.setStringFlat(base + 1, '');
+      result.setStringFlat(base, "");
+      result.setStringFlat(base + 1, "");
       result.setStringFlat(base + 2, s);
     } else {
       result.setStringFlat(base, s.slice(0, idx));
@@ -433,11 +462,14 @@ export function rpartition(a: NDArray | string[], sep: string): NDArray {
  * @param encoding - Character encoding (default 'utf-8')
  * @returns Array of Uint8Arrays
  */
-export function encode(a: NDArray | string[], _encoding: string = 'utf-8'): Uint8Array[] {
+export function encode(
+  a: NDArray | string[],
+  _encoding: string = "utf-8",
+): Uint8Array[] {
   const arr = Array.isArray(a) ? NDArray.fromStringArray(a) : a;
 
   if (!arr.isStringArray) {
-    throw new Error('Input must be a string array');
+    throw new Error("Input must be a string array");
   }
 
   const encoder = new TextEncoder(); // Always UTF-8 in browsers
@@ -458,7 +490,7 @@ export function encode(a: NDArray | string[], _encoding: string = 'utf-8'): Uint
  * @param encoding - Character encoding (default 'utf-8')
  * @returns String NDArray
  */
-export function decode(a: Uint8Array[], encoding: string = 'utf-8'): NDArray {
+export function decode(a: Uint8Array[], encoding: string = "utf-8"): NDArray {
   const decoder = new TextDecoder(encoding);
   const strings: string[] = [];
 
@@ -474,11 +506,14 @@ export function decode(a: Uint8Array[], encoding: string = 'utf-8'): NDArray {
 /**
  * Apply a string transform to each element.
  */
-function _applyTransform(a: NDArray | string[], transform: (s: string) => string): NDArray {
+function _applyTransform(
+  a: NDArray | string[],
+  transform: (s: string) => string,
+): NDArray {
   const arr = Array.isArray(a) ? NDArray.fromStringArray(a) : a;
 
   if (!arr.isStringArray) {
-    throw new Error('Input must be a string array');
+    throw new Error("Input must be a string array");
   }
 
   const result = NDArray.emptyString(arr.shape);
@@ -494,7 +529,7 @@ function _applyTransform(a: NDArray | string[], transform: (s: string) => string
  * Escape special regex characters in a string.
  */
 function _escapeRegex(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
@@ -502,11 +537,15 @@ function _escapeRegex(s: string): string {
  */
 function _validateShapes(a1: NDArray, a2: NDArray): void {
   if (a1.shape.length !== a2.shape.length) {
-    throw new Error(`Shape mismatch: ${JSON.stringify(a1.shape)} vs ${JSON.stringify(a2.shape)}`);
+    throw new Error(
+      `Shape mismatch: ${JSON.stringify(a1.shape)} vs ${JSON.stringify(a2.shape)}`,
+    );
   }
   for (let i = 0; i < a1.shape.length; i++) {
     if (a1.shape[i] !== a2.shape[i]) {
-      throw new Error(`Shape mismatch: ${JSON.stringify(a1.shape)} vs ${JSON.stringify(a2.shape)}`);
+      throw new Error(
+        `Shape mismatch: ${JSON.stringify(a1.shape)} vs ${JSON.stringify(a2.shape)}`,
+      );
     }
   }
 }

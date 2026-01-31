@@ -273,7 +273,24 @@ EXPORTED_FUNCTIONS='[
     "_dense_matrix_eye",
     "_dense_matrix_zeros",
     "_dense_matrix_ones",
-    "_dense_matrix_diag"
+    "_dense_matrix_diag",
+    "_dense_matrix_submatrix",
+    "_dense_matrix_row_join",
+    "_dense_matrix_col_join",
+    "_dense_matrix_row_del",
+    "_dense_matrix_col_del",
+    "_dense_matrix_det",
+    "_dense_matrix_inv",
+    "_dense_matrix_transpose",
+    "_dense_matrix_add_matrix",
+    "_dense_matrix_mul_matrix",
+    "_dense_matrix_add_scalar",
+    "_dense_matrix_mul_scalar",
+    "_dense_matrix_LU",
+    "_dense_matrix_LDL",
+    "_dense_matrix_FFLU",
+    "_dense_matrix_FFLDU",
+    "_dense_matrix_LU_solve"
 ]'
 
 EXPORTED_RUNTIME='["ccall", "cwrap", "getValue", "setValue", "UTF8ToString", "stringToUTF8", "lengthBytesUTF8"]'

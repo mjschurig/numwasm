@@ -5,8 +5,8 @@
  * Adapted from NumPy's item_selection.c
  */
 
-import { NDArray } from './NDArray.js';
-import { DType, CLIP_RAISE, CLIP_WRAP, CLIP_CLIP } from './types.js';
+import { NDArray } from "./_core/NDArray.js";
+import { DType, CLIP_RAISE, CLIP_WRAP, CLIP_CLIP } from "./types.js";
 
 export { CLIP_RAISE, CLIP_WRAP, CLIP_CLIP };
 
@@ -35,7 +35,7 @@ export async function take(
   arr: NDArray,
   indices: NDArray,
   axis: number = 0,
-  mode: ClipMode = CLIP_RAISE
+  mode: ClipMode = CLIP_RAISE,
 ): Promise<NDArray> {
   const module = arr._wasmModule;
 
@@ -43,11 +43,11 @@ export async function take(
     arr._wasmPtr,
     indices._wasmPtr,
     axis,
-    mode
+    mode,
   );
 
   if (resultPtr === 0) {
-    throw new Error('take failed: index out of bounds or invalid axis');
+    throw new Error("take failed: index out of bounds or invalid axis");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -64,18 +64,18 @@ export async function take(
 export async function takeFlat(
   arr: NDArray,
   indices: NDArray,
-  mode: ClipMode = CLIP_RAISE
+  mode: ClipMode = CLIP_RAISE,
 ): Promise<NDArray> {
   const module = arr._wasmModule;
 
   const resultPtr = module._ndarray_take_flat(
     arr._wasmPtr,
     indices._wasmPtr,
-    mode
+    mode,
   );
 
   if (resultPtr === 0) {
-    throw new Error('takeFlat failed: index out of bounds');
+    throw new Error("takeFlat failed: index out of bounds");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -101,7 +101,7 @@ export async function put(
   arr: NDArray,
   indices: NDArray,
   values: NDArray,
-  mode: ClipMode = CLIP_RAISE
+  mode: ClipMode = CLIP_RAISE,
 ): Promise<void> {
   const module = arr._wasmModule;
 
@@ -109,11 +109,11 @@ export async function put(
     arr._wasmPtr,
     indices._wasmPtr,
     values._wasmPtr,
-    mode
+    mode,
   );
 
   if (result !== 0) {
-    throw new Error('put failed: index out of bounds or array not writeable');
+    throw new Error("put failed: index out of bounds or array not writeable");
   }
 }
 
@@ -150,7 +150,7 @@ export async function nonzero(arr: NDArray): Promise<NDArray> {
   const resultPtr = module._ndarray_nonzero(arr._wasmPtr);
 
   if (resultPtr === 0) {
-    throw new Error('nonzero failed: cannot call on 0-d array');
+    throw new Error("nonzero failed: cannot call on 0-d array");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -168,7 +168,7 @@ export async function flatnonzero(arr: NDArray): Promise<NDArray> {
   const resultPtr = module._ndarray_flatnonzero(arr._wasmPtr);
 
   if (resultPtr === 0) {
-    throw new Error('flatnonzero failed');
+    throw new Error("flatnonzero failed");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -202,7 +202,7 @@ export async function flatnonzero(arr: NDArray): Promise<NDArray> {
 export async function where(
   condition: NDArray,
   x?: NDArray,
-  y?: NDArray
+  y?: NDArray,
 ): Promise<NDArray> {
   const module = condition._wasmModule;
 
@@ -213,9 +213,9 @@ export async function where(
 
   if (resultPtr === 0) {
     if (x !== undefined && y === undefined) {
-      throw new Error('where requires both x and y, or neither');
+      throw new Error("where requires both x and y, or neither");
     }
-    throw new Error('where failed: shapes not broadcastable');
+    throw new Error("where failed: shapes not broadcastable");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -239,18 +239,20 @@ export async function where(
 export async function compress(
   condition: NDArray,
   arr: NDArray,
-  axis: number = 0
+  axis: number = 0,
 ): Promise<NDArray> {
   const module = arr._wasmModule;
 
   const resultPtr = module._ndarray_compress(
     condition._wasmPtr,
     arr._wasmPtr,
-    axis
+    axis,
   );
 
   if (resultPtr === 0) {
-    throw new Error('compress failed: condition must be 1D or axis not supported');
+    throw new Error(
+      "compress failed: condition must be 1D or axis not supported",
+    );
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -272,14 +274,14 @@ export async function compress(
  */
 export async function extract(
   condition: NDArray,
-  arr: NDArray
+  arr: NDArray,
 ): Promise<NDArray> {
   const module = arr._wasmModule;
 
   const resultPtr = module._ndarray_extract(condition._wasmPtr, arr._wasmPtr);
 
   if (resultPtr === 0) {
-    throw new Error('extract failed: condition and arr must have same size');
+    throw new Error("extract failed: condition and arr must have same size");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -306,10 +308,10 @@ export async function extract(
 export async function choose(
   indices: NDArray,
   choices: NDArray[],
-  mode: ClipMode = CLIP_RAISE
+  mode: ClipMode = CLIP_RAISE,
 ): Promise<NDArray> {
   if (choices.length === 0) {
-    throw new Error('choices must not be empty');
+    throw new Error("choices must not be empty");
   }
 
   const module = indices._wasmModule;
@@ -317,20 +319,22 @@ export async function choose(
   // Allocate array of pointers to choice arrays
   const choicesPtr = module._malloc(choices.length * 4);
   for (let i = 0; i < choices.length; i++) {
-    module.setValue(choicesPtr + i * 4, choices[i]._wasmPtr, 'i32');
+    module.setValue(choicesPtr + i * 4, choices[i]._wasmPtr, "i32");
   }
 
   const resultPtr = module._ndarray_choose(
     indices._wasmPtr,
     choicesPtr,
     choices.length,
-    mode
+    mode,
   );
 
   module._free(choicesPtr);
 
   if (resultPtr === 0) {
-    throw new Error('choose failed: index out of bounds or incompatible shapes');
+    throw new Error(
+      "choose failed: index out of bounds or incompatible shapes",
+    );
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -355,7 +359,7 @@ export async function diagonal(
   arr: NDArray,
   offset: number = 0,
   axis1: number = 0,
-  axis2: number = 1
+  axis2: number = 1,
 ): Promise<NDArray> {
   const module = arr._wasmModule;
 
@@ -363,11 +367,11 @@ export async function diagonal(
     arr._wasmPtr,
     offset,
     axis1,
-    axis2
+    axis2,
   );
 
   if (resultPtr === 0) {
-    throw new Error('diagonal failed: array must be at least 2D');
+    throw new Error("diagonal failed: array must be at least 2D");
   }
 
   return NDArray._fromPtr(resultPtr, module);
@@ -385,7 +389,7 @@ export async function diagonal(
  */
 export async function unravelIndex(
   indices: number[] | NDArray,
-  shape: number[]
+  shape: number[],
 ): Promise<number[][]> {
   const flatIndices =
     indices instanceof NDArray ? (indices.toArray() as number[]) : indices;
@@ -412,10 +416,12 @@ export async function unravelIndex(
  */
 export async function ravelMultiIndex(
   coords: number[][],
-  shape: number[]
+  shape: number[],
 ): Promise<number[]> {
   if (coords.length !== shape.length) {
-    throw new Error('Number of coordinate arrays must match number of dimensions');
+    throw new Error(
+      "Number of coordinate arrays must match number of dimensions",
+    );
   }
 
   const n = coords[0].length;
@@ -445,9 +451,7 @@ export async function meshgrid(
   ...xi: (number[] | NDArray)[]
 ): Promise<NDArray[]> {
   const arrays = await Promise.all(
-    xi.map(async (x) =>
-      x instanceof NDArray ? (x.toArray() as number[]) : x
-    )
+    xi.map(async (x) => (x instanceof NDArray ? (x.toArray() as number[]) : x)),
   );
 
   const ndim = arrays.length;
@@ -509,11 +513,11 @@ export async function meshgrid(
  * ```
  */
 export function atleast_1d(...arrs: NDArray[]): NDArray | NDArray[] {
-  const results = arrs.map(arr => {
+  const results = arrs.map((arr) => {
     if (arr.ndim === 0) {
       return arr.reshape([1]);
     }
-    return arr;  // Already 1D+, return as-is (view)
+    return arr; // Already 1D+, return as-is (view)
   });
   return arrs.length === 1 ? results[0] : results;
 }
@@ -531,13 +535,13 @@ export function atleast_1d(...arrs: NDArray[]): NDArray | NDArray[] {
  * ```
  */
 export function atleast_2d(...arrs: NDArray[]): NDArray | NDArray[] {
-  const results = arrs.map(arr => {
+  const results = arrs.map((arr) => {
     if (arr.ndim === 0) {
       return arr.reshape([1, 1]);
     } else if (arr.ndim === 1) {
-      return arr.expandDims(0);  // [N] -> [1, N]
+      return arr.expandDims(0); // [N] -> [1, N]
     }
-    return arr;  // Already 2D+, return as-is
+    return arr; // Already 2D+, return as-is
   });
   return arrs.length === 1 ? results[0] : results;
 }
@@ -555,7 +559,7 @@ export function atleast_2d(...arrs: NDArray[]): NDArray | NDArray[] {
  * ```
  */
 export function atleast_3d(...arrs: NDArray[]): NDArray | NDArray[] {
-  const results = arrs.map(arr => {
+  const results = arrs.map((arr) => {
     if (arr.ndim === 0) {
       return arr.reshape([1, 1, 1]);
     } else if (arr.ndim === 1) {
@@ -565,7 +569,7 @@ export function atleast_3d(...arrs: NDArray[]): NDArray | NDArray[] {
       // [M, N] -> [M, N, 1]
       return arr.expandDims(2);
     }
-    return arr;  // Already 3D+, return as-is
+    return arr; // Already 3D+, return as-is
   });
   return arrs.length === 1 ? results[0] : results;
 }
@@ -623,7 +627,7 @@ export async function argwhere(arr: NDArray): Promise<NDArray> {
 export async function indices(
   dimensions: number[],
   dtype: DType = DType.Int32,
-  sparse: boolean = false
+  sparse: boolean = false,
 ): Promise<NDArray | NDArray[]> {
   const N = dimensions.length;
 
@@ -694,9 +698,7 @@ export async function indices(
  * // cols.shape = [1, 3], cols = [[2, 3, 4]]
  * ```
  */
-export async function ix_(
-  ...args: (number[] | NDArray)[]
-): Promise<NDArray[]> {
+export async function ix_(...args: (number[] | NDArray)[]): Promise<NDArray[]> {
   const nd = args.length;
   if (nd === 0) return [];
 
@@ -711,7 +713,7 @@ export async function ix_(
     }
 
     if (arr.ndim !== 1) {
-      throw new Error('Cross index must be 1 dimensional');
+      throw new Error("Cross index must be 1 dimensional");
     }
 
     // Handle boolean arrays (convert via nonzero)
@@ -755,7 +757,7 @@ export async function ix_(
  */
 export async function diag_indices(
   n: number,
-  ndim: number = 2
+  ndim: number = 2,
 ): Promise<NDArray[]> {
   const idx = await NDArray.arange(0, n);
   const converted = idx.astype(DType.Int32);
@@ -786,7 +788,7 @@ export async function diag_indices(
 export async function tril_indices(
   n: number,
   k: number = 0,
-  m?: number
+  m?: number,
 ): Promise<[NDArray, NDArray]> {
   m = m ?? n;
 
@@ -805,7 +807,7 @@ export async function tril_indices(
 
   return [
     await NDArray.fromArray(rows, [rows.length], { dtype: DType.Int32 }),
-    await NDArray.fromArray(cols, [cols.length], { dtype: DType.Int32 })
+    await NDArray.fromArray(cols, [cols.length], { dtype: DType.Int32 }),
   ];
 }
 
@@ -827,7 +829,7 @@ export async function tril_indices(
 export async function triu_indices(
   n: number,
   k: number = 0,
-  m?: number
+  m?: number,
 ): Promise<[NDArray, NDArray]> {
   m = m ?? n;
 
@@ -846,7 +848,7 @@ export async function triu_indices(
 
   return [
     await NDArray.fromArray(rows, [rows.length], { dtype: DType.Int32 }),
-    await NDArray.fromArray(cols, [cols.length], { dtype: DType.Int32 })
+    await NDArray.fromArray(cols, [cols.length], { dtype: DType.Int32 }),
   ];
 }
 
@@ -886,19 +888,21 @@ function unravelIndexSingle(flatIndex: number, shape: number[]): number[] {
 export async function take_along_axis(
   arr: NDArray,
   indicesArr: NDArray,
-  axis: number
+  axis: number,
 ): Promise<NDArray> {
   // Normalize axis
   const ndim = arr.ndim;
   axis = axis < 0 ? axis + ndim : axis;
 
   if (axis < 0 || axis >= ndim) {
-    throw new Error(`axis ${axis} is out of bounds for array with ${ndim} dimensions`);
+    throw new Error(
+      `axis ${axis} is out of bounds for array with ${ndim} dimensions`,
+    );
   }
 
   // Validate that indices has same ndim
   if (indicesArr.ndim !== ndim) {
-    throw new Error('indices must have same number of dimensions as arr');
+    throw new Error("indices must have same number of dimensions as arr");
   }
 
   // Create result array with same shape as indices
@@ -950,22 +954,24 @@ export async function put_along_axis(
   arr: NDArray,
   indicesArr: NDArray,
   values: NDArray,
-  axis: number
+  axis: number,
 ): Promise<void> {
   // Normalize axis
   const ndim = arr.ndim;
   axis = axis < 0 ? axis + ndim : axis;
 
   if (axis < 0 || axis >= ndim) {
-    throw new Error(`axis ${axis} is out of bounds for array with ${ndim} dimensions`);
+    throw new Error(
+      `axis ${axis} is out of bounds for array with ${ndim} dimensions`,
+    );
   }
 
   // Validate dimensions match
   if (indicesArr.ndim !== ndim) {
-    throw new Error('indices must have same number of dimensions as arr');
+    throw new Error("indices must have same number of dimensions as arr");
   }
   if (values.ndim !== ndim) {
-    throw new Error('values must have same number of dimensions as arr');
+    throw new Error("values must have same number of dimensions as arr");
   }
 
   // Iterate over all positions in indices
@@ -1014,13 +1020,13 @@ export async function put_along_axis(
 export async function putmask(
   arr: NDArray,
   mask: NDArray,
-  values: NDArray
+  values: NDArray,
 ): Promise<void> {
   const n = arr.size;
   const valSize = values.size;
 
   if (mask.size !== n) {
-    throw new Error('mask and arr must have the same size');
+    throw new Error("mask and arr must have the same size");
   }
 
   let valIdx = 0;
@@ -1052,7 +1058,7 @@ export async function putmask(
 export async function place(
   arr: NDArray,
   mask: NDArray,
-  vals: NDArray
+  vals: NDArray,
 ): Promise<void> {
   // For our implementation, place and putmask behave the same way
   // In NumPy, the difference is subtle and relates to how values are cycled
@@ -1081,14 +1087,14 @@ export async function place(
 export async function select(
   condlist: NDArray[],
   choicelist: NDArray[],
-  defaultValue: number = 0
+  defaultValue: number = 0,
 ): Promise<NDArray> {
   if (condlist.length !== choicelist.length) {
-    throw new Error('condlist and choicelist must have same length');
+    throw new Error("condlist and choicelist must have same length");
   }
 
   if (condlist.length === 0) {
-    throw new Error('select requires at least one condition');
+    throw new Error("select requires at least one condition");
   }
 
   // Get the common shape from the first array
@@ -1098,12 +1104,12 @@ export async function select(
   // Verify all arrays have compatible sizes
   for (const cond of condlist) {
     if (cond.size !== size) {
-      throw new Error('all conditions must have the same shape');
+      throw new Error("all conditions must have the same shape");
     }
   }
   for (const choice of choicelist) {
     if (choice.size !== size) {
-      throw new Error('all choices must have the same shape as conditions');
+      throw new Error("all choices must have the same shape as conditions");
     }
   }
 

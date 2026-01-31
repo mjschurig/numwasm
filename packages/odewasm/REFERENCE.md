@@ -64,21 +64,21 @@ Classic ODE/DAE solvers from the Netlib repository.
 
 | Solver | Method | Use Case | Status |
 |--------|--------|----------|--------|
-| **RKF45** | Runge-Kutta-Fehlberg 4(5) | Non-stiff, moderate accuracy | ⬚ Not started |
-| **DVERK** | Verner 6(5) RK | Non-stiff, higher accuracy | ⬚ Not started |
-| **ODE** | Adams-Bashforth-Moulton | Non-stiff, multistep | ⬚ Not started |
-| **VODE** | Variable-coefficient ODE solver (BDF/Adams) | Stiff or non-stiff, ODEPACK family | ⬚ Not started |
-| **ZVODE** | VODE for complex-valued ODEs | Complex stiff/non-stiff | ⬚ Not started |
-| **VODPK** | VODE with Krylov methods | Large stiff systems | ⬚ Not started |
-| **EPSODE** | Episode package | Stiff systems | ⬚ Not started |
-| **RKSUITE** | RK suite (orders 2,3 / 4,5 / 7,8) | Non-stiff with error assessment | ⬚ Not started |
+| **RKF45** | Runge-Kutta-Fehlberg 4(5) | Non-stiff, moderate accuracy | ✅ Implemented |
+| **DVERK** | Verner 6(5) RK | Non-stiff, higher accuracy | ✅ Implemented |
+| **ODE** | Adams-Bashforth-Moulton | Non-stiff, multistep | ✅ Implemented |
+| **VODE** | Variable-coefficient ODE solver (BDF/Adams) | Stiff or non-stiff, ODEPACK family | ✅ Implemented |
+| **ZVODE** | VODE for complex-valued ODEs | Complex stiff/non-stiff | ✅ Implemented |
+| **VODPK** | VODE with Krylov methods | Large stiff systems | ✅ Implemented |
+| **EPSODE** | Episode package | Stiff systems | 🔶 WASM compiled, TS pending |
+| **RKSUITE** | RK suite (orders 2,3 / 4,5 / 7,8) | Non-stiff with error assessment | ✅ Implemented |
 
 ### Stabilized Explicit Methods
 
 | Solver | Method | Use Case | Status |
 |--------|--------|----------|--------|
-| **RKC** | Runge-Kutta-Chebyshev order 2 | Mildly stiff, parabolic PDEs | ⬚ Not started |
-| **IRKC** | Implicit RKC (F90) | Stiff parabolic PDEs | ⬚ Not started |
+| **RKC** | Runge-Kutta-Chebyshev order 2 | Mildly stiff, parabolic PDEs | ✅ Implemented |
+| **IRKC** | Implicit RKC (F90) | Stiff parabolic PDEs | ⬚ Deferred (F90 conversion needed) |
 
 ### Differential-Algebraic Equations (DAEs)
 
@@ -365,12 +365,12 @@ Classic ODE/DAE solvers from the Netlib repository.
 | **Hairer MOL** | 2 | 0 | 0% |
 | **Hairer Mechanical** | 2 | 0 | 0% |
 | **Hairer Geometric** | 1 | 0 | 0% |
-| **Netlib IVP** | 8 | 0 | 0% |
-| **Netlib Stabilized** | 2 | 0 | 0% |
+| **Netlib IVP** | 8 | 7 | 88% (EPSODE pending) |
+| **Netlib Stabilized** | 2 | 1 | 50% (IRKC needs F90 conversion) |
 | **Netlib DAE** | 5 | 0 | 0% |
 | **Netlib BVP** | 7 | 0 | 0% |
 | **Netlib Special** | 3 | 0 | 0% |
-| **Total Solvers** | **41** | **3** | **7%** |
+| **Total Solvers** | **41** | **11** | **27%** |
 
 ### Core Functions Status
 

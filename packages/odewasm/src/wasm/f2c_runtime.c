@@ -1,6 +1,8 @@
 /*
  * f2c Runtime Library - Essential functions for f2c-generated ODE solver code
  * Minimal implementation for WebAssembly compatibility.
+ *
+ * Note: BLAS routines are in separate files (daxpy.c, dcopy.c, etc.)
  */
 
 /* Include system headers BEFORE f2c.h to avoid macro conflicts */
@@ -53,6 +55,12 @@ double d_sign(doublereal *a, doublereal *b) {
 double r_sign(real *a, real *b) {
     double x = (*a >= 0 ? *a : -*a);
     return (*b >= 0 ? x : -x);
+}
+
+/* Integer sign function */
+integer i_sign(integer *a, integer *b) {
+    integer x = *a >= 0 ? *a : -*a;
+    return *b >= 0 ? x : -x;
 }
 
 /* Log base 10 */
@@ -166,8 +174,68 @@ int do_lio(integer *type, integer *num, char *ptr, ftnlen len) {
     return 0;
 }
 
+/* Internal write stubs (used by RKSUITE) */
+int s_wsfi(icilist *a) { (void)a; return 0; }
+int e_wsfi(void) { return 0; }
+
 /* Stop statement - just return in WASM */
 int s_stop(char *s, ftnlen n) {
     (void)s; (void)n;
     return 0;
+}
+
+/* ============================================
+ * Complex math functions
+ * ============================================ */
+
+/* Double complex absolute value: |z| = sqrt(r^2 + i^2) */
+double z_abs(doublecomplex *z) {
+    double ar = z->r >= 0 ? z->r : -z->r;
+    double ai = z->i >= 0 ? z->i : -z->i;
+    double t;
+    if (ar == 0 && ai == 0) return 0;
+    if (ar > ai) {
+        t = ai / ar;
+        return ar * sqrt(1.0 + t*t);
+    }
+    t = ar / ai;
+    return ai * sqrt(1.0 + t*t);
+}
+
+/* Imaginary part of double complex */
+double d_imag(doublecomplex *z) {
+    return z->i;
+}
+
+/* Double complex conjugate: r = conj(z) */
+void d_cnjg(doublecomplex *r, doublecomplex *z) {
+    r->r = z->r;
+    r->i = -z->i;
+}
+
+/* Double complex division: r = a / b */
+void z_div(doublecomplex *r, doublecomplex *a, doublecomplex *b) {
+    double ratio, den;
+    double abr, abi;
+
+    abr = b->r >= 0 ? b->r : -b->r;
+    abi = b->i >= 0 ? b->i : -b->i;
+
+    if (abr <= abi) {
+        if (abi == 0) {
+            /* Division by zero */
+            r->r = 1.0 / 0.0;
+            r->i = 1.0 / 0.0;
+            return;
+        }
+        ratio = b->r / b->i;
+        den = b->i * (1 + ratio*ratio);
+        r->r = (a->r * ratio + a->i) / den;
+        r->i = (a->i * ratio - a->r) / den;
+    } else {
+        ratio = b->i / b->r;
+        den = b->r * (1 + ratio*ratio);
+        r->r = (a->r + a->i * ratio) / den;
+        r->i = (a->i - a->r * ratio) / den;
+    }
 }

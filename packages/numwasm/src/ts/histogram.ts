@@ -5,10 +5,10 @@
  * compatible with NumPy's histogram API.
  */
 
-import { NDArray } from './NDArray.js';
-import { DType } from './types.js';
-import { searchsorted, min, max, mean, std } from './statistics.js';
-import { sort } from './sorting.js';
+import { NDArray } from "./_core/NDArray.js";
+import { DType } from "./types.js";
+import { searchsorted, min, max, mean, std } from "./statistics.js";
+import { sort } from "./sorting.js";
 
 /**
  * Error class for histogram-related errors.
@@ -16,7 +16,7 @@ import { sort } from './sorting.js';
 export class HistogramError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'HistogramError';
+    this.name = "HistogramError";
   }
 }
 
@@ -24,14 +24,14 @@ export class HistogramError extends Error {
  * Supported bin estimation methods.
  */
 export type BinMethod =
-  | 'auto'
-  | 'fd'
-  | 'doane'
-  | 'scott'
-  | 'stone'
-  | 'rice'
-  | 'sturges'
-  | 'sqrt';
+  | "auto"
+  | "fd"
+  | "doane"
+  | "scott"
+  | "stone"
+  | "rice"
+  | "sturges"
+  | "sqrt";
 
 /**
  * Result of histogram computation.
@@ -119,7 +119,7 @@ async function _computeIQR(arr: NDArray): Promise<number> {
 function _computeSkewness(
   data: number[],
   meanVal: number,
-  stdVal: number
+  stdVal: number,
 ): number {
   const n = data.length;
   if (n === 0 || stdVal === 0) return 0;
@@ -168,7 +168,7 @@ function _findBin(val: number, edges: number[]): number {
 async function _linspace(
   start: number,
   stop: number,
-  num: number
+  num: number,
 ): Promise<NDArray> {
   const result = new Float64Array(num);
   if (num === 1) {
@@ -208,7 +208,7 @@ async function _linspace(
 export async function bincount(
   x: NDArray | number[],
   weights: NDArray | number[] | null = null,
-  minlength: number = 0
+  minlength: number = 0,
 ): Promise<NDArray> {
   // Convert to NDArray if needed
   const arr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
@@ -217,7 +217,7 @@ export async function bincount(
   try {
     // Validate input is 1D
     if (arr.ndim !== 1) {
-      throw new HistogramError('bincount only works on 1-D arrays');
+      throw new HistogramError("bincount only works on 1-D arrays");
     }
 
     // Get data as array
@@ -229,12 +229,12 @@ export async function bincount(
       const val = xData[i];
       if (val < 0) {
         throw new HistogramError(
-          `'x' must contain non-negative integers, got ${val} at index ${i}`
+          `'x' must contain non-negative integers, got ${val} at index ${i}`,
         );
       }
       if (!Number.isInteger(val)) {
         throw new HistogramError(
-          `'x' must contain non-negative integers, got ${val} at index ${i}`
+          `'x' must contain non-negative integers, got ${val} at index ${i}`,
         );
       }
       if (val > maxVal) maxVal = val;
@@ -253,7 +253,7 @@ export async function bincount(
       try {
         if (weightsArr.size !== arr.size) {
           throw new HistogramError(
-            `weights and x must have the same size, got ${weightsArr.size} and ${arr.size}`
+            `weights and x must have the same size, got ${weightsArr.size} and ${arr.size}`,
           );
         }
 
@@ -307,7 +307,7 @@ export async function bincount(
 export async function digitize(
   x: NDArray | number[],
   bins: NDArray | number[],
-  right: boolean = false
+  right: boolean = false,
 ): Promise<NDArray> {
   // Convert to NDArray if needed
   const xArr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
@@ -318,11 +318,11 @@ export async function digitize(
   try {
     // Validate bins
     if (binsArr.ndim !== 1) {
-      throw new HistogramError('bins must be 1-dimensional');
+      throw new HistogramError("bins must be 1-dimensional");
     }
 
     if (binsArr.size < 1) {
-      throw new HistogramError('bins must have at least one element');
+      throw new HistogramError("bins must have at least one element");
     }
 
     // Check monotonicity
@@ -332,7 +332,7 @@ export async function digitize(
 
     if (!isIncreasing && !isDecreasing) {
       throw new HistogramError(
-        'bins must be monotonically increasing or decreasing'
+        "bins must be monotonically increasing or decreasing",
       );
     }
 
@@ -344,8 +344,12 @@ export async function digitize(
 
       try {
         // Use searchsorted on reversed bins
-        const side = right ? 'left' : 'right';
-        const indices = (await searchsorted(reversedBinsArr, xArr, side)) as NDArray;
+        const side = right ? "left" : "right";
+        const indices = (await searchsorted(
+          reversedBinsArr,
+          xArr,
+          side,
+        )) as NDArray;
 
         // Adjust indices for reversed bins
         const indicesData = indices.toArray() as number[];
@@ -364,14 +368,14 @@ export async function digitize(
     }
 
     // For increasing bins, use searchsorted directly
-    const side = right ? 'left' : 'right';
+    const side = right ? "left" : "right";
     const result = await searchsorted(binsArr, xArr, side);
 
-    if (typeof result === 'number') {
+    if (typeof result === "number") {
       return NDArray.fromTypedArray(
         new Float64Array([result]),
         [1],
-        DType.Float64
+        DType.Float64,
       );
     }
     return result;
@@ -391,7 +395,7 @@ export async function digitize(
 async function _estimateBins(
   arr: NDArray,
   method: BinMethod,
-  dataRange: number
+  dataRange: number,
 ): Promise<number> {
   const n = arr.size;
 
@@ -404,19 +408,19 @@ async function _estimateBins(
   }
 
   switch (method) {
-    case 'sqrt':
+    case "sqrt":
       // Square root rule
       return Math.ceil(Math.sqrt(n));
 
-    case 'sturges':
+    case "sturges":
       // Sturges' formula
       return Math.ceil(Math.log2(n) + 1);
 
-    case 'rice':
+    case "rice":
       // Rice rule
       return Math.ceil(2 * Math.cbrt(n));
 
-    case 'scott': {
+    case "scott": {
       // Scott's rule
       const stdVal = (await std(arr)) as number;
       if (stdVal === 0) return 1;
@@ -424,7 +428,7 @@ async function _estimateBins(
       return Math.max(1, Math.ceil(dataRange / scottBinWidth));
     }
 
-    case 'fd': {
+    case "fd": {
       // Freedman-Diaconis rule
       const iqr = await _computeIQR(arr);
       if (iqr === 0) return Math.ceil(Math.sqrt(n)); // fallback
@@ -432,7 +436,7 @@ async function _estimateBins(
       return Math.max(1, Math.ceil(dataRange / fdBinWidth));
     }
 
-    case 'doane': {
+    case "doane": {
       // Doane's formula
       const stdDev = (await std(arr)) as number;
       const meanVal = (await mean(arr)) as number;
@@ -443,19 +447,19 @@ async function _estimateBins(
       const skewness = _computeSkewness(data, meanVal, stdDev);
       const sigmaSg = Math.sqrt((6 * (n - 2)) / ((n + 1) * (n + 3)));
       return Math.ceil(
-        1 + Math.log2(n) + Math.log2(1 + Math.abs(skewness) / sigmaSg)
+        1 + Math.log2(n) + Math.log2(1 + Math.abs(skewness) / sigmaSg),
       );
     }
 
-    case 'stone': {
+    case "stone": {
       // Stone's rule (simplified)
       return Math.max(1, Math.ceil(Math.pow(n, 1 / 3) * 2));
     }
 
-    case 'auto': {
+    case "auto": {
       // Auto: choose between Sturges and FD based on data
-      const fdBins = await _estimateBins(arr, 'fd', dataRange);
-      const sturgesBins = await _estimateBins(arr, 'sturges', dataRange);
+      const fdBins = await _estimateBins(arr, "fd", dataRange);
+      const sturgesBins = await _estimateBins(arr, "sturges", dataRange);
       return Math.max(fdBins, sturgesBins);
     }
 
@@ -484,9 +488,9 @@ async function _estimateBins(
  */
 export async function histogram_bin_edges(
   a: NDArray | number[],
-  bins: number | BinMethod | NDArray | number[] = 'auto',
+  bins: number | BinMethod | NDArray | number[] = "auto",
   range: [number, number] | null = null,
-  weights: NDArray | number[] | null = null
+  weights: NDArray | number[] | null = null,
 ): Promise<NDArray> {
   // Convert to NDArray and flatten
   const arr = Array.isArray(a) ? await NDArray.fromArray(a) : a;
@@ -507,13 +511,13 @@ export async function histogram_bin_edges(
         try {
           const binsData = binsArr.toArray() as number[];
           if (!_isMonotonicIncreasing(binsData)) {
-            throw new HistogramError('bins must be monotonically increasing');
+            throw new HistogramError("bins must be monotonically increasing");
           }
           // Return a copy
           return NDArray.fromTypedArray(
             new Float64Array(binsData),
             [binsData.length],
-            DType.Float64
+            DType.Float64,
           );
         } finally {
           if (disposeBins) binsArr.dispose();
@@ -527,11 +531,11 @@ export async function histogram_bin_edges(
       if (range !== null) {
         [minVal, maxVal] = range;
         if (!Number.isFinite(minVal) || !Number.isFinite(maxVal)) {
-          throw new HistogramError('range must contain finite values');
+          throw new HistogramError("range must contain finite values");
         }
         if (minVal > maxVal) {
           throw new HistogramError(
-            `range must have first_edge <= last_edge, got ${minVal} > ${maxVal}`
+            `range must have first_edge <= last_edge, got ${minVal} > ${maxVal}`,
           );
         }
       } else {
@@ -555,16 +559,16 @@ export async function histogram_bin_edges(
       // Determine number of bins
       let nBins: number;
 
-      if (typeof bins === 'number') {
+      if (typeof bins === "number") {
         if (bins < 1) {
-          throw new HistogramError('bins must be a positive integer');
+          throw new HistogramError("bins must be a positive integer");
         }
         nBins = Math.round(bins);
-      } else if (typeof bins === 'string') {
+      } else if (typeof bins === "string") {
         // String method - weights not supported
         if (weights !== null) {
           throw new HistogramError(
-            `Automated bin estimation is not supported for weighted data. Use explicit bin edges or integer bin count.`
+            `Automated bin estimation is not supported for weighted data. Use explicit bin edges or integer bin count.`,
           );
         }
         nBins = await _estimateBins(flat, bins as BinMethod, dataRange);
@@ -614,7 +618,7 @@ export async function histogram(
   bins: number | BinMethod | NDArray | number[] = 10,
   range: [number, number] | null = null,
   density: boolean = false,
-  weights: NDArray | number[] | null = null
+  weights: NDArray | number[] | null = null,
 ): Promise<HistogramResult> {
   // Convert to NDArray and flatten
   const arr = Array.isArray(a) ? await NDArray.fromArray(a) : a;
@@ -632,7 +636,11 @@ export async function histogram(
       const histData = new Float64Array(nBins);
 
       if (flat.size === 0) {
-        const hist = await NDArray.fromTypedArray(histData, [nBins], DType.Float64);
+        const hist = await NDArray.fromTypedArray(
+          histData,
+          [nBins],
+          DType.Float64,
+        );
         return { hist, bin_edges };
       }
 
@@ -656,7 +664,7 @@ export async function histogram(
           weightsFlat.dispose();
           if (disposeWeights && weightsArr) weightsArr.dispose();
           throw new HistogramError(
-            `weights must have the same shape as a, got ${weightsArr.size} vs ${arr.size}`
+            `weights must have the same shape as a, got ${weightsArr.size} vs ${arr.size}`,
           );
         }
         weightsData = weightsFlat.toArray() as number[];
@@ -690,7 +698,11 @@ export async function histogram(
         }
 
         // Create histogram array
-        let hist = await NDArray.fromTypedArray(histData, [nBins], DType.Float64);
+        let hist = await NDArray.fromTypedArray(
+          histData,
+          [nBins],
+          DType.Float64,
+        );
 
         // Convert to density if requested
         if (density) {
@@ -713,7 +725,11 @@ export async function histogram(
               densityData[i] = histData[i] / (binWidths[i] * totalCount);
             }
             hist.dispose();
-            hist = await NDArray.fromTypedArray(densityData, [nBins], DType.Float64);
+            hist = await NDArray.fromTypedArray(
+              densityData,
+              [nBins],
+              DType.Float64,
+            );
           }
         }
 
@@ -756,7 +772,7 @@ export async function histogramdd(
   bins: number | number[] | NDArray[] = 10,
   range: Array<[number, number]> | null = null,
   density: boolean = false,
-  weights: NDArray | number[] | null = null
+  weights: NDArray | number[] | null = null,
 ): Promise<HistogramDDResult> {
   // Convert sample to NDArray
   const sampleArr = Array.isArray(sample)
@@ -780,26 +796,26 @@ export async function histogramdd(
       ndim = sampleArr.shape[1];
       nSamples = sampleArr.shape[0];
     } else {
-      throw new HistogramError('sample must be 1D or 2D array');
+      throw new HistogramError("sample must be 1D or 2D array");
     }
 
     // Process bins specification for each dimension
     const binsPerDim: (number | NDArray)[] = [];
-    if (typeof bins === 'number') {
+    if (typeof bins === "number") {
       for (let d = 0; d < ndim; d++) {
         binsPerDim.push(bins);
       }
     } else if (Array.isArray(bins)) {
       if (bins.length !== ndim) {
         throw new HistogramError(
-          `bins must have ${ndim} elements, got ${bins.length}`
+          `bins must have ${ndim} elements, got ${bins.length}`,
         );
       }
       for (let d = 0; d < ndim; d++) {
         binsPerDim.push(bins[d]);
       }
     } else {
-      throw new HistogramError('Invalid bins specification');
+      throw new HistogramError("Invalid bins specification");
     }
 
     // Compute bin edges for each dimension
@@ -816,7 +832,7 @@ export async function histogramdd(
       const dimData = await NDArray.fromTypedArray(
         dimDataArr,
         [nSamples],
-        DType.Float64
+        DType.Float64,
       );
 
       const dimRange = range ? range[d] : null;
@@ -853,7 +869,7 @@ export async function histogramdd(
       if (weightsArr.size !== nSamples) {
         if (disposeWeights) weightsArr.dispose();
         throw new HistogramError(
-          `weights must have the same length as samples, got ${weightsArr.size} vs ${nSamples}`
+          `weights must have the same length as samples, got ${weightsArr.size} vs ${nSamples}`,
         );
       }
       weightsData = weightsArr.toArray() as number[];
@@ -900,7 +916,11 @@ export async function histogramdd(
       }
 
       // Create histogram array with correct shape
-      let H = await NDArray.fromTypedArray(histData, nBinsPerDim, DType.Float64);
+      let H = await NDArray.fromTypedArray(
+        histData,
+        nBinsPerDim,
+        DType.Float64,
+      );
 
       // Apply density normalization
       if (density) {
@@ -935,7 +955,11 @@ export async function histogramdd(
           }
 
           H.dispose();
-          H = await NDArray.fromTypedArray(densityData, nBinsPerDim, DType.Float64);
+          H = await NDArray.fromTypedArray(
+            densityData,
+            nBinsPerDim,
+            DType.Float64,
+          );
         }
       }
 
@@ -972,10 +996,13 @@ export async function histogramdd(
 export async function histogram2d(
   x: NDArray | number[],
   y: NDArray | number[],
-  bins: number | [number, number] | [NDArray | number[], NDArray | number[]] = 10,
+  bins:
+    | number
+    | [number, number]
+    | [NDArray | number[], NDArray | number[]] = 10,
   range: [[number, number], [number, number]] | null = null,
   density: boolean = false,
-  weights: NDArray | number[] | null = null
+  weights: NDArray | number[] | null = null,
 ): Promise<Histogram2DResult> {
   // Convert to NDArrays if needed
   const xArr = Array.isArray(x) ? await NDArray.fromArray(x) : x;
@@ -990,7 +1017,7 @@ export async function histogram2d(
 
     try {
       if (xFlat.size !== yFlat.size) {
-        throw new HistogramError('x and y must have the same length');
+        throw new HistogramError("x and y must have the same length");
       }
 
       const nSamples = xFlat.size;
@@ -1008,22 +1035,24 @@ export async function histogram2d(
       const sample = await NDArray.fromTypedArray(
         sampleData,
         [nSamples, 2],
-        DType.Float64
+        DType.Float64,
       );
 
       try {
         // Handle bins specification
         let binsSpec: number | number[] | NDArray[];
 
-        if (typeof bins === 'number') {
+        if (typeof bins === "number") {
           binsSpec = [bins, bins];
         } else if (Array.isArray(bins)) {
           if (bins.length !== 2) {
-            throw new HistogramError('bins must have 2 elements for 2D histogram');
+            throw new HistogramError(
+              "bins must have 2 elements for 2D histogram",
+            );
           }
           // Check if bins are numbers or arrays
           const [b0, b1] = bins;
-          if (typeof b0 === 'number' && typeof b1 === 'number') {
+          if (typeof b0 === "number" && typeof b1 === "number") {
             binsSpec = [b0, b1];
           } else {
             // Convert any number[] to NDArray
@@ -1034,17 +1063,23 @@ export async function histogram2d(
               } else if (b instanceof NDArray) {
                 processedBins.push(b);
               } else {
-                throw new HistogramError('Invalid bins specification');
+                throw new HistogramError("Invalid bins specification");
               }
             }
             binsSpec = processedBins;
           }
         } else {
-          throw new HistogramError('Invalid bins specification');
+          throw new HistogramError("Invalid bins specification");
         }
 
         // Call histogramdd
-        const result = await histogramdd(sample, binsSpec, range, density, weights);
+        const result = await histogramdd(
+          sample,
+          binsSpec,
+          range,
+          density,
+          weights,
+        );
 
         return {
           H: result.H,

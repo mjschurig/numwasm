@@ -97,6 +97,81 @@ NDArray* ndarray_empty(int32_t ndim, int32_t* shape, DType dtype);
 NDArray* ndarray_full(int32_t ndim, int32_t* shape, DType dtype, double value);
 
 /*
+ * Create a 1D array with evenly spaced values within a given interval.
+ *
+ * @param start  Start of interval
+ * @param stop   End of interval (exclusive)
+ * @param step   Spacing between values
+ * @param dtype  Data type for elements
+ * @return       New NDArray or NULL on allocation failure
+ */
+NDArray* ndarray_arange(double start, double stop, double step, DType dtype);
+
+/*
+ * Create a 1D array with evenly spaced numbers over a specified interval.
+ *
+ * @param start     Start of interval
+ * @param stop      End of interval
+ * @param num       Number of samples
+ * @param endpoint  If true, stop is the last sample
+ * @param dtype     Data type for elements
+ * @return          New NDArray or NULL on allocation failure
+ */
+NDArray* ndarray_linspace(double start, double stop, int32_t num, int32_t endpoint, DType dtype);
+
+/*
+ * Create a 2D array with ones on the diagonal and zeros elsewhere.
+ *
+ * @param N      Number of rows
+ * @param M      Number of columns
+ * @param k      Diagonal offset (0 = main diagonal, >0 = above, <0 = below)
+ * @param dtype  Data type for elements
+ * @return       New NDArray or NULL on allocation failure
+ */
+NDArray* ndarray_eye(int32_t N, int32_t M, int32_t k, DType dtype);
+
+/*
+ * Create a 2D array with ones at and below the given diagonal.
+ *
+ * @param N      Number of rows
+ * @param M      Number of columns
+ * @param k      Diagonal offset
+ * @param dtype  Data type for elements
+ * @return       New NDArray or NULL on allocation failure
+ */
+NDArray* ndarray_tri(int32_t N, int32_t M, int32_t k, DType dtype);
+
+/*
+ * Return lower triangle of a 2D array.
+ * Elements above the k-th diagonal are zeroed.
+ *
+ * @param arr    Input 2D array
+ * @param k      Diagonal above which to zero elements
+ * @return       New NDArray or NULL on failure
+ */
+NDArray* ndarray_tril(const NDArray* arr, int32_t k);
+
+/*
+ * Return upper triangle of a 2D array.
+ * Elements below the k-th diagonal are zeroed.
+ *
+ * @param arr    Input 2D array
+ * @param k      Diagonal below which to zero elements
+ * @return       New NDArray or NULL on failure
+ */
+NDArray* ndarray_triu(const NDArray* arr, int32_t k);
+
+/*
+ * Generate a Vandermonde matrix.
+ *
+ * @param x           Input 1D array of values
+ * @param N           Number of columns (if <= 0, uses length of x)
+ * @param increasing  If true, powers increase left to right; if false, decrease
+ * @return            New NDArray (len(x) x N) or NULL on failure
+ */
+NDArray* ndarray_vander(const NDArray* x, int32_t N, int32_t increasing);
+
+/*
  * Create a 0-dimensional (scalar) array.
  *
  * @param value  Scalar value
@@ -119,6 +194,17 @@ void ndarray_free(NDArray* arr);
  * @return       New NDArray or NULL on allocation failure
  */
 NDArray* ndarray_copy(const NDArray* arr);
+
+/*
+ * Copy values from src array into dst array.
+ * Both arrays must have the same size (broadcasting not supported).
+ *
+ * @param dst    Destination array (modified in place)
+ * @param src    Source array
+ * @param where  Optional boolean mask (NULL for unconditional copy)
+ * @return       0 on success, -1 on error
+ */
+int32_t ndarray_copyto(NDArray* dst, const NDArray* src, const NDArray* where);
 
 /*
  * Create a copy with a different dtype.

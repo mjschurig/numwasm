@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
@@ -8,11 +8,23 @@ import { ForceGraph } from './ForceGraph';
 import type { GraphFilters, PackageId } from './types';
 import { DEFAULT_FILTERS, PACKAGE_COLORS, ALL_PACKAGES } from './types';
 
+// Mobile detection hook
+function useIsMobile() {
+  return useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    // Check for touch device or small screen
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isSmallScreen = window.innerWidth < 768;
+    return isTouchDevice || isSmallScreen;
+  }, []);
+}
+
 export function OverviewGraph() {
   const [filters, setFilters] = useState<GraphFilters>(DEFAULT_FILTERS);
   const [hoveredNode, setHoveredNode] = useState<SimNode | null>(null);
   const { elements, isLoading, error } = useGraphData(filters);
   const { nodes, edges, step, isSettled } = useForceSimulation(elements, filters.searchQuery);
+  const isMobile = useIsMobile();
 
   // Handle hover - use callback to avoid re-renders
   const handleHover = useCallback((node: SimNode | null) => {
@@ -140,9 +152,9 @@ export function OverviewGraph() {
       <div className="flex-1 min-h-0 relative bg-[#0a0a12]">
         <Canvas
           camera={{ position: [0, 0, 80], fov: 60 }}
-          dpr={[1, 2]}
+          dpr={isMobile ? [1, 1] : [1, 2]}
           gl={{
-            antialias: true,
+            antialias: !isMobile,
             alpha: false,
             powerPreference: 'high-performance',
           }}
@@ -155,15 +167,18 @@ export function OverviewGraph() {
             isSettled={isSettled}
             hoveredNode={hoveredNode}
             onHover={handleHover}
+            isMobile={isMobile}
           />
-          <EffectComposer>
-            <Bloom
-              luminanceThreshold={0.2}
-              luminanceSmoothing={0.9}
-              intensity={1.5}
-              mipmapBlur
-            />
-          </EffectComposer>
+          {!isMobile && (
+            <EffectComposer>
+              <Bloom
+                luminanceThreshold={0.2}
+                luminanceSmoothing={0.9}
+                intensity={1.5}
+                mipmapBlur
+              />
+            </EffectComposer>
+          )}
         </Canvas>
       </div>
 

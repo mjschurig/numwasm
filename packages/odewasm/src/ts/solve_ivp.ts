@@ -7,6 +7,12 @@
 import { dopri5 } from "./dopri5.js";
 import { dop853 } from "./dop853.js";
 import { radau5 } from "./radau5.js";
+import { rkf45 } from "./rkf45.js";
+import { dverk } from "./dverk.js";
+import { ode_abm } from "./ode.js";
+import { vode } from "./vode.js";
+import { rksuite } from "./rksuite.js";
+import { rkc } from "./rkc.js";
 import {
   ExplicitMethod,
   ODEFunction,
@@ -44,6 +50,14 @@ import {
  *   [0, 10],
  *   [1, 0]  // y(0) = 1, y'(0) = 0
  * );
+ *
+ * // Using a different method
+ * const rkcResult = await solve_ivp(
+ *   (t, y) => y.map((yi, i) => -i * yi),
+ *   [0, 1],
+ *   [1, 1, 1],
+ *   { method: 'RKC' }
+ * );
  * ```
  */
 export async function solve_ivp(
@@ -63,34 +77,104 @@ export async function solve_ivp(
     jac,
   } = options ?? {};
 
-  if (method === "RK45") {
-    return dopri5(fun, t_span, y0, {
-      rtol,
-      atol,
-      max_step,
-      first_step,
-      dense_output,
-      t_eval,
-    });
-  } else if (method === "DOP853") {
-    return dop853(fun, t_span, y0, {
-      rtol,
-      atol,
-      max_step,
-      first_step,
-      dense_output,
-      t_eval,
-    });
-  } else if (method === "Radau") {
-    return radau5(fun, t_span, y0, {
-      rtol,
-      atol,
-      first_step,
-      dense_output,
-      t_eval,
-      jac,
-    });
-  } else {
-    throw new Error(`Unknown method: ${method}`);
+  // Convert method to string for comparison
+  const methodStr = String(method);
+
+  switch (methodStr) {
+    // Hairer explicit methods
+    case "RK45":
+      return dopri5(fun, t_span, y0, {
+        rtol,
+        atol,
+        max_step,
+        first_step,
+        dense_output,
+        t_eval,
+      });
+
+    case "DOP853":
+      return dop853(fun, t_span, y0, {
+        rtol,
+        atol,
+        max_step,
+        first_step,
+        dense_output,
+        t_eval,
+      });
+
+    // Hairer implicit method
+    case "Radau":
+      return radau5(fun, t_span, y0, {
+        rtol,
+        atol,
+        first_step,
+        dense_output,
+        t_eval,
+        jac,
+      });
+
+    // Netlib explicit methods
+    case "RKF45":
+      return rkf45(fun, t_span, y0, {
+        rtol,
+        atol: typeof atol === "number" ? atol : atol[0],
+      });
+
+    case "DVERK":
+      return dverk(fun, t_span, y0, {
+        tol: rtol,
+      });
+
+    case "ODE":
+      return ode_abm(fun, t_span, y0, {
+        rtol,
+        atol: typeof atol === "number" ? atol : atol[0],
+      });
+
+    // RKSUITE methods
+    case "RKSUITE23":
+      return rksuite(fun, t_span, y0, {
+        tol: rtol,
+        method: 1,
+      });
+
+    case "RKSUITE45":
+      return rksuite(fun, t_span, y0, {
+        tol: rtol,
+        method: 2,
+      });
+
+    case "RKSUITE78":
+      return rksuite(fun, t_span, y0, {
+        tol: rtol,
+        method: 3,
+      });
+
+    // Netlib implicit methods
+    case "VODE":
+      return vode(fun, t_span, y0, {
+        rtol,
+        atol,
+        mf: 10, // Adams method
+        jac,
+      });
+
+    case "BDF":
+      return vode(fun, t_span, y0, {
+        rtol,
+        atol,
+        mf: 22, // BDF with internal Jacobian
+        jac,
+      });
+
+    // Stabilized explicit method
+    case "RKC":
+      return rkc(fun, t_span, y0, {
+        rtol,
+        atol,
+      });
+
+    default:
+      throw new Error(`Unknown method: ${method}`);
   }
 }

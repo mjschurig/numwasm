@@ -21,10 +21,10 @@
  * ```
  */
 
-import { NDArray } from './NDArray.js';
-import { DType } from './types.js';
-import { getWasmModule, loadWasmModule } from './wasm-loader.js';
-import { take } from './indexing.js';
+import { NDArray } from "./_core/NDArray.js";
+import { DType } from "./types.js";
+import { getWasmModule, loadWasmModule } from "./wasm-loader.js";
+import { take } from "./indexing.js";
 
 /* ============ Type Definitions ============ */
 
@@ -37,7 +37,7 @@ export type SizeType = number | number[] | null;
  * State object for PCG64 generator.
  */
 export interface PCG64State {
-  bit_generator: 'PCG64';
+  bit_generator: "PCG64";
   state: {
     state: bigint;
     inc: bigint;
@@ -50,7 +50,7 @@ export interface PCG64State {
  * State object for MT19937 generator.
  */
 export interface MT19937State {
-  bit_generator: 'MT19937';
+  bit_generator: "MT19937";
   state: {
     key: Uint32Array;
     pos: number;
@@ -63,7 +63,7 @@ export interface MT19937State {
  * State object for Philox generator.
  */
 export interface PhiloxState {
-  bit_generator: 'Philox';
+  bit_generator: "Philox";
   state: {
     counter: BigUint64Array;
     key: BigUint64Array;
@@ -78,7 +78,7 @@ export interface PhiloxState {
  * State object for SFC64 generator.
  */
 export interface SFC64State {
-  bit_generator: 'SFC64';
+  bit_generator: "SFC64";
   state: {
     a: bigint;
     b: bigint;
@@ -174,7 +174,7 @@ export class SeedSequence {
   constructor(
     entropy?: number | bigint | number[] | Uint32Array | null,
     spawnKey: number[] = [],
-    poolSize: number = 4
+    poolSize: number = 4,
   ) {
     this._spawnKey = spawnKey;
     this._poolSize = poolSize;
@@ -182,33 +182,35 @@ export class SeedSequence {
     if (entropy === null || entropy === undefined) {
       // Use crypto.getRandomValues for OS entropy
       this._entropy = new Uint32Array(poolSize);
-      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
         crypto.getRandomValues(this._entropy);
       } else {
         // Fallback: use Date.now() + Math.random()
         for (let i = 0; i < poolSize; i++) {
-          this._entropy[i] = ((Date.now() * Math.random()) >>> 0) ^ (Math.random() * 0xffffffff >>> 0);
+          this._entropy[i] =
+            ((Date.now() * Math.random()) >>> 0) ^
+            ((Math.random() * 0xffffffff) >>> 0);
         }
       }
-    } else if (typeof entropy === 'number') {
+    } else if (typeof entropy === "number") {
       // Single integer seed - split into low and high 32-bit parts
       this._entropy = new Uint32Array([
         entropy >>> 0,
-        Math.floor(entropy / 0x100000000) >>> 0
+        Math.floor(entropy / 0x100000000) >>> 0,
       ]);
-    } else if (typeof entropy === 'bigint') {
+    } else if (typeof entropy === "bigint") {
       // BigInt seed
       this._entropy = new Uint32Array([
-        Number(entropy & 0xFFFFFFFFn),
-        Number((entropy >> 32n) & 0xFFFFFFFFn),
-        Number((entropy >> 64n) & 0xFFFFFFFFn),
-        Number((entropy >> 96n) & 0xFFFFFFFFn)
+        Number(entropy & 0xffffffffn),
+        Number((entropy >> 32n) & 0xffffffffn),
+        Number((entropy >> 64n) & 0xffffffffn),
+        Number((entropy >> 96n) & 0xffffffffn),
       ]);
     } else if (entropy instanceof Uint32Array) {
       this._entropy = new Uint32Array(entropy);
     } else {
       // Array of numbers
-      this._entropy = new Uint32Array(entropy.map(n => n >>> 0));
+      this._entropy = new Uint32Array(entropy.map((n) => n >>> 0));
     }
   }
 
@@ -218,7 +220,10 @@ export class SeedSequence {
    * @param nWords - Number of 32-bit words to generate
    * @param dtype - Output type ('uint32' or 'uint64')
    */
-  generateState(nWords: number, dtype: 'uint32' | 'uint64' = 'uint32'): Uint32Array | BigUint64Array {
+  generateState(
+    nWords: number,
+    dtype: "uint32" | "uint64" = "uint32",
+  ): Uint32Array | BigUint64Array {
     const wasm = getWasmModule();
 
     // Allocate WASM memory
@@ -239,10 +244,13 @@ export class SeedSequence {
 
       // Call WASM seed_seq_generate_words
       wasm._seed_seq_generate_words(
-        entropyPtr, this._entropy.length,
-        spawnKeyPtr, this._spawnKey.length,
+        entropyPtr,
+        this._entropy.length,
+        spawnKeyPtr,
+        this._spawnKey.length,
         this._poolSize,
-        outPtr, nWords
+        outPtr,
+        nWords,
       );
 
       // Copy result
@@ -251,10 +259,11 @@ export class SeedSequence {
         result[i] = wasm.HEAPU32[(outPtr >> 2) + i];
       }
 
-      if (dtype === 'uint64') {
+      if (dtype === "uint64") {
         const result64 = new BigUint64Array(Math.floor(nWords / 2));
         for (let i = 0; i < result64.length; i++) {
-          result64[i] = BigInt(result[i * 2]) | (BigInt(result[i * 2 + 1]) << 32n);
+          result64[i] =
+            BigInt(result[i * 2]) | (BigInt(result[i * 2 + 1]) << 32n);
         }
         return result64;
       }
@@ -276,11 +285,13 @@ export class SeedSequence {
   spawn(nChildren: number): SeedSequence[] {
     const children: SeedSequence[] = [];
     for (let i = 0; i < nChildren; i++) {
-      children.push(new SeedSequence(
-        this._entropy,
-        [...this._spawnKey, this._nChildrenSpawned + i],
-        this._poolSize
-      ));
+      children.push(
+        new SeedSequence(
+          this._entropy,
+          [...this._spawnKey, this._nChildrenSpawned + i],
+          this._poolSize,
+        ),
+      );
     }
     this._nChildrenSpawned += nChildren;
     return children;
@@ -335,7 +346,7 @@ export class PCG64 extends BitGenerator {
     this._wasmState = wasm._pcg64_create();
 
     if (this._wasmState === 0) {
-      throw new Error('Failed to create PCG64 state: memory allocation failed');
+      throw new Error("Failed to create PCG64 state: memory allocation failed");
     }
 
     if (seed instanceof SeedSequence) {
@@ -345,7 +356,7 @@ export class PCG64 extends BitGenerator {
     }
 
     // Generate 8 uint32 values for 4 x 32-bit parts of two 128-bit numbers
-    const state = this._seedSequence.generateState(8, 'uint32') as Uint32Array;
+    const state = this._seedSequence.generateState(8, "uint32") as Uint32Array;
     this._initFromState(state);
   }
 
@@ -357,14 +368,20 @@ export class PCG64 extends BitGenerator {
     // state[4..7] = inc:  [hh, hl, lh, ll] forms inc_high | inc_low
     wasm._pcg64_seed_parts(
       this._wasmState,
-      state[0], state[1], state[2], state[3],  // seed_hh, seed_hl, seed_lh, seed_ll
-      state[4], state[5], state[6], state[7]   // inc_hh, inc_hl, inc_lh, inc_ll
+      state[0],
+      state[1],
+      state[2],
+      state[3], // seed_hh, seed_hl, seed_lh, seed_ll
+      state[4],
+      state[5],
+      state[6],
+      state[7], // inc_hh, inc_hl, inc_lh, inc_ll
     );
   }
 
   private ensureNotDisposed(): void {
     if (this._disposed) {
-      throw new Error('PCG64 has been disposed');
+      throw new Error("PCG64 has been disposed");
     }
   }
 
@@ -404,8 +421,8 @@ export class PCG64 extends BitGenerator {
   advance(delta: bigint): this {
     this.ensureNotDisposed();
     const wasm = getWasmModule();
-    const low = Number(delta & 0xFFFFFFFFFFFFFFFFn);
-    const high = Number((delta >> 64n) & 0xFFFFFFFFFFFFFFFFn);
+    const low = Number(delta & 0xffffffffffffffffn);
+    const high = Number((delta >> 64n) & 0xffffffffffffffffn);
     wasm._pcg64_advance(this._wasmState, high, low);
     return this;
   }
@@ -437,17 +454,21 @@ export class PCG64 extends BitGenerator {
       wasm._pcg64_get_state(this._wasmState, statePtr);
 
       // Read the state values
-      const stateLow = BigInt(wasm.HEAPU32[statePtr >> 2]) |
-                       (BigInt(wasm.HEAPU32[(statePtr >> 2) + 1]) << 32n);
-      const stateHigh = BigInt(wasm.HEAPU32[(statePtr >> 2) + 2]) |
-                        (BigInt(wasm.HEAPU32[(statePtr >> 2) + 3]) << 32n);
-      const incLow = BigInt(wasm.HEAPU32[(statePtr >> 2) + 4]) |
-                     (BigInt(wasm.HEAPU32[(statePtr >> 2) + 5]) << 32n);
-      const incHigh = BigInt(wasm.HEAPU32[(statePtr >> 2) + 6]) |
-                      (BigInt(wasm.HEAPU32[(statePtr >> 2) + 7]) << 32n);
+      const stateLow =
+        BigInt(wasm.HEAPU32[statePtr >> 2]) |
+        (BigInt(wasm.HEAPU32[(statePtr >> 2) + 1]) << 32n);
+      const stateHigh =
+        BigInt(wasm.HEAPU32[(statePtr >> 2) + 2]) |
+        (BigInt(wasm.HEAPU32[(statePtr >> 2) + 3]) << 32n);
+      const incLow =
+        BigInt(wasm.HEAPU32[(statePtr >> 2) + 4]) |
+        (BigInt(wasm.HEAPU32[(statePtr >> 2) + 5]) << 32n);
+      const incHigh =
+        BigInt(wasm.HEAPU32[(statePtr >> 2) + 6]) |
+        (BigInt(wasm.HEAPU32[(statePtr >> 2) + 7]) << 32n);
 
       return {
-        bit_generator: 'PCG64',
+        bit_generator: "PCG64",
         state: {
           state: stateLow | (stateHigh << 64n),
           inc: incLow | (incHigh << 64n),
@@ -471,14 +492,14 @@ export class PCG64 extends BitGenerator {
       const inc = BigInt(s.state.inc);
 
       // Write state values to WASM memory
-      wasm.HEAPU32[statePtr >> 2] = Number(st & 0xFFFFFFFFn);
-      wasm.HEAPU32[(statePtr >> 2) + 1] = Number((st >> 32n) & 0xFFFFFFFFn);
-      wasm.HEAPU32[(statePtr >> 2) + 2] = Number((st >> 64n) & 0xFFFFFFFFn);
-      wasm.HEAPU32[(statePtr >> 2) + 3] = Number((st >> 96n) & 0xFFFFFFFFn);
-      wasm.HEAPU32[(statePtr >> 2) + 4] = Number(inc & 0xFFFFFFFFn);
-      wasm.HEAPU32[(statePtr >> 2) + 5] = Number((inc >> 32n) & 0xFFFFFFFFn);
-      wasm.HEAPU32[(statePtr >> 2) + 6] = Number((inc >> 64n) & 0xFFFFFFFFn);
-      wasm.HEAPU32[(statePtr >> 2) + 7] = Number((inc >> 96n) & 0xFFFFFFFFn);
+      wasm.HEAPU32[statePtr >> 2] = Number(st & 0xffffffffn);
+      wasm.HEAPU32[(statePtr >> 2) + 1] = Number((st >> 32n) & 0xffffffffn);
+      wasm.HEAPU32[(statePtr >> 2) + 2] = Number((st >> 64n) & 0xffffffffn);
+      wasm.HEAPU32[(statePtr >> 2) + 3] = Number((st >> 96n) & 0xffffffffn);
+      wasm.HEAPU32[(statePtr >> 2) + 4] = Number(inc & 0xffffffffn);
+      wasm.HEAPU32[(statePtr >> 2) + 5] = Number((inc >> 32n) & 0xffffffffn);
+      wasm.HEAPU32[(statePtr >> 2) + 6] = Number((inc >> 64n) & 0xffffffffn);
+      wasm.HEAPU32[(statePtr >> 2) + 7] = Number((inc >> 96n) & 0xffffffffn);
       wasm.HEAPU32[(statePtr >> 2) + 8] = s.has_uint32;
       wasm.HEAPU32[(statePtr >> 2) + 9] = s.uinteger;
 
@@ -491,10 +512,12 @@ export class PCG64 extends BitGenerator {
   spawn(nChildren: number): PCG64[] {
     this.ensureNotDisposed();
     if (!this._seedSequence) {
-      throw new Error('Cannot spawn from a BitGenerator without a SeedSequence');
+      throw new Error(
+        "Cannot spawn from a BitGenerator without a SeedSequence",
+      );
     }
     const childSeqs = this._seedSequence.spawn(nChildren);
-    return childSeqs.map(seq => new PCG64(seq));
+    return childSeqs.map((seq) => new PCG64(seq));
   }
 
   dispose(): void {
@@ -539,7 +562,7 @@ export class SFC64 extends BitGenerator {
     this._wasmState = wasm._sfc64_create();
 
     if (this._wasmState === 0) {
-      throw new Error('Failed to create SFC64 state: memory allocation failed');
+      throw new Error("Failed to create SFC64 state: memory allocation failed");
     }
 
     if (seed instanceof SeedSequence) {
@@ -549,7 +572,7 @@ export class SFC64 extends BitGenerator {
     }
 
     // Generate 8 uint32 values for 4 × 64-bit state values
-    const state = this._seedSequence.generateState(8, 'uint32') as Uint32Array;
+    const state = this._seedSequence.generateState(8, "uint32") as Uint32Array;
     this._initFromState(state);
   }
 
@@ -570,7 +593,7 @@ export class SFC64 extends BitGenerator {
 
   private ensureNotDisposed(): void {
     if (this._disposed) {
-      throw new Error('SFC64 has been disposed');
+      throw new Error("SFC64 has been disposed");
     }
   }
 
@@ -616,7 +639,7 @@ export class SFC64 extends BitGenerator {
       };
 
       return {
-        bit_generator: 'SFC64',
+        bit_generator: "SFC64",
         state: {
           a: readUint64(0),
           b: readUint64(1),
@@ -639,8 +662,10 @@ export class SFC64 extends BitGenerator {
     const statePtr = wasm._malloc(6 * 8);
     try {
       const writeUint64 = (offset: number, val: bigint): void => {
-        wasm.HEAPU32[(statePtr >> 2) + offset * 2] = Number(val & 0xFFFFFFFFn);
-        wasm.HEAPU32[(statePtr >> 2) + offset * 2 + 1] = Number((val >> 32n) & 0xFFFFFFFFn);
+        wasm.HEAPU32[(statePtr >> 2) + offset * 2] = Number(val & 0xffffffffn);
+        wasm.HEAPU32[(statePtr >> 2) + offset * 2 + 1] = Number(
+          (val >> 32n) & 0xffffffffn,
+        );
       };
 
       writeUint64(0, s.state.a);
@@ -659,10 +684,12 @@ export class SFC64 extends BitGenerator {
   spawn(nChildren: number): SFC64[] {
     this.ensureNotDisposed();
     if (!this._seedSequence) {
-      throw new Error('Cannot spawn from a BitGenerator without a SeedSequence');
+      throw new Error(
+        "Cannot spawn from a BitGenerator without a SeedSequence",
+      );
     }
     const childSeqs = this._seedSequence.spawn(nChildren);
-    return childSeqs.map(seq => new SFC64(seq));
+    return childSeqs.map((seq) => new SFC64(seq));
   }
 
   dispose(): void {
@@ -708,7 +735,9 @@ export class MT19937 extends BitGenerator {
     this._wasmState = wasm._mt19937_create();
 
     if (this._wasmState === 0) {
-      throw new Error('Failed to create MT19937 state: memory allocation failed');
+      throw new Error(
+        "Failed to create MT19937 state: memory allocation failed",
+      );
     }
 
     if (seed instanceof SeedSequence) {
@@ -718,7 +747,10 @@ export class MT19937 extends BitGenerator {
     }
 
     // Generate 624 uint32 values for the full state
-    const state = this._seedSequence.generateState(624, 'uint32') as Uint32Array;
+    const state = this._seedSequence.generateState(
+      624,
+      "uint32",
+    ) as Uint32Array;
     this._initFromState(state);
   }
 
@@ -738,7 +770,7 @@ export class MT19937 extends BitGenerator {
 
   private ensureNotDisposed(): void {
     if (this._disposed) {
-      throw new Error('MT19937 has been disposed');
+      throw new Error("MT19937 has been disposed");
     }
   }
 
@@ -778,7 +810,13 @@ export class MT19937 extends BitGenerator {
     const uintegerPtr = wasm._malloc(4);
 
     try {
-      wasm._mt19937_get_state(this._wasmState, keyPtr, posPtr, hasUint32Ptr, uintegerPtr);
+      wasm._mt19937_get_state(
+        this._wasmState,
+        keyPtr,
+        posPtr,
+        hasUint32Ptr,
+        uintegerPtr,
+      );
 
       const key = new Uint32Array(624);
       for (let i = 0; i < 624; i++) {
@@ -786,7 +824,7 @@ export class MT19937 extends BitGenerator {
       }
 
       return {
-        bit_generator: 'MT19937',
+        bit_generator: "MT19937",
         state: {
           key: key,
           pos: wasm.HEAP32[posPtr >> 2],
@@ -812,7 +850,13 @@ export class MT19937 extends BitGenerator {
       for (let i = 0; i < 624; i++) {
         wasm.HEAPU32[(keyPtr >> 2) + i] = s.state.key[i];
       }
-      wasm._mt19937_set_state(this._wasmState, keyPtr, s.state.pos, s.has_uint32, s.uinteger);
+      wasm._mt19937_set_state(
+        this._wasmState,
+        keyPtr,
+        s.state.pos,
+        s.has_uint32,
+        s.uinteger,
+      );
     } finally {
       wasm._free(keyPtr);
     }
@@ -821,10 +865,12 @@ export class MT19937 extends BitGenerator {
   spawn(nChildren: number): MT19937[] {
     this.ensureNotDisposed();
     if (!this._seedSequence) {
-      throw new Error('Cannot spawn from a BitGenerator without a SeedSequence');
+      throw new Error(
+        "Cannot spawn from a BitGenerator without a SeedSequence",
+      );
     }
     const childSeqs = this._seedSequence.spawn(nChildren);
-    return childSeqs.map(seq => new MT19937(seq));
+    return childSeqs.map((seq) => new MT19937(seq));
   }
 
   dispose(): void {
@@ -872,7 +918,9 @@ export class Philox extends BitGenerator {
     this._wasmState = wasm._philox_create();
 
     if (this._wasmState === 0) {
-      throw new Error('Failed to create Philox state: memory allocation failed');
+      throw new Error(
+        "Failed to create Philox state: memory allocation failed",
+      );
     }
 
     if (seed instanceof SeedSequence) {
@@ -882,7 +930,7 @@ export class Philox extends BitGenerator {
     }
 
     // Generate 4 uint32 values for the 2 × 64-bit key
-    const state = this._seedSequence.generateState(4, 'uint32') as Uint32Array;
+    const state = this._seedSequence.generateState(4, "uint32") as Uint32Array;
     this._initFromState(state);
   }
 
@@ -902,7 +950,7 @@ export class Philox extends BitGenerator {
 
   private ensureNotDisposed(): void {
     if (this._disposed) {
-      throw new Error('Philox has been disposed');
+      throw new Error("Philox has been disposed");
     }
   }
 
@@ -957,11 +1005,13 @@ export class Philox extends BitGenerator {
     const stepPtr = wasm._malloc(4 * 8);
     try {
       // Write delta as 4 × 64-bit values (little-endian)
-      const mask64 = 0xFFFFFFFFFFFFFFFFn;
+      const mask64 = 0xffffffffffffffffn;
       for (let i = 0; i < 4; i++) {
         const val = (delta >> BigInt(i * 64)) & mask64;
-        wasm.HEAPU32[(stepPtr >> 2) + i * 2] = Number(val & 0xFFFFFFFFn);
-        wasm.HEAPU32[(stepPtr >> 2) + i * 2 + 1] = Number((val >> 32n) & 0xFFFFFFFFn);
+        wasm.HEAPU32[(stepPtr >> 2) + i * 2] = Number(val & 0xffffffffn);
+        wasm.HEAPU32[(stepPtr >> 2) + i * 2 + 1] = Number(
+          (val >> 32n) & 0xffffffffn,
+        );
       }
       wasm._philox_advance(this._wasmState, stepPtr);
     } finally {
@@ -999,7 +1049,12 @@ export class Philox extends BitGenerator {
     try {
       wasm._philox_get_state(
         this._wasmState,
-        ctrPtr, keyPtr, bufferPosPtr, bufferPtr, hasUint32Ptr, uintegerPtr
+        ctrPtr,
+        keyPtr,
+        bufferPosPtr,
+        bufferPtr,
+        hasUint32Ptr,
+        uintegerPtr,
       );
 
       const readUint64Array = (ptr: number, count: number): BigUint64Array => {
@@ -1013,7 +1068,7 @@ export class Philox extends BitGenerator {
       };
 
       return {
-        bit_generator: 'Philox',
+        bit_generator: "Philox",
         state: {
           counter: readUint64Array(ctrPtr, 4),
           key: readUint64Array(keyPtr, 2),
@@ -1045,8 +1100,10 @@ export class Philox extends BitGenerator {
     try {
       const writeUint64Array = (ptr: number, arr: BigUint64Array): void => {
         for (let i = 0; i < arr.length; i++) {
-          wasm.HEAPU32[(ptr >> 2) + i * 2] = Number(arr[i] & 0xFFFFFFFFn);
-          wasm.HEAPU32[(ptr >> 2) + i * 2 + 1] = Number((arr[i] >> 32n) & 0xFFFFFFFFn);
+          wasm.HEAPU32[(ptr >> 2) + i * 2] = Number(arr[i] & 0xffffffffn);
+          wasm.HEAPU32[(ptr >> 2) + i * 2 + 1] = Number(
+            (arr[i] >> 32n) & 0xffffffffn,
+          );
         }
       };
 
@@ -1056,7 +1113,12 @@ export class Philox extends BitGenerator {
 
       wasm._philox_set_state(
         this._wasmState,
-        ctrPtr, keyPtr, s.buffer_pos, bufferPtr, s.has_uint32, s.uinteger
+        ctrPtr,
+        keyPtr,
+        s.buffer_pos,
+        bufferPtr,
+        s.has_uint32,
+        s.uinteger,
       );
     } finally {
       wasm._free(ctrPtr);
@@ -1068,10 +1130,12 @@ export class Philox extends BitGenerator {
   spawn(nChildren: number): Philox[] {
     this.ensureNotDisposed();
     if (!this._seedSequence) {
-      throw new Error('Cannot spawn from a BitGenerator without a SeedSequence');
+      throw new Error(
+        "Cannot spawn from a BitGenerator without a SeedSequence",
+      );
     }
     const childSeqs = this._seedSequence.spawn(nChildren);
-    return childSeqs.map(seq => new Philox(seq));
+    return childSeqs.map((seq) => new Philox(seq));
   }
 
   dispose(): void {
@@ -1089,11 +1153,14 @@ export class Philox extends BitGenerator {
 /**
  * Registry of available BitGenerator classes.
  */
-const BIT_GENERATORS: Record<string, new (seed?: number | bigint | number[] | SeedSequence | null) => BitGenerator> = {
-  'PCG64': PCG64,
-  'MT19937': MT19937,
-  'PHILOX': Philox,
-  'SFC64': SFC64,
+const BIT_GENERATORS: Record<
+  string,
+  new (seed?: number | bigint | number[] | SeedSequence | null) => BitGenerator
+> = {
+  PCG64: PCG64,
+  MT19937: MT19937,
+  PHILOX: Philox,
+  SFC64: SFC64,
 };
 
 /**
@@ -1108,11 +1175,15 @@ const BIT_GENERATORS: Record<string, new (seed?: number | bigint | number[] | Se
  * const mt = new MT(12345);
  * ```
  */
-export function getBitGenerator(name: string): new (seed?: number | bigint | number[] | SeedSequence | null) => BitGenerator {
+export function getBitGenerator(
+  name: string,
+): new (
+  seed?: number | bigint | number[] | SeedSequence | null,
+) => BitGenerator {
   const normalized = name.toUpperCase();
   const cls = BIT_GENERATORS[normalized];
   if (!cls) {
-    const available = Object.keys(BIT_GENERATORS).join(', ');
+    const available = Object.keys(BIT_GENERATORS).join(", ");
     throw new Error(`Unknown BitGenerator: ${name}. Available: ${available}`);
   }
   return cls;
@@ -1166,27 +1237,42 @@ export class Generator {
     // Allocate bitgen_t structure and initialize it
     this._wasmBitgen = wasm._malloc(40); // sizeof(bitgen_t)
     if (this._wasmBitgen === 0) {
-      throw new Error('Failed to allocate bitgen_t');
+      throw new Error("Failed to allocate bitgen_t");
     }
 
     // Initialize based on the BitGenerator type
     if (this._bitGenerator instanceof PCG64) {
-      wasm._pcg64_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+      wasm._pcg64_init_bitgen(
+        this._wasmBitgen,
+        this._bitGenerator.wasmStatePtr,
+      );
     } else if (this._bitGenerator instanceof SFC64) {
-      wasm._sfc64_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+      wasm._sfc64_init_bitgen(
+        this._wasmBitgen,
+        this._bitGenerator.wasmStatePtr,
+      );
     } else if (this._bitGenerator instanceof MT19937) {
-      wasm._mt19937_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+      wasm._mt19937_init_bitgen(
+        this._wasmBitgen,
+        this._bitGenerator.wasmStatePtr,
+      );
     } else if (this._bitGenerator instanceof Philox) {
-      wasm._philox_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+      wasm._philox_init_bitgen(
+        this._wasmBitgen,
+        this._bitGenerator.wasmStatePtr,
+      );
     } else {
       // Fallback for custom BitGenerators - use PCG64 style (may not work correctly)
-      wasm._pcg64_init_bitgen(this._wasmBitgen, this._bitGenerator.wasmStatePtr);
+      wasm._pcg64_init_bitgen(
+        this._wasmBitgen,
+        this._bitGenerator.wasmStatePtr,
+      );
     }
   }
 
   private ensureNotDisposed(): void {
     if (this._disposed) {
-      throw new Error('Generator has been disposed');
+      throw new Error("Generator has been disposed");
     }
   }
 
@@ -1206,7 +1292,7 @@ export class Generator {
   spawn(nChildren: number): Generator[] {
     this.ensureNotDisposed();
     const childBitGens = this._bitGenerator.spawn(nChildren);
-    return childBitGens.map(bg => new Generator(bg));
+    return childBitGens.map((bg) => new Generator(bg));
   }
 
   /**
@@ -1239,7 +1325,7 @@ export class Generator {
       return this._bitGenerator.next_double();
     }
 
-    const shape = typeof size === 'number' ? [size] : size;
+    const shape = typeof size === "number" ? [size] : size;
     const totalSize = shape.reduce((a, b) => a * b, 1);
     const wasm = getWasmModule();
 
@@ -1274,7 +1360,7 @@ export class Generator {
     for (let i = 0; i < length; i += 4) {
       const val = this._bitGenerator.next_uint32();
       for (let j = 0; j < 4 && i + j < length; j++) {
-        result[i + j] = (val >> (j * 8)) & 0xFF;
+        result[i + j] = (val >> (j * 8)) & 0xff;
       }
     }
     return result;
@@ -1296,7 +1382,7 @@ export class Generator {
     high?: number | null,
     size?: SizeType,
     _dtype: DType = DType.Int64,
-    endpoint: boolean = false
+    endpoint: boolean = false,
   ): NDArray | number {
     this.ensureNotDisposed();
 
@@ -1317,14 +1403,20 @@ export class Generator {
       return wasm._random_integers32(this._wasmBitgen, low, high - 1);
     }
 
-    const shape = typeof size === 'number' ? [size] : size;
+    const shape = typeof size === "number" ? [size] : size;
     const totalSize = shape.reduce((a, b) => a * b, 1);
 
     // Allocate output buffer - use int32 for better JS compatibility
     const outPtr = wasm._malloc(totalSize * 4); // int32_t = 4 bytes
 
     try {
-      wasm._random_integers32_fill(this._wasmBitgen, totalSize, low, high - 1, outPtr);
+      wasm._random_integers32_fill(
+        this._wasmBitgen,
+        totalSize,
+        low,
+        high - 1,
+        outPtr,
+      );
       // Use Int32 dtype for the result
       return this._createArrayFromPtr(outPtr, shape, DType.Int32);
     } finally {
@@ -1346,16 +1438,16 @@ export class Generator {
     a: number | NDArray | number[],
     size?: SizeType,
     replace: boolean = true,
-    _p?: NDArray | number[] | null,  // TODO: Implement probability weights
+    _p?: NDArray | number[] | null, // TODO: Implement probability weights
     axis: number = 0,
-    _shuffle: boolean = true  // TODO: Implement shuffle option
+    _shuffle: boolean = true, // TODO: Implement shuffle option
   ): Promise<NDArray | number> {
     this.ensureNotDisposed();
 
     let population: number;
     let sourceArray: NDArray | null = null;
 
-    if (typeof a === 'number') {
+    if (typeof a === "number") {
       population = a;
     } else if (Array.isArray(a)) {
       sourceArray = await NDArray.fromArray(a);
@@ -1366,28 +1458,31 @@ export class Generator {
     }
 
     if (!replace && size !== null && size !== undefined) {
-      const sizeNum = typeof size === 'number' ? size : size.reduce((x, y) => x * y, 1);
+      const sizeNum =
+        typeof size === "number" ? size : size.reduce((x, y) => x * y, 1);
       if (sizeNum > population) {
-        throw new Error('Cannot take a larger sample than population when replace=false');
+        throw new Error(
+          "Cannot take a larger sample than population when replace=false",
+        );
       }
     }
 
     if (size === null || size === undefined) {
       // Return single element
       const idx = this.integers(0, population) as number;
-      if (typeof a === 'number') {
+      if (typeof a === "number") {
         return idx;
       }
       return sourceArray!.get(idx);
     }
 
-    const shape = typeof size === 'number' ? [size] : size;
+    const shape = typeof size === "number" ? [size] : size;
     const totalSize = shape.reduce((x, y) => x * y, 1);
 
     if (replace) {
       // With replacement: simple random indices
       const indices = this.integers(0, population, totalSize) as NDArray;
-      if (typeof a === 'number') {
+      if (typeof a === "number") {
         return indices.reshape(shape);
       }
       const result = await take(sourceArray!, indices);
@@ -1405,9 +1500,11 @@ export class Generator {
         [indexArray[i], indexArray[j]] = [indexArray[j], indexArray[i]];
       }
 
-      const selectedIndices = await NDArray.fromArray(Array.from(indexArray.slice(0, totalSize)));
+      const selectedIndices = await NDArray.fromArray(
+        Array.from(indexArray.slice(0, totalSize)),
+      );
 
-      if (typeof a === 'number') {
+      if (typeof a === "number") {
         return selectedIndices.reshape(shape);
       }
 
@@ -1426,7 +1523,11 @@ export class Generator {
    * @param high - Upper boundary
    * @param size - Output shape
    */
-  uniform(low: number = 0.0, high: number = 1.0, size?: SizeType): NDArray | number {
+  uniform(
+    low: number = 0.0,
+    high: number = 1.0,
+    size?: SizeType,
+  ): NDArray | number {
     this.ensureNotDisposed();
 
     if (size === null || size === undefined) {
@@ -1445,7 +1546,10 @@ export class Generator {
    * @param size - Output shape
    * @param dtype - Output dtype
    */
-  standard_normal(size?: SizeType, dtype: DType = DType.Float64): NDArray | number {
+  standard_normal(
+    size?: SizeType,
+    dtype: DType = DType.Float64,
+  ): NDArray | number {
     this.ensureNotDisposed();
     const wasm = getWasmModule();
 
@@ -1453,7 +1557,7 @@ export class Generator {
       return wasm._random_standard_normal(this._wasmBitgen);
     }
 
-    const shape = typeof size === 'number' ? [size] : size;
+    const shape = typeof size === "number" ? [size] : size;
     const totalSize = shape.reduce((a, b) => a * b, 1);
     const itemSize = dtype === DType.Float32 ? 4 : 8;
     const outPtr = wasm._malloc(totalSize * itemSize);
@@ -1462,7 +1566,11 @@ export class Generator {
       if (dtype === DType.Float64) {
         wasm._random_standard_normal_fill(this._wasmBitgen, totalSize, outPtr);
       } else {
-        wasm._random_standard_normal_fill_f(this._wasmBitgen, totalSize, outPtr);
+        wasm._random_standard_normal_fill_f(
+          this._wasmBitgen,
+          totalSize,
+          outPtr,
+        );
       }
       return this._createArrayFromPtr(outPtr, shape, dtype);
     } finally {
@@ -1477,11 +1585,15 @@ export class Generator {
    * @param scale - Standard deviation
    * @param size - Output shape
    */
-  normal(loc: number = 0.0, scale: number = 1.0, size?: SizeType): NDArray | number {
+  normal(
+    loc: number = 0.0,
+    scale: number = 1.0,
+    size?: SizeType,
+  ): NDArray | number {
     this.ensureNotDisposed();
 
     if (scale < 0) {
-      throw new Error('scale must be non-negative');
+      throw new Error("scale must be non-negative");
     }
 
     if (size === null || size === undefined) {
@@ -1503,7 +1615,7 @@ export class Generator {
   standard_exponential(
     size?: SizeType,
     dtype: DType = DType.Float64,
-    method: 'zig' | 'inv' = 'zig'
+    method: "zig" | "inv" = "zig",
   ): NDArray | number {
     this.ensureNotDisposed();
     const wasm = getWasmModule();
@@ -1512,15 +1624,23 @@ export class Generator {
       return wasm._random_standard_exponential(this._wasmBitgen);
     }
 
-    const shape = typeof size === 'number' ? [size] : size;
+    const shape = typeof size === "number" ? [size] : size;
     const totalSize = shape.reduce((a, b) => a * b, 1);
     const outPtr = wasm._malloc(totalSize * 8);
 
     try {
-      if (method === 'zig') {
-        wasm._random_standard_exponential_fill(this._wasmBitgen, totalSize, outPtr);
+      if (method === "zig") {
+        wasm._random_standard_exponential_fill(
+          this._wasmBitgen,
+          totalSize,
+          outPtr,
+        );
       } else {
-        wasm._random_standard_exponential_inv_fill(this._wasmBitgen, totalSize, outPtr);
+        wasm._random_standard_exponential_inv_fill(
+          this._wasmBitgen,
+          totalSize,
+          outPtr,
+        );
       }
       return this._createArrayFromPtr(outPtr, shape, dtype);
     } finally {
@@ -1538,7 +1658,7 @@ export class Generator {
     this.ensureNotDisposed();
 
     if (scale < 0) {
-      throw new Error('scale must be non-negative');
+      throw new Error("scale must be non-negative");
     }
 
     if (size === null || size === undefined) {
@@ -1557,11 +1677,15 @@ export class Generator {
    * @param size - Output shape
    * @param dtype - Output dtype
    */
-  standard_gamma(shape: number, size?: SizeType, dtype: DType = DType.Float64): NDArray | number {
+  standard_gamma(
+    shape: number,
+    size?: SizeType,
+    dtype: DType = DType.Float64,
+  ): NDArray | number {
     this.ensureNotDisposed();
 
     if (shape < 0) {
-      throw new Error('shape must be non-negative');
+      throw new Error("shape must be non-negative");
     }
 
     const wasm = getWasmModule();
@@ -1570,12 +1694,17 @@ export class Generator {
       return wasm._random_standard_gamma(this._wasmBitgen, shape);
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((a, b) => a * b, 1);
     const outPtr = wasm._malloc(totalSize * 8);
 
     try {
-      wasm._random_standard_gamma_fill(this._wasmBitgen, totalSize, shape, outPtr);
+      wasm._random_standard_gamma_fill(
+        this._wasmBitgen,
+        totalSize,
+        shape,
+        outPtr,
+      );
       return this._createArrayFromPtr(outPtr, sizeArr, dtype);
     } finally {
       wasm._free(outPtr);
@@ -1593,10 +1722,10 @@ export class Generator {
     this.ensureNotDisposed();
 
     if (shape < 0) {
-      throw new Error('shape must be non-negative');
+      throw new Error("shape must be non-negative");
     }
     if (scale < 0) {
-      throw new Error('scale must be non-negative');
+      throw new Error("scale must be non-negative");
     }
 
     if (size === null || size === undefined) {
@@ -1618,8 +1747,8 @@ export class Generator {
   beta(a: number, b: number, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (a <= 0) throw new Error('a must be positive');
-    if (b <= 0) throw new Error('b must be positive');
+    if (a <= 0) throw new Error("a must be positive");
+    if (b <= 0) throw new Error("b must be positive");
 
     const wasm = getWasmModule();
 
@@ -1627,7 +1756,7 @@ export class Generator {
       return wasm._random_beta(this._wasmBitgen, a, b);
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
     const outPtr = wasm._malloc(totalSize * 8);
 
@@ -1648,7 +1777,7 @@ export class Generator {
   chisquare(df: number, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (df <= 0) throw new Error('df must be positive');
+    if (df <= 0) throw new Error("df must be positive");
     return this.gamma(df / 2.0, 2.0, size);
   }
 
@@ -1662,8 +1791,8 @@ export class Generator {
   f(dfnum: number, dfden: number, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (dfnum <= 0) throw new Error('dfnum must be positive');
-    if (dfden <= 0) throw new Error('dfden must be positive');
+    if (dfnum <= 0) throw new Error("dfnum must be positive");
+    if (dfden <= 0) throw new Error("dfden must be positive");
 
     const wasm = getWasmModule();
 
@@ -1672,7 +1801,7 @@ export class Generator {
     }
 
     // Generate using ratio of chi-square variates
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((a, b) => a * b, 1);
 
     const num = this.chisquare(dfnum, totalSize) as NDArray;
@@ -1701,7 +1830,7 @@ export class Generator {
   standard_t(df: number, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (df <= 0) throw new Error('df must be positive');
+    if (df <= 0) throw new Error("df must be positive");
 
     const wasm = getWasmModule();
 
@@ -1710,7 +1839,7 @@ export class Generator {
     }
 
     // Generate using ratio of normal and chi-square
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((a, b) => a * b, 1);
 
     const normal = this.standard_normal(totalSize) as NDArray;
@@ -1743,7 +1872,7 @@ export class Generator {
     }
 
     // Generate using ratio of two standard normals
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((a, b) => a * b, 1);
 
     const n1 = this.standard_normal(totalSize) as NDArray;
@@ -1769,7 +1898,7 @@ export class Generator {
   pareto(a: number, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (a <= 0) throw new Error('a must be positive');
+    if (a <= 0) throw new Error("a must be positive");
 
     const wasm = getWasmModule();
 
@@ -1777,7 +1906,7 @@ export class Generator {
       return wasm._random_pareto(this._wasmBitgen, a);
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
 
     const exp = this.standard_exponential(totalSize) as NDArray;
@@ -1800,7 +1929,7 @@ export class Generator {
   weibull(a: number, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (a < 0) throw new Error('a must be non-negative');
+    if (a < 0) throw new Error("a must be non-negative");
 
     const wasm = getWasmModule();
 
@@ -1808,7 +1937,7 @@ export class Generator {
       return wasm._random_weibull(this._wasmBitgen, a);
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
 
     const exp = this.standard_exponential(totalSize) as NDArray;
@@ -1829,10 +1958,14 @@ export class Generator {
    * @param scale - Scale parameter
    * @param size - Output shape
    */
-  laplace(loc: number = 0.0, scale: number = 1.0, size?: SizeType): NDArray | number {
+  laplace(
+    loc: number = 0.0,
+    scale: number = 1.0,
+    size?: SizeType,
+  ): NDArray | number {
     this.ensureNotDisposed();
 
-    if (scale < 0) throw new Error('scale must be non-negative');
+    if (scale < 0) throw new Error("scale must be non-negative");
 
     const wasm = getWasmModule();
 
@@ -1840,7 +1973,7 @@ export class Generator {
       return wasm._random_laplace(this._wasmBitgen, loc, scale);
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
     const result = _createFloat64Array(sizeArr);
 
@@ -1863,16 +1996,20 @@ export class Generator {
    * @param sigma - Standard deviation of the underlying normal
    * @param size - Output shape
    */
-  lognormal(mean: number = 0.0, sigma: number = 1.0, size?: SizeType): NDArray | number {
+  lognormal(
+    mean: number = 0.0,
+    sigma: number = 1.0,
+    size?: SizeType,
+  ): NDArray | number {
     this.ensureNotDisposed();
 
-    if (sigma < 0) throw new Error('sigma must be non-negative');
+    if (sigma < 0) throw new Error("sigma must be non-negative");
 
     if (size === null || size === undefined) {
       return Math.exp(mean + sigma * (this.standard_normal() as number));
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
     const normal = this.normal(mean, sigma, totalSize) as NDArray;
 
@@ -1894,7 +2031,7 @@ export class Generator {
   rayleigh(scale: number = 1.0, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (scale < 0) throw new Error('scale must be non-negative');
+    if (scale < 0) throw new Error("scale must be non-negative");
 
     const wasm = getWasmModule();
 
@@ -1902,7 +2039,7 @@ export class Generator {
       return wasm._random_rayleigh(this._wasmBitgen, scale);
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
     const exp = this.standard_exponential(totalSize) as NDArray;
 
@@ -1927,8 +2064,8 @@ export class Generator {
   binomial(n: number, p: number, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (n < 0) throw new Error('n must be non-negative');
-    if (p < 0 || p > 1) throw new Error('p must be in [0, 1]');
+    if (n < 0) throw new Error("n must be non-negative");
+    if (p < 0 || p > 1) throw new Error("p must be in [0, 1]");
 
     const wasm = getWasmModule();
 
@@ -1936,7 +2073,7 @@ export class Generator {
       return wasm._random_binomial32(this._wasmBitgen, p, n);
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
     const result = _createFloat64Array(sizeArr);
 
@@ -1956,7 +2093,7 @@ export class Generator {
   poisson(lam: number = 1.0, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (lam < 0) throw new Error('lam must be non-negative');
+    if (lam < 0) throw new Error("lam must be non-negative");
 
     const wasm = getWasmModule();
 
@@ -1964,7 +2101,7 @@ export class Generator {
       return wasm._random_poisson32(this._wasmBitgen, lam);
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
     const result = _createFloat64Array(sizeArr);
 
@@ -1984,7 +2121,7 @@ export class Generator {
   geometric(p: number, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (p <= 0 || p > 1) throw new Error('p must be in (0, 1]');
+    if (p <= 0 || p > 1) throw new Error("p must be in (0, 1]");
 
     const wasm = getWasmModule();
 
@@ -1992,7 +2129,7 @@ export class Generator {
       return wasm._random_geometric32(this._wasmBitgen, p);
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
     const result = _createFloat64Array(sizeArr);
 
@@ -2013,8 +2150,8 @@ export class Generator {
   negative_binomial(n: number, p: number, size?: SizeType): NDArray | number {
     this.ensureNotDisposed();
 
-    if (n <= 0) throw new Error('n must be positive');
-    if (p <= 0 || p >= 1) throw new Error('p must be in (0, 1)');
+    if (n <= 0) throw new Error("n must be positive");
+    if (p <= 0 || p >= 1) throw new Error("p must be in (0, 1)");
 
     const wasm = getWasmModule();
 
@@ -2022,7 +2159,7 @@ export class Generator {
       return wasm._random_negative_binomial32(this._wasmBitgen, n, p);
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
     const result = _createFloat64Array(sizeArr);
 
@@ -2041,26 +2178,40 @@ export class Generator {
    * @param nsample - Number of items sampled
    * @param size - Output shape
    */
-  hypergeometric(ngood: number, nbad: number, nsample: number, size?: SizeType): NDArray | number {
+  hypergeometric(
+    ngood: number,
+    nbad: number,
+    nsample: number,
+    size?: SizeType,
+  ): NDArray | number {
     this.ensureNotDisposed();
 
-    if (ngood < 0) throw new Error('ngood must be non-negative');
-    if (nbad < 0) throw new Error('nbad must be non-negative');
-    if (nsample < 0) throw new Error('nsample must be non-negative');
-    if (nsample > ngood + nbad) throw new Error('nsample must not exceed ngood + nbad');
+    if (ngood < 0) throw new Error("ngood must be non-negative");
+    if (nbad < 0) throw new Error("nbad must be non-negative");
+    if (nsample < 0) throw new Error("nsample must be non-negative");
+    if (nsample > ngood + nbad)
+      throw new Error("nsample must not exceed ngood + nbad");
 
     const wasm = getWasmModule();
 
     if (size === null || size === undefined) {
-      return wasm._random_hypergeometric32(this._wasmBitgen, ngood, nbad, nsample);
+      return wasm._random_hypergeometric32(
+        this._wasmBitgen,
+        ngood,
+        nbad,
+        nsample,
+      );
     }
 
-    const sizeArr = typeof size === 'number' ? [size] : size;
+    const sizeArr = typeof size === "number" ? [size] : size;
     const totalSize = sizeArr.reduce((x, y) => x * y, 1);
     const result = _createFloat64Array(sizeArr);
 
     for (let i = 0; i < totalSize; i++) {
-      result.set(wasm._random_hypergeometric32(this._wasmBitgen, ngood, nbad, nsample), i);
+      result.set(
+        wasm._random_hypergeometric32(this._wasmBitgen, ngood, nbad, nsample),
+        i,
+      );
     }
 
     return result;
@@ -2101,7 +2252,7 @@ export class Generator {
     this.ensureNotDisposed();
 
     let arr: NDArray;
-    if (typeof x === 'number') {
+    if (typeof x === "number") {
       arr = await NDArray.arange(0, x);
     } else {
       arr = await x.copy();
@@ -2120,7 +2271,7 @@ export class Generator {
   private _createArrayFromPtr(
     dataPtr: number,
     shape: number[],
-    dtype: DType
+    dtype: DType,
   ): NDArray {
     const wasm = getWasmModule();
     const totalSize = shape.reduce((a, b) => a * b, 1);
@@ -2128,14 +2279,14 @@ export class Generator {
     // Create the array synchronously
     const shapePtr = wasm._malloc(shape.length * 4);
     for (let i = 0; i < shape.length; i++) {
-      wasm.setValue(shapePtr + i * 4, shape[i], 'i32');
+      wasm.setValue(shapePtr + i * 4, shape[i], "i32");
     }
 
     const ptr = wasm._ndarray_create(shape.length, shapePtr, dtype);
     wasm._free(shapePtr);
 
     if (ptr === 0) {
-      throw new Error('Failed to create NDArray');
+      throw new Error("Failed to create NDArray");
     }
 
     const result = NDArray._fromPtr(ptr, wasm);
@@ -2145,8 +2296,16 @@ export class Generator {
     const destPtr = wasm._ndarray_get_data(result._wasmPtr);
 
     // Use memcpy for efficiency
-    const src = new Uint8Array(wasm.HEAPU8.buffer, dataPtr, totalSize * itemSize);
-    const dest = new Uint8Array(wasm.HEAPU8.buffer, destPtr, totalSize * itemSize);
+    const src = new Uint8Array(
+      wasm.HEAPU8.buffer,
+      dataPtr,
+      totalSize * itemSize,
+    );
+    const dest = new Uint8Array(
+      wasm.HEAPU8.buffer,
+      destPtr,
+      totalSize * itemSize,
+    );
     dest.set(src);
 
     return result;
@@ -2185,7 +2344,12 @@ export class Generator {
    * Swap elements at positions i and j along an axis.
    * @internal
    */
-  private async _swapAlongAxis(arr: NDArray, i: number, j: number, _axis: number): Promise<void> {
+  private async _swapAlongAxis(
+    arr: NDArray,
+    i: number,
+    j: number,
+    _axis: number,
+  ): Promise<void> {
     // Note: _axis is unused for now - this is a simplified 1D implementation
     const temp = arr.get(i);
     arr.set(arr.get(j), i);
@@ -2232,13 +2396,13 @@ export class Generator {
  */
 export function default_rng(
   seed?: number | bigint | number[] | SeedSequence | BitGenerator | null,
-  options?: { bitGenerator?: string }
+  options?: { bitGenerator?: string },
 ): Generator {
   if (seed instanceof BitGenerator) {
     return new Generator(seed);
   }
 
-  const bitGeneratorName = options?.bitGenerator ?? 'PCG64';
+  const bitGeneratorName = options?.bitGenerator ?? "PCG64";
   const BitGenClass = getBitGenerator(bitGeneratorName);
 
   if (seed instanceof SeedSequence) {
@@ -2300,7 +2464,7 @@ export function randn(...args: number[]): NDArray | number {
 export function randint(
   low: number,
   high?: number | null,
-  size?: SizeType
+  size?: SizeType,
 ): NDArray | number {
   return getDefaultGenerator().integers(low, high, size);
 }
@@ -2328,14 +2492,14 @@ function _createFloat64Array(shape: number[]): NDArray {
 
   const shapePtr = module._malloc(shape.length * 4);
   for (let i = 0; i < shape.length; i++) {
-    module.setValue(shapePtr + i * 4, shape[i], 'i32');
+    module.setValue(shapePtr + i * 4, shape[i], "i32");
   }
 
   const ptr = module._ndarray_create(shape.length, shapePtr, DType.Float64);
   module._free(shapePtr);
 
   if (ptr === 0) {
-    throw new Error('Failed to create float64 array');
+    throw new Error("Failed to create float64 array");
   }
 
   return NDArray._fromPtr(ptr, module);
@@ -2350,16 +2514,15 @@ function _createInt64Array(shape: number[]): NDArray {
 
   const shapePtr = module._malloc(shape.length * 4);
   for (let i = 0; i < shape.length; i++) {
-    module.setValue(shapePtr + i * 4, shape[i], 'i32');
+    module.setValue(shapePtr + i * 4, shape[i], "i32");
   }
 
   const ptr = module._ndarray_create(shape.length, shapePtr, DType.Int64);
   module._free(shapePtr);
 
   if (ptr === 0) {
-    throw new Error('Failed to create int64 array');
+    throw new Error("Failed to create int64 array");
   }
 
   return NDArray._fromPtr(ptr, module);
 }
-

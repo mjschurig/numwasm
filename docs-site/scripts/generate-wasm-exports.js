@@ -49,7 +49,10 @@ function findWasmCalls(code) {
   // - arr._module._func(   - any variable._module reference
   // - _wasmModule._func(   - underscore prefixed
   // - wasm[wasmFn]( or module[funcName]( - dynamic calls
-  const wasmCallRegex = /(?:(?:this\.|[\w]+\.)?_?[mM]odule|wasm|_wasmModule)(?:\._(\w+)|\[['"]?(\w+)['"]?\])\s*\(/g;
+  // - xsf._wasm_func( - xsfwasm pattern
+  // - arpack._func( - arwasm pattern
+  // - anyVar._wasm_func( - generic WASM function call pattern
+  const wasmCallRegex = /(?:(?:this\.|[\w]+\.)?_?[mM]odule|wasm|_wasmModule|xsf|arpack|lapack|linpack|quadpack|superlu|ode)(?:\._(\w+)|\[['"]?(\w+)['"]?\])\s*\(/g;
   const wasmCalls = new Set();
   let match;
 
@@ -64,26 +67,108 @@ function findWasmCalls(code) {
     }
   }
 
+  // Also match any variable calling _wasm_* or _* functions (common pattern)
+  // This catches patterns like: someVar._wasm_gamma(x)
+  const genericWasmRegex = /\w+\.(_wasm_\w+)\s*\(/g;
+  while ((match = genericWasmRegex.exec(code)) !== null) {
+    const funcName = match[1];
+    if (funcName && funcName !== '_free' && funcName !== '_malloc') {
+      wasmCalls.add(funcName);
+    }
+  }
+
   return wasmCalls;
 }
 
 /**
  * Find the end of a brace-delimited block
+ * Properly handles strings, template literals, and comments
  */
 function findBlockEnd(content, start) {
   let braceCount = 1;
   let end = start;
-  for (let i = start; i < content.length && braceCount > 0; i++) {
-    if (content[i] === '{') braceCount++;
-    else if (content[i] === '}') braceCount--;
+  let i = start;
+
+  while (i < content.length && braceCount > 0) {
+    const ch = content[i];
+    const next = content[i + 1];
+
+    // Skip single-line comments
+    if (ch === '/' && next === '/') {
+      while (i < content.length && content[i] !== '\n') i++;
+      i++;
+      continue;
+    }
+
+    // Skip multi-line comments
+    if (ch === '/' && next === '*') {
+      i += 2;
+      while (i < content.length - 1 && !(content[i] === '*' && content[i + 1] === '/')) i++;
+      i += 2;
+      continue;
+    }
+
+    // Skip string literals (single quote)
+    if (ch === "'") {
+      i++;
+      while (i < content.length && content[i] !== "'") {
+        if (content[i] === '\\') i++; // Skip escaped character
+        i++;
+      }
+      i++;
+      continue;
+    }
+
+    // Skip string literals (double quote)
+    if (ch === '"') {
+      i++;
+      while (i < content.length && content[i] !== '"') {
+        if (content[i] === '\\') i++; // Skip escaped character
+        i++;
+      }
+      i++;
+      continue;
+    }
+
+    // Skip template literals (backtick) - these can contain ${} expressions
+    if (ch === '`') {
+      i++;
+      while (i < content.length && content[i] !== '`') {
+        if (content[i] === '\\') {
+          i++; // Skip escaped character
+        } else if (content[i] === '$' && content[i + 1] === '{') {
+          // Handle template expression - find matching }
+          i += 2;
+          let templateBraceCount = 1;
+          while (i < content.length && templateBraceCount > 0) {
+            if (content[i] === '{') templateBraceCount++;
+            else if (content[i] === '}') templateBraceCount--;
+            if (templateBraceCount > 0) i++;
+          }
+        }
+        i++;
+      }
+      i++;
+      continue;
+    }
+
+    // Count braces
+    if (ch === '{') braceCount++;
+    else if (ch === '}') braceCount--;
+
     end = i;
+    i++;
   }
+
   return end;
 }
 
 /**
  * Extract TS function to WASM function mappings from TypeScript source files
- * Parses exported functions, classes, and their methods to find WASM calls
+ * Parses exported functions, classes, and their methods to find WASM calls.
+ *
+ * For files where exports call internal helper functions that in turn call WASM,
+ * we associate all WASM calls in the file with all exports from that file.
  */
 function extractTsToWasmMappings(packageDir) {
   const mappings = {};
@@ -104,6 +189,12 @@ function extractTsToWasmMappings(packageDir) {
 
     const content = fs.readFileSync(filePath, 'utf-8');
 
+    // Find all WASM calls in the entire file (for fallback association)
+    const fileWasmCalls = findWasmCalls(content);
+
+    // Collect exported function names from this file
+    const exportedFunctions = [];
+
     // 1. Find exported functions: export [async] function name(...)
     // Note: We find the function declaration, then scan forward to find the opening brace
     // that starts the function body (skipping braces in return type annotations)
@@ -112,6 +203,8 @@ function extractTsToWasmMappings(packageDir) {
 
     while ((funcMatch = funcRegex.exec(content)) !== null) {
       const funcName = funcMatch[1];
+      exportedFunctions.push(funcName);
+
       // Find the opening brace of the function body by tracking paren/angle bracket depth
       let pos = funcMatch.index + funcMatch[0].length;
       let parenDepth = 1; // We're inside the params already
@@ -155,6 +248,8 @@ function extractTsToWasmMappings(packageDir) {
 
     while ((arrowMatch = arrowFuncRegex.exec(content)) !== null) {
       const funcName = arrowMatch[1];
+      exportedFunctions.push(funcName);
+
       const funcStart = arrowMatch.index + arrowMatch[0].length;
       const funcEnd = findBlockEnd(content, funcStart);
       const funcBody = content.substring(funcStart, funcEnd);
@@ -171,6 +266,8 @@ function extractTsToWasmMappings(packageDir) {
 
     while ((classMatch = classRegex.exec(content)) !== null) {
       const className = classMatch[1];
+      exportedFunctions.push(className);
+
       const classStart = classMatch.index + classMatch[0].length;
       const classEnd = findBlockEnd(content, classStart);
       const classBody = content.substring(classStart, classEnd);
@@ -210,6 +307,17 @@ function extractTsToWasmMappings(packageDir) {
       // Add class-level mapping (all WASM calls from all methods)
       if (classWasmCalls.size > 0) {
         mappings[className] = [...classWasmCalls];
+      }
+    }
+
+    // 4. Associate file-level WASM calls with exports that don't have direct WASM calls
+    // This handles the case where exports call internal helper functions that call WASM
+    if (fileWasmCalls.size > 0 && exportedFunctions.length > 0) {
+      for (const funcName of exportedFunctions) {
+        // If this export has no direct WASM calls, associate it with file-level calls
+        if (!mappings[funcName]) {
+          mappings[funcName] = [...fileWasmCalls];
+        }
       }
     }
   }

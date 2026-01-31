@@ -6,9 +6,9 @@
  * Reference: numpy/core/records.py, numpy/lib/_npyio_impl.py
  */
 
-import { NDArray } from '../NDArray.js';
-import { DType, DTYPE_SIZES } from '../types.js';
-import { isNode } from './format.js';
+import { NDArray } from "../_core/NDArray.js";
+import { DType, DTYPE_SIZES } from "../types.js";
+import { isNode } from "./format.js";
 
 /**
  * Options for fromfile()
@@ -61,17 +61,12 @@ export interface FrombufferOptions {
  */
 export async function fromfile(
   file: string | File | ArrayBuffer | URL,
-  options: FromfileOptions = {}
+  options: FromfileOptions = {},
 ): Promise<NDArray> {
-  const {
-    dtype = DType.Float64,
-    count = -1,
-    sep = '',
-    offset = 0,
-  } = options;
+  const { dtype = DType.Float64, count = -1, sep = "", offset = 0 } = options;
 
   // Text mode if separator is provided
-  if (sep !== '') {
+  if (sep !== "") {
     return fromfileText(file, dtype, count, sep, offset);
   }
 
@@ -99,7 +94,12 @@ export async function fromfile(
   // Create typed array from buffer
   const dataBytes = numItems * itemSize;
   const slice = bytes.slice(startOffset, startOffset + dataBytes);
-  const typedArray = createTypedArrayFromBuffer(dtype, slice.buffer, slice.byteOffset, numItems);
+  const typedArray = createTypedArrayFromBuffer(
+    dtype,
+    slice.buffer,
+    slice.byteOffset,
+    numItems,
+  );
 
   return NDArray.fromTypedArray(typedArray, [numItems], dtype);
 }
@@ -112,39 +112,42 @@ async function fromfileText(
   dtype: DType,
   count: number,
   sep: string,
-  offset: number
+  offset: number,
 ): Promise<NDArray> {
   // Read as text
   let text: string;
 
   if (file instanceof ArrayBuffer) {
-    const decoder = new TextDecoder('utf-8');
+    const decoder = new TextDecoder("utf-8");
     text = decoder.decode(file);
-  } else if (typeof File !== 'undefined' && file instanceof File) {
+  } else if (typeof File !== "undefined" && file instanceof File) {
     text = await file.text();
-  } else if (file instanceof URL || (typeof file === 'string' && file.startsWith('http'))) {
+  } else if (
+    file instanceof URL ||
+    (typeof file === "string" && file.startsWith("http"))
+  ) {
     const response = await fetch(file.toString());
     text = await response.text();
-  } else if (typeof file === 'string') {
+  } else if (typeof file === "string") {
     if (isNode()) {
-      const fs = await import('fs/promises');
-      text = await fs.readFile(file, { encoding: 'utf-8' });
+      const fs = await import("fs/promises");
+      text = await fs.readFile(file, { encoding: "utf-8" });
     } else {
-      throw new Error('String file paths only supported in Node.js');
+      throw new Error("String file paths only supported in Node.js");
     }
   } else {
-    throw new Error('Unsupported file source');
+    throw new Error("Unsupported file source");
   }
 
   // Skip offset bytes (as characters in text mode)
   text = text.slice(offset);
 
   // Split by separator and parse
-  const parts = text.split(sep).filter(s => s.trim().length > 0);
+  const parts = text.split(sep).filter((s) => s.trim().length > 0);
   const maxItems = parts.length;
   const numItems = count === -1 ? maxItems : Math.min(count, maxItems);
 
-  const data = parts.slice(0, numItems).map(s => parseFloat(s.trim()));
+  const data = parts.slice(0, numItems).map((s) => parseFloat(s.trim()));
 
   return NDArray.fromArray(data, [data.length], { dtype });
 }
@@ -173,13 +176,9 @@ async function fromfileText(
  */
 export async function frombuffer(
   buffer: ArrayBuffer | ArrayBufferView,
-  options: FrombufferOptions = {}
+  options: FrombufferOptions = {},
 ): Promise<NDArray> {
-  const {
-    dtype = DType.Float64,
-    count = -1,
-    offset = 0,
-  } = options;
+  const { dtype = DType.Float64, count = -1, offset = 0 } = options;
 
   // Get underlying ArrayBuffer
   let arrayBuffer: ArrayBuffer;
@@ -210,7 +209,12 @@ export async function frombuffer(
   }
 
   // Create typed array view
-  const typedArray = createTypedArrayFromBuffer(dtype, arrayBuffer, totalOffset, numItems);
+  const typedArray = createTypedArrayFromBuffer(
+    dtype,
+    arrayBuffer,
+    totalOffset,
+    numItems,
+  );
 
   // Create NDArray from typed array
   return NDArray.fromTypedArray(typedArray, [numItems], dtype);
@@ -220,36 +224,39 @@ export async function frombuffer(
  * Read binary data from various file sources.
  */
 async function readFileBuffer(
-  file: string | File | ArrayBuffer | URL
+  file: string | File | ArrayBuffer | URL,
 ): Promise<ArrayBuffer> {
   if (file instanceof ArrayBuffer) {
     return file;
   }
 
   // Check for File in browser
-  if (typeof File !== 'undefined' && file instanceof File) {
+  if (typeof File !== "undefined" && file instanceof File) {
     return file.arrayBuffer();
   }
 
-  if (file instanceof URL || (typeof file === 'string' && file.startsWith('http'))) {
+  if (
+    file instanceof URL ||
+    (typeof file === "string" && file.startsWith("http"))
+  ) {
     const response = await fetch(file.toString());
     return response.arrayBuffer();
   }
 
-  if (typeof file === 'string') {
+  if (typeof file === "string") {
     // Node.js file path
     if (isNode()) {
-      const fs = await import('fs/promises');
+      const fs = await import("fs/promises");
       const buffer = await fs.readFile(file);
       return buffer.buffer.slice(
         buffer.byteOffset,
-        buffer.byteOffset + buffer.byteLength
+        buffer.byteOffset + buffer.byteLength,
       );
     }
-    throw new Error('String file paths only supported in Node.js');
+    throw new Error("String file paths only supported in Node.js");
   }
 
-  throw new Error('Unsupported file source');
+  throw new Error("Unsupported file source");
 }
 
 /**
@@ -259,8 +266,18 @@ function createTypedArrayFromBuffer(
   dtype: DType,
   buffer: ArrayBuffer,
   byteOffset: number,
-  length: number
-): Float64Array | Float32Array | Int32Array | Int16Array | Int8Array | Uint32Array | Uint16Array | Uint8Array | BigInt64Array | BigUint64Array {
+  length: number,
+):
+  | Float64Array
+  | Float32Array
+  | Int32Array
+  | Int16Array
+  | Int8Array
+  | Uint32Array
+  | Uint16Array
+  | Uint8Array
+  | BigInt64Array
+  | BigUint64Array {
   switch (dtype) {
     case DType.Float64:
       return new Float64Array(buffer, byteOffset, length);

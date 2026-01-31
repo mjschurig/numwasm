@@ -26,87 +26,94 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # Try to restore WASM from cache first
-      - name: Restore WASM from cache
-        id: cache-wasm
+      # ============ RESTORE ALL WASM CACHES (FAIL FAST) ============
+      - name: Restore numwasm from cache
         uses: actions/cache/restore@v4
         with:
-          path: wasm-artifacts/
-          key: wasm-dist-${{ hashFiles('packages/*/src/wasm/**', 'packages/*/scripts/*.sh') }}
+          path: packages/numwasm/dist
+          key: numwasm-dist-${{ hashFiles('packages/numwasm/src/wasm/**', 'packages/numwasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
-      # If cache hit, restore the dist directories
-      - name: Restore WASM dist directories from cache
-        if: steps.cache-wasm.outputs.cache-hit == 'true'
-        run: |
-          echo "Cache hit! Restoring WASM artifacts..."
-          cp -r wasm-artifacts/numwasm-dist packages/numwasm/dist
-          cp -r wasm-artifacts/sciwasm-dist packages/sciwasm/dist
-          cp -r wasm-artifacts/symwasm-dist packages/symwasm/dist
-          cp -r wasm-artifacts/lawasm-dist packages/lawasm/dist
-          cp -r wasm-artifacts/arwasm-dist packages/arwasm/dist
-          cp -r wasm-artifacts/linwasm-dist packages/linwasm/dist
-          cp -r wasm-artifacts/quadwasm-dist packages/quadwasm/dist
-          cp -r wasm-artifacts/superluwasm-dist packages/superluwasm/dist
-          cp -r wasm-artifacts/xsfwasm-dist packages/xsfwasm/dist
-          echo "WASM artifacts restored successfully"
-
-      # If cache miss, build WASM from source
-      - name: Install Emscripten
-        if: steps.cache-wasm.outputs.cache-hit != 'true'
-        uses: mymindstorm/setup-emsdk@v14
+      - name: Restore sciwasm from cache
+        uses: actions/cache/restore@v4
         with:
-          version: '3.1.51'
+          path: packages/sciwasm/dist
+          key: sciwasm-dist-${{ hashFiles('packages/sciwasm/src/wasm/**', 'packages/sciwasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
-      - name: Build numwasm
-        if: steps.cache-wasm.outputs.cache-hit != 'true'
-        run: pnpm --filter numwasm run build
+      - name: Restore symwasm from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: packages/symwasm/dist
+          key: symwasm-dist-${{ hashFiles('packages/symwasm/src/wasm/**', 'packages/symwasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
-      - name: Build sciwasm
-        if: steps.cache-wasm.outputs.cache-hit != 'true'
-        run: pnpm --filter sciwasm run build
+      - name: Restore odewasm from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: packages/odewasm/dist
+          key: odewasm-dist-${{ hashFiles('packages/odewasm/src/wasm/**', 'packages/odewasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
-      - name: Build symwasm
-        if: steps.cache-wasm.outputs.cache-hit != 'true'
-        run: pnpm --filter symwasm run build
+      - name: Restore lawasm from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: packages/lawasm/dist
+          key: lawasm-dist-${{ hashFiles('packages/lawasm/src/wasm/**', 'packages/lawasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
-      - name: Build lawasm
-        if: steps.cache-wasm.outputs.cache-hit != 'true'
-        run: pnpm --filter lawasm run build
+      - name: Restore arwasm from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: packages/arwasm/dist
+          key: arwasm-dist-${{ hashFiles('packages/arwasm/src/wasm/**', 'packages/arwasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
-      - name: Build arwasm
-        if: steps.cache-wasm.outputs.cache-hit != 'true'
-        run: pnpm --filter arwasm run build
+      - name: Restore linwasm from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: packages/linwasm/dist
+          key: linwasm-dist-${{ hashFiles('packages/linwasm/src/wasm/**', 'packages/linwasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
-      - name: Build linwasm
-        if: steps.cache-wasm.outputs.cache-hit != 'true'
-        run: pnpm --filter linwasm run build
+      - name: Restore quadwasm from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: packages/quadwasm/dist
+          key: quadwasm-dist-${{ hashFiles('packages/quadwasm/src/wasm/**', 'packages/quadwasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
-      - name: Build quadwasm
-        if: steps.cache-wasm.outputs.cache-hit != 'true'
-        run: pnpm --filter quadwasm run build
+      - name: Restore superluwasm from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: packages/superluwasm/dist
+          key: superluwasm-dist-${{ hashFiles('packages/superluwasm/src/wasm/**', 'packages/superluwasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
-      - name: Build superluwasm
-        if: steps.cache-wasm.outputs.cache-hit != 'true'
-        run: pnpm --filter superluwasm run build
+      - name: Restore xsfwasm from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: packages/xsfwasm/dist
+          key: xsfwasm-dist-${{ hashFiles('packages/xsfwasm/src/wasm/**', 'packages/xsfwasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
-      - name: Build xsfwasm
-        if: steps.cache-wasm.outputs.cache-hit != 'true'
-        run: pnpm --filter xsfwasm run build
+      - name: Restore mfemwasm from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: packages/mfemwasm/dist
+          key: mfemwasm-dist-${{ hashFiles('packages/mfemwasm/src/wasm/**', 'packages/mfemwasm/scripts/*.sh') }}
+          fail-on-cache-miss: true
 
+      # ============ SET VERSIONS ============
       - name: Set version from tag
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           echo "Publishing version: $VERSION"
-          cd packages/numwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
-          cd packages/sciwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
-          cd packages/symwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
-          cd packages/lawasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
-          cd packages/arwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
-          cd packages/linwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
-          cd packages/quadwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
-          cd packages/superluwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
-          cd packages/xsfwasm && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
+          for pkg in numwasm sciwasm symwasm odewasm lawasm arwasm linwasm quadwasm superluwasm xsfwasm mfemwasm; do
+            cd packages/$pkg && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
+          done
 
+      # ============ PUBLISH PACKAGES ============
       - name: Publish numwasm
         working-directory: packages/numwasm
         run: pnpm publish --no-git-checks --access public
@@ -121,6 +128,12 @@ jobs:
 
       - name: Publish symwasm
         working-directory: packages/symwasm
+        run: pnpm publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish odewasm
+        working-directory: packages/odewasm
         run: pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -157,6 +170,12 @@ jobs:
 
       - name: Publish xsfwasm
         working-directory: packages/xsfwasm
+        run: pnpm publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish mfemwasm
+        working-directory: packages/mfemwasm
         run: pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

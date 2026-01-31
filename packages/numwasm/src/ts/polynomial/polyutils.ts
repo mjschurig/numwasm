@@ -4,7 +4,7 @@
  * Utility functions for polynomial operations, shared across all polynomial bases.
  */
 
-import { NDArray } from '../NDArray.js';
+import { NDArray } from "../_core/NDArray.js";
 
 /**
  * Error class for polynomial operations.
@@ -12,7 +12,7 @@ import { NDArray } from '../NDArray.js';
 export class PolyError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'PolyError';
+    this.name = "PolyError";
   }
 }
 
@@ -22,7 +22,7 @@ export class PolyError extends Error {
 export class PolyDomainWarning extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'PolyDomainWarning';
+    this.name = "PolyDomainWarning";
   }
 }
 
@@ -85,7 +85,7 @@ export function trimcoef(c: number[], tol: number = 0): number[] {
  */
 export function as_series(
   alist: (number[] | NDArray)[],
-  trim: boolean = true
+  trim: boolean = true,
 ): number[][] {
   const result: number[][] = [];
 
@@ -94,7 +94,7 @@ export function as_series(
 
     if (arr instanceof NDArray) {
       if (arr.ndim !== 1) {
-        throw new PolyError('Coefficient arrays must be 1-D');
+        throw new PolyError("Coefficient arrays must be 1-D");
       }
       coef = arr.toArray() as number[];
     } else {
@@ -159,7 +159,7 @@ export function getdomain(x: number[] | NDArray): [number, number] {
  */
 export function mapparms(
   old: [number, number],
-  new_: [number, number]
+  new_: [number, number],
 ): [number, number] {
   const [oldMin, oldMax] = old;
   const [newMin, newMax] = new_;
@@ -168,7 +168,7 @@ export function mapparms(
   const newLen = newMax - newMin;
 
   if (oldLen === 0) {
-    throw new PolyError('Old domain has zero length');
+    throw new PolyError("Old domain has zero length");
   }
 
   const scl = newLen / oldLen;
@@ -195,16 +195,16 @@ export function mapparms(
 export function mapdomain(
   x: number[] | NDArray | number,
   old: [number, number],
-  new_: [number, number]
+  new_: [number, number],
 ): number[] | number {
   const [off, scl] = mapparms(old, new_);
 
-  if (typeof x === 'number') {
+  if (typeof x === "number") {
     return off + scl * x;
   }
 
   const arr = x instanceof NDArray ? (x.toArray() as number[]) : x;
-  return arr.map(v => off + scl * v);
+  return arr.map((v) => off + scl * v);
 }
 
 /* ============ Generic Polynomial Arithmetic ============ */
@@ -288,7 +288,7 @@ export function polydiv(c1: number[], c2: number[]): [number[], number[]] {
   c2 = trimseq([...c2]);
 
   if (c2.length === 1 && c2[0] === 0) {
-    throw new PolyError('Division by zero polynomial');
+    throw new PolyError("Division by zero polynomial");
   }
 
   if (c1.length < c2.length) {
@@ -319,9 +319,13 @@ export function polydiv(c1: number[], c2: number[]): [number[], number[]] {
  * @param maxpower - Maximum allowed power (default: 100)
  * @returns Coefficients of c**pow
  */
-export function polypow(c: number[], pow: number, maxpower: number = 100): number[] {
+export function polypow(
+  c: number[],
+  pow: number,
+  maxpower: number = 100,
+): number[] {
   if (!Number.isInteger(pow) || pow < 0) {
-    throw new PolyError('Power must be a non-negative integer');
+    throw new PolyError("Power must be a non-negative integer");
   }
 
   if (pow === 0) {
