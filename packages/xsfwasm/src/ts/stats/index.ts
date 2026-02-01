@@ -1,20 +1,10 @@
 /**
- * Statistical distribution functions - high-level API
+ * Statistical distribution functions
+ *
+ * Includes CDFs, survival functions, and inverse CDFs for various distributions.
  */
 
-import { getXSFModule, isXSFLoaded } from './loader.js';
-import type { XSFModule } from './types.js';
-
-type ArrayInput = number[] | Float64Array;
-
-function ensureLoaded(): XSFModule {
-  if (!isXSFLoaded()) {
-    throw new Error(
-      'XSF WASM module not loaded. Call "await loadXSFModule()" before using special functions.'
-    );
-  }
-  return getXSFModule();
-}
+import { ensureLoaded, toFloat64Array, type ArrayInput } from '../core/utils.js';
 
 // =============================================================================
 // NORMAL DISTRIBUTION
@@ -43,7 +33,7 @@ export function ndtr(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_ndtr(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_ndtr(arr[i]);
@@ -74,7 +64,7 @@ export function ndtri(p: number | ArrayInput): number | Float64Array {
     return xsf._wasm_ndtri(p);
   }
 
-  const arr = p instanceof Float64Array ? p : new Float64Array(p);
+  const arr = toFloat64Array(p);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_ndtri(arr[i]);
@@ -90,16 +80,16 @@ export function ndtri(p: number | ArrayInput): number | Float64Array {
  * @param x - Input value
  * @returns log(Φ(x))
  */
-export function log_ndtr(x: number): number;
-export function log_ndtr(x: ArrayInput): Float64Array;
-export function log_ndtr(x: number | ArrayInput): number | Float64Array {
+export function logNdtr(x: number): number;
+export function logNdtr(x: ArrayInput): Float64Array;
+export function logNdtr(x: number | ArrayInput): number | Float64Array {
   const xsf = ensureLoaded();
 
   if (typeof x === 'number') {
     return xsf._wasm_log_ndtr(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_log_ndtr(arr[i]);
@@ -130,7 +120,7 @@ export function chdtr(
     return xsf._wasm_chdtr(df, x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_chdtr(df, arr[i]);
@@ -157,7 +147,7 @@ export function chdtrc(
     return xsf._wasm_chdtrc(df, x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_chdtrc(df, arr[i]);
@@ -184,7 +174,7 @@ export function chdtri(
     return xsf._wasm_chdtri(df, p);
   }
 
-  const arr = p instanceof Float64Array ? p : new Float64Array(p);
+  const arr = toFloat64Array(p);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_chdtri(df, arr[i]);
@@ -217,7 +207,7 @@ export function fdtr(
     return xsf._wasm_fdtr(dfn, dfd, x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_fdtr(dfn, dfd, arr[i]);
@@ -241,7 +231,7 @@ export function fdtrc(
     return xsf._wasm_fdtrc(dfn, dfd, x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_fdtrc(dfn, dfd, arr[i]);
@@ -265,7 +255,7 @@ export function fdtri(
     return xsf._wasm_fdtri(dfn, dfd, p);
   }
 
-  const arr = p instanceof Float64Array ? p : new Float64Array(p);
+  const arr = toFloat64Array(p);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_fdtri(dfn, dfd, arr[i]);
@@ -298,7 +288,7 @@ export function gdtr(
     return xsf._wasm_gdtr(a, b, x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_gdtr(a, b, arr[i]);
@@ -322,7 +312,7 @@ export function gdtrc(
     return xsf._wasm_gdtrc(a, b, x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_gdtrc(a, b, arr[i]);
@@ -353,7 +343,7 @@ export function pdtr(
     return xsf._wasm_pdtr(k, m);
   }
 
-  const arr = k instanceof Float64Array ? k : new Float64Array(k);
+  const arr = toFloat64Array(k);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_pdtr(arr[i], m);
@@ -376,7 +366,7 @@ export function pdtrc(
     return xsf._wasm_pdtrc(k, m);
   }
 
-  const arr = k instanceof Float64Array ? k : new Float64Array(k);
+  const arr = toFloat64Array(k);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_pdtrc(arr[i], m);
@@ -477,7 +467,7 @@ export function kolmogorov(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_kolmogorov(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_kolmogorov(arr[i]);
@@ -497,7 +487,7 @@ export function kolmogi(p: number | ArrayInput): number | Float64Array {
     return xsf._wasm_kolmogi(p);
   }
 
-  const arr = p instanceof Float64Array ? p : new Float64Array(p);
+  const arr = toFloat64Array(p);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_kolmogi(arr[i]);
@@ -524,7 +514,7 @@ export function smirnov(
     return xsf._wasm_smirnov(n, x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_smirnov(n, arr[i]);
@@ -547,7 +537,7 @@ export function smirnovi(
     return xsf._wasm_smirnovi(n, p);
   }
 
-  const arr = p instanceof Float64Array ? p : new Float64Array(p);
+  const arr = toFloat64Array(p);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_smirnovi(n, arr[i]);
@@ -570,7 +560,7 @@ export function smirnovi(
  * @param a - Second parameter
  * @returns T(h, a)
  */
-export function owens_t(h: number, a: number): number {
+export function owensT(h: number, a: number): number {
   const xsf = ensureLoaded();
   return xsf._wasm_owens_t(h, a);
 }

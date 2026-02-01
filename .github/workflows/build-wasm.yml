@@ -40,15 +40,13 @@ jobs:
             build_type: emcc
           - package: arwasm
             build_type: emcc
-          - package: linwasm
-            build_type: emcc
           - package: quadwasm
             build_type: emcc
           - package: superluwasm
             build_type: emcc
           - package: xsfwasm
             build_type: emcc
-          - package: mfemwasm
+          - package: eigenwasm
             build_type: emcc
           # Docker/Flang package
           - package: lawasm

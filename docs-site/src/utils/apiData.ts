@@ -105,14 +105,89 @@ const SYMWASM_MODULE_DEFS: ModuleDef[] = [
   { slug: 'printing', displayName: 'Printing', varName: 'printing', isNamespace: true },
 ];
 
-// Standalone WASM packages (lower-level, fewer TS wrappers)
-const ARWASM_MODULE_DEFS: ModuleDef[] = [];
-const LAWASM_MODULE_DEFS: ModuleDef[] = [];
+// ARPACK eigenvalue solvers
+const ARWASM_MODULE_DEFS: ModuleDef[] = [
+  { slug: 'core', displayName: 'Core Solvers', varName: 'core', isNamespace: true },
+  { slug: 'complex', displayName: 'Complex Solvers', varName: 'complex', isNamespace: true },
+  { slug: 'svd', displayName: 'SVD', varName: 'svd', isNamespace: true },
+  { slug: 'generalized', displayName: 'Generalized', varName: 'generalized', isNamespace: true },
+  { slug: 'graph', displayName: 'Graph Analysis', varName: 'graph', isNamespace: true },
+  { slug: 'dimred', displayName: 'Dimensionality Reduction', varName: 'dimred', isNamespace: true },
+  { slug: 'linalg', displayName: 'Linear Algebra', varName: 'linalg', isNamespace: true },
+  { slug: 'sparse', displayName: 'Sparse Matrices', varName: 'sparse', isNamespace: true },
+  { slug: 'operators', displayName: 'Operators', varName: 'operators', isNamespace: true },
+  { slug: 'validation', displayName: 'Validation', varName: 'validation', isNamespace: true },
+  { slug: 'advanced', displayName: 'Advanced', varName: 'advanced', isNamespace: true },
+  { slug: 'matfun', displayName: 'Matrix Functions', varName: 'matfun', isNamespace: true },
+  { slug: 'continuation', displayName: 'Continuation', varName: 'continuation', isNamespace: true },
+];
+
+// LAPACK linear algebra
+const LAWASM_MODULE_DEFS: ModuleDef[] = [
+  { slug: 'linearSolvers', displayName: 'Linear Solvers', varName: 'linearSolvers', isNamespace: true },
+  { slug: 'factorizations', displayName: 'Factorizations', varName: 'factorizations', isNamespace: true },
+  { slug: 'svd', displayName: 'SVD', varName: 'svd', isNamespace: true },
+  { slug: 'eigenvalues', displayName: 'Eigenvalues', varName: 'eigenvalues', isNamespace: true },
+  { slug: 'leastSquares', displayName: 'Least Squares', varName: 'leastSquares', isNamespace: true },
+  { slug: 'inverses', displayName: 'Inverses', varName: 'inverses', isNamespace: true },
+  { slug: 'norms', displayName: 'Norms', varName: 'norms', isNamespace: true },
+  { slug: 'blas', displayName: 'BLAS', varName: 'blas', isNamespace: true },
+  { slug: 'utilities', displayName: 'Utilities', varName: 'utilities', isNamespace: true },
+  { slug: 'matrixFunctions', displayName: 'Matrix Functions', varName: 'matrixFunctions', isNamespace: true },
+];
+
+// LINPACK (minimal, low-level only)
 const LINWASM_MODULE_DEFS: ModuleDef[] = [];
-const QUADWASM_MODULE_DEFS: ModuleDef[] = [];
-const SUPERLUWASM_MODULE_DEFS: ModuleDef[] = [];
-const XSFWASM_MODULE_DEFS: ModuleDef[] = [];
-const ODEWASM_MODULE_DEFS: ModuleDef[] = [];
+
+// QUADPACK integration
+const QUADWASM_MODULE_DEFS: ModuleDef[] = [
+  { slug: 'quadFns', displayName: 'Basic Integration', varName: 'quadFns', isNamespace: true },
+  { slug: 'quadInfFns', displayName: 'Infinite Intervals', varName: 'quadInfFns', isNamespace: true },
+  { slug: 'quadOscFns', displayName: 'Oscillatory', varName: 'quadOscFns', isNamespace: true },
+  { slug: 'quadSingularFns', displayName: 'Singular', varName: 'quadSingularFns', isNamespace: true },
+  { slug: 'quadBreakFns', displayName: 'Break Points', varName: 'quadBreakFns', isNamespace: true },
+  { slug: 'quadRuleFns', displayName: 'Quadrature Rules', varName: 'quadRuleFns', isNamespace: true },
+  { slug: 'quadNgFns', displayName: 'Non-Adaptive', varName: 'quadNgFns', isNamespace: true },
+  { slug: 'quadFixedFns', displayName: 'Fixed Order', varName: 'quadFixedFns', isNamespace: true },
+  { slug: 'integrateFns', displayName: 'Unified API', varName: 'integrateFns', isNamespace: true },
+];
+
+// SuperLU sparse solvers
+const SUPERLUWASM_MODULE_DEFS: ModuleDef[] = [
+  { slug: 'core', displayName: 'Core', varName: 'core', isNamespace: true },
+  { slug: 'factorization', displayName: 'Factorization', varName: 'factorization', isNamespace: true },
+  { slug: 'solvers', displayName: 'Solvers', varName: 'solvers', isNamespace: true },
+];
+
+// XSF special functions
+const XSFWASM_MODULE_DEFS: ModuleDef[] = [
+  { slug: 'gammaFns', displayName: 'Gamma Functions', varName: 'gammaFns', isNamespace: true },
+  { slug: 'betaFns', displayName: 'Beta Functions', varName: 'betaFns', isNamespace: true },
+  { slug: 'errorFns', displayName: 'Error Functions', varName: 'errorFns', isNamespace: true },
+  { slug: 'besselFns', displayName: 'Bessel Functions', varName: 'besselFns', isNamespace: true },
+  { slug: 'sphBesselFns', displayName: 'Spherical Bessel', varName: 'sphBesselFns', isNamespace: true },
+  { slug: 'combinatorialFns', displayName: 'Combinatorial', varName: 'combinatorialFns', isNamespace: true },
+  { slug: 'airyFns', displayName: 'Airy Functions', varName: 'airyFns', isNamespace: true },
+  { slug: 'ellipticFns', displayName: 'Elliptic Integrals', varName: 'ellipticFns', isNamespace: true },
+  { slug: 'expintFns', displayName: 'Exponential Integrals', varName: 'expintFns', isNamespace: true },
+  { slug: 'fresnelFns', displayName: 'Fresnel Integrals', varName: 'fresnelFns', isNamespace: true },
+  { slug: 'hyperFns', displayName: 'Hypergeometric', varName: 'hyperFns', isNamespace: true },
+  { slug: 'kelvinFns', displayName: 'Kelvin Functions', varName: 'kelvinFns', isNamespace: true },
+  { slug: 'siciFns', displayName: 'Sine/Cosine Integrals', varName: 'siciFns', isNamespace: true },
+  { slug: 'struveFns', displayName: 'Struve Functions', varName: 'struveFns', isNamespace: true },
+  { slug: 'zetaFns', displayName: 'Zeta Function', varName: 'zetaFns', isNamespace: true },
+  { slug: 'legendreFns', displayName: 'Legendre Polynomials', varName: 'legendreFns', isNamespace: true },
+  { slug: 'statsFns', displayName: 'Statistics', varName: 'statsFns', isNamespace: true },
+];
+
+// ODE solvers
+const ODEWASM_MODULE_DEFS: ModuleDef[] = [
+  { slug: 'core', displayName: 'Core', varName: 'core', isNamespace: true },
+  { slug: 'explicit', displayName: 'Explicit Solvers', varName: 'explicit', isNamespace: true },
+  { slug: 'implicit', displayName: 'Implicit Solvers', varName: 'implicit', isNamespace: true },
+  { slug: 'stabilized', displayName: 'Stabilized Solvers', varName: 'stabilized', isNamespace: true },
+  { slug: 'unified', displayName: 'Unified API', varName: 'unified', isNamespace: true },
+];
 
 const PACKAGE_MODULE_DEFS: Record<PackageId, ModuleDef[]> = {
   numwasm: NUMWASM_MODULE_DEFS,
@@ -297,6 +372,34 @@ function buildPackageData(packageId: PackageId): PackageData {
   const moduleDefs = PACKAGE_MODULE_DEFS[packageId];
   const categoryDefs = PACKAGE_CATEGORY_DEFS[packageId];
 
+  // Build an ID -> declaration map for resolving references
+  const idMap = new Map<number, DeclarationReflection>();
+  function indexChildren(items: DeclarationReflection[]) {
+    for (const item of items) {
+      if (item.id !== undefined) {
+        idMap.set(item.id, item);
+      }
+      if (item.children) {
+        indexChildren(item.children);
+      }
+      // Also index nested declarations (e.g., in type declarations)
+      const nestedDecl = (item.type as any)?.declaration;
+      if (nestedDecl?.children) {
+        indexChildren(nestedDecl.children);
+      }
+    }
+  }
+  indexChildren(allChildren);
+
+  // Helper to resolve a reference to its target declaration
+  function resolveRef(item: DeclarationReflection): DeclarationReflection {
+    if (item.kind === ReflectionKind.Reference && (item as any).target !== undefined) {
+      const target = idMap.get((item as any).target);
+      if (target) return target;
+    }
+    return item;
+  }
+
   const moduleClaimedNames = new Set<string>();
   const moduleChildrenMap = new Map<string, DeclarationReflection[]>();
 
@@ -308,7 +411,8 @@ function buildPackageData(packageId: PackageId): PackageData {
         c => c.kind === ReflectionKind.Namespace && c.name === mod.slug
       );
       if (ns?.children) {
-        children = ns.children;
+        // Resolve references within namespace to their actual declarations
+        children = ns.children.map(resolveRef);
       }
       moduleClaimedNames.add(mod.slug);
     } else if (mod.varName) {

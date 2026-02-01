@@ -912,7 +912,7 @@ int mfem_mesh_derefine(void* mesh_ptr, const int* derefinements, int num_derefs)
             derefs[i] = derefinements[i];
         }
 
-        mesh->Derefine(derefs);
+        mesh->ncmesh->Derefine(derefs);
         return 0;
     } catch (...) {
         return -1;

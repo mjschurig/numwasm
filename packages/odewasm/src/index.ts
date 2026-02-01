@@ -102,3 +102,22 @@ export type { VodpkOptions, VodpkMethodFlag, PsolFunction } from "./ts/implicit/
 
 // Stabilized solver option types
 export type { RkcOptions, SpcradFunction } from "./ts/stabilized/rkc.js";
+
+// ============================================================
+// NAMESPACE EXPORTS (for organized module access)
+// ============================================================
+
+/** Core types and module loader */
+export * as core from "./ts/core/index.js";
+
+/** Explicit solvers (non-stiff ODEs) */
+export * as explicit from "./ts/explicit/index.js";
+
+/** Implicit solvers (stiff ODEs) */
+export * as implicit from "./ts/implicit/index.js";
+
+/** Stabilized solvers (mildly stiff ODEs) */
+export * as stabilized from "./ts/stabilized/index.js";
+
+/** Unified SciPy-compatible API */
+export * as unified from "./ts/unified/index.js";

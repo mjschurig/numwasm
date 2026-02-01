@@ -1,28 +1,16 @@
 /**
- * Bessel functions - high-level API
+ * Bessel function family
  *
- * Provides user-friendly wrappers for Bessel functions of various kinds:
- * - J (first kind)
- * - Y (second kind / Neumann)
- * - I (modified first kind)
- * - K (modified second kind / MacDonald)
- *
- * All functions support both scalar and array inputs.
+ * Includes:
+ * - Bessel functions of the first kind (J)
+ * - Bessel functions of the second kind (Y) - Neumann functions
+ * - Modified Bessel functions of the first kind (I)
+ * - Modified Bessel functions of the second kind (K) - MacDonald functions
+ * - Spherical Bessel functions
+ * - Kelvin functions
  */
 
-import { getXSFModule, isXSFLoaded } from './loader.js';
-import type { XSFModule } from './types.js';
-
-type ArrayInput = number[] | Float64Array;
-
-function ensureLoaded(): XSFModule {
-  if (!isXSFLoaded()) {
-    throw new Error(
-      'XSF WASM module not loaded. Call "await loadXSFModule()" before using special functions.'
-    );
-  }
-  return getXSFModule();
-}
+import { ensureLoaded, toFloat64Array, type ArrayInput } from '../core/utils.js';
 
 // =============================================================================
 // BESSEL FUNCTIONS OF THE FIRST KIND (J)
@@ -59,7 +47,7 @@ export function j0(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_j0(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_j0(arr[i]);
@@ -96,7 +84,7 @@ export function j1(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_j1(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_j1(arr[i]);
@@ -140,16 +128,8 @@ export function jv(
     return xsf._wasm_jv(v as number, x as number);
   }
 
-  const vArr = vIsScalar
-    ? null
-    : v instanceof Float64Array
-      ? v
-      : new Float64Array(v as number[]);
-  const xArr = xIsScalar
-    ? null
-    : x instanceof Float64Array
-      ? x
-      : new Float64Array(x as number[]);
+  const vArr = vIsScalar ? null : toFloat64Array(v as ArrayInput);
+  const xArr = xIsScalar ? null : toFloat64Array(x as ArrayInput);
 
   const length = vArr?.length ?? xArr!.length;
   if (vArr && xArr && vArr.length !== xArr.length) {
@@ -198,7 +178,7 @@ export function y0(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_y0(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_y0(arr[i]);
@@ -233,7 +213,7 @@ export function y1(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_y1(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_y1(arr[i]);
@@ -277,16 +257,8 @@ export function yv(
     return xsf._wasm_yv(v as number, x as number);
   }
 
-  const vArr = vIsScalar
-    ? null
-    : v instanceof Float64Array
-      ? v
-      : new Float64Array(v as number[]);
-  const xArr = xIsScalar
-    ? null
-    : x instanceof Float64Array
-      ? x
-      : new Float64Array(x as number[]);
+  const vArr = vIsScalar ? null : toFloat64Array(v as ArrayInput);
+  const xArr = xIsScalar ? null : toFloat64Array(x as ArrayInput);
 
   const length = vArr?.length ?? xArr!.length;
   if (vArr && xArr && vArr.length !== xArr.length) {
@@ -338,7 +310,7 @@ export function i0(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_i0(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_i0(arr[i]);
@@ -375,7 +347,7 @@ export function i1(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_i1(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_i1(arr[i]);
@@ -419,16 +391,8 @@ export function iv(
     return xsf._wasm_iv(v as number, x as number);
   }
 
-  const vArr = vIsScalar
-    ? null
-    : v instanceof Float64Array
-      ? v
-      : new Float64Array(v as number[]);
-  const xArr = xIsScalar
-    ? null
-    : x instanceof Float64Array
-      ? x
-      : new Float64Array(x as number[]);
+  const vArr = vIsScalar ? null : toFloat64Array(v as ArrayInput);
+  const xArr = xIsScalar ? null : toFloat64Array(x as ArrayInput);
 
   const length = vArr?.length ?? xArr!.length;
   if (vArr && xArr && vArr.length !== xArr.length) {
@@ -480,7 +444,7 @@ export function k0(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_k0(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_k0(arr[i]);
@@ -517,10 +481,337 @@ export function k1(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_k1(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_k1(arr[i]);
+  }
+  return result;
+}
+
+// =============================================================================
+// SPHERICAL BESSEL FUNCTIONS
+// =============================================================================
+
+/**
+ * Spherical Bessel function of the first kind j_n(x).
+ *
+ * j_n(x) = √(π/(2x)) J_{n+1/2}(x)
+ *
+ * @param n - Order (non-negative integer)
+ * @param x - Argument
+ * @returns j_n(x)
+ *
+ * @example
+ * ```ts
+ * sphericalJn(0, 1);  // sin(1)/1 ≈ 0.841
+ * sphericalJn(1, 1);  // sin(1) - cos(1) ≈ 0.301
+ * ```
+ */
+export function sphericalJn(n: number, x: number): number;
+export function sphericalJn(n: number, x: ArrayInput): Float64Array;
+export function sphericalJn(
+  n: number,
+  x: number | ArrayInput
+): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_spherical_jn(n, x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_spherical_jn(n, arr[i]);
+  }
+  return result;
+}
+
+/**
+ * Spherical Bessel function of the second kind y_n(x).
+ *
+ * y_n(x) = √(π/(2x)) Y_{n+1/2}(x)
+ *
+ * @param n - Order (non-negative integer)
+ * @param x - Argument (x > 0)
+ * @returns y_n(x)
+ *
+ * @example
+ * ```ts
+ * sphericalYn(0, 1);  // -cos(1)/1 ≈ -0.540
+ * ```
+ */
+export function sphericalYn(n: number, x: number): number;
+export function sphericalYn(n: number, x: ArrayInput): Float64Array;
+export function sphericalYn(
+  n: number,
+  x: number | ArrayInput
+): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_spherical_yn(n, x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_spherical_yn(n, arr[i]);
+  }
+  return result;
+}
+
+/**
+ * Modified spherical Bessel function of the first kind i_n(x).
+ *
+ * i_n(x) = √(π/(2x)) I_{n+1/2}(x)
+ *
+ * @param n - Order (non-negative integer)
+ * @param x - Argument
+ * @returns i_n(x)
+ *
+ * @example
+ * ```ts
+ * sphericalIn(0, 1);  // sinh(1)/1 ≈ 1.175
+ * ```
+ */
+export function sphericalIn(n: number, x: number): number;
+export function sphericalIn(n: number, x: ArrayInput): Float64Array;
+export function sphericalIn(
+  n: number,
+  x: number | ArrayInput
+): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_spherical_in(n, x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_spherical_in(n, arr[i]);
+  }
+  return result;
+}
+
+/**
+ * Modified spherical Bessel function of the second kind k_n(x).
+ *
+ * k_n(x) = √(π/(2x)) K_{n+1/2}(x)
+ *
+ * @param n - Order (non-negative integer)
+ * @param x - Argument (x > 0)
+ * @returns k_n(x)
+ *
+ * @example
+ * ```ts
+ * sphericalKn(0, 1);  // π/(2e) ≈ 0.578
+ * ```
+ */
+export function sphericalKn(n: number, x: number): number;
+export function sphericalKn(n: number, x: ArrayInput): Float64Array;
+export function sphericalKn(
+  n: number,
+  x: number | ArrayInput
+): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_spherical_kn(n, x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_spherical_kn(n, arr[i]);
+  }
+  return result;
+}
+
+// =============================================================================
+// KELVIN FUNCTIONS
+// =============================================================================
+
+/**
+ * Kelvin function ber(x).
+ *
+ * ber(x) = Re[J₀(x·e^(3πi/4))]
+ *
+ * Related to Bessel functions of complex argument.
+ *
+ * @param x - Input value (x ≥ 0)
+ * @returns ber(x)
+ */
+export function ber(x: number): number;
+export function ber(x: ArrayInput): Float64Array;
+export function ber(x: number | ArrayInput): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_ber(x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_ber(arr[i]);
+  }
+  return result;
+}
+
+/**
+ * Kelvin function bei(x).
+ *
+ * bei(x) = Im[J₀(x·e^(3πi/4))]
+ *
+ * @param x - Input value (x ≥ 0)
+ * @returns bei(x)
+ */
+export function bei(x: number): number;
+export function bei(x: ArrayInput): Float64Array;
+export function bei(x: number | ArrayInput): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_bei(x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_bei(arr[i]);
+  }
+  return result;
+}
+
+/**
+ * Kelvin function ker(x).
+ *
+ * ker(x) = Re[K₀(x·e^(πi/4))]
+ *
+ * @param x - Input value (x > 0)
+ * @returns ker(x)
+ */
+export function ker(x: number): number;
+export function ker(x: ArrayInput): Float64Array;
+export function ker(x: number | ArrayInput): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_ker(x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_ker(arr[i]);
+  }
+  return result;
+}
+
+/**
+ * Kelvin function kei(x).
+ *
+ * kei(x) = Im[K₀(x·e^(πi/4))]
+ *
+ * @param x - Input value (x > 0)
+ * @returns kei(x)
+ */
+export function kei(x: number): number;
+export function kei(x: ArrayInput): Float64Array;
+export function kei(x: number | ArrayInput): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_kei(x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_kei(arr[i]);
+  }
+  return result;
+}
+
+/**
+ * Derivative of Kelvin function ber'(x).
+ */
+export function berp(x: number): number;
+export function berp(x: ArrayInput): Float64Array;
+export function berp(x: number | ArrayInput): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_berp(x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_berp(arr[i]);
+  }
+  return result;
+}
+
+/**
+ * Derivative of Kelvin function bei'(x).
+ */
+export function beip(x: number): number;
+export function beip(x: ArrayInput): Float64Array;
+export function beip(x: number | ArrayInput): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_beip(x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_beip(arr[i]);
+  }
+  return result;
+}
+
+/**
+ * Derivative of Kelvin function ker'(x).
+ */
+export function kerp(x: number): number;
+export function kerp(x: ArrayInput): Float64Array;
+export function kerp(x: number | ArrayInput): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_kerp(x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_kerp(arr[i]);
+  }
+  return result;
+}
+
+/**
+ * Derivative of Kelvin function kei'(x).
+ */
+export function keip(x: number): number;
+export function keip(x: ArrayInput): Float64Array;
+export function keip(x: number | ArrayInput): number | Float64Array {
+  const xsf = ensureLoaded();
+
+  if (typeof x === 'number') {
+    return xsf._wasm_keip(x);
+  }
+
+  const arr = toFloat64Array(x);
+  const result = new Float64Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    result[i] = xsf._wasm_keip(arr[i]);
   }
   return result;
 }

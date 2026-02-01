@@ -69,13 +69,6 @@ jobs:
           key: arwasm-dist-${{ hashFiles('packages/arwasm/src/wasm/**', 'packages/arwasm/scripts/*.sh') }}
           fail-on-cache-miss: true
 
-      - name: Restore linwasm from cache
-        uses: actions/cache/restore@v4
-        with:
-          path: packages/linwasm/dist
-          key: linwasm-dist-${{ hashFiles('packages/linwasm/src/wasm/**', 'packages/linwasm/scripts/*.sh') }}
-          fail-on-cache-miss: true
-
       - name: Restore quadwasm from cache
         uses: actions/cache/restore@v4
         with:
@@ -97,11 +90,11 @@ jobs:
           key: xsfwasm-dist-${{ hashFiles('packages/xsfwasm/src/wasm/**', 'packages/xsfwasm/scripts/*.sh') }}
           fail-on-cache-miss: true
 
-      - name: Restore mfemwasm from cache
+      - name: Restore eigenwasm from cache
         uses: actions/cache/restore@v4
         with:
-          path: packages/mfemwasm/dist
-          key: mfemwasm-dist-${{ hashFiles('packages/mfemwasm/src/wasm/**', 'packages/mfemwasm/scripts/*.sh') }}
+          path: packages/eigenwasm/dist
+          key: eigenwasm-dist-${{ hashFiles('packages/eigenwasm/src/wasm/**', 'packages/eigenwasm/scripts/*.sh') }}
           fail-on-cache-miss: true
 
       # ============ SET VERSIONS ============
@@ -109,7 +102,7 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           echo "Publishing version: $VERSION"
-          for pkg in numwasm sciwasm symwasm odewasm lawasm arwasm linwasm quadwasm superluwasm xsfwasm mfemwasm; do
+          for pkg in numwasm sciwasm symwasm odewasm lawasm arwasm quadwasm superluwasm xsfwasm eigenwasm; do
             cd packages/$pkg && npm version $VERSION --no-git-tag-version --allow-same-version && cd ../..
           done
 
@@ -150,12 +143,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish linwasm
-        working-directory: packages/linwasm
-        run: pnpm publish --no-git-checks --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Publish quadwasm
         working-directory: packages/quadwasm
         run: pnpm publish --no-git-checks --access public
@@ -174,8 +161,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish mfemwasm
-        working-directory: packages/mfemwasm
+      - name: Publish eigenwasm
+        working-directory: packages/eigenwasm
         run: pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

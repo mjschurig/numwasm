@@ -118,3 +118,34 @@ export {
   QUADPACKWeight,
   QUADPACKOscillatory,
 } from './ts/types.js';
+
+// ============================================================
+// NAMESPACE EXPORTS (for organized module access)
+// ============================================================
+
+/** Basic adaptive integration */
+export * as quadFns from './ts/quad.js';
+
+/** Integration over infinite intervals */
+export * as quadInfFns from './ts/quad_inf.js';
+
+/** Oscillatory integration */
+export * as quadOscFns from './ts/quad_osc.js';
+
+/** Singular integration */
+export * as quadSingularFns from './ts/quad_singular.js';
+
+/** Integration with break points */
+export * as quadBreakFns from './ts/quad_break.js';
+
+/** Integration with specific rules */
+export * as quadRuleFns from './ts/quad_rule.js';
+
+/** Non-adaptive integration */
+export * as quadNgFns from './ts/quad_ng.js';
+
+/** Fixed-order integration */
+export * as quadFixedFns from './ts/quad_fixed.js';
+
+/** Unified integration interface */
+export * as integrateFns from './ts/integrate.js';

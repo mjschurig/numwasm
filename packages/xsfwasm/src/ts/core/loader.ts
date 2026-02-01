@@ -72,7 +72,7 @@ async function findWasmCjs(): Promise<string> {
   const moduleDir = await getModuleDir();
 
   const candidates = [
-    nodePath.join(moduleDir, 'wasm', 'xsf.cjs'),
+    nodePath.join(moduleDir, '..', 'wasm', 'xsf.cjs'),
   ];
 
   // Walk up to find package root (directory containing package.json)
@@ -106,8 +106,8 @@ async function loadWasmNode(): Promise<XSFModule> {
 }
 
 function getBrowserAssetUrls(): { wasmUrl: string; glueUrl: string } {
-  const wasmUrl = new URL('./wasm/xsf.wasm', import.meta.url).href;
-  const glueUrl = new URL('./wasm/xsf.mjs', import.meta.url).href;
+  const wasmUrl = new URL('../wasm/xsf.wasm', import.meta.url).href;
+  const glueUrl = new URL('../wasm/xsf.mjs', import.meta.url).href;
   return { wasmUrl, glueUrl };
 }
 

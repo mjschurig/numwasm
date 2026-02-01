@@ -259,3 +259,46 @@ export {
   WHICH_NONSYMMETRIC,
   WHICH_COMPLEX,
 } from './ts/types.js';
+
+// ============================================================
+// NAMESPACE EXPORTS (for organized module access)
+// ============================================================
+
+/** Core eigenvalue solvers for real matrices */
+export * as core from './ts/core/index.js';
+
+/** Complex eigenvalue solvers */
+export * as complex from './ts/complex/index.js';
+
+/** Singular value decomposition */
+export * as svd from './ts/svd/index.js';
+
+/** Generalized eigenvalue problems */
+export * as generalized from './ts/generalized/index.js';
+
+/** Graph and network analysis */
+export * as graph from './ts/graph/index.js';
+
+/** Dimensionality reduction */
+export * as dimred from './ts/dimred/index.js';
+
+/** Linear algebra utilities */
+export * as linalg from './ts/linalg/index.js';
+
+/** Sparse matrix helpers */
+export * as sparse from './ts/sparse/index.js';
+
+/** Operator combinators */
+export * as operators from './ts/operators/index.js';
+
+/** Validation and diagnostics */
+export * as validation from './ts/validation/index.js';
+
+/** Advanced eigenvalue modes */
+export * as advanced from './ts/advanced/index.js';
+
+/** Matrix functions */
+export * as matfun from './ts/matfun/index.js';
+
+/** Continuation and deflation */
+export * as continuation from './ts/continuation/index.js';

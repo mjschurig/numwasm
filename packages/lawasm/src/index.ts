@@ -458,3 +458,37 @@ export {
   type RealArray,
   type ComplexArray,
 } from './ts/helpers.js';
+
+// ============================================================
+// NAMESPACE EXPORTS (for organized module access)
+// ============================================================
+
+/** Linear system solvers */
+export * as linearSolvers from './ts/linear-solvers/index.js';
+
+/** Matrix factorizations (LU, Cholesky, QR, etc.) */
+export * as factorizations from './ts/factorizations/index.js';
+
+/** Singular value decomposition */
+export * as svd from './ts/svd/index.js';
+
+/** Eigenvalue problems */
+export * as eigenvalues from './ts/eigenvalues/index.js';
+
+/** Least squares and minimum norm */
+export * as leastSquares from './ts/least-squares/index.js';
+
+/** Matrix inverses and pseudoinverse */
+export * as inverses from './ts/inverses/index.js';
+
+/** Matrix norms, condition numbers, determinants */
+export * as norms from './ts/norms/index.js';
+
+/** BLAS operations */
+export * as blas from './ts/blas/index.js';
+
+/** Matrix utilities */
+export * as utilities from './ts/utilities/index.js';
+
+/** Matrix functions (expm, logm, sqrtm, etc.) */
+export * as matrixFunctions from './ts/matrix-functions/index.js';

@@ -1,23 +1,10 @@
 /**
- * Combinatorial functions - high-level API
+ * Combinatorial functions
  *
- * Provides user-friendly wrappers for combinatorial special functions
- * with support for both scalar and array inputs.
+ * Includes binomial coefficients, Pochhammer symbol, and permutations.
  */
 
-import { getXSFModule, isXSFLoaded } from './loader.js';
-import type { XSFModule } from './types.js';
-
-type ArrayInput = number[] | Float64Array;
-
-function ensureLoaded(): XSFModule {
-  if (!isXSFLoaded()) {
-    throw new Error(
-      'XSF WASM module not loaded. Call "await loadXSFModule()" before using special functions.'
-    );
-  }
-  return getXSFModule();
-}
+import { ensureLoaded, toFloat64Array, type ArrayInput } from '../core/utils.js';
 
 /**
  * Binomial coefficient C(n, k) = n! / (k! * (n-k)!).
@@ -64,16 +51,8 @@ export function binom(
     return xsf._wasm_binom(n as number, k as number);
   }
 
-  const nArr = nIsScalar
-    ? null
-    : n instanceof Float64Array
-      ? n
-      : new Float64Array(n as number[]);
-  const kArr = kIsScalar
-    ? null
-    : k instanceof Float64Array
-      ? k
-      : new Float64Array(k as number[]);
+  const nArr = nIsScalar ? null : toFloat64Array(n as ArrayInput);
+  const kArr = kIsScalar ? null : toFloat64Array(k as ArrayInput);
 
   const length = nArr?.length ?? kArr!.length;
   if (nArr && kArr && nArr.length !== kArr.length) {
@@ -125,16 +104,8 @@ export function binomExact(
     return xsf._wasm_binom_exact(n as number, k as number);
   }
 
-  const nArr = nIsScalar
-    ? null
-    : n instanceof Float64Array
-      ? n
-      : new Float64Array(n as number[]);
-  const kArr = kIsScalar
-    ? null
-    : k instanceof Float64Array
-      ? k
-      : new Float64Array(k as number[]);
+  const nArr = nIsScalar ? null : toFloat64Array(n as ArrayInput);
+  const kArr = kIsScalar ? null : toFloat64Array(k as ArrayInput);
 
   const length = nArr?.length ?? kArr!.length;
   if (nArr && kArr && nArr.length !== kArr.length) {
@@ -191,16 +162,8 @@ export function poch(
     return xsf._wasm_poch(x as number, m as number);
   }
 
-  const xArr = xIsScalar
-    ? null
-    : x instanceof Float64Array
-      ? x
-      : new Float64Array(x as number[]);
-  const mArr = mIsScalar
-    ? null
-    : m instanceof Float64Array
-      ? m
-      : new Float64Array(m as number[]);
+  const xArr = xIsScalar ? null : toFloat64Array(x as ArrayInput);
+  const mArr = mIsScalar ? null : toFloat64Array(m as ArrayInput);
 
   const length = xArr?.length ?? mArr!.length;
   if (xArr && mArr && xArr.length !== mArr.length) {
@@ -258,16 +221,8 @@ export function permExact(
     return xsf._wasm_perm_exact(n as number, k as number);
   }
 
-  const nArr = nIsScalar
-    ? null
-    : n instanceof Float64Array
-      ? n
-      : new Float64Array(n as number[]);
-  const kArr = kIsScalar
-    ? null
-    : k instanceof Float64Array
-      ? k
-      : new Float64Array(k as number[]);
+  const nArr = nIsScalar ? null : toFloat64Array(n as ArrayInput);
+  const kArr = kIsScalar ? null : toFloat64Array(k as ArrayInput);
 
   const length = nArr?.length ?? kArr!.length;
   if (nArr && kArr && nArr.length !== kArr.length) {

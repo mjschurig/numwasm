@@ -46,7 +46,10 @@
  * @packageDocumentation
  */
 
-// Module management
+// ============================================================
+// MODULE MANAGEMENT
+// ============================================================
+
 export {
   loadXSFModule,
   getXSFModule,
@@ -54,19 +57,20 @@ export {
   resetXSFModule,
   configureXSF,
   type XSFLoadConfig,
-} from './ts/loader.js';
+} from './ts/core/loader.js';
+
+// Types (re-export low-level types for advanced users)
+export type { XSFModule, XSFModuleFactory } from './ts/core/types.js';
+
+// ============================================================
+// DIRECT FUNCTION EXPORTS (most common use case)
+// ============================================================
 
 // Gamma functions
-export { gamma, gammaln, rgamma } from './ts/gamma.js';
-
-// Digamma function
-export { digamma } from './ts/digamma.js';
-
-// Beta functions
-export { beta, betaln } from './ts/beta.js';
+export { gamma, gammaln, rgamma, beta, betaln, digamma } from './ts/gamma/index.js';
 
 // Error functions
-export { erf, erfc, erfcx, erfi } from './ts/error.js';
+export { erf, erfc, erfcx, erfi } from './ts/error/index.js';
 
 // Bessel functions
 export {
@@ -85,43 +89,12 @@ export {
   // Modified second kind (K) - MacDonald
   k0,
   k1,
-} from './ts/bessel.js';
-
-// Spherical Bessel functions
-export {
-  spherical_jn,
-  spherical_yn,
-  spherical_in,
-  spherical_kn,
-} from './ts/sph_bessel.js';
-
-// Combinatorial functions
-export { binom, binomExact, poch, permExact } from './ts/combinatorial.js';
-
-// Airy functions
-export { airy, type AiryResult } from './ts/airy.js';
-
-// Elliptic integrals
-export {
-  ellipk,
-  ellipe,
-  ellipkinc,
-  ellipeinc,
-  ellipj,
-  type EllipjResult,
-} from './ts/elliptic.js';
-
-// Exponential integrals
-export { exp1, expi } from './ts/expint.js';
-
-// Fresnel integrals
-export { fresnel, type FresnelResult } from './ts/fresnel.js';
-
-// Hypergeometric function
-export { hyp2f1 } from './ts/hyper.js';
-
-// Kelvin functions
-export {
+  // Spherical Bessel
+  sphericalJn,
+  sphericalYn,
+  sphericalIn,
+  sphericalKn,
+  // Kelvin functions
   ber,
   bei,
   ker,
@@ -130,46 +103,75 @@ export {
   beip,
   kerp,
   keip,
-} from './ts/kelvin.js';
+} from './ts/bessel/index.js';
 
-// Lambert W function
-export { lambertw } from './ts/lambertw.js';
+// Special functions
+export {
+  airy,
+  type AiryResult,
+  type AiryArrayResult,
+  struveH,
+  struveL,
+  legendreP,
+  hyp2f1,
+} from './ts/special/index.js';
 
-// Sine/cosine integrals
-export { sici, shichi, type SiCiResult, type ShiChiResult } from './ts/sici.js';
+// Integral functions
+export {
+  ellipk,
+  ellipe,
+  ellipkinc,
+  ellipeinc,
+  ellipj,
+  type EllipjResult,
+  type EllipjArrayResult,
+  exp1,
+  expi,
+  fresnel,
+  type FresnelResult,
+  type FresnelArrayResult,
+  sici,
+  type SiCiResult,
+  type SiCiArrayResult,
+  shichi,
+  type ShiChiResult,
+  type ShiChiArrayResult,
+} from './ts/integrals/index.js';
 
-// Struve functions
-export { struve_h, struve_l } from './ts/struve.js';
+// Combinatorial functions
+export { binom, binomExact, poch, permExact } from './ts/combinatorics/index.js';
 
-// Zeta function
-export { zeta, zetac } from './ts/zeta.js';
-
-// Legendre polynomials
-export { legendre_p } from './ts/legendre.js';
+// Analysis functions
+export { zeta, zetac, lambertw } from './ts/analysis/index.js';
 
 // Statistical distributions
 export {
   // Normal distribution
   ndtr,
   ndtri,
-  log_ndtr,
+  logNdtr,
   // Chi-square distribution
   chdtr,
+  chdtrc,
   chdtri,
   // F-distribution
   fdtr,
+  fdtrc,
   fdtri,
   // Gamma distribution
   gdtr,
   gdtrc,
   // Poisson distribution
   pdtr,
+  pdtrc,
   pdtri,
   // Binomial distribution
   bdtr,
+  bdtrc,
   bdtri,
   // Negative binomial distribution
   nbdtr,
+  nbdtrc,
   nbdtri,
   // Kolmogorov-Smirnov
   kolmogorov,
@@ -177,8 +179,33 @@ export {
   smirnov,
   smirnovi,
   // Owen's T function
-  owens_t,
-} from './ts/stats.js';
+  owensT,
+} from './ts/stats/index.js';
 
-// Types (re-export low-level types for advanced users)
-export type { XSFModule, XSFModuleFactory } from './ts/types.js';
+// ============================================================
+// NAMESPACE EXPORTS (for organized module access)
+// ============================================================
+
+/** Gamma function family (gamma, beta, digamma) */
+export * as gammaFns from './ts/gamma/index.js';
+
+/** Bessel function family (J, Y, I, K, spherical, Kelvin) */
+export * as besselFns from './ts/bessel/index.js';
+
+/** Error functions (erf, erfc, erfcx, erfi) */
+export * as errorFns from './ts/error/index.js';
+
+/** Special functions (Airy, Struve, Legendre, hypergeometric) */
+export * as specialFns from './ts/special/index.js';
+
+/** Integral functions (elliptic, exponential, Fresnel, sine/cosine) */
+export * as integralFns from './ts/integrals/index.js';
+
+/** Combinatorial functions (binomial, Pochhammer, permutations) */
+export * as combinatoricsFns from './ts/combinatorics/index.js';
+
+/** Analysis functions (zeta, Lambert W) */
+export * as analysisFns from './ts/analysis/index.js';
+
+/** Statistical distributions */
+export * as statsFns from './ts/stats/index.js';

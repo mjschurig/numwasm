@@ -1,23 +1,10 @@
 /**
- * Error functions - high-level API
+ * Error functions
  *
- * Provides user-friendly wrappers for error-related special functions
- * with support for both scalar and array inputs.
+ * Includes erf, erfc, erfcx, and erfi functions.
  */
 
-import { getXSFModule, isXSFLoaded } from './loader.js';
-import type { XSFModule } from './types.js';
-
-type ArrayInput = number[] | Float64Array;
-
-function ensureLoaded(): XSFModule {
-  if (!isXSFLoaded()) {
-    throw new Error(
-      'XSF WASM module not loaded. Call "await loadXSFModule()" before using special functions.'
-    );
-  }
-  return getXSFModule();
-}
+import { ensureLoaded, toFloat64Array, type ArrayInput } from '../core/utils.js';
 
 /**
  * Error function erf(x).
@@ -51,7 +38,7 @@ export function erf(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_erf(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_erf(arr[i]);
@@ -91,7 +78,7 @@ export function erfc(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_erfc(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_erfc(arr[i]);
@@ -131,7 +118,7 @@ export function erfcx(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_erfcx(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_erfcx(arr[i]);
@@ -170,7 +157,7 @@ export function erfi(x: number | ArrayInput): number | Float64Array {
     return xsf._wasm_erfi(x);
   }
 
-  const arr = x instanceof Float64Array ? x : new Float64Array(x);
+  const arr = toFloat64Array(x);
   const result = new Float64Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = xsf._wasm_erfi(arr[i]);

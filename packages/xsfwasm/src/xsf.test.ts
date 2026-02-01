@@ -7,7 +7,6 @@ import {
   loadXSFModule,
   getXSFModule,
   isXSFLoaded,
-  resetXSFModule,
   // Gamma functions
   gamma,
   gammaln,
@@ -34,10 +33,10 @@ import {
   k0,
   k1,
   // Spherical Bessel
-  spherical_jn,
-  spherical_yn,
-  spherical_in,
-  spherical_kn,
+  sphericalJn,
+  sphericalYn,
+  sphericalIn,
+  sphericalKn,
   // Combinatorial
   binom,
   binomExact,
@@ -73,17 +72,17 @@ import {
   sici,
   shichi,
   // Struve
-  struve_h,
-  struve_l,
+  struveH,
+  struveL,
   // Zeta
   zeta,
   zetac,
   // Legendre
-  legendre_p,
+  legendreP,
   // Statistics
   ndtr,
   ndtri,
-  log_ndtr,
+  logNdtr,
   chdtr,
   chdtri,
   fdtr,
@@ -100,7 +99,7 @@ import {
   kolmogi,
   smirnov,
   smirnovi,
-  owens_t,
+  owensT,
 } from './index.js';
 
 beforeAll(async () => {
@@ -219,24 +218,24 @@ describe('Bessel functions', () => {
 });
 
 describe('Spherical Bessel functions', () => {
-  test('spherical_jn', () => {
+  test('sphericalJn', () => {
     // j_0(x) = sin(x)/x
-    expect(spherical_jn(0, 1)).toBeCloseTo(Math.sin(1), 8);
+    expect(sphericalJn(0, 1)).toBeCloseTo(Math.sin(1), 8);
   });
 
-  test('spherical_yn', () => {
+  test('sphericalYn', () => {
     // y_0(x) = -cos(x)/x
-    expect(spherical_yn(0, 1)).toBeCloseTo(-Math.cos(1), 8);
+    expect(sphericalYn(0, 1)).toBeCloseTo(-Math.cos(1), 8);
   });
 
-  test('spherical_in', () => {
+  test('sphericalIn', () => {
     // i_0(x) = sinh(x)/x
-    expect(spherical_in(0, 1)).toBeCloseTo(Math.sinh(1), 8);
+    expect(sphericalIn(0, 1)).toBeCloseTo(Math.sinh(1), 8);
   });
 
-  test('spherical_kn', () => {
+  test('sphericalKn', () => {
     // k_0(x) = (π/2) * e^(-x) / x
-    expect(spherical_kn(0, 1)).toBeCloseTo((Math.PI / 2) * Math.exp(-1), 8);
+    expect(sphericalKn(0, 1)).toBeCloseTo((Math.PI / 2) * Math.exp(-1), 8);
   });
 });
 
@@ -377,12 +376,12 @@ describe('Sine/cosine integrals', () => {
 });
 
 describe('Struve functions', () => {
-  test('struve_h', () => {
-    expect(struve_h(0, 0)).toBeCloseTo(0, 10);
+  test('struveH', () => {
+    expect(struveH(0, 0)).toBeCloseTo(0, 10);
   });
 
-  test('struve_l', () => {
-    expect(struve_l(0, 0)).toBeCloseTo(0, 10);
+  test('struveL', () => {
+    expect(struveL(0, 0)).toBeCloseTo(0, 10);
   });
 });
 
@@ -398,10 +397,10 @@ describe('Zeta function', () => {
 });
 
 describe('Legendre polynomials', () => {
-  test('legendre_p', () => {
-    expect(legendre_p(0, 0.5)).toBeCloseTo(1, 10);
-    expect(legendre_p(1, 0.5)).toBeCloseTo(0.5, 10);
-    expect(legendre_p(2, 0.5)).toBeCloseTo(-0.125, 10);
+  test('legendreP', () => {
+    expect(legendreP(0, 0.5)).toBeCloseTo(1, 10);
+    expect(legendreP(1, 0.5)).toBeCloseTo(0.5, 10);
+    expect(legendreP(2, 0.5)).toBeCloseTo(-0.125, 10);
   });
 });
 
@@ -418,10 +417,10 @@ describe('Statistical distributions', () => {
     expect(ndtri(0.025)).toBeCloseTo(-1.96, 2);
   });
 
-  test('log_ndtr (log normal CDF)', () => {
-    expect(log_ndtr(0)).toBeCloseTo(Math.log(0.5), 10);
-    // For very negative x, log_ndtr is more accurate than log(ndtr(x))
-    expect(log_ndtr(-5)).toBeCloseTo(-15.0649983939, 5);
+  test('logNdtr (log normal CDF)', () => {
+    expect(logNdtr(0)).toBeCloseTo(Math.log(0.5), 10);
+    // For very negative x, logNdtr is more accurate than log(ndtr(x))
+    expect(logNdtr(-5)).toBeCloseTo(-15.0649983939, 5);
   });
 
   test('chdtr (chi-square CDF)', () => {
@@ -513,9 +512,9 @@ describe('Statistical distributions', () => {
     expect(smirnov(10, x)).toBeCloseTo(0.95, 5);
   });
 
-  test('owens_t', () => {
-    expect(owens_t(0, 0)).toBeCloseTo(0, 10);
-    expect(owens_t(1, 1)).toBeCloseTo(0.0667418821, 6);
+  test('owensT', () => {
+    expect(owensT(0, 0)).toBeCloseTo(0, 10);
+    expect(owensT(1, 1)).toBeCloseTo(0.0667418821, 6);
   });
 });
 
@@ -660,7 +659,7 @@ describe('Edge cases and special values', () => {
   test('spherical Bessel j_0 relation', () => {
     // j_0(x) = sin(x)/x
     const x = 2;
-    expect(spherical_jn(0, x)).toBeCloseTo(Math.sin(x) / x, 10);
+    expect(sphericalJn(0, x)).toBeCloseTo(Math.sin(x) / x, 10);
   });
 
   test('elliptic integrals at m=0', () => {

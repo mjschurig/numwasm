@@ -396,7 +396,7 @@ console.log('Extracting WASM exports...\n');
 
 // numwasm
 console.log('Processing numwasm...');
-const numwasmTypesPath = path.join(PACKAGES_DIR, 'numwasm', 'src', 'ts', 'types.ts');
+const numwasmTypesPath = path.join(PACKAGES_DIR, 'numwasm', 'src', 'ts', '_core', 'types.ts');
 if (fs.existsSync(numwasmTypesPath)) {
   const content = fs.readFileSync(numwasmTypesPath, 'utf-8');
   const exports = extractFromTypeScriptInterface(content);
@@ -484,6 +484,7 @@ for (const pkg of standalonePackages) {
   const possiblePaths = [
     path.join(PACKAGES_DIR, pkg.name, 'src', 'types.ts'),
     path.join(PACKAGES_DIR, pkg.name, 'src', 'ts', 'types.ts'),
+    path.join(PACKAGES_DIR, pkg.name, 'src', 'ts', 'core', 'types.ts'),
   ];
 
   let typesPath = possiblePaths.find(p => fs.existsSync(p));
