@@ -6,6 +6,9 @@
 
 #ifndef MFEM_USE_CEED
 
+// Forward declaration
+namespace mfem { class FiniteElementSpace; }
+
 namespace mfem
 {
 
@@ -14,7 +17,10 @@ inline bool DeviceCanUseCeed() { return false; }
 
 namespace ceed
 {
-// Placeholder namespace
+
+// Stub function when CEED is not available - does nothing
+inline void RemoveBasisAndRestriction(const FiniteElementSpace *fes) { }
+
 } // namespace ceed
 
 } // namespace mfem

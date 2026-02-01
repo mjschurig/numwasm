@@ -508,3 +508,77 @@ export function createDenseMatrixWithSize(rows: number, cols: number): DenseMatr
   const ptr = wasm._dense_matrix_new_rows_cols(rows, cols);
   return new DenseMatrixObject(ptr);
 }
+
+/**
+ * Wrapper class for SymEngine CSparseMatrix objects
+ * Manages lifecycle and memory cleanup for sparse matrices (CSR format)
+ */
+export class SparseMatrixObject {
+  private ptr: number;
+
+  constructor(ptr: number) {
+    this.ptr = ptr;
+  }
+
+  /**
+   * Get the WASM pointer to this matrix
+   */
+  getPtr(): number {
+    return this.ptr;
+  }
+
+  /**
+   * Check if this matrix object is still valid (not freed)
+   */
+  isValid(): boolean {
+    return this.ptr !== 0;
+  }
+
+  /**
+   * Free the WASM memory for this matrix
+   */
+  free(): void {
+    if (this.ptr !== 0) {
+      const wasm = getWasmModule();
+      wasm._sparse_matrix_free(this.ptr);
+      this.ptr = 0;
+    }
+  }
+
+  /**
+   * Get the string representation of this matrix
+   */
+  toString(): string {
+    if (!this.isValid()) {
+      throw new Error('Cannot convert freed SparseMatrixObject to string');
+    }
+    const wasm = getWasmModule();
+    const strPtr = wasm._sparse_matrix_str(this.ptr);
+    const str = wasm.UTF8ToString(strPtr);
+    wasm._free(strPtr);
+    return str;
+  }
+}
+
+/**
+ * Create a new empty SparseMatrixObject
+ * @returns A new SparseMatrixObject wrapper
+ */
+export function createSparseMatrix(): SparseMatrixObject {
+  const wasm = getWasmModule();
+  const ptr = wasm._sparse_matrix_new();
+  return new SparseMatrixObject(ptr);
+}
+
+/**
+ * Create a SparseMatrixObject with specified dimensions
+ * @param rows Number of rows
+ * @param cols Number of columns
+ * @returns A new SparseMatrixObject wrapper
+ */
+export function createSparseMatrixWithSize(rows: number, cols: number): SparseMatrixObject {
+  const wasm = getWasmModule();
+  const ptr = wasm._sparse_matrix_new();
+  wasm._sparse_matrix_rows_cols(ptr, rows, cols);
+  return new SparseMatrixObject(ptr);
+}

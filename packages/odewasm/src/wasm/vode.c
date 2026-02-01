@@ -12,15 +12,19 @@
 
 #include "f2c.h"
 
-/* Common Block Declarations */
+#ifdef VODE_COMMON_DEFINED
+/* Common blocks and shared functions are defined in vode_common.c */
+#include "vode_common.h"
+#else
+/* Common Block Declarations (when compiling standalone) */
 
 union {
     struct {
-	doublereal acnrm, ccmxj, conp, crate, drc, el[13], eta, etamax, h__, 
-		hmin, hmxi, hnew, hscal, prl1, rc, rl1, tau[13], tq[5], tn, 
+	doublereal acnrm, ccmxj, conp, crate, drc, el[13], eta, etamax, h__,
+		hmin, hmxi, hnew, hscal, prl1, rc, rl1, tau[13], tq[5], tn,
 		uround;
 	integer icf, init, ipup, jcur, jstart, jsv, kflag, kuth, l, lmax, lyh,
-		 lewt, lacor, lsavf, lwm, liwm, locjs, maxord, meth, miter, 
+		 lewt, lacor, lsavf, lwm, liwm, locjs, maxord, meth, miter,
 		msbj, mxhnil, mxstep, n, newh, newq, nhnil, nq, nqnyh, nqwait,
 		 nslj, nslp, nyh;
     } _1;
@@ -29,9 +33,6 @@ union {
 	integer ivod1[33];
     } _2;
 } dvod01_;
-
-#define dvod01_1 (dvod01_._1)
-#define dvod01_2 (dvod01_._2)
 
 union {
     struct {
@@ -43,6 +44,10 @@ union {
 	integer ivod2[8];
     } _2;
 } dvod02_;
+#endif
+
+#define dvod01_1 (dvod01_._1)
+#define dvod01_2 (dvod01_._2)
 
 #define dvod02_1 (dvod02_._1)
 #define dvod02_2 (dvod02_._2)
@@ -2126,6 +2131,10 @@ L800:
 /* ----------------------- End of Subroutine DVODE ----------------------- */
 } /* dvode_ */
 
+#ifndef VODE_COMMON_DEFINED
+/* The following functions are shared between vode.c, vodpk.c, and zvode.c.
+   When VODE_COMMON_DEFINED is set, these are provided by vode_common.c */
+
 /* DECK DVHIN */
 /* Subroutine */ int dvhin_(integer *n, doublereal *t0, doublereal *y0, 
 	doublereal *ydot, S_fp f, doublereal *rpar, integer *ipar, doublereal 
@@ -2492,6 +2501,8 @@ L90:
     return 0;
 /* ----------------------- End of Subroutine DVINDY ---------------------- */
 } /* dvindy_ */
+
+#endif /* VODE_COMMON_DEFINED - end guard for dvhin_ and dvindy_ */
 
 /* DECK DVSTEP */
 /* Subroutine */ int dvstep_(doublereal *y, doublereal *yh, integer *ldyh, 
@@ -4559,6 +4570,10 @@ L100:
 /* ----------------------- End of Subroutine DVSRCO ---------------------- */
 } /* dvsrco_ */
 
+#ifndef VODE_COMMON_DEFINED
+/* The following utility functions are shared between vode.c, vodpk.c, and zvode.c.
+   When VODE_COMMON_DEFINED is set, these are provided by vode_common.c */
+
 /* DECK DEWSET */
 /* Subroutine */ int dewset_(integer *n, integer *itol, doublereal *rtol, 
 	doublereal *atol, doublereal *ycur, doublereal *ewt)
@@ -5100,4 +5115,6 @@ L10:
     *c__ = *a + *b;
     return 0;
 } /* dumsum_ */
+
+#endif /* VODE_COMMON_DEFINED */
 

@@ -9,5 +9,27 @@
   "excludeExternals": true,
   "includeVersion": true,
   "name": "superluwasm",
-  "skipErrorChecking": true
+  "skipErrorChecking": true,
+  "readme": "none",
+  "categoryOrder": [
+    "Module Loading",
+    "Configuration",
+    "Types",
+    "Enumerations",
+    "*"
+  ],
+  "groupOrder": [
+    "Functions",
+    "Type Aliases",
+    "Interfaces",
+    "Enumerations",
+    "Variables",
+    "*"
+  ],
+  "sort": ["source-order"],
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": false
+  }
 }

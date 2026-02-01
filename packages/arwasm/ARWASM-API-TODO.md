@@ -17,9 +17,9 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
 
 ## Core Eigenvalue Solvers
 
-### Complex Eigenvalue Solvers (High Priority)
+### Complex Eigenvalue Solvers (High Priority) ✅
 
-- [ ] `zeigs()` - Complex non-symmetric eigenvalue problem (wraps znaupd/zneupd)
+- [x] `zeigs()` - Complex non-symmetric eigenvalue problem (wraps znaupd/zneupd)
   ```typescript
   async function zeigs(
     matvec: ComplexMatVecFunction,
@@ -29,7 +29,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): Promise<ZeigsResult>
   ```
 
-- [ ] `zeigsh()` - Complex Hermitian eigenvalue problem
+- [x] `zeigsh()` - Complex Hermitian eigenvalue problem
   ```typescript
   async function zeigsh(
     matvec: ComplexMatVecFunction,
@@ -63,9 +63,9 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
 
 ---
 
-## Singular Value Decomposition (High Priority)
+## Singular Value Decomposition (High Priority) ✅
 
-- [ ] `svds()` - Partial SVD via ARPACK (like scipy.sparse.linalg.svds)
+- [x] `svds()` - Partial SVD via ARPACK (like scipy.sparse.linalg.svds)
   ```typescript
   async function svds(
     matvec: MatVecFunction,           // A @ x
@@ -97,9 +97,9 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
 
 ## Specialized Eigenvalue Problems
 
-### Generalized Eigenvalue Problem (High Priority)
+### Generalized Eigenvalue Problem (High Priority) ✅
 
-- [ ] `geigs()` - Explicit generalized eigenvalue: A @ x = λ * B @ x
+- [x] `geigs()` - Explicit generalized eigenvalue: A @ x = λ * B @ x
   ```typescript
   async function geigs(
     Amatvec: MatVecFunction,
@@ -110,9 +110,9 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): Promise<EigsResult>
   ```
 
-### Shift-Invert Convenience Functions (High Priority)
+### Shift-Invert Convenience Functions (High Priority) ✅
 
-- [ ] `eigsNear()` - Find eigenvalues near sigma (symmetric)
+- [x] `eigsNear()` - Find eigenvalues near sigma (symmetric)
   ```typescript
   async function eigsNear(
     matvec: MatVecFunction,
@@ -124,7 +124,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): Promise<EigsResult>
   ```
 
-- [ ] `eignNear()` - Find eigenvalues near sigma (non-symmetric)
+- [x] `eignNear()` - Find eigenvalues near sigma (non-symmetric)
   ```typescript
   async function eignNear(
     matvec: MatVecFunction,
@@ -136,9 +136,9 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): Promise<EignResult>
   ```
 
-### Advanced ARPACK Modes (Low Priority)
+### Advanced ARPACK Modes (Low Priority) ✅
 
-- [ ] `bucklingEigs()` - Buckling mode: K @ x = λ * Kg @ x (Mode 4)
+- [x] `bucklingEigs()` - Buckling mode: K @ x = λ * Kg @ x (Mode 4)
   ```typescript
   async function bucklingEigs(
     Kmatvec: MatVecFunction,           // Stiffness matrix
@@ -150,7 +150,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): Promise<EigsResult>
   ```
 
-- [ ] `cayleyEigs()` - Cayley transform mode (Mode 5)
+- [x] `cayleyEigs()` - Cayley transform mode (Mode 5)
   ```typescript
   async function cayleyEigs(
     Amatvec: MatVecFunction,
@@ -163,13 +163,16 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): Promise<EigsResult>
   ```
 
+- [x] `eigsInInterval()` - Find eigenvalues in an interval
+- [x] `criticalBucklingLoad()` - Find critical buckling load
+
 ---
 
 ## Application-Specific Functions
 
-### Graph/Network Analysis (Medium Priority)
+### Graph/Network Analysis (Medium Priority) ✅
 
-- [ ] `laplacianEigs()` - Graph Laplacian eigenvalues for spectral clustering
+- [x] `laplacianEigs()` - Graph Laplacian eigenvalues for spectral clustering
   ```typescript
   async function laplacianEigs(
     adjacency: SparseMatrix | MatVecFunction,
@@ -190,7 +193,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   }
   ```
 
-- [ ] `pagerank()` - PageRank via power iteration / ARPACK
+- [x] `pagerank()` - PageRank via power iteration / ARPACK
   ```typescript
   async function pagerank(
     outlinks: MatVecFunction,         // Sparse adjacency (column-stochastic)
@@ -211,9 +214,9 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   }
   ```
 
-### Dimensionality Reduction (Medium Priority)
+### Dimensionality Reduction (Medium Priority) ✅
 
-- [ ] `spectralEmbedding()` - Laplacian eigenmaps for manifold learning
+- [x] `spectralEmbedding()` - Laplacian eigenmaps for manifold learning
   ```typescript
   async function spectralEmbedding(
     affinity: MatVecFunction | SparseMatrix,
@@ -233,7 +236,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   }
   ```
 
-- [ ] `truncatedPCA()` - Truncated PCA via eigendecomposition of covariance
+- [x] `truncatedPCA()` - Truncated PCA via eigendecomposition of covariance
   ```typescript
   async function truncatedPCA(
     covariance: MatVecFunction | SparseMatrix,
@@ -253,18 +256,18 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
 
 ## Linear Algebra Utilities
 
-### Matrix Properties (Medium Priority)
+### Matrix Properties (Medium Priority) ✅
 
-- [ ] `spectralRadius()` - Largest magnitude eigenvalue
+- [x] `spectralRadius()` - Largest magnitude eigenvalue
   ```typescript
   async function spectralRadius(
     matvec: MatVecFunction,
     n: number,
     options?: SpectralRadiusOptions
-  ): Promise<number>
+  ): Promise<SpectralRadiusResult>
   ```
 
-- [ ] `spectralNorm()` - Largest singular value (2-norm)
+- [x] `spectralNorm()` - Largest singular value (2-norm)
   ```typescript
   async function spectralNorm(
     matvec: MatVecFunction,
@@ -272,20 +275,20 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
     m: number,
     n: number,
     options?: SpectralNormOptions
-  ): Promise<number>
+  ): Promise<SpectralNormResult>
   ```
 
-- [ ] `condest()` - Condition number estimate
+- [x] `condest()` - Condition number estimate
   ```typescript
   async function condest(
     matvec: MatVecFunction,
     matvecT: MatVecFunction,
     n: number,
     options?: CondestOptions
-  ): Promise<{ largest: number; smallest: number; condition: number }>
+  ): Promise<CondestResult>
   ```
 
-- [ ] `nuclearNormApprox()` - Approximate nuclear norm (sum of singular values)
+- [x] `nuclearNormApprox()` - Approximate nuclear norm (sum of singular values)
   ```typescript
   async function nuclearNormApprox(
     matvec: MatVecFunction,
@@ -294,56 +297,64 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
     n: number,
     k: number,                        // Number of singular values to sum
     options?: NuclearNormOptions
-  ): Promise<number>
+  ): Promise<NuclearNormResult>
   ```
 
-### Matrix Functions (Low Priority)
+### Matrix Functions (Low Priority) ✅
 
-- [ ] `expmv()` - Matrix exponential times vector: exp(t*A) @ v
+- [x] `expmv()` - Matrix exponential times vector: exp(t*A) @ v
   ```typescript
-  async function expmv(
+  function expmv(
     matvec: MatVecFunction,
     v: Float64Array,
     t: number,
     options?: ExpmvOptions
-  ): Promise<Float64Array>
+  ): ExpmvResult
   ```
 
-- [ ] `sqrtmv()` - Matrix square root times vector (for SPD matrices)
+- [x] `sqrtmv()` - Matrix square root times vector (for SPD matrices)
   ```typescript
   async function sqrtmv(
     matvec: MatVecFunction,
     v: Float64Array,
     options?: SqrtmvOptions
-  ): Promise<Float64Array>
+  ): Promise<SqrtmvResult>
   ```
+
+- [x] `invsqrtmv()` - Inverse matrix square root times vector
+- [x] `matpowv()` - Matrix power times vector: A^p @ v
+- [x] `expmvMultiple()` - Matrix exponential for multiple time points
 
 ---
 
 ## Iterative Refinement & Continuation
 
-### Deflation & Hot Start (Low Priority)
+### Deflation & Hot Start (Low Priority) ✅
 
-- [ ] `eigsContinue()` - Continue from previous computation
+- [x] `eigsContinue()` - Continue from previous computation
   ```typescript
   async function eigsContinue(
-    previousResult: EigsResult,
     matvec: MatVecFunction,
-    additionalEigs: number,
-    options?: EigsContinueOptions
+    n: number,
+    additionalNev: number,
+    previousResult: EigsResult,
+    options?: EigsDeflatedOptions
   ): Promise<EigsResult>
   ```
 
-- [ ] `eigsDeflated()` - Find eigenvalues orthogonal to known eigenvectors
+- [x] `eigsDeflated()` - Find eigenvalues orthogonal to known eigenvectors
   ```typescript
   async function eigsDeflated(
     matvec: MatVecFunction,
     n: number,
     nev: number,
     knownEigenvectors: Float64Array[],
-    options?: EigsOptions
+    knownEigenvalues?: Float64Array,
+    options?: EigsDeflatedOptions
   ): Promise<EigsResult>
   ```
+
+- [x] `eignDeflated()` - Non-symmetric deflated eigenvalue solver
 
 ### Block Methods (Low Priority)
 
@@ -362,11 +373,11 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
 
 ---
 
-## Sparse Matrix Helpers (High Priority)
+## Sparse Matrix Helpers (High Priority) ✅
 
 ### Create MatVec from Sparse Formats
 
-- [ ] `csrMatvec()` - CSR (Compressed Sparse Row) format
+- [x] `csrMatvec()` - CSR (Compressed Sparse Row) format
   ```typescript
   function csrMatvec(
     indptr: Int32Array,
@@ -376,7 +387,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
-- [ ] `cscMatvec()` - CSC (Compressed Sparse Column) format
+- [x] `cscMatvec()` - CSC (Compressed Sparse Column) format
   ```typescript
   function cscMatvec(
     indptr: Int32Array,
@@ -386,7 +397,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
-- [ ] `cooMatvec()` - COO (Coordinate) format
+- [x] `cooMatvec()` - COO (Coordinate) format
   ```typescript
   function cooMatvec(
     rows: Int32Array,
@@ -396,7 +407,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
-- [ ] `denseMatvec()` - Dense array (for small problems)
+- [x] `denseMatvec()` - Dense array (for small problems)
   ```typescript
   function denseMatvec(
     matrix: Float64Array,
@@ -406,12 +417,12 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
-- [ ] `diagMatvec()` - Diagonal matrix
+- [x] `diagMatvec()` - Diagonal matrix
   ```typescript
   function diagMatvec(diagonal: Float64Array): MatVecFunction
   ```
 
-- [ ] `tridiagMatvec()` - Tridiagonal matrix
+- [x] `tridiagMatvec()` - Tridiagonal matrix
   ```typescript
   function tridiagMatvec(
     lower: Float64Array,
@@ -420,7 +431,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
-- [ ] `bandedMatvec()` - General banded matrix
+- [x] `bandedMatvec()` - General banded matrix
   ```typescript
   function bandedMatvec(
     bands: Float64Array[],
@@ -431,9 +442,9 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
 
 ---
 
-## Operator Combinators (Medium Priority)
+## Operator Combinators (Medium Priority) ✅
 
-- [ ] `addMatvec()` - Linear combination: (α*A + β*B) @ x
+- [x] `addMatvec()` - Linear combination: (α*A + β*B) @ x
   ```typescript
   function addMatvec(
     A: MatVecFunction,
@@ -443,7 +454,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
-- [ ] `mulMatvec()` - Product: A @ B @ x
+- [x] `mulMatvec()` - Product: A @ B @ x
   ```typescript
   function mulMatvec(
     A: MatVecFunction,
@@ -451,7 +462,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
-- [ ] `shiftMatvec()` - Shift: (A - σI) @ x
+- [x] `shiftMatvec()` - Shift: (A - σI) @ x
   ```typescript
   function shiftMatvec(
     matvec: MatVecFunction,
@@ -459,7 +470,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
-- [ ] `scaleMatvec()` - Scale: α * A @ x
+- [x] `scaleMatvec()` - Scale: α * A @ x
   ```typescript
   function scaleMatvec(
     matvec: MatVecFunction,
@@ -467,7 +478,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
-- [ ] `transposeMatvec()` - Transpose via explicit computation
+- [x] `transposeMatvec()` - Transpose via explicit computation
   ```typescript
   function transposeMatvec(
     matvec: MatVecFunction,
@@ -476,7 +487,7 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
-- [ ] `symmetrizeMatvec()` - (A + A.T) / 2
+- [x] `symmetrizeMatvec()` - (A + A.T) / 2
   ```typescript
   function symmetrizeMatvec(
     matvec: MatVecFunction,
@@ -484,22 +495,28 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   ): MatVecFunction
   ```
 
+Also implemented:
+- [x] `identityMatvec()` - Identity operator
+- [x] `negateMatvec()` - Negation operator
+- [x] `powerMatvec()` - Power operator A^k
+- [x] `blockDiagMatvec()` - Block diagonal operator
+
 ---
 
-## Validation & Diagnostics (Medium Priority)
+## Validation & Diagnostics (Medium Priority) ✅
 
 ### Result Verification
 
-- [ ] `verifyEigs()` - Verify eigenvalue/eigenvector pairs
+- [x] `verifyEigs()` - Verify eigenvalue/eigenvector pairs
   ```typescript
   function verifyEigs(
     matvec: MatVecFunction,
     eigenvalues: Float64Array,
     eigenvectors: Float64Array[],
     options?: VerifyOptions
-  ): VerifyResult
+  ): VerifyEigsResult
 
-  interface VerifyResult {
+  interface VerifyEigsResult {
     residuals: Float64Array;          // ||Av - λv|| for each pair
     maxResidual: number;
     relativeResiduals: Float64Array;  // ||Av - λv|| / |λ|
@@ -508,7 +525,9 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
   }
   ```
 
-- [ ] `verifySvds()` - Verify singular value decomposition
+- [x] `verifyEign()` - Verify non-symmetric eigenvalue/eigenvector pairs
+
+- [x] `verifySvds()` - Verify singular value decomposition
   ```typescript
   function verifySvds(
     matvec: MatVecFunction,
@@ -517,30 +536,32 @@ A comprehensive list of all high-level TypeScript API functions that arwasm coul
     s: Float64Array,
     Vt: Float64Array[],
     options?: VerifyOptions
-  ): VerifyResult
+  ): VerifySvdsResult
   ```
 
 ### Matrix Properties
 
-- [ ] `checkSymmetry()` - Check if matrix is symmetric via random probing
+- [x] `checkSymmetry()` - Check if matrix is symmetric via random probing
   ```typescript
-  async function checkSymmetry(
+  function checkSymmetry(
     matvec: MatVecFunction,
     n: number,
     nProbes?: number
-  ): Promise<{ isSymmetric: boolean; maxAsymmetry: number }>
+  ): SymmetryCheckResult
   ```
 
-- [ ] `checkPositiveDefinite()` - Check if matrix is positive definite
+- [x] `checkPositiveDefinite()` - Check if matrix is positive definite
   ```typescript
   async function checkPositiveDefinite(
     matvec: MatVecFunction,
     n: number,
-    options?: CheckPDOptions
-  ): Promise<{ isPositiveDefinite: boolean; smallestEigenvalue: number }>
+    tol?: number
+  ): Promise<PositiveDefiniteCheckResult>
   ```
 
-### Convergence Monitoring
+- [x] `checkNormalization()` - Check eigenvector normalization
+
+### Convergence Monitoring (Not implemented - requires ARPACK internals)
 
 - [ ] Add `onIteration` callback to all solver options
   ```typescript
@@ -620,20 +641,21 @@ interface ZeigsResult {
 
 ## Priority Summary
 
-| Priority | Category | Functions |
-|----------|----------|-----------|
-| **High** | Core Eigensolvers | `zeigs`, `zeigsh` |
-| **High** | SVD | `svds` |
-| **High** | Generalized/Shift-Invert | `geigs`, `eigsNear`, `eignNear` |
-| **High** | Sparse Helpers | `csrMatvec`, `cscMatvec`, `cooMatvec`, `denseMatvec`, `diagMatvec`, `tridiagMatvec` |
-| **Medium** | Single Precision | `seigs`, `seign` |
-| **Medium** | Graph/ML | `laplacianEigs`, `spectralEmbedding`, `pagerank` |
-| **Medium** | Matrix Properties | `spectralRadius`, `spectralNorm`, `condest` |
-| **Medium** | Operator Combinators | `addMatvec`, `shiftMatvec`, `scaleMatvec`, `mulMatvec` |
-| **Medium** | Validation | `verifyEigs`, `checkSymmetry`, convergence callbacks |
-| **Low** | Advanced Modes | `bucklingEigs`, `cayleyEigs` |
-| **Low** | Matrix Functions | `expmv`, `sqrtmv` |
-| **Low** | Continuation | `eigsContinue`, `eigsDeflated`, `eigsBlock` |
+| Priority | Category | Functions | Status |
+|----------|----------|-----------|--------|
+| **High** | Core Eigensolvers | `zeigs`, `zeigsh` | ✅ Done |
+| **High** | SVD | `svds` | ✅ Done |
+| **High** | Generalized/Shift-Invert | `geigs`, `eigsNear`, `eignNear` | ✅ Done |
+| **High** | Sparse Helpers | `csrMatvec`, `cscMatvec`, `cooMatvec`, `denseMatvec`, `diagMatvec`, `tridiagMatvec`, `bandedMatvec` | ✅ Done |
+| **Medium** | Single Precision | `seigs`, `seign` | ⏳ Pending |
+| **Medium** | Graph/ML | `laplacianEigs`, `spectralEmbedding`, `pagerank` | ✅ Done |
+| **Medium** | Matrix Properties | `spectralRadius`, `spectralNorm`, `condest`, `nuclearNormApprox` | ✅ Done |
+| **Medium** | Operator Combinators | `addMatvec`, `shiftMatvec`, `scaleMatvec`, `mulMatvec`, `symmetrizeMatvec`, `transposeMatvec` | ✅ Done |
+| **Medium** | Validation | `verifyEigs`, `verifySvds`, `checkSymmetry`, `checkPositiveDefinite` | ✅ Done |
+| **Low** | Advanced Modes | `bucklingEigs`, `cayleyEigs`, `eigsInInterval`, `criticalBucklingLoad` | ✅ Done |
+| **Low** | Matrix Functions | `expmv`, `expmvMultiple`, `sqrtmv`, `invsqrtmv`, `matpowv` | ✅ Done |
+| **Low** | Continuation | `eigsContinue`, `eigsDeflated`, `eignDeflated` | ✅ Done |
+| **Low** | Block Methods | `eigsBlock` | ⏳ Pending |
 
 ---
 

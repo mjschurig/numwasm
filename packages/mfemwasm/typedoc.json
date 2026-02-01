@@ -1,0 +1,22 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src/index.ts"],
+  "out": "./docs",
+  "name": "mfemwasm",
+  "includeVersion": true,
+  "categorizeByGroup": true,
+  "categoryOrder": ["Mesh", "FiniteElementSpace", "GridFunction", "Loader", "Types", "*"],
+  "navigationLinks": {
+    "GitHub": "https://github.com/nicobako/wasm-libs/tree/main/packages/mfemwasm",
+    "MFEM": "https://mfem.org"
+  },
+  "plugin": [],
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": false
+  }
+}

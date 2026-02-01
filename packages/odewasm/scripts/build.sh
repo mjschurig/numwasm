@@ -167,6 +167,11 @@ echo "  Compiling radau5.c..."
 emcc -c "$SRC_DIR/radau5.c" -o "$OBJ_DIR/radau5.o" "${CFLAGS[@]}"
 ODE_OBJS+=("$OBJ_DIR/radau5.o")
 
+# Compile ODEX
+echo "  Compiling odex.c..."
+emcc -c "$SRC_DIR/odex.c" -o "$OBJ_DIR/odex.o" "${CFLAGS[@]}"
+ODE_OBJS+=("$OBJ_DIR/odex.o")
+
 # Compile DC_DECSOL (decomposition/solve routines for RADAU5)
 echo "  Compiling dc_decsol.c..."
 emcc -c "$SRC_DIR/dc_decsol.c" -o "$OBJ_DIR/dc_decsol.o" "${CFLAGS[@]}"
@@ -207,31 +212,38 @@ if [ -f "$SRC_DIR/ode.c" ]; then
     ODE_OBJS+=("$OBJ_DIR/ode.o")
 fi
 
-# Compile VODE
+# Compile VODE common routines first (shared by vode, vodpk, zvode)
+if [ -f "$SRC_DIR/vode_common.c" ]; then
+    echo "  Compiling vode_common.c..."
+    emcc -c "$SRC_DIR/vode_common.c" -o "$OBJ_DIR/vode_common.o" "${CFLAGS[@]}"
+    ODE_OBJS+=("$OBJ_DIR/vode_common.o")
+fi
+
+# Compile VODE (uses shared routines from vode_common)
 if [ -f "$SRC_DIR/vode.c" ]; then
     echo "  Compiling vode.c..."
-    emcc -c "$SRC_DIR/vode.c" -o "$OBJ_DIR/vode.o" "${CFLAGS[@]}"
+    emcc -c "$SRC_DIR/vode.c" -o "$OBJ_DIR/vode.o" "${CFLAGS[@]}" -DVODE_COMMON_DEFINED
     ODE_OBJS+=("$OBJ_DIR/vode.o")
 fi
 
-# Compile ZVODE
+# Compile ZVODE (uses shared routines from vode_common)
 if [ -f "$SRC_DIR/zvode.c" ]; then
     echo "  Compiling zvode.c..."
-    emcc -c "$SRC_DIR/zvode.c" -o "$OBJ_DIR/zvode.o" "${CFLAGS[@]}"
+    emcc -c "$SRC_DIR/zvode.c" -o "$OBJ_DIR/zvode.o" "${CFLAGS[@]}" -DVODE_COMMON_DEFINED
     ODE_OBJS+=("$OBJ_DIR/zvode.o")
 fi
 
-# Compile EPSODE
+# Compile EPSODE (uses dec_/sol_ from decsol.c)
 if [ -f "$SRC_DIR/epsode.c" ]; then
     echo "  Compiling epsode.c..."
-    emcc -c "$SRC_DIR/epsode.c" -o "$OBJ_DIR/epsode.o" "${CFLAGS[@]}"
+    emcc -c "$SRC_DIR/epsode.c" -o "$OBJ_DIR/epsode.o" "${CFLAGS[@]}" -DDECSOL_DEFINED
     ODE_OBJS+=("$OBJ_DIR/epsode.o")
 fi
 
-# Compile VODPK
+# Compile VODPK (uses shared routines from vode_common)
 if [ -f "$SRC_DIR/vodpk.c" ]; then
     echo "  Compiling vodpk.c..."
-    emcc -c "$SRC_DIR/vodpk.c" -o "$OBJ_DIR/vodpk.o" "${CFLAGS[@]}"
+    emcc -c "$SRC_DIR/vodpk.c" -o "$OBJ_DIR/vodpk.o" "${CFLAGS[@]}" -DVODE_COMMON_DEFINED
     ODE_OBJS+=("$OBJ_DIR/vodpk.o")
 fi
 
@@ -254,17 +266,18 @@ echo ""
 
 # Exported functions
 EXPORTED_FUNCTIONS='[
-    "_wasm_dopri5", "_wasm_dop853", "_wasm_radau5",
+    "_wasm_dopri5", "_wasm_dop853", "_wasm_radau5", "_wasm_odex",
     "_wasm_rkf45", "_wasm_dverk", "_wasm_ode",
     "_wasm_vode", "_wasm_zvode", "_wasm_vodpk",
     "_wasm_rksuite_setup", "_wasm_rksuite_ut", "_wasm_rksuite_ct", "_wasm_rksuite_stat",
     "_wasm_rkc", "_wasm_rkc_int",
-    "_wasm_contd5", "_wasm_contd8", "_wasm_contr5",
+    "_wasm_contd5", "_wasm_contd8", "_wasm_contr5", "_wasm_contex",
     "_wasm_set_fcn_callback", "_wasm_set_solout_callback", "_wasm_set_jac_callback",
     "_wasm_set_jac_vode_callback", "_wasm_set_psol_callback", "_wasm_set_spcrad_callback",
     "_wasm_dopri5_work_size", "_wasm_dopri5_iwork_size",
     "_wasm_dop853_work_size", "_wasm_dop853_iwork_size",
     "_wasm_radau5_work_size", "_wasm_radau5_iwork_size",
+    "_wasm_odex_work_size", "_wasm_odex_iwork_size",
     "_wasm_rkf45_work_size", "_wasm_rkf45_iwork_size",
     "_wasm_dverk_c_size", "_wasm_dverk_work_size",
     "_wasm_ode_work_size", "_wasm_ode_iwork_size",
@@ -288,7 +301,6 @@ LINK_FLAGS=(
     -s ALLOW_TABLE_GROWTH=1
     -s INITIAL_MEMORY=16777216
     -s STACK_SIZE=1048576
-    -Wl,--allow-multiple-definition
     -O2
 )
 

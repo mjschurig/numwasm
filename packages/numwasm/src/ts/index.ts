@@ -95,12 +95,15 @@ export {
   // Function-based creation
   fromfunction,
   fromiter,
+  fromstring,
   // Conversion functions
   asanyarray,
   asarray_chkfinite,
   copy,
   ascontiguousarray,
   asfortranarray,
+  require,
+  astype,
 } from "./creation/index.js";
 
 // Slice utilities (from _core)
@@ -117,6 +120,7 @@ export type { IndexElement, IndexSpec, Ellipsis, Newaxis } from "./_core/slice.j
 
 // Broadcasting functions (from _core)
 export {
+  broadcast,
   broadcastShapes,
   broadcastShapesMulti,
   shapesAreBroadcastable,
@@ -150,8 +154,13 @@ export {
   indices,
   ix_,
   diag_indices,
+  diag_indices_from,
   tril_indices,
+  tril_indices_from,
   triu_indices,
+  triu_indices_from,
+  mask_indices,
+  fill_diagonal,
   // Advanced indexing
   take_along_axis,
   put_along_axis,
@@ -165,6 +174,7 @@ export type { ClipMode } from "./indexing.js";
 export {
   sort,
   argsort,
+  lexsort,
   partition,
   argpartition,
   sort_complex,
@@ -189,6 +199,23 @@ export {
   cumprod,
   nancumsum,
   nancumprod,
+  // NumPy 2.0 cumulative aliases
+  cumulative_sum,
+  cumulative_prod,
+  // Product and range
+  prod,
+  ptp,
+  // Aliases
+  amin,
+  amax,
+  // Weighted average
+  average,
+  // Percentile and quantile
+  percentile,
+  quantile,
+  // Covariance and correlation
+  cov,
+  corrcoef,
 } from "./statistics.js";
 
 // NaN-handling functions (Phase 23)
@@ -207,6 +234,18 @@ export {
   nanpercentile,
   nan_to_num,
 } from "./nanfunctions.js";
+
+// Special functions (lib.function_base)
+export {
+  clip,
+  diff,
+  gradient,
+  convolve,
+  correlate,
+  interp,
+  trapezoid,
+  unwrap,
+} from "./special.js";
 
 // Manipulation functions (Phase 5)
 export {
@@ -347,6 +386,7 @@ export {
   // Bitwise (unary)
   invert,
   bitwise_not,
+  bitwise_invert,
   // Binary arithmetic
   add,
   subtract,
@@ -382,6 +422,8 @@ export {
   bitwise_xor,
   left_shift,
   right_shift,
+  bitwise_left_shift,
+  bitwise_right_shift,
   // Special math
   arctan2,
   atan2,
@@ -415,6 +457,7 @@ export {
   vectorize,
   frompyfunc,
   piecewise,
+  iterable,
 } from "./_lib/functional.js";
 export type { VectorizeOptions, UfuncLike } from "./_lib/functional.js";
 
@@ -475,6 +518,10 @@ export {
   // NPY format
   save,
   load,
+  // NPZ format (multiple arrays)
+  savez,
+  savez_compressed,
+  loadz,
   // Text I/O
   loadtxt,
   savetxt,
@@ -510,10 +557,15 @@ export {
   dtypeToDescr,
   descrToDtype,
   isNode,
+  // Bit packing
+  packbits,
+  unpackbits,
 } from "./io/index.js";
 export type {
   SaveOptions,
   LoadOptions,
+  SavezOptions,
+  NpzFile,
   LoadtxtOptions,
   SavetxtOptions,
   GenfromtxtOptions,
@@ -523,6 +575,7 @@ export type {
   PrintOptions,
   MemmapMode,
   MemmapOptions,
+  BitOrder,
 } from "./io/index.js";
 
 // Window functions (Phase 11)
@@ -545,7 +598,17 @@ export {
 } from "./constants.js";
 
 // Type information classes (Phase 12)
-export { finfo, iinfo } from "./_lib/typeinfo.js";
+export {
+  finfo,
+  iinfo,
+  can_cast,
+  issubdtype,
+  isdtype,
+  common_type,
+  result_type,
+  min_scalar_type,
+} from "./_lib/typeinfo.js";
+export type { CastingMode } from "./_lib/typeinfo.js";
 
 // Linear algebra (Phase 13)
 export {
@@ -584,6 +647,11 @@ export {
   tensorinv,
   matrix_norm,
   vector_norm,
+  // NumPy 2.0 linalg functions
+  matrix_transpose,
+  vecdot,
+  matvec,
+  vecmat,
 } from "./linalg.js";
 export type {
   EigResult,
@@ -630,6 +698,7 @@ export {
   // Classes
   Generator,
   PCG64,
+  PCG64DXSM,
   SeedSequence,
   BitGenerator,
   // Phase 27: Additional BitGenerators
@@ -646,12 +715,23 @@ export {
   random,
   randn,
   randint,
+  choice,
+  shuffle,
+  permutation,
+  bytes,
+  // Legacy functions (deprecated but available)
+  rand,
+  ranf,
+  random_sample,
+  sample,
+  random_integers,
   // Initialization
   initRandom,
 } from "./random.js";
 export type {
   SizeType,
   PCG64State,
+  PCG64DXSMState,
   MT19937State,
   PhiloxState,
   SFC64State,
@@ -709,6 +789,10 @@ export {
   rpartition,
   encode,
   decode,
+  // NumPy 2.0 string functions
+  mod as strMod,
+  translate as strTranslate,
+  slice as strSlice,
   // Namespace object
   strings,
 } from "./strings/index.js";
@@ -745,6 +829,10 @@ export {
   polymul,
   polydiv,
   polypow,
+  // NumPy legacy functions (descending powers order)
+  roots,
+  poly,
+  poly1d,
   // Chebyshev
   Chebyshev,
   chebval,

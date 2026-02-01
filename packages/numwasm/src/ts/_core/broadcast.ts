@@ -13,6 +13,190 @@ import { loadWasmModule } from "./wasm-loader.js";
  */
 const NPY_MAXDIMS = 32;
 
+/* ============ Broadcast Class ============ */
+
+/**
+ * Broadcast class for iterating over multiple arrays as if they had been broadcast.
+ *
+ * This class encapsulates the result of broadcasting arrays together
+ * and provides an iterable interface to iterate over them.
+ *
+ * @example
+ * ```typescript
+ * const x = await NDArray.fromArray([1, 2, 3]);
+ * const y = await NDArray.fromArray([[4], [5]]);
+ * const b = await broadcast.create(x, y);
+ *
+ * console.log(b.shape);  // [2, 3]
+ * console.log(b.ndim);   // 2
+ * console.log(b.size);   // 6
+ *
+ * // Iterate over broadcast indices
+ * for (const idx of b) {
+ *   console.log(idx);  // [0,0], [0,1], [0,2], [1,0], [1,1], [1,2]
+ * }
+ *
+ * // Reset and iterate again
+ * b.reset();
+ * ```
+ */
+export class broadcast implements Iterable<number[]> {
+  private _arrays: NDArray[];
+  private _shape: number[];
+  private _index: number[];
+  private _position: number;
+  private _numIterations: number;
+
+  /**
+   * Create a broadcast object.
+   * Use broadcast.create() instead of constructor directly.
+   */
+  private constructor(arrays: NDArray[], shape: number[]) {
+    this._arrays = arrays;
+    this._shape = shape;
+    this._index = new Array(shape.length).fill(0);
+    this._position = 0;
+    this._numIterations = shape.reduce((a, b) => a * b, 1);
+  }
+
+  /**
+   * Create a broadcast object from multiple arrays.
+   *
+   * @param arrays - Arrays to broadcast together
+   * @returns A new broadcast object
+   * @throws Error if arrays cannot be broadcast together
+   *
+   * @example
+   * ```typescript
+   * const b = await broadcast.create(arr1, arr2, arr3);
+   * ```
+   */
+  static async create(...arrays: NDArray[]): Promise<broadcast> {
+    if (arrays.length === 0) {
+      return new broadcast([], []);
+    }
+
+    const shapes = arrays.map((arr) => arr.shape);
+    const broadcastShape = await broadcastShapesMulti(shapes);
+
+    if (broadcastShape === null) {
+      const shapeStrs = shapes.map((s) => `(${s.join(", ")})`).join(", ");
+      throw new Error(
+        `shape mismatch: objects cannot be broadcast to a single shape. Shapes: ${shapeStrs}`,
+      );
+    }
+
+    return new broadcast(arrays, broadcastShape);
+  }
+
+  /**
+   * The shape of the broadcast result.
+   */
+  get shape(): number[] {
+    return [...this._shape];
+  }
+
+  /**
+   * Number of dimensions of the broadcast result.
+   */
+  get ndim(): number {
+    return this._shape.length;
+  }
+
+  /**
+   * Total size of the broadcast result.
+   */
+  get size(): number {
+    return this._numIterations;
+  }
+
+  /**
+   * Number of arrays being broadcast.
+   */
+  get numiter(): number {
+    return this._arrays.length;
+  }
+
+  /**
+   * Current iteration index (flat index).
+   */
+  get index(): number {
+    return this._position;
+  }
+
+  /**
+   * The input arrays.
+   */
+  get iters(): NDArray[] {
+    return this._arrays;
+  }
+
+  /**
+   * Reset the broadcast iterator to the beginning.
+   */
+  reset(): void {
+    this._index = new Array(this._shape.length).fill(0);
+    this._position = 0;
+  }
+
+  /**
+   * Iterate over multi-dimensional indices.
+   */
+  *[Symbol.iterator](): Iterator<number[]> {
+    this.reset();
+
+    while (this._position < this._numIterations) {
+      yield [...this._index];
+
+      // Increment multi-dimensional index
+      this._position++;
+      if (this._position < this._numIterations) {
+        for (let d = this._shape.length - 1; d >= 0; d--) {
+          this._index[d]++;
+          if (this._index[d] < this._shape[d]) {
+            break;
+          }
+          this._index[d] = 0;
+        }
+      }
+    }
+  }
+
+  /**
+   * Get values from all arrays at the current broadcast position.
+   *
+   * @param index - Multi-dimensional index in broadcast space
+   * @returns Array of values, one from each input array
+   */
+  getValues(index: number[]): number[] {
+    const values: number[] = [];
+
+    for (const arr of this._arrays) {
+      // Map broadcast index to array index
+      const arrIndex: number[] = [];
+      const offset = index.length - arr.ndim;
+
+      for (let d = 0; d < arr.ndim; d++) {
+        const broadcastDim = d + offset;
+        if (arr.shape[d] === 1) {
+          arrIndex.push(0);
+        } else {
+          arrIndex.push(index[broadcastDim]);
+        }
+      }
+
+      // Get flat index and retrieve value
+      let flatIdx = 0;
+      for (let d = 0; d < arr.ndim; d++) {
+        flatIdx = flatIdx * arr.shape[d] + arrIndex[d];
+      }
+      values.push(arr.getFlat(flatIdx));
+    }
+
+    return values;
+  }
+}
+
 /**
  * Compute the broadcast shape for two shapes.
  *

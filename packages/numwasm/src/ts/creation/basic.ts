@@ -6,6 +6,7 @@
 
 import { NDArray } from "../_core/NDArray.js";
 import type { NDArrayOptions } from "../_core/types.js";
+import { DType } from "../types.js";
 
 /**
  * Create a new NDArray filled with zeros.
@@ -266,4 +267,133 @@ export async function asfortranarray(
   const arr =
     a instanceof NDArray ? a : await array(a as number[], undefined, options);
   return arr.asfortranarray();
+}
+
+/**
+ * Return an ndarray of the provided type that satisfies requirements.
+ *
+ * This function is useful when you need an array with specific requirements
+ * (dtype, memory layout, writeable, etc.).
+ *
+ * @param a - Input array or array-like object
+ * @param dtype - Required data type
+ * @param requirements - String or list of requirements: 'C' (C_CONTIGUOUS),
+ *                       'F' (F_CONTIGUOUS), 'A' (either), 'W' (WRITEABLE),
+ *                       'O' (OWNDATA), 'E' (ENSUREARRAY)
+ * @returns Promise resolving to an array satisfying requirements
+ *
+ * @example
+ * ```typescript
+ * const a = await require([[1, 2], [3, 4]], DType.Float64, 'C');
+ * // Returns a C-contiguous float64 array
+ *
+ * const b = await require(arr, null, ['F', 'W']);
+ * // Returns a Fortran-contiguous, writeable array
+ * ```
+ */
+export async function require(
+  a: NDArray | number[] | number[][],
+  dtype: DType | null = null,
+  requirements: string | string[] | null = null,
+): Promise<NDArray> {
+  // Convert to array if needed
+  let arr: NDArray;
+  if (a instanceof NDArray) {
+    arr = a;
+  } else {
+    arr = await array(a as number[], undefined, dtype ? { dtype } : {});
+  }
+
+  // Parse requirements
+  const reqs = new Set<string>();
+  if (requirements !== null) {
+    const reqList =
+      typeof requirements === "string"
+        ? requirements.split(",").map((r) => r.trim().toUpperCase())
+        : requirements.map((r) => r.toUpperCase());
+    for (const r of reqList) {
+      // Handle both short and long forms
+      if (r === "C" || r === "C_CONTIGUOUS" || r === "CONTIGUOUS") {
+        reqs.add("C");
+      } else if (r === "F" || r === "F_CONTIGUOUS" || r === "FORTRAN") {
+        reqs.add("F");
+      } else if (r === "A" || r === "ALIGNED") {
+        reqs.add("A");
+      } else if (r === "W" || r === "WRITEABLE") {
+        reqs.add("W");
+      } else if (r === "O" || r === "OWNDATA") {
+        reqs.add("O");
+      } else if (r === "E" || r === "ENSUREARRAY") {
+        reqs.add("E");
+      }
+    }
+  }
+
+  // Check dtype requirement
+  let needsCopy = false;
+  if (dtype !== null && arr.dtype !== dtype) {
+    needsCopy = true;
+  }
+
+  // Check contiguity requirements
+  if (reqs.has("C") && !arr.flags.c_contiguous) {
+    needsCopy = true;
+  }
+  if (reqs.has("F") && !arr.flags.f_contiguous) {
+    // If we need F-contiguous and also need a copy for other reasons,
+    // we'll handle it specially
+    if (needsCopy || !arr.flags.f_contiguous) {
+      arr = arr.asfortranarray();
+      needsCopy = false; // asfortranarray creates a copy if needed
+    }
+  }
+
+  // Check writeable requirement (views of readonly arrays need copy)
+  if (reqs.has("W") && !arr.flags.writeable) {
+    needsCopy = true;
+  }
+
+  // Check owndata requirement
+  if (reqs.has("O") && !arr.flags.owndata) {
+    needsCopy = true;
+  }
+
+  // Make copy if needed
+  if (needsCopy) {
+    if (dtype !== null && arr.dtype !== dtype) {
+      arr = arr.astype(dtype);
+    } else {
+      arr = arr.copy();
+    }
+  }
+
+  return arr;
+}
+
+/**
+ * Cast an array to a specified type.
+ *
+ * This is the top-level function version of NDArray.astype().
+ *
+ * @param a - Input array
+ * @param dtype - Target data type
+ * @param copy - If true, always return a copy. Default false.
+ * @returns Array cast to the specified type
+ *
+ * @example
+ * ```typescript
+ * const a = await NDArray.fromArray([1.5, 2.7, 3.9]);
+ * const b = astype(a, DType.Int32);
+ * // b contains [1, 2, 3]
+ * ```
+ */
+export function astype(
+  a: NDArray,
+  dtype: DType,
+  copy: boolean = false,
+): NDArray {
+  if (a.dtype === dtype && !copy) {
+    return a;
+  }
+  return a.astype(dtype);
 }

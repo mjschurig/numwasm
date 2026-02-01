@@ -510,3 +510,332 @@ export { polydiv } from './polyutils.js';
  * @returns Power coefficients
  */
 export { polypow } from './polyutils.js';
+
+/* ============ NumPy Legacy Functions ============ */
+
+/**
+ * Find the roots of a polynomial with coefficients given in c.
+ *
+ * This is a NumPy legacy function. The coefficients are given in descending
+ * powers order (highest power first), which is the opposite of the numpy.polynomial
+ * module convention.
+ *
+ * NOTE: This is the legacy numpy.roots function. For the modern API, use
+ * polyroots() from the polynomial module which uses ascending powers order.
+ *
+ * @param p - Coefficient array in descending powers order [c_n, c_{n-1}, ..., c_1, c_0]
+ * @returns Array of roots
+ *
+ * @example
+ * ```typescript
+ * // Find roots of x^2 - 4 (coefficients: 1*x^2 + 0*x - 4)
+ * const r = await roots([1, 0, -4]);  // [2, -2]
+ *
+ * // Find roots of x^2 + 2x + 1 = (x+1)^2
+ * const r = await roots([1, 2, 1]);   // [-1, -1]
+ * ```
+ */
+export async function roots(p: number[]): Promise<number[]> {
+  // Convert from descending powers (NumPy legacy) to ascending powers (polynomial module)
+  const ascending = [...p].reverse();
+  return polyroots(ascending);
+}
+
+/**
+ * Find the coefficients of a polynomial with the given sequence of roots.
+ *
+ * This is a NumPy legacy function. Returns coefficients in descending
+ * powers order (highest power first), which is the opposite of the numpy.polynomial
+ * module convention.
+ *
+ * NOTE: This is the legacy numpy.poly function. For the modern API, use
+ * polyfromroots() from the polynomial module which uses ascending powers order.
+ *
+ * @param seq_of_zeros - A sequence of polynomial roots
+ * @returns Polynomial coefficients in descending powers order [c_n, c_{n-1}, ..., c_1, c_0]
+ *
+ * @example
+ * ```typescript
+ * // Create polynomial with roots at 2 and -2
+ * const c = poly([2, -2]);  // [1, 0, -4] representing x^2 - 4
+ *
+ * // Create polynomial with root at -1 (double root)
+ * const c = poly([-1, -1]); // [1, 2, 1] representing x^2 + 2x + 1 = (x+1)^2
+ * ```
+ */
+export function poly(seq_of_zeros: number[]): number[] {
+  // Get coefficients in ascending powers order
+  const ascending = polyfromroots(seq_of_zeros);
+  // Convert to descending powers order (NumPy legacy convention)
+  return ascending.reverse();
+}
+
+/**
+ * A one-dimensional polynomial class.
+ *
+ * NOTE: This is a convenience class for use with the legacy numpy.poly1d API.
+ * For new code, the Polynomial class is preferred.
+ *
+ * A poly1d instance represents a polynomial p(x):
+ *   p(x) = c[0]*x^n + c[1]*x^(n-1) + ... + c[n-1]*x + c[n]
+ *
+ * where coefficients are stored in descending powers order.
+ *
+ * @example
+ * ```typescript
+ * // Create from coefficients (descending powers)
+ * const p = new poly1d([1, 2, 3]);  // x^2 + 2x + 3
+ *
+ * // Evaluate at a point
+ * p.call(2);  // 1*4 + 2*2 + 3 = 11
+ *
+ * // Create from roots
+ * const p = new poly1d([1, -1], true);  // (x-1)(x+1) = x^2 - 1
+ *
+ * // Arithmetic operations
+ * const sum = p.add(q);
+ * const prod = p.mul(q);
+ * ```
+ */
+export class poly1d {
+  /** Coefficients in descending powers order */
+  readonly c: number[];
+
+  /** Degree of the polynomial */
+  readonly order: number;
+
+  /** Alias for c - coefficients */
+  readonly coeffs: number[];
+
+  /** Alias for c - coefficients */
+  readonly coef: number[];
+
+  /** Whether constructed from roots */
+  readonly variable: string;
+
+  /**
+   * Create a polynomial.
+   *
+   * @param c_or_r - Coefficients (descending powers) or roots
+   * @param r - If true, c_or_r are roots. Default false.
+   * @param variable - Symbol for display. Default 'x'.
+   */
+  constructor(c_or_r: number[], r: boolean = false, variable: string = "x") {
+    this.variable = variable;
+
+    let coeffs: number[];
+    if (r) {
+      // Create from roots - use the poly function
+      coeffs = poly(c_or_r);
+    } else {
+      // Direct coefficients
+      coeffs = [...c_or_r];
+    }
+
+    // Trim leading zeros
+    while (coeffs.length > 1 && coeffs[0] === 0) {
+      coeffs.shift();
+    }
+
+    this.c = coeffs;
+    this.coeffs = this.c;
+    this.coef = this.c;
+    this.order = Math.max(0, coeffs.length - 1);
+  }
+
+  /**
+   * Evaluate the polynomial at x.
+   */
+  call(x: number): number {
+    // Horner's method for descending powers
+    let result = 0;
+    for (const coef of this.c) {
+      result = result * x + coef;
+    }
+    return result;
+  }
+
+  /**
+   * Evaluate the polynomial at each element of x.
+   */
+  callArray(x: number[]): number[] {
+    return x.map((v) => this.call(v));
+  }
+
+  /**
+   * Return the roots of the polynomial.
+   * Note: Unlike NumPy, this is async due to WASM dependency.
+   */
+  get r(): Promise<number[]> {
+    return roots(this.c);
+  }
+
+  /**
+   * Alias for r - roots.
+   * Note: Unlike NumPy, this is async due to WASM dependency.
+   */
+  get roots(): Promise<number[]> {
+    return this.r;
+  }
+
+  /**
+   * Compute and return the roots of the polynomial (async method version).
+   */
+  async getRoots(): Promise<number[]> {
+    return roots(this.c);
+  }
+
+  /**
+   * Add another polynomial.
+   */
+  add(other: poly1d | number[]): poly1d {
+    const otherCoeffs = other instanceof poly1d ? other.c : other;
+    // Pad shorter array with zeros on the left
+    const maxLen = Math.max(this.c.length, otherCoeffs.length);
+    const a = new Array(maxLen - this.c.length).fill(0).concat(this.c);
+    const b = new Array(maxLen - otherCoeffs.length).fill(0).concat(otherCoeffs);
+    const result = a.map((v, i) => v + b[i]);
+    return new poly1d(result, false, this.variable);
+  }
+
+  /**
+   * Subtract another polynomial.
+   */
+  sub(other: poly1d | number[]): poly1d {
+    const otherCoeffs = other instanceof poly1d ? other.c : other;
+    const maxLen = Math.max(this.c.length, otherCoeffs.length);
+    const a = new Array(maxLen - this.c.length).fill(0).concat(this.c);
+    const b = new Array(maxLen - otherCoeffs.length).fill(0).concat(otherCoeffs);
+    const result = a.map((v, i) => v - b[i]);
+    return new poly1d(result, false, this.variable);
+  }
+
+  /**
+   * Multiply by another polynomial.
+   */
+  mul(other: poly1d | number[] | number): poly1d {
+    if (typeof other === "number") {
+      return new poly1d(this.c.map((v) => v * other), false, this.variable);
+    }
+    const otherCoeffs = other instanceof poly1d ? other.c : other;
+    // Convolution
+    const m = this.c.length;
+    const n = otherCoeffs.length;
+    const result = new Array(m + n - 1).fill(0);
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        result[i + j] += this.c[i] * otherCoeffs[j];
+      }
+    }
+    return new poly1d(result, false, this.variable);
+  }
+
+  /**
+   * Negate the polynomial.
+   */
+  neg(): poly1d {
+    return new poly1d(this.c.map((v) => -v), false, this.variable);
+  }
+
+  /**
+   * Raise to a non-negative integer power.
+   */
+  pow(n: number): poly1d {
+    if (!Number.isInteger(n) || n < 0) {
+      throw new Error("Power must be a non-negative integer");
+    }
+    if (n === 0) {
+      return new poly1d([1], false, this.variable);
+    }
+    let result = new poly1d([1], false, this.variable);
+    for (let i = 0; i < n; i++) {
+      result = result.mul(this);
+    }
+    return result;
+  }
+
+  /**
+   * Differentiate the polynomial.
+   *
+   * @param m - Order of differentiation (default 1)
+   */
+  deriv(m: number = 1): poly1d {
+    let coeffs = [...this.c];
+    for (let d = 0; d < m; d++) {
+      if (coeffs.length <= 1) {
+        coeffs = [0];
+        break;
+      }
+      const deg = coeffs.length - 1;
+      const newCoeffs: number[] = [];
+      for (let i = 0; i < deg; i++) {
+        newCoeffs.push(coeffs[i] * (deg - i));
+      }
+      coeffs = newCoeffs;
+    }
+    return new poly1d(coeffs, false, this.variable);
+  }
+
+  /**
+   * Integrate the polynomial.
+   *
+   * @param m - Order of integration (default 1)
+   * @param k - Integration constants (default all zeros)
+   */
+  integ(m: number = 1, k: number | number[] = 0): poly1d {
+    const kArr = typeof k === "number" ? [k] : k;
+    let coeffs = [...this.c];
+
+    for (let d = 0; d < m; d++) {
+      const deg = coeffs.length;
+      const newCoeffs: number[] = [];
+      for (let i = 0; i < deg; i++) {
+        newCoeffs.push(coeffs[i] / (deg - i));
+      }
+      // Add integration constant
+      const constant = kArr[d] !== undefined ? kArr[d] : 0;
+      newCoeffs.push(constant);
+      coeffs = newCoeffs;
+    }
+    return new poly1d(coeffs, false, this.variable);
+  }
+
+  /**
+   * Return a string representation.
+   */
+  toString(): string {
+    if (this.c.length === 0 || (this.c.length === 1 && this.c[0] === 0)) {
+      return "0";
+    }
+
+    const x = this.variable;
+    const terms: string[] = [];
+    const deg = this.order;
+
+    for (let i = 0; i < this.c.length; i++) {
+      const coef = this.c[i];
+      const power = deg - i;
+
+      if (coef === 0) continue;
+
+      let term = "";
+      const absCoef = Math.abs(coef);
+
+      if (power === 0) {
+        term = absCoef.toString();
+      } else if (power === 1) {
+        term = absCoef === 1 ? x : `${absCoef}*${x}`;
+      } else {
+        term = absCoef === 1 ? `${x}^${power}` : `${absCoef}*${x}^${power}`;
+      }
+
+      if (terms.length === 0) {
+        terms.push(coef < 0 ? `-${term}` : term);
+      } else {
+        terms.push(coef < 0 ? ` - ${term}` : ` + ${term}`);
+      }
+    }
+
+    return terms.join("") || "0";
+  }
+}

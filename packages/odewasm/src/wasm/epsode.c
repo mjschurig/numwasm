@@ -2098,6 +2098,10 @@ L60:
 /* -----------------------  end of subroutine pset ----------------------- */
 } /* pset_ */
 
+#ifndef DECSOL_DEFINED
+/* dec_ and sol_ are also defined in decsol.c. When linking together,
+   we use the versions from decsol.c and skip these. */
+
 /* Subroutine */ int dec_(integer *n, integer *ndim, doublereal *a, integer *
 	ip, integer *ier)
 {
@@ -2279,4 +2283,6 @@ L50:
     return 0;
 /* -----------------------  end of subroutine sol  ----------------------- */
 } /* sol_ */
+
+#endif /* DECSOL_DEFINED */
 

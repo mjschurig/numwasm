@@ -501,6 +501,303 @@ export function decode(a: Uint8Array[], encoding: string = "utf-8"): NDArray {
   return NDArray.fromStringArray(strings);
 }
 
+/* ============ Formatting ============ */
+
+/**
+ * Return element-wise (a % i), i.e. string formatting.
+ *
+ * This is the printf-style string formatting operation.
+ * Each string in `a` is interpreted as a format string,
+ * and the corresponding values in `values` are substituted.
+ *
+ * @param a - Input format string array
+ * @param values - Values to substitute (array or single value)
+ * @returns String array with formatted strings
+ *
+ * @example
+ * ```typescript
+ * mod(['%d items', '%.2f dollars'], [42, 19.99])
+ * // returns ['42 items', '19.99 dollars']
+ *
+ * mod(['Hello, %s!'], 'World')
+ * // returns ['Hello, World!']
+ * ```
+ */
+export function mod(
+  a: NDArray | string[],
+  values: unknown | unknown[],
+): NDArray {
+  const arr = Array.isArray(a) ? NDArray.fromStringArray(a) : a;
+
+  if (!arr.isStringArray) {
+    throw new Error("First argument must be a string array");
+  }
+
+  const valArray = Array.isArray(values) ? values : [values];
+  const result = NDArray.emptyString(arr.shape);
+
+  for (let i = 0; i < arr.size; i++) {
+    const formatStr = arr.getStringFlat(i);
+    const val = valArray[i % valArray.length];
+    result.setStringFlat(i, _sprintf(formatStr, val));
+  }
+
+  return result;
+}
+
+/**
+ * Simple sprintf-like formatting for a single value.
+ */
+function _sprintf(format: string, value: unknown): string {
+  // Handle the most common format specifiers
+  return format.replace(/%([+\-#0 ]*)(\d*)(\.(\d+))?([diouxXeEfFgGcrsb%])/g,
+    (match, flags, width, _precisionGroup, precision, specifier) => {
+      if (specifier === '%') return '%';
+
+      const leftAlign = flags.includes('-');
+      const padZero = flags.includes('0') && !leftAlign;
+      const showSign = flags.includes('+');
+      const spaceSign = flags.includes(' ');
+      const minWidth = parseInt(width) || 0;
+      const prec = precision !== undefined ? parseInt(precision) : undefined;
+
+      let result: string;
+
+      switch (specifier) {
+        case 'd':
+        case 'i': {
+          const num = Math.trunc(Number(value));
+          const sign = num < 0 ? '-' : (showSign ? '+' : (spaceSign ? ' ' : ''));
+          result = sign + Math.abs(num).toString();
+          break;
+        }
+        case 'o': {
+          const num = Math.trunc(Number(value));
+          result = Math.abs(num).toString(8);
+          if (flags.includes('#') && num !== 0) result = '0' + result;
+          break;
+        }
+        case 'x': {
+          const num = Math.trunc(Number(value));
+          result = Math.abs(num).toString(16);
+          if (flags.includes('#') && num !== 0) result = '0x' + result;
+          break;
+        }
+        case 'X': {
+          const num = Math.trunc(Number(value));
+          result = Math.abs(num).toString(16).toUpperCase();
+          if (flags.includes('#') && num !== 0) result = '0X' + result;
+          break;
+        }
+        case 'e': {
+          const num = Number(value);
+          result = num.toExponential(prec ?? 6);
+          break;
+        }
+        case 'E': {
+          const num = Number(value);
+          result = num.toExponential(prec ?? 6).toUpperCase();
+          break;
+        }
+        case 'f':
+        case 'F': {
+          const num = Number(value);
+          const sign = num < 0 ? '-' : (showSign ? '+' : (spaceSign ? ' ' : ''));
+          result = sign + Math.abs(num).toFixed(prec ?? 6);
+          break;
+        }
+        case 'g': {
+          const num = Number(value);
+          const p = prec ?? 6;
+          result = num.toPrecision(p > 0 ? p : 1);
+          // Remove trailing zeros
+          if (!flags.includes('#')) {
+            result = result.replace(/\.?0+$/, '');
+          }
+          break;
+        }
+        case 'G': {
+          const num = Number(value);
+          const p = prec ?? 6;
+          result = num.toPrecision(p > 0 ? p : 1).toUpperCase();
+          if (!flags.includes('#')) {
+            result = result.replace(/\.?0+$/, '');
+          }
+          break;
+        }
+        case 'c':
+          result = String.fromCharCode(Number(value));
+          break;
+        case 's':
+          result = String(value);
+          if (prec !== undefined) result = result.slice(0, prec);
+          break;
+        case 'r':
+          result = JSON.stringify(value);
+          break;
+        case 'b': {
+          const num = Math.trunc(Number(value));
+          result = Math.abs(num).toString(2);
+          if (flags.includes('#') && num !== 0) result = '0b' + result;
+          break;
+        }
+        default:
+          result = match;
+      }
+
+      // Apply width padding
+      if (minWidth > result.length) {
+        const padChar = padZero ? '0' : ' ';
+        const padding = padChar.repeat(minWidth - result.length);
+        result = leftAlign ? result + padding : padding + result;
+      }
+
+      return result;
+    }
+  );
+}
+
+/**
+ * Return element-wise translation of string using a translation table.
+ *
+ * Each character in the string is mapped through the translation table.
+ * Characters not in the table are left unchanged.
+ *
+ * @param a - Input string array
+ * @param table - Translation table as a Map, object, or string pairs
+ * @param deletechars - Characters to delete (optional)
+ * @returns String array with translated strings
+ *
+ * @example
+ * ```typescript
+ * // Using an object as translation table
+ * translate(['hello'], {'h': 'H', 'e': '3'})
+ * // returns ['H3llo']
+ *
+ * // Deleting characters
+ * translate(['hello world'], {}, 'eo')
+ * // returns ['hll wrld']
+ * ```
+ */
+export function translate(
+  a: NDArray | string[],
+  table: Map<string, string> | Record<string, string> | null,
+  deletechars: string = "",
+): NDArray {
+  // Convert table to Map if needed
+  let tableMap: Map<string, string>;
+  if (table === null) {
+    tableMap = new Map();
+  } else if (table instanceof Map) {
+    tableMap = table;
+  } else {
+    tableMap = new Map(Object.entries(table));
+  }
+
+  // Create set of characters to delete
+  const deleteSet = new Set(deletechars);
+
+  return _applyTransform(a, (s) => {
+    let result = "";
+    for (const char of s) {
+      if (deleteSet.has(char)) {
+        continue; // Skip deleted characters
+      }
+      const mapped = tableMap.get(char);
+      result += mapped !== undefined ? mapped : char;
+    }
+    return result;
+  });
+}
+
+/**
+ * Return element-wise sliced strings.
+ *
+ * This is the NumPy 2.0 string slicing function, providing
+ * Python-style string slicing for each element.
+ *
+ * @param a - Input string array
+ * @param start - Start index (default 0)
+ * @param stop - Stop index (default: end of string)
+ * @param step - Step size (default 1)
+ * @returns String array with sliced strings
+ *
+ * @example
+ * ```typescript
+ * slice(['hello', 'world'], 1, 4)
+ * // returns ['ell', 'orl']
+ *
+ * slice(['hello', 'world'], null, null, -1)
+ * // returns ['olleh', 'dlrow'] (reversed)
+ *
+ * slice(['hello'], 0, null, 2)
+ * // returns ['hlo'] (every 2nd char)
+ * ```
+ */
+export function slice(
+  a: NDArray | string[],
+  start: number | null = null,
+  stop: number | null = null,
+  step: number | null = null,
+): NDArray {
+  const actualStep = step ?? 1;
+
+  if (actualStep === 0) {
+    throw new Error("slice step cannot be zero");
+  }
+
+  return _applyTransform(a, (s) => {
+    const len = s.length;
+
+    // Handle negative indices and defaults
+    let startIdx: number;
+    let stopIdx: number;
+
+    if (actualStep > 0) {
+      startIdx = start === null ? 0 : _normalizeIndex(start, len);
+      stopIdx = stop === null ? len : _normalizeIndex(stop, len);
+    } else {
+      startIdx = start === null ? len - 1 : _normalizeIndex(start, len, true);
+      stopIdx = stop === null ? -1 : _normalizeIndex(stop, len, true);
+    }
+
+    // Build result string
+    let result = "";
+
+    if (actualStep > 0) {
+      for (let i = startIdx; i < stopIdx && i < len; i += actualStep) {
+        if (i >= 0) {
+          result += s[i];
+        }
+      }
+    } else {
+      for (let i = startIdx; i > stopIdx && i >= 0; i += actualStep) {
+        if (i < len) {
+          result += s[i];
+        }
+      }
+    }
+
+    return result;
+  });
+}
+
+/**
+ * Normalize a slice index to be within bounds.
+ */
+function _normalizeIndex(idx: number, len: number, forNegativeStep: boolean = false): number {
+  if (idx < 0) {
+    idx = len + idx;
+  }
+
+  if (forNegativeStep) {
+    // For negative step, we want different clamping behavior
+    return Math.max(-1, Math.min(idx, len - 1));
+  }
+
+  return Math.max(0, Math.min(idx, len));
+}
+
 /* ============ Helper Functions ============ */
 
 /**

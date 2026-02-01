@@ -51,6 +51,14 @@ extern int radau5_(integer *n, U_fp fcn, doublereal *x, doublereal *y,
                    integer *liwork, doublereal *rpar, integer *ipar,
                    integer *idid);
 
+/* ODEX: GBS extrapolation with explicit midpoint rule */
+extern int odex_(integer *n, U_fp fcn, doublereal *x, doublereal *y,
+                 doublereal *xend, doublereal *h__, doublereal *rtol,
+                 doublereal *atol, integer *itol, U_fp solout, integer *iout,
+                 doublereal *work, integer *lwork, integer *iwork,
+                 integer *liwork, doublereal *rpar, integer *ipar,
+                 integer *idid);
+
 /* Dense output interpolation functions */
 extern doublereal contd5_(integer *ii, doublereal *x, doublereal *con,
                           integer *icomp, integer *nd);
@@ -58,6 +66,8 @@ extern doublereal contd8_(integer *ii, doublereal *x, doublereal *con,
                           integer *icomp, integer *nd);
 extern doublereal contr5_(integer *ii, doublereal *s, doublereal *cont,
                           integer *lrc);
+extern doublereal contex_(integer *ii, doublereal *x, doublereal *y,
+                          integer *ncon, integer *icomp, integer *n);
 
 /* ============================================
  * External declarations for Netlib solvers
@@ -452,6 +462,54 @@ EXPORT void wasm_radau5(
             &rpar, &ipar, idid);
 }
 
+/*
+ * SOLOUT thunk for ODEX: SOLOUT(NR, XOLD, X, Y, N, CON, NCON, ICOMP, ND, RPAR, IPAR, IRTRN)
+ * We translate to: solout(nr, xold, x, y, n, irtrn)
+ */
+static int solout_odex_thunk_(integer *nr, doublereal *xold, doublereal *x,
+                               doublereal *y, integer *n, doublereal *con,
+                               integer *ncon, integer *icomp, integer *nd,
+                               doublereal *rpar, integer *ipar, integer *irtrn) {
+    (void)con; (void)ncon; (void)icomp; (void)nd; (void)rpar; (void)ipar;
+    if (g_solout_callback) {
+        g_solout_callback(*nr, *xold, *x, y, *n, irtrn);
+    }
+    return 0;
+}
+
+/*
+ * wasm_odex - Solve ODE using ODEX (GBS Extrapolation with Explicit Midpoint)
+ *
+ * Parameters:
+ *   n      - System dimension (number of equations)
+ *   x      - Initial time (modified on output to final time)
+ *   y      - State vector (n elements, modified on output)
+ *   xend   - Target end time
+ *   h      - Initial step size guess (0 for automatic)
+ *   rtol   - Relative tolerance (scalar or array based on itol)
+ *   atol   - Absolute tolerance (scalar or array based on itol)
+ *   itol   - 0: scalar tolerances, 1: vector tolerances
+ *   iout   - Output mode: 0=none, 1=after steps, 2=dense output
+ *   work   - Work array (at least n*(km+5)+5*km+20+(2*km*(km+2)+5)*nrdens)
+ *   lwork  - Length of work array
+ *   iwork  - Integer work array (at least 2*km+21+nrdens)
+ *   liwork - Length of iwork array
+ *   idid   - Output: status code (1=success, negative=error)
+ */
+EXPORT void wasm_odex(
+    integer n, doublereal *x, doublereal *y, doublereal xend,
+    doublereal h, doublereal *rtol, doublereal *atol, integer itol, integer iout,
+    doublereal *work, integer lwork, integer *iwork, integer liwork,
+    integer *idid)
+{
+    doublereal rpar = 0;
+    integer ipar = 0;
+
+    odex_(&n, (U_fp)fcn_thunk_, x, y, &xend, &h, rtol, atol, &itol,
+          (U_fp)solout_odex_thunk_, &iout, work, &lwork, iwork, &liwork,
+          &rpar, &ipar, idid);
+}
+
 /* ============================================
  * Netlib Solver Entry Points
  * ============================================ */
@@ -736,6 +794,24 @@ EXPORT doublereal wasm_contr5(integer ii, doublereal s, doublereal *cont,
     return contr5_(&ii, &s, cont, &lrc);
 }
 
+/*
+ * wasm_contex - Dense output for ODEX
+ *
+ * Parameters:
+ *   ii    - Component index (1-based Fortran indexing)
+ *   x     - Evaluation point (must be in [xold, x] from last step)
+ *   con   - Continuous output coefficients (from work array)
+ *   ncon  - Length of continuous output array
+ *   icomp - Component indices for dense output
+ *   nd    - Number of components for dense output
+ *
+ * Returns: Interpolated value of component ii at time x
+ */
+EXPORT doublereal wasm_contex(integer ii, doublereal x, doublereal *con,
+                               integer ncon, integer *icomp, integer nd) {
+    return contex_(&ii, &x, con, &ncon, icomp, &nd);
+}
+
 /* ============================================
  * Utility Functions
  * ============================================ */
@@ -776,6 +852,24 @@ EXPORT integer wasm_radau5_work_size(integer n) {
 EXPORT integer wasm_radau5_iwork_size(integer n) {
     /* For full Jacobian: 3*n + 20 */
     return 3 * n + 20;
+}
+
+/*
+ * Get minimum work array size for ODEX
+ * n: system dimension
+ * nrdens: number of components for dense output (0 if not used)
+ * km: maximum columns in extrapolation table (default 9)
+ *
+ * Formula: n*(km+5) + 5*km + 20 + (2*km*(km+2)+5)*nrdens
+ */
+EXPORT integer wasm_odex_work_size(integer n, integer nrdens, integer km) {
+    if (km <= 0) km = 9;  /* Default value */
+    return n * (km + 5) + 5 * km + 20 + (2 * km * (km + 2) + 5) * nrdens;
+}
+
+EXPORT integer wasm_odex_iwork_size(integer nrdens, integer km) {
+    if (km <= 0) km = 9;  /* Default value */
+    return 2 * km + 21 + nrdens;
 }
 
 /*

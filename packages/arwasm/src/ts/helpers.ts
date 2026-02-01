@@ -10,6 +10,8 @@ import {
   DNAUPD_ERRORS,
   DSEUPD_ERRORS,
   DNEUPD_ERRORS,
+  ZNAUPD_ERRORS,
+  ZNEUPD_ERRORS,
 } from './types.js';
 
 const DOUBLE_SIZE = 8;
@@ -49,6 +51,34 @@ export function dnaupdWorklSize(ncv: number): number {
  */
 export function dneupdWorkevSize(ncv: number): number {
   return 3 * ncv;
+}
+
+/**
+ * Calculate required workl size for complex problems (znaupd).
+ * @param ncv - Number of Arnoldi vectors
+ * @returns Required size in complex numbers (multiply by 2 for doubles)
+ */
+export function znaupdWorklSize(ncv: number): number {
+  // From ARPACK docs: lworkl >= 3*ncv² + 5*ncv (in complex numbers)
+  return 3 * ncv * ncv + 5 * ncv;
+}
+
+/**
+ * Calculate required workev size for complex extraction (zneupd).
+ * @param ncv - Number of Arnoldi vectors
+ * @returns Required size in complex numbers (multiply by 2 for doubles)
+ */
+export function zneupdWorkevSize(ncv: number): number {
+  return 2 * ncv;
+}
+
+/**
+ * Calculate required rwork size for complex problems (znaupd).
+ * @param ncv - Number of Arnoldi vectors
+ * @returns Required size in doubles (real array)
+ */
+export function znaupdRworkSize(ncv: number): number {
+  return ncv;
 }
 
 /**
@@ -102,6 +132,20 @@ export function getDseupdMessage(info: number): string {
  */
 export function getDneupdMessage(info: number): string {
   return DNEUPD_ERRORS[info] ?? `Unknown error code: ${info}`;
+}
+
+/**
+ * Get error message for znaupd info code.
+ */
+export function getZnaupdMessage(info: number): string {
+  return ZNAUPD_ERRORS[info] ?? `Unknown error code: ${info}`;
+}
+
+/**
+ * Get error message for zneupd info code.
+ */
+export function getZneupdMessage(info: number): string {
+  return ZNEUPD_ERRORS[info] ?? `Unknown error code: ${info}`;
 }
 
 // ============================================================
@@ -182,9 +226,9 @@ export function allocateString(Module: ARPACKModule, str: string): number {
   }
 
   for (let i = 0; i < str.length; i++) {
-    Module.HEAP8[ptr + i] = str.charCodeAt(i);
+    Module.HEAPU8[ptr + i] = str.charCodeAt(i);
   }
-  Module.HEAP8[ptr + str.length] = 0; // null terminator
+  Module.HEAPU8[ptr + str.length] = 0; // null terminator
 
   return ptr;
 }
@@ -261,5 +305,90 @@ export function freeAll(Module: ARPACKModule, ptrs: number[]): void {
     if (ptr !== 0) {
       Module._free(ptr);
     }
+  }
+}
+
+// ============================================================
+// COMPLEX ARRAY HELPERS
+// ============================================================
+
+/** Complex array type with separate real and imaginary parts */
+export interface ComplexArray {
+  re: Float64Array;
+  im: Float64Array;
+}
+
+/**
+ * Allocate a complex array in WASM memory (interleaved format).
+ * Complex numbers are stored as [re0, im0, re1, im1, ...].
+ * @param Module - ARPACK WASM module
+ * @param values - Initial values as ComplexArray (re/im arrays), or null for uninitialized
+ * @param size - Number of complex elements to allocate
+ * @returns Pointer to allocated memory
+ */
+export function allocateComplex(
+  Module: ARPACKModule,
+  values: ComplexArray | null,
+  size?: number
+): number {
+  const len = size ?? (values?.re.length ?? 0);
+  if (len === 0) return 0;
+
+  // Each complex number is 2 doubles (16 bytes)
+  const ptr = Module._malloc(len * 2 * DOUBLE_SIZE);
+  if (ptr === 0) {
+    throw new Error('Failed to allocate WASM memory for complex array');
+  }
+
+  if (values) {
+    const baseIdx = ptr >> 3;
+    for (let i = 0; i < values.re.length; i++) {
+      Module.HEAPF64[baseIdx + 2 * i] = values.re[i];
+      Module.HEAPF64[baseIdx + 2 * i + 1] = values.im[i];
+    }
+  }
+
+  return ptr;
+}
+
+/**
+ * Read a complex array from WASM memory (interleaved format).
+ * @param Module - ARPACK WASM module
+ * @param ptr - Pointer to the array
+ * @param length - Number of complex elements to read
+ * @returns ComplexArray with separate re and im Float64Arrays
+ */
+export function readComplex(
+  Module: ARPACKModule,
+  ptr: number,
+  length: number
+): ComplexArray {
+  const re = new Float64Array(length);
+  const im = new Float64Array(length);
+  const baseIdx = ptr >> 3;
+
+  for (let i = 0; i < length; i++) {
+    re[i] = Module.HEAPF64[baseIdx + 2 * i];
+    im[i] = Module.HEAPF64[baseIdx + 2 * i + 1];
+  }
+
+  return { re, im };
+}
+
+/**
+ * Write complex values to WASM memory (interleaved format).
+ * @param Module - ARPACK WASM module
+ * @param ptr - Pointer to write to
+ * @param values - ComplexArray to write
+ */
+export function writeComplex(
+  Module: ARPACKModule,
+  ptr: number,
+  values: ComplexArray
+): void {
+  const baseIdx = ptr >> 3;
+  for (let i = 0; i < values.re.length; i++) {
+    Module.HEAPF64[baseIdx + 2 * i] = values.re[i];
+    Module.HEAPF64[baseIdx + 2 * i + 1] = values.im[i];
   }
 }

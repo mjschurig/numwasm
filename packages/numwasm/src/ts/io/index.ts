@@ -28,6 +28,16 @@ export {
   load,
   type SaveOptions,
   type LoadOptions,
+  // NPZ file I/O
+  savez,
+  savez_compressed,
+  loadz,
+  type SavezOptions,
+  type NpzFile,
+  // Bit packing
+  packbits,
+  unpackbits,
+  type BitOrder,
 } from './npyio.js';
 
 // Text file I/O

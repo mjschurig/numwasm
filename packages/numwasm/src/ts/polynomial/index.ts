@@ -47,6 +47,10 @@ export {
   polymul,
   polydiv,
   polypow,
+  // NumPy legacy functions (descending powers order)
+  roots,
+  poly,
+  poly1d,
 } from './polynomial.js';
 
 // Chebyshev

@@ -25,6 +25,11 @@ export {
   multi_dot,
   kron,
   cross,
+  // NumPy 2.0
+  matrix_transpose,
+  vecdot,
+  matvec,
+  vecmat,
 } from "./linalg/products.js";
 
 // Decompositions

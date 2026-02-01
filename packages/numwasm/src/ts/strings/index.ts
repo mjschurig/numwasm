@@ -85,6 +85,10 @@ export {
   // Encoding
   encode,
   decode,
+  // Formatting (NumPy 2.0)
+  mod,
+  translate,
+  slice,
 } from './manipulation.js';
 
 // Re-import for namespace object
@@ -142,6 +146,9 @@ import {
   rpartition,
   encode,
   decode,
+  mod,
+  translate,
+  slice,
 } from './manipulation.js';
 
 /**
@@ -219,4 +226,9 @@ export const strings = {
   // Encoding
   encode,
   decode,
+
+  // Formatting (NumPy 2.0)
+  mod,
+  translate,
+  slice,
 };

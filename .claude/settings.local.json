@@ -44,7 +44,9 @@
       "Bash(pnpm exec tsc:*)",
       "Bash(echo:*)",
       "Bash(f2c:*)",
-      "Bash(pnpm exec vitest:*)"
+      "Bash(pnpm exec vitest:*)",
+      "Bash(pnpm --filter mfemwasm run build:wasm:*)",
+      "Bash(pnpm run:*)"
     ]
   }
 }

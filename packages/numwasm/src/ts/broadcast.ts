@@ -5,6 +5,7 @@
  */
 
 export {
+  broadcast,
   broadcastShapes,
   broadcastShapesMulti,
   shapesAreBroadcastable,

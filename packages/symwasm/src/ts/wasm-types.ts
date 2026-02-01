@@ -249,6 +249,28 @@ export interface SymwasmModule extends EmscriptenModule {
   _dense_matrix_FFLU(lu: number, mat: number): number; // Fraction-free LU factorization
   _dense_matrix_FFLDU(l: number, d: number, u: number, mat: number): number; // Fraction-free LDU factorization
   _dense_matrix_LU_solve(x: number, A: number, b: number): number; // Solve A*x = b using LU
+
+  // === Common Subexpression Elimination ===
+  _basic_cse(
+    replacement_syms: number,
+    replacement_exprs: number,
+    reduced_exprs: number,
+    exprs: number
+  ): number; // replacement_syms, replacement_exprs, reduced_exprs, exprs are all CVecBasic*
+
+  // === Dense Matrix — Calculus ===
+  _dense_matrix_diff(result: number, A: number, x: number): number; // Elementwise derivative of A w.r.t. x
+  _dense_matrix_jacobian(result: number, A: number, x: number): number; // Jacobian of A w.r.t. x (A is column vector, x is column vector of symbols)
+
+  // === Sparse Matrix Operations ===
+  _sparse_matrix_new(): number; // Returns CSparseMatrix*
+  _sparse_matrix_free(self: number): void;
+  _sparse_matrix_init(s: number): void;
+  _sparse_matrix_rows_cols(s: number, r: number, c: number): void;
+  _sparse_matrix_str(s: number): number; // Returns char* (must be freed)
+  _sparse_matrix_get_basic(s: number, mat: number, r: number, c: number): number;
+  _sparse_matrix_set_basic(mat: number, r: number, c: number, s: number): number;
+  _sparse_matrix_eq(lhs: number, rhs: number): number; // Returns 1 if equal
 }
 
 /**

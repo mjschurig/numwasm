@@ -530,6 +530,274 @@ export class PCG64 extends BitGenerator {
   }
 }
 
+/* ============ PCG64DXSM BitGenerator ============ */
+
+/**
+ * State object for PCG64DXSM generator.
+ */
+export interface PCG64DXSMState {
+  bit_generator: "PCG64DXSM";
+  state: {
+    state: bigint;
+    inc: bigint;
+  };
+  has_uint32: number;
+  uinteger: number;
+}
+
+/**
+ * PCG64DXSM BitGenerator - PCG with DXSM output function.
+ *
+ * PCG64DXSM is a variant of PCG64 that uses the "Double Xor Shift Multiply"
+ * (DXSM) output function. This variant has better statistical properties
+ * for some applications and is the default in NumPy 1.17+.
+ *
+ * Uses the same 128-bit state as PCG64 but with the DXSM output transform:
+ * 1. XOR high and low halves
+ * 2. Multiply by an odd constant
+ * 3. Right rotation
+ *
+ * @example
+ * ```typescript
+ * // Create with integer seed
+ * const rng = new PCG64DXSM(12345);
+ *
+ * // Create with OS entropy
+ * const rng2 = new PCG64DXSM();
+ *
+ * // Use with Generator
+ * const gen = new Generator(new PCG64DXSM(12345));
+ * ```
+ */
+export class PCG64DXSM extends BitGenerator {
+  private _seedSequence: SeedSequence | null = null;
+  private _disposed: boolean = false;
+  private _stateHigh: bigint = 0n;
+  private _stateLow: bigint = 0n;
+  private _incHigh: bigint = 0n;
+  private _incLow: bigint = 0n;
+  private _hasUint32: number = 0;
+  private _uinteger: number = 0;
+
+  // DXSM multiplier constant
+  private static readonly MULT = 0xda942042e4dd58b5n;
+
+  constructor(seed?: number | bigint | number[] | SeedSequence | null) {
+    super();
+
+    if (seed instanceof SeedSequence) {
+      this._seedSequence = seed;
+    } else {
+      this._seedSequence = new SeedSequence(seed);
+    }
+
+    // Generate 8 uint32 values for 4 x 32-bit parts of two 128-bit numbers
+    const state = this._seedSequence.generateState(8, "uint32") as Uint32Array;
+    this._initFromState(state);
+  }
+
+  private _initFromState(state: Uint32Array): void {
+    // PCG64DXSM needs 128-bit seed and 128-bit increment
+    // Combine 32-bit parts into 64-bit values
+    this._stateLow =
+      BigInt(state[2] >>> 0) | (BigInt(state[3] >>> 0) << 32n);
+    this._stateHigh =
+      BigInt(state[0] >>> 0) | (BigInt(state[1] >>> 0) << 32n);
+    this._incLow =
+      BigInt(state[6] >>> 0) | (BigInt(state[7] >>> 0) << 32n);
+    this._incHigh =
+      BigInt(state[4] >>> 0) | (BigInt(state[5] >>> 0) << 32n);
+
+    // Ensure increment is odd (required for full period)
+    this._incLow |= 1n;
+  }
+
+  private ensureNotDisposed(): void {
+    if (this._disposed) {
+      throw new Error("PCG64DXSM has been disposed");
+    }
+  }
+
+  /**
+   * Apply the DXSM (Double Xor Shift Multiply) output function.
+   * This transforms the state into a high-quality random output.
+   */
+  private _dxsmOutput(stateHigh: bigint, stateLow: bigint): bigint {
+    // hi = (low >> 32n) with top bit set
+    let hi = (stateLow >> 32n) | (1n << 63n);
+
+    // XOR with stateHigh
+    hi ^= stateHigh;
+
+    // Multiply
+    hi = this._mul64(hi, PCG64DXSM.MULT);
+
+    // Final XOR
+    hi ^= hi >> 32n;
+    hi = this._mul64(hi, PCG64DXSM.MULT);
+    hi ^= hi >> 32n;
+
+    return hi & 0xffffffffffffffffn;
+  }
+
+  /**
+   * 64-bit multiply keeping only lower 64 bits.
+   */
+  private _mul64(a: bigint, b: bigint): bigint {
+    return (a * b) & 0xffffffffffffffffn;
+  }
+
+  /**
+   * Advance the internal state by one step.
+   */
+  private _step(): void {
+    // 128-bit multiply by the LCG multiplier
+    // state = state * mult + inc (mod 2^128)
+    // Since we're using BigInt, we can do this directly
+    const stateLo = this._stateLow;
+    const stateHi = this._stateHigh;
+    const multLow = 0x4385df649fccf645n;
+    const multHigh = 0x2360ed051fc65da4n;
+
+    // Compute full 128-bit product: state * mult
+    const fullProd = stateLo * multLow +
+                     ((stateHi * multLow + stateLo * multHigh) << 64n);
+    const fullWithInc = fullProd + this._incLow + (this._incHigh << 64n);
+
+    this._stateLow = fullWithInc & 0xffffffffffffffffn;
+    this._stateHigh = (fullWithInc >> 64n) & 0xffffffffffffffffn;
+  }
+
+  next_uint64(): bigint {
+    this.ensureNotDisposed();
+
+    // Get output from current state
+    const output = this._dxsmOutput(this._stateHigh, this._stateLow);
+
+    // Step the generator
+    this._step();
+
+    return output;
+  }
+
+  next_uint32(): number {
+    this.ensureNotDisposed();
+
+    if (this._hasUint32) {
+      this._hasUint32 = 0;
+      return this._uinteger >>> 0;
+    }
+
+    const val = this.next_uint64();
+    this._uinteger = Number((val >> 32n) & 0xffffffffn);
+    this._hasUint32 = 1;
+    return Number(val & 0xffffffffn) >>> 0;
+  }
+
+  next_double(): number {
+    this.ensureNotDisposed();
+    const val = this.next_uint64();
+    // Convert to double in [0, 1): divide by 2^64
+    return Number(val) / 18446744073709551616.0;
+  }
+
+  /**
+   * Advance the state by delta steps.
+   * Uses the classic O(log n) PCG advance algorithm.
+   */
+  advance(delta: bigint): this {
+    this.ensureNotDisposed();
+
+    // Use 128-bit modular arithmetic to advance by delta steps
+    // new_state = mult^delta * state + (mult^delta - 1) / (mult - 1) * inc
+
+    if (delta === 0n) return this;
+
+    let curMult = 0x2360ed051fc65da44385df649fccf645n; // Full 128-bit multiplier
+    let curAdd = this._incLow | (this._incHigh << 64n);
+    let accMult = 1n;
+    let accAdd = 0n;
+    const mod = 1n << 128n;
+
+    while (delta > 0n) {
+      if (delta & 1n) {
+        accMult = (accMult * curMult) % mod;
+        accAdd = (accAdd * curMult + curAdd) % mod;
+      }
+      curAdd = ((curMult + 1n) * curAdd) % mod;
+      curMult = (curMult * curMult) % mod;
+      delta >>= 1n;
+    }
+
+    const state = this._stateLow | (this._stateHigh << 64n);
+    const newState = ((accMult * state) % mod + accAdd) % mod;
+
+    this._stateLow = newState & 0xffffffffffffffffn;
+    this._stateHigh = (newState >> 64n) & 0xffffffffffffffffn;
+
+    return this;
+  }
+
+  /**
+   * Return a jumped copy of the generator.
+   */
+  jumped(jumps: number = 1): PCG64DXSM {
+    this.ensureNotDisposed();
+    const newGen = new PCG64DXSM(this._seedSequence);
+    newGen.setState(this.getState());
+    const jumpSize = 1n << 64n;
+    for (let i = 0; i < jumps; i++) {
+      newGen.advance(jumpSize);
+    }
+    return newGen;
+  }
+
+  getState(): PCG64DXSMState {
+    this.ensureNotDisposed();
+    return {
+      bit_generator: "PCG64DXSM",
+      state: {
+        state: this._stateLow | (this._stateHigh << 64n),
+        inc: this._incLow | (this._incHigh << 64n),
+      },
+      has_uint32: this._hasUint32,
+      uinteger: this._uinteger,
+    };
+  }
+
+  setState(state: object): void {
+    this.ensureNotDisposed();
+    const s = state as PCG64DXSMState;
+
+    const st = BigInt(s.state.state);
+    const inc = BigInt(s.state.inc);
+
+    this._stateLow = st & 0xffffffffffffffffn;
+    this._stateHigh = (st >> 64n) & 0xffffffffffffffffn;
+    this._incLow = inc & 0xffffffffffffffffn;
+    this._incHigh = (inc >> 64n) & 0xffffffffffffffffn;
+    this._hasUint32 = s.has_uint32;
+    this._uinteger = s.uinteger;
+  }
+
+  spawn(nChildren: number): PCG64DXSM[] {
+    this.ensureNotDisposed();
+    if (!this._seedSequence) {
+      throw new Error(
+        "Cannot spawn from a BitGenerator without a SeedSequence",
+      );
+    }
+    const childSeqs = this._seedSequence.spawn(nChildren);
+    return childSeqs.map((seq) => new PCG64DXSM(seq));
+  }
+
+  dispose(): void {
+    if (!this._disposed) {
+      this._disposed = true;
+    }
+  }
+}
+
 /* ============ SFC64 BitGenerator ============ */
 
 /**
@@ -1158,6 +1426,7 @@ const BIT_GENERATORS: Record<
   new (seed?: number | bigint | number[] | SeedSequence | null) => BitGenerator
 > = {
   PCG64: PCG64,
+  PCG64DXSM: PCG64DXSM,
   MT19937: MT19937,
   PHILOX: Philox,
   SFC64: SFC64,
@@ -1196,6 +1465,57 @@ export function getBitGenerator(
  */
 export function listBitGenerators(): string[] {
   return Object.keys(BIT_GENERATORS);
+}
+
+/* ============ Helper Functions ============ */
+
+/**
+ * Compute Cholesky decomposition of a symmetric positive semi-definite matrix.
+ * Returns the lower triangular matrix L such that A = L * L^T.
+ * @internal
+ */
+function choleskyDecomposition(
+  A: number[][],
+  checkValid: "warn" | "raise" | "ignore" = "warn",
+  tol: number = 1e-8,
+): number[][] {
+  const n = A.length;
+  const L: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j <= i; j++) {
+      let sum = 0;
+      for (let k = 0; k < j; k++) {
+        sum += L[i][k] * L[j][k];
+      }
+
+      if (i === j) {
+        const diag = A[i][i] - sum;
+        if (diag < -tol) {
+          if (checkValid === "raise") {
+            throw new Error("covariance matrix is not positive semi-definite");
+          } else if (checkValid === "warn") {
+            console.warn(
+              "covariance matrix is not positive semi-definite, " +
+              "results may be unreliable",
+            );
+          }
+          // Use small positive value to continue
+          L[i][j] = Math.sqrt(Math.max(diag, tol));
+        } else {
+          L[i][j] = Math.sqrt(Math.max(diag, 0));
+        }
+      } else {
+        if (L[j][j] !== 0) {
+          L[i][j] = (A[i][j] - sum) / L[j][j];
+        } else {
+          L[i][j] = 0;
+        }
+      }
+    }
+  }
+
+  return L;
 }
 
 /* ============ Generator Class ============ */
@@ -2217,6 +2537,645 @@ export class Generator {
     return result;
   }
 
+  /**
+   * Draw samples from a Gumbel distribution.
+   *
+   * The Gumbel distribution is used to model the distribution of the maximum
+   * (or minimum) of a number of samples of various distributions.
+   *
+   * @param loc - Location parameter (mode of the distribution)
+   * @param scale - Scale parameter (> 0)
+   * @param size - Output shape
+   */
+  gumbel(loc: number = 0.0, scale: number = 1.0, size?: SizeType): NDArray | number {
+    this.ensureNotDisposed();
+
+    if (scale < 0) throw new Error("scale must be non-negative");
+
+    const wasm = getWasmModule();
+
+    if (size === null || size === undefined) {
+      return wasm._random_gumbel(this._wasmBitgen, loc, scale);
+    }
+
+    const sizeArr = typeof size === "number" ? [size] : size;
+    const totalSize = sizeArr.reduce((x, y) => x * y, 1);
+    const result = _createFloat64Array(sizeArr);
+
+    for (let i = 0; i < totalSize; i++) {
+      result.set(wasm._random_gumbel(this._wasmBitgen, loc, scale), i);
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a logistic distribution.
+   *
+   * @param loc - Location parameter
+   * @param scale - Scale parameter (> 0)
+   * @param size - Output shape
+   */
+  logistic(loc: number = 0.0, scale: number = 1.0, size?: SizeType): NDArray | number {
+    this.ensureNotDisposed();
+
+    if (scale < 0) throw new Error("scale must be non-negative");
+
+    const wasm = getWasmModule();
+
+    if (size === null || size === undefined) {
+      return wasm._random_logistic(this._wasmBitgen, loc, scale);
+    }
+
+    const sizeArr = typeof size === "number" ? [size] : size;
+    const totalSize = sizeArr.reduce((x, y) => x * y, 1);
+    const result = _createFloat64Array(sizeArr);
+
+    for (let i = 0; i < totalSize; i++) {
+      result.set(wasm._random_logistic(this._wasmBitgen, loc, scale), i);
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a logarithmic series distribution.
+   *
+   * @param p - Shape parameter (0 < p < 1)
+   * @param size - Output shape
+   */
+  logseries(p: number, size?: SizeType): NDArray | number {
+    this.ensureNotDisposed();
+
+    if (p <= 0 || p >= 1) throw new Error("p must be in (0, 1)");
+
+    const wasm = getWasmModule();
+
+    if (size === null || size === undefined) {
+      return wasm._random_logseries32(this._wasmBitgen, p);
+    }
+
+    const sizeArr = typeof size === "number" ? [size] : size;
+    const totalSize = sizeArr.reduce((x, y) => x * y, 1);
+    const result = _createFloat64Array(sizeArr);
+
+    for (let i = 0; i < totalSize; i++) {
+      result.set(wasm._random_logseries32(this._wasmBitgen, p), i);
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a noncentral chi-square distribution.
+   *
+   * @param df - Degrees of freedom (> 0)
+   * @param nonc - Non-centrality parameter (>= 0)
+   * @param size - Output shape
+   */
+  noncentral_chisquare(df: number, nonc: number, size?: SizeType): NDArray | number {
+    this.ensureNotDisposed();
+
+    if (df <= 0) throw new Error("df must be positive");
+    if (nonc < 0) throw new Error("nonc must be non-negative");
+
+    const wasm = getWasmModule();
+
+    if (size === null || size === undefined) {
+      return wasm._random_noncentral_chisquare(this._wasmBitgen, df, nonc);
+    }
+
+    const sizeArr = typeof size === "number" ? [size] : size;
+    const totalSize = sizeArr.reduce((x, y) => x * y, 1);
+    const result = _createFloat64Array(sizeArr);
+
+    for (let i = 0; i < totalSize; i++) {
+      result.set(wasm._random_noncentral_chisquare(this._wasmBitgen, df, nonc), i);
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a noncentral F distribution.
+   *
+   * @param dfnum - Degrees of freedom for numerator (> 0)
+   * @param dfden - Degrees of freedom for denominator (> 0)
+   * @param nonc - Non-centrality parameter (>= 0)
+   * @param size - Output shape
+   */
+  noncentral_f(dfnum: number, dfden: number, nonc: number, size?: SizeType): NDArray | number {
+    this.ensureNotDisposed();
+
+    if (dfnum <= 0) throw new Error("dfnum must be positive");
+    if (dfden <= 0) throw new Error("dfden must be positive");
+    if (nonc < 0) throw new Error("nonc must be non-negative");
+
+    const wasm = getWasmModule();
+
+    if (size === null || size === undefined) {
+      return wasm._random_noncentral_f(this._wasmBitgen, dfnum, dfden, nonc);
+    }
+
+    const sizeArr = typeof size === "number" ? [size] : size;
+    const totalSize = sizeArr.reduce((x, y) => x * y, 1);
+    const result = _createFloat64Array(sizeArr);
+
+    for (let i = 0; i < totalSize; i++) {
+      result.set(wasm._random_noncentral_f(this._wasmBitgen, dfnum, dfden, nonc), i);
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a power distribution.
+   *
+   * Samples are drawn from a power distribution with positive exponent a - 1
+   * in the interval [0, 1].
+   *
+   * @param a - Shape parameter (> 0)
+   * @param size - Output shape
+   */
+  power(a: number, size?: SizeType): NDArray | number {
+    this.ensureNotDisposed();
+
+    if (a <= 0) throw new Error("a must be positive");
+
+    const wasm = getWasmModule();
+
+    if (size === null || size === undefined) {
+      return wasm._random_power(this._wasmBitgen, a);
+    }
+
+    const sizeArr = typeof size === "number" ? [size] : size;
+    const totalSize = sizeArr.reduce((x, y) => x * y, 1);
+    const result = _createFloat64Array(sizeArr);
+
+    for (let i = 0; i < totalSize; i++) {
+      result.set(wasm._random_power(this._wasmBitgen, a), i);
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a triangular distribution.
+   *
+   * @param left - Lower limit
+   * @param mode - Mode (peak) of the distribution (left <= mode <= right)
+   * @param right - Upper limit
+   * @param size - Output shape
+   */
+  triangular(left: number, mode: number, right: number, size?: SizeType): NDArray | number {
+    this.ensureNotDisposed();
+
+    if (left > mode) throw new Error("left must be <= mode");
+    if (mode > right) throw new Error("mode must be <= right");
+    if (left === right) throw new Error("left must be < right");
+
+    const wasm = getWasmModule();
+
+    if (size === null || size === undefined) {
+      return wasm._random_triangular(this._wasmBitgen, left, mode, right);
+    }
+
+    const sizeArr = typeof size === "number" ? [size] : size;
+    const totalSize = sizeArr.reduce((x, y) => x * y, 1);
+    const result = _createFloat64Array(sizeArr);
+
+    for (let i = 0; i < totalSize; i++) {
+      result.set(wasm._random_triangular(this._wasmBitgen, left, mode, right), i);
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a von Mises distribution.
+   *
+   * Also known as the circular normal distribution. The von Mises distribution
+   * is a continuous probability distribution on the circle.
+   *
+   * @param mu - Mode (peak) of the distribution, in radians
+   * @param kappa - Concentration parameter (>= 0)
+   * @param size - Output shape
+   */
+  vonmises(mu: number, kappa: number, size?: SizeType): NDArray | number {
+    this.ensureNotDisposed();
+
+    if (kappa < 0) throw new Error("kappa must be non-negative");
+
+    const wasm = getWasmModule();
+
+    if (size === null || size === undefined) {
+      return wasm._random_vonmises(this._wasmBitgen, mu, kappa);
+    }
+
+    const sizeArr = typeof size === "number" ? [size] : size;
+    const totalSize = sizeArr.reduce((x, y) => x * y, 1);
+    const result = _createFloat64Array(sizeArr);
+
+    for (let i = 0; i < totalSize; i++) {
+      result.set(wasm._random_vonmises(this._wasmBitgen, mu, kappa), i);
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a Wald (inverse Gaussian) distribution.
+   *
+   * @param mean - Mean of the distribution (> 0)
+   * @param scale - Scale parameter (> 0)
+   * @param size - Output shape
+   */
+  wald(mean: number, scale: number, size?: SizeType): NDArray | number {
+    this.ensureNotDisposed();
+
+    if (mean <= 0) throw new Error("mean must be positive");
+    if (scale <= 0) throw new Error("scale must be positive");
+
+    const wasm = getWasmModule();
+
+    if (size === null || size === undefined) {
+      return wasm._random_wald(this._wasmBitgen, mean, scale);
+    }
+
+    const sizeArr = typeof size === "number" ? [size] : size;
+    const totalSize = sizeArr.reduce((x, y) => x * y, 1);
+    const result = _createFloat64Array(sizeArr);
+
+    for (let i = 0; i < totalSize; i++) {
+      result.set(wasm._random_wald(this._wasmBitgen, mean, scale), i);
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a Zipf distribution.
+   *
+   * @param a - Distribution parameter (> 1)
+   * @param size - Output shape
+   */
+  zipf(a: number, size?: SizeType): NDArray | number {
+    this.ensureNotDisposed();
+
+    if (a <= 1) throw new Error("a must be > 1");
+
+    const wasm = getWasmModule();
+
+    if (size === null || size === undefined) {
+      return wasm._random_zipf32(this._wasmBitgen, a);
+    }
+
+    const sizeArr = typeof size === "number" ? [size] : size;
+    const totalSize = sizeArr.reduce((x, y) => x * y, 1);
+    const result = _createFloat64Array(sizeArr);
+
+    for (let i = 0; i < totalSize; i++) {
+      result.set(wasm._random_zipf32(this._wasmBitgen, a), i);
+    }
+
+    return result;
+  }
+
+  /* ============ Multivariate Distributions ============ */
+
+  /**
+   * Draw samples from a Dirichlet distribution.
+   *
+   * The Dirichlet distribution is a multivariate generalization of the
+   * Beta distribution. It is the conjugate prior of the categorical
+   * distribution and multinomial distribution.
+   *
+   * @param alpha - Concentration parameters. Must be > 0.
+   * @param size - Number of samples to draw (output shape is (*size, len(alpha)))
+   * @returns Array of shape (*size, len(alpha)) if size specified, else (len(alpha),)
+   *
+   * @example
+   * ```typescript
+   * const rng = default_rng(12345);
+   *
+   * // Draw from symmetric Dirichlet
+   * const alpha = [1, 1, 1];
+   * const sample = await rng.dirichlet(alpha);  // Shape: (3,)
+   *
+   * // Draw multiple samples
+   * const samples = await rng.dirichlet(alpha, 10);  // Shape: (10, 3)
+   * ```
+   */
+  async dirichlet(
+    alpha: number[] | NDArray,
+    size?: number | number[],
+  ): Promise<NDArray> {
+    this.ensureNotDisposed();
+
+    // Get alpha values as array
+    let alphaArr: number[];
+    if (Array.isArray(alpha)) {
+      alphaArr = alpha;
+    } else {
+      alphaArr = [];
+      for (let i = 0; i < alpha.size; i++) {
+        alphaArr.push(alpha.getFlat(i) as number);
+      }
+    }
+
+    const k = alphaArr.length;
+    if (k < 2) {
+      throw new Error("alpha must have at least 2 elements");
+    }
+
+    for (let i = 0; i < k; i++) {
+      if (alphaArr[i] <= 0) {
+        throw new Error("all alpha values must be > 0");
+      }
+    }
+
+    // Determine output shape
+    let numSamples: number;
+    let outputShape: number[];
+
+    if (size === undefined || size === null) {
+      numSamples = 1;
+      outputShape = [k];
+    } else if (typeof size === "number") {
+      numSamples = size;
+      outputShape = [size, k];
+    } else {
+      numSamples = size.reduce((a, b) => a * b, 1);
+      outputShape = [...size, k];
+    }
+
+    // Generate samples using the Gamma distribution method:
+    // For Dirichlet(alpha), draw X_i ~ Gamma(alpha_i, 1) and normalize
+    const result = await NDArray.zeros(outputShape);
+    const wasm = getWasmModule();
+
+    for (let s = 0; s < numSamples; s++) {
+      let sum = 0;
+      const values: number[] = [];
+
+      // Draw from gamma distributions
+      for (let i = 0; i < k; i++) {
+        const g = wasm._random_gamma(this._wasmBitgen, alphaArr[i], 1.0);
+        values.push(g);
+        sum += g;
+      }
+
+      // Normalize and store
+      for (let i = 0; i < k; i++) {
+        result.setFlat(s * k + i, values[i] / sum);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a multinomial distribution.
+   *
+   * The multinomial distribution is a generalization of the binomial
+   * distribution, modeling the number of occurrences of each of K
+   * different outcomes in n independent trials.
+   *
+   * @param n - Number of trials (experiments)
+   * @param pvals - Probabilities of each outcome (must sum to 1)
+   * @param size - Number of samples to draw
+   * @returns Array of shape (*size, len(pvals)) if size specified, else (len(pvals),)
+   *
+   * @example
+   * ```typescript
+   * const rng = default_rng(12345);
+   *
+   * // Roll a fair die 20 times
+   * const pvals = [1/6, 1/6, 1/6, 1/6, 1/6, 1/6];
+   * const sample = await rng.multinomial(20, pvals);  // Shape: (6,)
+   * // sample might be [4, 3, 2, 5, 3, 3] (counts summing to 20)
+   *
+   * // Draw multiple experiments
+   * const samples = await rng.multinomial(20, pvals, 100);  // Shape: (100, 6)
+   * ```
+   */
+  async multinomial(
+    n: number,
+    pvals: number[] | NDArray,
+    size?: number | number[],
+  ): Promise<NDArray> {
+    this.ensureNotDisposed();
+
+    if (n < 0 || !Number.isInteger(n)) {
+      throw new Error("n must be a non-negative integer");
+    }
+
+    // Get probability values as array
+    let pArr: number[];
+    if (Array.isArray(pvals)) {
+      pArr = pvals;
+    } else {
+      pArr = [];
+      for (let i = 0; i < pvals.size; i++) {
+        pArr.push(pvals.getFlat(i) as number);
+      }
+    }
+
+    const k = pArr.length;
+    if (k < 2) {
+      throw new Error("pvals must have at least 2 elements");
+    }
+
+    // Validate probabilities
+    let pSum = 0;
+    for (let i = 0; i < k; i++) {
+      if (pArr[i] < 0 || pArr[i] > 1) {
+        throw new Error("all pvals must be in [0, 1]");
+      }
+      pSum += pArr[i];
+    }
+    if (Math.abs(pSum - 1.0) > 1e-10) {
+      throw new Error("pvals must sum to 1");
+    }
+
+    // Determine output shape
+    let numSamples: number;
+    let outputShape: number[];
+
+    if (size === undefined || size === null) {
+      numSamples = 1;
+      outputShape = [k];
+    } else if (typeof size === "number") {
+      numSamples = size;
+      outputShape = [size, k];
+    } else {
+      numSamples = size.reduce((a, b) => a * b, 1);
+      outputShape = [...size, k];
+    }
+
+    const result = await NDArray.zeros(outputShape, { dtype: DType.Int32 });
+    const wasm = getWasmModule();
+
+    for (let s = 0; s < numSamples; s++) {
+      // Use the conditional binomial method:
+      // For each category, draw from binomial with remaining trials and
+      // conditional probability
+      let remaining = n;
+      let pRemaining = 1.0;
+
+      for (let i = 0; i < k - 1 && remaining > 0; i++) {
+        // Conditional probability for category i
+        const pCond = pArr[i] / pRemaining;
+
+        // Draw from binomial(remaining, pCond)
+        const count = wasm._random_binomial(this._wasmBitgen, remaining, pCond);
+
+        result.setFlat(s * k + i, count);
+        remaining -= count;
+        pRemaining -= pArr[i];
+      }
+
+      // Last category gets remaining trials
+      result.setFlat(s * k + (k - 1), remaining);
+    }
+
+    return result;
+  }
+
+  /**
+   * Draw samples from a multivariate normal distribution.
+   *
+   * The multivariate normal distribution is a generalization of the
+   * one-dimensional normal distribution to higher dimensions.
+   *
+   * @param mean - Mean of the distribution (length N)
+   * @param cov - Covariance matrix (NxN, symmetric positive semi-definite)
+   * @param size - Number of samples to draw
+   * @param checkValid - Method for checking positive semi-definiteness
+   * @param tol - Tolerance for singular value check
+   * @returns Array of shape (*size, N) if size specified, else (N,)
+   *
+   * @example
+   * ```typescript
+   * const rng = default_rng(12345);
+   *
+   * // 2D multivariate normal
+   * const mean = [0, 0];
+   * const cov = [[1, 0.5], [0.5, 1]];
+   * const sample = await rng.multivariate_normal(mean, cov);  // Shape: (2,)
+   *
+   * // Draw multiple samples
+   * const samples = await rng.multivariate_normal(mean, cov, 1000);  // Shape: (1000, 2)
+   * ```
+   */
+  async multivariate_normal(
+    mean: number[] | NDArray,
+    cov: number[][] | NDArray,
+    size?: number | number[],
+    checkValid: "warn" | "raise" | "ignore" = "warn",
+    tol: number = 1e-8,
+  ): Promise<NDArray> {
+    this.ensureNotDisposed();
+
+    // Get mean values as array
+    let meanArr: number[];
+    if (Array.isArray(mean)) {
+      meanArr = mean;
+    } else {
+      meanArr = [];
+      for (let i = 0; i < mean.size; i++) {
+        meanArr.push(mean.getFlat(i) as number);
+      }
+    }
+
+    const n = meanArr.length;
+    if (n < 1) {
+      throw new Error("mean must have at least 1 element");
+    }
+
+    // Get covariance matrix as 2D array
+    let covArr: number[][];
+    if (Array.isArray(cov)) {
+      covArr = cov;
+    } else {
+      // NDArray - reshape to 2D
+      if (cov.ndim !== 2) {
+        throw new Error("cov must be a 2D array");
+      }
+      covArr = [];
+      for (let i = 0; i < cov.shape[0]; i++) {
+        const row: number[] = [];
+        for (let j = 0; j < cov.shape[1]; j++) {
+          row.push(cov.get(i, j) as number);
+        }
+        covArr.push(row);
+      }
+    }
+
+    // Validate covariance matrix dimensions
+    if (covArr.length !== n || covArr[0].length !== n) {
+      throw new Error(`cov must be ${n}x${n} to match mean length ${n}`);
+    }
+
+    // Check symmetry
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        if (Math.abs(covArr[i][j] - covArr[j][i]) > tol) {
+          if (checkValid === "raise") {
+            throw new Error("cov matrix is not symmetric");
+          } else if (checkValid === "warn") {
+            console.warn("cov matrix is not symmetric, using (cov + cov.T) / 2");
+          }
+          // Symmetrize
+          const avg = (covArr[i][j] + covArr[j][i]) / 2;
+          covArr[i][j] = avg;
+          covArr[j][i] = avg;
+        }
+      }
+    }
+
+    // Compute Cholesky decomposition for sampling
+    // L such that cov = L * L^T
+    const L = choleskyDecomposition(covArr, checkValid, tol);
+
+    // Determine output shape
+    let numSamples: number;
+    let outputShape: number[];
+
+    if (size === undefined || size === null) {
+      numSamples = 1;
+      outputShape = [n];
+    } else if (typeof size === "number") {
+      numSamples = size;
+      outputShape = [size, n];
+    } else {
+      numSamples = size.reduce((a, b) => a * b, 1);
+      outputShape = [...size, n];
+    }
+
+    const result = await NDArray.zeros(outputShape);
+    const wasm = getWasmModule();
+
+    for (let s = 0; s < numSamples; s++) {
+      // Draw standard normal samples
+      const z: number[] = [];
+      for (let i = 0; i < n; i++) {
+        z.push(wasm._random_normal(this._wasmBitgen, 0, 1));
+      }
+
+      // Transform: x = mean + L * z
+      for (let i = 0; i < n; i++) {
+        let val = meanArr[i];
+        for (let j = 0; j <= i; j++) {
+          val += L[i][j] * z[j];
+        }
+        result.setFlat(s * n + i, val);
+      }
+    }
+
+    return result;
+  }
+
   /* ============ Permutation Methods ============ */
 
   /**
@@ -2469,6 +3428,183 @@ export function randint(
   return getDefaultGenerator().integers(low, high, size);
 }
 
+/**
+ * Generates a random sample from a given array or range.
+ *
+ * @param a - If an array, a random sample is generated from its elements.
+ *            If an int, the random sample is generated from arange(a).
+ * @param size - Output shape. If null (default), a single value is returned.
+ * @param replace - Whether the sample is with or without replacement. Default is true.
+ * @param p - Probabilities associated with each entry in a. If not given, the sample
+ *            assumes a uniform distribution over all entries.
+ * @returns Random samples from the array
+ *
+ * @example
+ * // Choose 3 random elements from [1, 2, 3, 4, 5]
+ * const c = await choice([1, 2, 3, 4, 5], 3);
+ *
+ * @example
+ * // Choose 5 elements from range(10) with replacement
+ * const c = await choice(10, 5, true);
+ */
+export async function choice(
+  a: number | number[] | NDArray,
+  size?: SizeType,
+  replace: boolean = true,
+  p?: number[] | NDArray | null,
+): Promise<NDArray | number> {
+  return getDefaultGenerator().choice(a, size, replace, p);
+}
+
+/**
+ * Randomly shuffle elements of an array in-place along an axis.
+ *
+ * @param x - Array to shuffle (modified in-place)
+ * @param axis - Axis along which to shuffle (default 0)
+ *
+ * @example
+ * const arr = await NDArray.fromArray([1, 2, 3, 4, 5]);
+ * await shuffle(arr);
+ * // arr is now shuffled in-place
+ */
+export async function shuffle(x: NDArray, axis: number = 0): Promise<void> {
+  return getDefaultGenerator().shuffle(x, axis);
+}
+
+/**
+ * Randomly permute a sequence, or return a permuted range.
+ *
+ * @param x - If an integer, randomly permute arange(x).
+ *            If an array, make a copy and shuffle the elements randomly.
+ * @param axis - Axis along which to permute (default 0)
+ * @returns Permuted array (new array, not in-place)
+ *
+ * @example
+ * // Permute range(5)
+ * const p = await permutation(5);
+ * // e.g., [3, 1, 4, 0, 2]
+ *
+ * @example
+ * // Permute an array
+ * const arr = await NDArray.fromArray([10, 20, 30, 40]);
+ * const p = await permutation(arr);
+ */
+export async function permutation(
+  x: number | NDArray,
+  axis: number = 0,
+): Promise<NDArray> {
+  return getDefaultGenerator().permutation(x, axis);
+}
+
+/**
+ * Return random bytes.
+ *
+ * @param length - Number of random bytes to generate
+ * @returns A Uint8Array of random bytes
+ *
+ * @example
+ * // Generate 16 random bytes
+ * const b = bytes(16);
+ */
+export function bytes(length: number): Uint8Array {
+  return getDefaultGenerator().bytes(length);
+}
+
+/* ============ Legacy Functions ============ */
+
+/**
+ * Random values in a given shape.
+ *
+ * Create an array of the given shape and populate it with random samples
+ * from a uniform distribution over [0, 1).
+ *
+ * @deprecated This is a legacy function from numpy.random. Use random.random()
+ *   or Generator.random() instead. For new code, prefer default_rng().
+ *
+ * @param d0 - First dimension
+ * @param d1, d2, ... - Additional dimensions
+ * @returns Random values in the specified shape
+ *
+ * @example
+ * // Random float
+ * rand();
+ *
+ * // Random 1D array
+ * rand(5);
+ *
+ * // Random 2D array
+ * rand(3, 4);
+ */
+export function rand(...shape: number[]): NDArray | number {
+  if (shape.length === 0) {
+    return getDefaultGenerator().random(null) as number;
+  }
+  return getDefaultGenerator().random(shape);
+}
+
+/**
+ * Return random floats in the half-open interval [0.0, 1.0).
+ *
+ * @deprecated This is a legacy alias for random_sample. Use random.random()
+ *   or Generator.random() instead. For new code, prefer default_rng().
+ *
+ * @param size - Output shape
+ * @returns Random values in [0, 1)
+ */
+export function ranf(size?: SizeType): NDArray | number {
+  return getDefaultGenerator().random(size);
+}
+
+/**
+ * Return random floats in the half-open interval [0.0, 1.0).
+ *
+ * @deprecated This is a legacy function. Use random.random()
+ *   or Generator.random() instead. For new code, prefer default_rng().
+ *
+ * @param size - Output shape
+ * @returns Random values in [0, 1)
+ */
+export function random_sample(size?: SizeType): NDArray | number {
+  return getDefaultGenerator().random(size);
+}
+
+/**
+ * Return random floats in the half-open interval [0.0, 1.0).
+ *
+ * @deprecated This is a legacy alias for random_sample. Use random.random()
+ *   or Generator.random() instead. For new code, prefer default_rng().
+ *
+ * @param size - Output shape
+ * @returns Random values in [0, 1)
+ */
+export function sample(size?: SizeType): NDArray | number {
+  return getDefaultGenerator().random(size);
+}
+
+/**
+ * Return random integers from low (inclusive) to high (exclusive).
+ *
+ * @deprecated This is a legacy function. Use random.randint() or
+ *   Generator.integers() instead. For new code, prefer default_rng().
+ *
+ * @param low - Lowest integer (unless high is None, then range is [0, low))
+ * @param high - Upper bound (exclusive). If None, range is [0, low)
+ * @param size - Output shape
+ * @returns Random integers in [low, high)
+ */
+export function random_integers(
+  low: number,
+  high?: number | null,
+  size?: SizeType,
+): NDArray | number {
+  // In legacy random_integers, the range is inclusive: [low, high]
+  // If high is None, range is [1, low] (inclusive)
+  if (high === null || high === undefined) {
+    return getDefaultGenerator().integers(1, low + 1, size);
+  }
+  return getDefaultGenerator().integers(low, high + 1, size);
+}
+
 /* ============ Async Initialization Helper ============ */
 
 /**
@@ -2508,8 +3644,9 @@ function _createFloat64Array(shape: number[]): NDArray {
 /**
  * Create an int64 array synchronously using the pre-loaded WASM module.
  * @internal
+ * @unused - Kept for future int64 distribution implementations
  */
-function _createInt64Array(shape: number[]): NDArray {
+export function _createInt64Array(shape: number[]): NDArray {
   const module = getWasmModule();
 
   const shapePtr = module._malloc(shape.length * 4);

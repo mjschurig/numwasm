@@ -975,3 +975,41 @@ function putWhereCondition(
     }
   }
 }
+
+/**
+ * Check whether the object is iterable.
+ *
+ * This function returns True if the object is iterable, i.e., if it has
+ * a Symbol.iterator method. Strings are considered iterable in JavaScript,
+ * but this function returns false for strings to match NumPy behavior.
+ *
+ * @param y - Object to check
+ * @returns True if iterable, false otherwise
+ *
+ * @example
+ * ```typescript
+ * iterable([1, 2, 3])  // true
+ * iterable(NDArray.fromArray([1, 2, 3]))  // true
+ * iterable(5)  // false
+ * iterable("hello")  // false (matches NumPy)
+ * iterable(null)  // false
+ * ```
+ */
+export function iterable(y: unknown): boolean {
+  // Null/undefined check
+  if (y == null) {
+    return false;
+  }
+
+  // Strings are technically iterable in JS but NumPy returns False for strings
+  if (typeof y === "string") {
+    return false;
+  }
+
+  // Check for Symbol.iterator
+  if (typeof y === "object" && Symbol.iterator in (y as object)) {
+    return true;
+  }
+
+  return false;
+}

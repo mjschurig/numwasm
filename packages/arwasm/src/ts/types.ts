@@ -321,6 +321,136 @@ export interface ARPACKModule {
   ): void;
 
   // ============================================================
+  // COMPLEX DOUBLE PRECISION EIGENVALUE SOLVER (ARNOLDI)
+  // ============================================================
+  // For complex matrices (general or Hermitian)
+  // Uses the Arnoldi method with complex arithmetic
+  // All eigenvalues and eigenvectors are complex
+  // ============================================================
+
+  /**
+   * ZNAUPD - Complex Non-Symmetric Arnoldi Update Iteration
+   *
+   * Reverse communication interface for computing eigenvalues and eigenvectors
+   * of a complex (general or Hermitian) operator using the Implicitly Restarted
+   * Arnoldi Method.
+   *
+   * Complex arrays are stored in interleaved format: [re0, im0, re1, im1, ...]
+   * Each complex number takes 2 doubles (16 bytes).
+   *
+   * Problem types:
+   * - Standard:    A*x = lambda*x       (bmat='I')
+   * - Generalized: A*x = lambda*B*x     (bmat='G', B Hermitian positive definite)
+   *
+   * Reverse communication actions (based on ido output):
+   * - ido = -1: Compute y = Op*x (first call initialization)
+   * - ido =  1: Compute y = Op*x, B*x available at ipntr(3) for generalized
+   * - ido =  2: Compute y = B*x (for generalized problems)
+   * - ido =  3: Compute shifts (advanced usage)
+   * - ido = 99: Converged, call zneupd to extract results
+   *
+   * @param idoPtr - Reverse communication flag (input/output)
+   * @param bmatPtr - Problem type: 'I'=standard, 'G'=generalized
+   * @param nPtr - Dimension of the eigenproblem
+   * @param whichPtr - Which eigenvalues to compute:
+   *                   'LM'=largest magnitude, 'SM'=smallest magnitude,
+   *                   'LR'=largest real part, 'SR'=smallest real part,
+   *                   'LI'=largest imaginary part, 'SI'=smallest imaginary part
+   * @param nevPtr - Number of eigenvalues requested (0 < nev < n-1)
+   * @param tolPtr - Convergence tolerance (0=machine precision)
+   * @param residPtr - Initial/final residual vector, size 2*n (complex, interleaved)
+   * @param ncvPtr - Number of Arnoldi vectors (nev+2 <= ncv <= n)
+   * @param vPtr - Arnoldi basis vectors, 2*n*ncv (complex, interleaved, column-major)
+   * @param ldvPtr - Leading dimension of v, >= n
+   * @param iparamPtr - Integer parameters array of size 11
+   * @param ipntrPtr - Pointer array of size 14
+   * @param workdPtr - Complex work array of size 3*n (6*n doubles, interleaved)
+   * @param worklPtr - Complex work array of size 3*ncv² + 5*ncv
+   * @param lworklPtr - Length of workl (in complex numbers)
+   * @param rworkPtr - Real work array of size ncv
+   * @param infoPtr - Status/error code
+   */
+  _znaupd_(
+    idoPtr: number,
+    bmatPtr: number,
+    nPtr: number,
+    whichPtr: number,
+    nevPtr: number,
+    tolPtr: number,
+    residPtr: number,
+    ncvPtr: number,
+    vPtr: number,
+    ldvPtr: number,
+    iparamPtr: number,
+    ipntrPtr: number,
+    workdPtr: number,
+    worklPtr: number,
+    lworklPtr: number,
+    rworkPtr: number,
+    infoPtr: number
+  ): void;
+
+  /**
+   * ZNEUPD - Complex Eigenvalue Post-Processing
+   *
+   * Extracts eigenvalues and (optionally) eigenvectors after znaupd has
+   * converged. All eigenvalues and eigenvectors are complex.
+   *
+   * Must be called after znaupd returns with ido=99.
+   *
+   * @param rvecPtr - Compute eigenvectors? 0=no, nonzero=yes
+   * @param howmnyPtr - Eigenvector selection: 'A'=all, 'P'=Schur vectors, 'S'=selected
+   * @param selectPtr - Selection array of size ncv (integer)
+   * @param dPtr - Complex eigenvalues output, size 2*(nev+1) (interleaved)
+   * @param zPtr - Complex eigenvectors output, 2*n*(nev+1) (interleaved, column-major)
+   * @param ldzPtr - Leading dimension of z, >= n
+   * @param sigmaPtr - Complex shift value, size 2 (real, imag)
+   * @param workevPtr - Complex work array of size 2*ncv (4*ncv doubles)
+   * @param bmatPtr - Same as in znaupd call
+   * @param nPtr - Same as in znaupd call
+   * @param whichPtr - Same as in znaupd call
+   * @param nevPtr - Same as in znaupd call
+   * @param tolPtr - Same as in znaupd call
+   * @param residPtr - Same as in znaupd call
+   * @param ncvPtr - Same as in znaupd call
+   * @param vPtr - Same as in znaupd call
+   * @param ldvPtr - Same as in znaupd call
+   * @param iparamPtr - Same as in znaupd call
+   * @param ipntrPtr - Same as in znaupd call
+   * @param workdPtr - Same as in znaupd call
+   * @param worklPtr - Same as in znaupd call
+   * @param lworklPtr - Same as in znaupd call
+   * @param rworkPtr - Same as in znaupd call
+   * @param infoPtr - Status code: 0=success, negative=error
+   */
+  _zneupd_(
+    rvecPtr: number,
+    howmnyPtr: number,
+    selectPtr: number,
+    dPtr: number,
+    zPtr: number,
+    ldzPtr: number,
+    sigmaPtr: number,
+    workevPtr: number,
+    bmatPtr: number,
+    nPtr: number,
+    whichPtr: number,
+    nevPtr: number,
+    tolPtr: number,
+    residPtr: number,
+    ncvPtr: number,
+    vPtr: number,
+    ldvPtr: number,
+    iparamPtr: number,
+    ipntrPtr: number,
+    workdPtr: number,
+    worklPtr: number,
+    lworklPtr: number,
+    rworkPtr: number,
+    infoPtr: number
+  ): void;
+
+  // ============================================================
   // MEMORY MANAGEMENT
   // ============================================================
 
@@ -535,3 +665,58 @@ export const WHICH_NONSYMMETRIC = ['LM', 'SM', 'LR', 'SR', 'LI', 'SI'] as const;
 
 /** Type for non-symmetric 'which' parameter values. */
 export type WhichNonSymmetric = (typeof WHICH_NONSYMMETRIC)[number];
+
+/**
+ * Valid 'which' parameter values for complex eigensolvers (znaupd/zneupd).
+ * Same as non-symmetric since complex eigenvalues can have any position in the complex plane.
+ */
+export const WHICH_COMPLEX = ['LM', 'SM', 'LR', 'SR', 'LI', 'SI'] as const;
+
+/** Type for complex 'which' parameter values. */
+export type WhichComplex = (typeof WHICH_COMPLEX)[number];
+
+/**
+ * Error messages for ZNAUPD (complex Arnoldi update).
+ * Maps info return codes to human-readable descriptions.
+ */
+export const ZNAUPD_ERRORS: Record<number, string> = {
+  0: 'Normal exit.',
+  1: 'Maximum number of iterations taken.',
+  2: 'No longer an informational error. Deprecated.',
+  3: 'No shifts could be applied during implicit restart.',
+  [-1]: 'N must be positive.',
+  [-2]: 'NEV must be positive.',
+  [-3]: 'NCV must satisfy NEV+2 <= NCV <= N.',
+  [-4]: 'Maximum number of iterations must be > 0.',
+  [-5]: 'WHICH must be one of "LM", "SM", "LR", "SR", "LI", "SI".',
+  [-6]: 'BMAT must be "I" or "G".',
+  [-7]: 'Length of WORKL not sufficient.',
+  [-8]: 'Error return from LAPACK eigenvalue calculation.',
+  [-9]: 'Starting vector is zero.',
+  [-10]: 'IPARAM(7) must be 1, 2, or 3.',
+  [-11]: 'IPARAM(7) = 1 and BMAT = "G" are incompatible.',
+  [-12]: 'IPARAM(1) must be 0 or 1.',
+  [-9999]: 'Could not build an Arnoldi factorization.',
+};
+
+/**
+ * Error messages for ZNEUPD (complex eigenvalue extraction).
+ * Maps info return codes to human-readable descriptions.
+ */
+export const ZNEUPD_ERRORS: Record<number, string> = {
+  0: 'Normal exit.',
+  1: 'The Schur form computed by LAPACK routine could not be reordered.',
+  [-1]: 'N must be positive.',
+  [-2]: 'NEV must be positive.',
+  [-3]: 'NCV must satisfy NEV+2 <= NCV <= N.',
+  [-5]: 'WHICH must be one of "LM", "SM", "LR", "SR", "LI", "SI".',
+  [-6]: 'BMAT must be "I" or "G".',
+  [-7]: 'Length of WORKL not sufficient.',
+  [-8]: 'Error return from LAPACK eigenvalue calculation.',
+  [-9]: 'Error return from computation of eigenvectors.',
+  [-10]: 'IPARAM(7) must be 1, 2, or 3.',
+  [-11]: 'IPARAM(7) = 1 and BMAT = "G" are incompatible.',
+  [-12]: 'HOWMNY = "S" not yet implemented.',
+  [-13]: 'HOWMNY must be "A" or "P" if RVEC = true.',
+  [-14]: 'ZNAUPD did not find any eigenvalues to sufficient accuracy.',
+};

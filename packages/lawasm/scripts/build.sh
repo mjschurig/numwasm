@@ -81,6 +81,20 @@ for f in "$LAPACK_SRC/BLAS"/*.f; do
     fi
 done
 
+# Compile .f90 files (Fortran 90) - includes dnrm2, snrm2, dznrm2, scnrm2, etc.
+for f in "$LAPACK_SRC/BLAS"/*.f90; do
+    if [ -f "$f" ]; then
+        base=$(basename "$f")
+        base_noext="${base%.*}"
+        echo "  Compiling: $base"
+        $FLANG $FFLAGS -c "$f" -o "${base_noext}.o" 2>&1 || {
+            echo "  Warning: Failed to compile $base"
+            continue
+        }
+        ((count++)) || true
+    fi
+done
+
 echo "  Creating libblas.a ($count objects)"
 $EMAR rcs libblas.a *.o
 $EMRANLIB libblas.a
@@ -144,14 +158,18 @@ $FLANG $FFLAGS -c "$LAPACK_SRC/SRC/la_xisnan.F90" -o la_xisnan.o 2>&1 || {
     exit 1
 }
 
-# 3. Now compile the F90 files that depend on these modules
-F90_FILES=(dlassq slassq classq zlassq)
-for f in "${F90_FILES[@]}"; do
-    src="$LAPACK_SRC/SRC/${f}.f90"
-    if [ -f "$src" ]; then
-        echo "  Compiling: ${f}.f90"
-        $FLANG $FFLAGS -c "$src" -o "${f}.o" 2>&1 || {
-            echo "  Warning: Failed to compile ${f}.f90"
+# 3. Compile all remaining .f90 files from SRC (includes dlartg, slartg, etc.)
+for f in "$LAPACK_SRC/SRC"/*.f90; do
+    if [ -f "$f" ]; then
+        base=$(basename "$f")
+        base_noext="${base%.*}"
+        # Skip already compiled modules
+        if [ "$base_noext" = "la_constants" ]; then
+            continue
+        fi
+        echo "  Compiling: $base"
+        $FLANG $FFLAGS -c "$f" -o "${base_noext}.o" 2>&1 || {
+            echo "  Warning: Failed to compile $base"
             continue
         }
     fi

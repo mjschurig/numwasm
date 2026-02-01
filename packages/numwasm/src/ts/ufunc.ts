@@ -98,11 +98,14 @@ export {
 export {
   invert,
   bitwise_not,
+  bitwise_invert,
   bitwise_and,
   bitwise_or,
   bitwise_xor,
   left_shift,
   right_shift,
+  bitwise_left_shift,
+  bitwise_right_shift,
   bitwise_count,
 } from "./ufunc/bitwise.js";
 

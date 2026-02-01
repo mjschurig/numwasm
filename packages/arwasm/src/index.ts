@@ -55,24 +55,155 @@
 // HIGH-LEVEL API (recommended for most users)
 // ============================================================
 
-// High-level eigenvalue solvers
-export { eigs } from './ts/eigs.js';
-export { eign } from './ts/eign.js';
-export { eigsh, isEigsResult, isEignResult } from './ts/eigsh.js';
+// Core eigenvalue solvers (real)
+export { eigs } from './ts/core/eigs.js';
+export { eign } from './ts/core/eign.js';
+export { eigsh, isEigsResult, isEignResult } from './ts/core/eigsh.js';
+
+// Complex eigenvalue solvers
+export { zeigs } from './ts/complex/zeigs.js';
+export { zeigsh } from './ts/complex/zeigsh.js';
+
+// Singular value decomposition
+export { svds } from './ts/svd/svds.js';
+
+// Generalized eigenvalue problem
+export { geigs } from './ts/generalized/geigs.js';
+
+// Shift-invert convenience functions
+export { eigsNear } from './ts/generalized/eigsNear.js';
+export { eignNear } from './ts/generalized/eignNear.js';
+
+// Graph/network analysis
+export { laplacianEigs } from './ts/graph/laplacianEigs.js';
+export { pagerank, pagerankEigs } from './ts/graph/pagerank.js';
+
+// Dimensionality reduction
+export { spectralEmbedding } from './ts/dimred/spectralEmbedding.js';
+export { truncatedPCA, truncatedPCAfromData } from './ts/dimred/truncatedPCA.js';
+
+// Linear algebra utilities
+export { spectralRadius } from './ts/linalg/spectralRadius.js';
+export { spectralNorm } from './ts/linalg/spectralNorm.js';
+export { condest } from './ts/linalg/condest.js';
+export { nuclearNormApprox } from './ts/linalg/nuclearNorm.js';
+
+// Sparse matrix helpers
+export { csrMatvec, csrMatvecT } from './ts/sparse/csrMatvec.js';
+export { cscMatvec, cscMatvecT } from './ts/sparse/cscMatvec.js';
+export { cooMatvec, cooMatvecT } from './ts/sparse/cooMatvec.js';
+export { denseMatvec, denseMatvecT } from './ts/sparse/denseMatvec.js';
+export {
+  diagMatvec,
+  diagMatvecInv,
+  diagMatvecSqrt,
+  diagMatvecInvSqrt,
+} from './ts/sparse/diagMatvec.js';
+export {
+  tridiagMatvec,
+  symTridiagMatvec,
+  toeplitzTridiagMatvec,
+} from './ts/sparse/tridiagMatvec.js';
+export {
+  bandedMatvec,
+  symBandedMatvec,
+  toeplitzBandedMatvec,
+} from './ts/sparse/bandedMatvec.js';
+
+// Operator combinators
+export {
+  addMatvec,
+  mulMatvec,
+  shiftMatvec,
+  scaleMatvec,
+  transposeMatvec,
+  symmetrizeMatvec,
+  identityMatvec,
+  negateMatvec,
+  powerMatvec,
+  blockDiagMatvec,
+} from './ts/operators/combinators.js';
+
+// Validation and diagnostics
+export {
+  verifyEigs,
+  verifyEign,
+  verifySvds,
+  checkSymmetry,
+  checkPositiveDefinite,
+  checkNormalization,
+} from './ts/validation/verify.js';
+export type {
+  VerifyOptions,
+  VerifyEigsResult,
+  VerifySvdsResult,
+  SymmetryCheckResult,
+  PositiveDefiniteCheckResult,
+} from './ts/validation/verify.js';
+
+// Advanced eigenvalue modes
+export { bucklingEigs, criticalBucklingLoad } from './ts/advanced/bucklingEigs.js';
+export type { BucklingEigsOptions, BucklingResult } from './ts/advanced/bucklingEigs.js';
+export { cayleyEigs, eigsInInterval } from './ts/advanced/cayleyEigs.js';
+export type { CayleyEigsOptions } from './ts/advanced/cayleyEigs.js';
+
+// Matrix functions
+export { expmv, expmvMultiple } from './ts/matfun/expmv.js';
+export type { ExpmvOptions, ExpmvResult } from './ts/matfun/expmv.js';
+export { sqrtmv, invsqrtmv, matpowv } from './ts/matfun/sqrtmv.js';
+export type { SqrtmvOptions, SqrtmvResult } from './ts/matfun/sqrtmv.js';
+
+// Continuation and deflation
+export { eigsDeflated, eigsContinue, eignDeflated } from './ts/continuation/eigsDeflated.js';
+export type { EigsDeflatedOptions, EignDeflatedOptions } from './ts/continuation/eigsDeflated.js';
 
 // High-level type definitions
 export type {
   RealArray,
+  ComplexArray,
   MatVecFunction,
   OperatorFunction,
   BMatVecFunction,
+  ComplexMatVecFunction,
+  ComplexOperatorFunction,
+  ComplexBMatVecFunction,
   EigOptionsBase,
+  ComplexEigOptionsBase,
   EigsOptions,
   EignOptions,
   EigsResult,
   EignResult,
   EigshOptions,
   ProblemType,
+  ZeigsOptions,
+  ZeigshOptions,
+  ZeigsResult,
+  ZeigshResult,
+  SvdsOptions,
+  SvdsResult,
+  GeigsOptions,
+  Complex,
+  EigsNearOptions,
+  EignNearOptions,
+  // Graph analysis types
+  LaplacianEigsOptions,
+  LaplacianEigsResult,
+  PagerankOptions,
+  PagerankResult,
+  // Dimensionality reduction types
+  SpectralEmbeddingOptions,
+  SpectralEmbeddingResult,
+  TruncatedPCAOptions,
+  TruncatedPCAResult,
+  // Linear algebra types
+  SpectralRadiusOptions,
+  SpectralRadiusResult,
+  SpectralNormOptions,
+  SpectralNormResult,
+  CondestOptions,
+  CondestResult,
+  NuclearNormOptions,
+  NuclearNormResult,
 } from './ts/high-level-types.js';
 
 // Helper utilities
@@ -80,11 +211,16 @@ export {
   dsaupdWorklSize,
   dnaupdWorklSize,
   dneupdWorkevSize,
+  znaupdWorklSize,
+  zneupdWorkevSize,
+  znaupdRworkSize,
   defaultNcv,
   getDsaupdMessage,
   getDnaupdMessage,
   getDseupdMessage,
   getDneupdMessage,
+  getZnaupdMessage,
+  getZneupdMessage,
 } from './ts/helpers.js';
 
 // ============================================================
@@ -108,6 +244,7 @@ export type {
   ARPACKModuleOptions,
   WhichSymmetric,
   WhichNonSymmetric,
+  WhichComplex,
 } from './ts/types.js';
 
 // Error code mappings and constants
@@ -116,6 +253,9 @@ export {
   DSEUPD_ERRORS,
   DNAUPD_ERRORS,
   DNEUPD_ERRORS,
+  ZNAUPD_ERRORS,
+  ZNEUPD_ERRORS,
   WHICH_SYMMETRIC,
   WHICH_NONSYMMETRIC,
+  WHICH_COMPLEX,
 } from './ts/types.js';

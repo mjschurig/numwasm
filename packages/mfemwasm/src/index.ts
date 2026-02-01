@@ -26,6 +26,15 @@ export {
 export type { MFEMLoadConfig } from './ts/loader.js';
 
 // High-level classes
-export { Mesh, FiniteElementSpace, GridFunction } from './ts/mesh.js';
+export { Mesh, BoundingBox } from './ts/mesh/index.js';
+export { FiniteElementSpace } from './ts/fespace/index.js';
+export { GridFunction } from './ts/gridfunction/index.js';
 
-export type { BoundingBox } from './ts/mesh.js';
+// Mesh operations
+export * as mesh from './ts/mesh/index.js';
+
+// Finite element space operations
+export * as fespace from './ts/fespace/index.js';
+
+// Grid function operations
+export * as gridfunction from './ts/gridfunction/index.js';

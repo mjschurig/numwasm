@@ -209,6 +209,17 @@ for subdir in fe integ lor qinterp eltrans dfem; do
     fi
 done
 
+# Compile ceed interface (nested subdirectory)
+if [ -d "$SRC_DIR/fem/ceed/interface" ]; then
+    echo "  Compiling ceed/interface..."
+    for src in "$SRC_DIR/fem/ceed/interface"/*.cpp; do
+        [ -f "$src" ] || continue
+        base=$(basename "$src" .cpp)
+        echo "    $base.cpp"
+        compile_cpp "$src" "fem_ceed_interface"
+    done
+fi
+
 # ==============================================================================
 # Compile WASM wrapper
 # ==============================================================================

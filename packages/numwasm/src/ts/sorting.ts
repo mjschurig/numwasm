@@ -205,3 +205,80 @@ export function sort_complex(a: NDArray): NDArray {
 
   return NDArray._fromPtr(resultPtr, module);
 }
+
+/**
+ * Perform an indirect stable sort using a sequence of keys.
+ *
+ * Given multiple sorting keys, lexsort returns an array of integer indices
+ * that describes the sort order by multiple columns. The last key in the
+ * sequence is used for the primary sort order, the second-to-last key for
+ * the secondary sort order, and so on.
+ *
+ * @param keys - Array of keys to sort by. Each key should be 1-D with the same length.
+ *               The last key is the primary sort key.
+ * @returns Array of indices that sort the keys
+ *
+ * @example
+ * ```typescript
+ * // Sort by last name, then by first name
+ * const surnames = await NDArray.fromArray(['Smith', 'Jones', 'Smith', 'Adams']);
+ * const firstNames = await NDArray.fromArray(['John', 'Mary', 'Alice', 'Bob']);
+ * const idx = await lexsort([firstNames, surnames]);
+ * // idx sorts first by surname, then by first name within each surname
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Sort by column 2, then by column 1
+ * const a = await NDArray.fromArray([1, 5, 1, 4, 3, 4, 4]);
+ * const b = await NDArray.fromArray([9, 4, 0, 4, 0, 2, 1]);
+ * const idx = await lexsort([b, a]);
+ * // First sorts by 'a', then by 'b' within equal 'a' values
+ * ```
+ */
+export async function lexsort(keys: NDArray[]): Promise<NDArray> {
+  if (keys.length === 0) {
+    throw new Error("lexsort requires at least one key array");
+  }
+
+  // Validate all keys have the same size
+  const n = keys[0].size;
+  for (let i = 1; i < keys.length; i++) {
+    if (keys[i].size !== n) {
+      throw new Error("all keys must have the same size");
+    }
+  }
+
+  // Create array of indices [0, 1, 2, ..., n-1]
+  const indices = new Int32Array(n);
+  for (let i = 0; i < n; i++) {
+    indices[i] = i;
+  }
+
+  // Extract values from all keys for comparison
+  const keyValues: number[][] = [];
+  for (const key of keys) {
+    const vals: number[] = [];
+    for (let i = 0; i < n; i++) {
+      vals.push(key.getFlat(i) as number);
+    }
+    keyValues.push(vals);
+  }
+
+  // Sort indices using a stable sort, comparing from last key to first
+  // (last key is primary sort key)
+  const indicesArray = Array.from(indices);
+  indicesArray.sort((i, j) => {
+    // Compare from last key (primary) to first key (least significant)
+    for (let k = keyValues.length - 1; k >= 0; k--) {
+      const a = keyValues[k][i];
+      const b = keyValues[k][j];
+      if (a < b) return -1;
+      if (a > b) return 1;
+    }
+    // Stable sort: preserve original order for equal elements
+    return i - j;
+  });
+
+  return NDArray.fromArray(indicesArray, undefined, { dtype: DType.Int32 });
+}

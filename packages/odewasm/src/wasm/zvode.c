@@ -12,6 +12,11 @@
 
 #include "f2c.h"
 
+#ifdef VODE_COMMON_DEFINED
+/* Shared functions (xerrwd_, dumach_, etc.) are defined in vode_common.c */
+#include "vode_common.h"
+#endif
+
 /* Common Block Declarations */
 
 union {
@@ -5051,6 +5056,10 @@ L20:
     return 0;
 } /* dzaxpy_ */
 
+#ifndef VODE_COMMON_DEFINED
+/* The following functions are shared between vode.c, vodpk.c, and zvode.c.
+   When VODE_COMMON_DEFINED is set, these are provided by vode_common.c */
+
 /* DECK DUMACH */
 doublereal dumach_(void)
 {
@@ -5459,4 +5468,6 @@ integer iumach_(void)
     return ret_val;
 /* ----------------------- End of Function IUMACH ------------------------ */
 } /* iumach_ */
+
+#endif /* VODE_COMMON_DEFINED */
 

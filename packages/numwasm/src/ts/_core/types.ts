@@ -558,6 +558,41 @@ export interface WasmModule {
   _ndarray_nancumsum_axis(ptr: number, axis: number, dtype: number): number;
   _ndarray_nancumprod_axis(ptr: number, axis: number, dtype: number): number;
 
+  // Product reductions
+  _ndarray_prod_axis(
+    ptr: number,
+    axis: number,
+    keepdims: boolean,
+    dtype: number
+  ): number;
+  _ndarray_nanprod(
+    ptr: number,
+    axis: number,
+    keepdims: boolean,
+    dtype: number
+  ): number;
+
+  // Peak-to-peak (max - min)
+  _ndarray_ptp_axis(ptr: number, axis: number, keepdims: boolean): number;
+
+  // Covariance and correlation
+  _ndarray_cov(
+    mPtr: number,
+    yPtr: number,
+    rowvar: boolean,
+    bias: boolean,
+    ddof: number
+  ): number;
+  _ndarray_corrcoef(xPtr: number, yPtr: number, rowvar: boolean): number;
+
+  // Differences and gradients
+  _ndarray_diff(ptr: number, n: number, axis: number): number;
+  _ndarray_gradient(ptr: number, dx: number, axis: number): number;
+
+  // Signal processing (convolution/correlation)
+  _ndarray_convolve(aPtr: number, vPtr: number, mode: number): number;
+  _ndarray_correlate(aPtr: number, vPtr: number, mode: number): number;
+
   // Set operations (Phase 8)
   _ndarray_unique(
     ptr: number,

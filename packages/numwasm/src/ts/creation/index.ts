@@ -20,6 +20,8 @@ export {
   asarray_chkfinite,
   ascontiguousarray,
   asfortranarray,
+  require,
+  astype,
 } from "./basic.js";
 
 // Range-based creation (arange, linspace, logspace, geomspace)
@@ -42,8 +44,9 @@ export {
   vander,
 } from "./matrices.js";
 
-// Data-based creation (fromfunction, fromiter)
+// Data-based creation (fromfunction, fromiter, fromstring)
 export {
   fromfunction,
   fromiter,
+  fromstring,
 } from "./from_data.js";

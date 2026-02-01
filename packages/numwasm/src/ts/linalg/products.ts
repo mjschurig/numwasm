@@ -623,3 +623,190 @@ export async function cross(
 
   return result;
 }
+
+/* ============ NumPy 2.0 Functions ============ */
+
+/**
+ * Transposes the last two dimensions of an array.
+ *
+ * NumPy 2.0 addition: Equivalent to swapaxes(a, -2, -1).
+ *
+ * @param x - Input array, must have at least 2 dimensions
+ * @returns Array with last two axes swapped
+ *
+ * @example
+ * const a = await NDArray.fromArray([[1, 2], [3, 4]]);
+ * const t = await matrix_transpose(a);
+ * // [[1, 3], [2, 4]]
+ */
+export function matrix_transpose(x: NDArray): NDArray {
+  if (x.ndim < 2) {
+    throw new LinAlgError("matrix_transpose requires at least 2-dimensional input");
+  }
+  return x.swapaxes(-2, -1);
+}
+
+/**
+ * Compute the vector dot product of two arrays along the last axis.
+ *
+ * NumPy 2.0 addition. For 1-D arrays, this is the same as dot.
+ * For N-D arrays, sums the product of elements along the last axis.
+ *
+ * @param x1 - First input array
+ * @param x2 - Second input array
+ * @param axis - Axis along which to compute the dot product (default: -1)
+ * @returns Vector dot product
+ *
+ * @example
+ * const a = await NDArray.fromArray([1, 2, 3]);
+ * const b = await NDArray.fromArray([4, 5, 6]);
+ * const d = await vecdot(a, b);
+ * // 32 (1*4 + 2*5 + 3*6)
+ */
+export async function vecdot(
+  x1: NDArray,
+  x2: NDArray,
+  axis: number = -1,
+): Promise<NDArray | number> {
+  // Normalize axis
+  const ax1 = axis < 0 ? x1.ndim + axis : axis;
+  const ax2 = axis < 0 ? x2.ndim + axis : axis;
+
+  if (ax1 < 0 || ax1 >= x1.ndim) {
+    throw new LinAlgError(`axis ${axis} is out of bounds for x1 with ${x1.ndim} dimensions`);
+  }
+  if (ax2 < 0 || ax2 >= x2.ndim) {
+    throw new LinAlgError(`axis ${axis} is out of bounds for x2 with ${x2.ndim} dimensions`);
+  }
+
+  // Check dimension sizes match
+  if (x1.shape[ax1] !== x2.shape[ax2]) {
+    throw new LinAlgError(
+      `shape mismatch: x1[${ax1}]=${x1.shape[ax1]} != x2[${ax2}]=${x2.shape[ax2]}`
+    );
+  }
+
+  // For 1D arrays, use dot directly
+  if (x1.ndim === 1 && x2.ndim === 1) {
+    return vdot(x1, x2);
+  }
+
+  // Move target axis to last position
+  const x1Moved = ax1 !== x1.ndim - 1 ? x1.moveaxis(ax1, -1) : x1;
+  const x2Moved = ax2 !== x2.ndim - 1 ? x2.moveaxis(ax2, -1) : x2;
+
+  // Multiply and sum along last axis
+  const module = getWasmModule();
+  const productPtr = module._ufunc_multiply(x1Moved._wasmPtr, x2Moved._wasmPtr);
+  if (productPtr === 0) {
+    throw new LinAlgError("vecdot: multiply failed");
+  }
+  const product = NDArray._fromPtr(productPtr, module);
+
+  // Sum along last axis
+  const axisVal = -1;
+  const sumPtr = module._ndarray_sum_axis(product._wasmPtr, axisVal, false, -1);
+  product.dispose();
+
+  if (sumPtr === 0) {
+    throw new LinAlgError("vecdot: sum failed");
+  }
+
+  const result = NDArray._fromPtr(sumPtr, module);
+
+  // Return scalar for 1D results
+  if (result.ndim === 0) {
+    const val = result.item();
+    result.dispose();
+    return val as number;
+  }
+
+  return result;
+}
+
+/**
+ * Matrix-vector product.
+ *
+ * NumPy 2.0 addition. Computes the matrix-vector product of x1 and x2.
+ * Equivalent to matmul with 2D @ 1D broadcasting.
+ *
+ * @param x1 - Matrix (..., M, N)
+ * @param x2 - Vector (..., N)
+ * @returns Result vector (..., M)
+ *
+ * @example
+ * const A = await NDArray.fromArray([[1, 2], [3, 4]]);
+ * const v = await NDArray.fromArray([1, 2]);
+ * const result = await matvec(A, v);
+ * // [5, 11] (1*1+2*2, 3*1+4*2)
+ */
+export async function matvec(x1: NDArray, x2: NDArray): Promise<NDArray> {
+  if (x1.ndim < 2) {
+    throw new LinAlgError("matvec: x1 must be at least 2-dimensional");
+  }
+  if (x2.ndim < 1) {
+    throw new LinAlgError("matvec: x2 must be at least 1-dimensional");
+  }
+
+  // Check dimensions match
+  const N1 = x1.shape[x1.ndim - 1];
+  const N2 = x2.shape[x2.ndim - 1];
+  if (N1 !== N2) {
+    throw new LinAlgError(
+      `matvec: x1.shape[-1]=${N1} does not match x2.shape[-1]=${N2}`
+    );
+  }
+
+  // Reshape x2 to column vector for matmul
+  const x2Col = x2.reshape([...x2.shape.slice(0, -1), N2, 1]);
+
+  // Use matmul
+  const result = await matmul(x1, x2Col);
+
+  // Remove the trailing dimension of 1
+  return result.reshape(result.shape.slice(0, -1));
+}
+
+/**
+ * Vector-matrix product.
+ *
+ * NumPy 2.0 addition. Computes the vector-matrix product of x1 and x2.
+ * Equivalent to matmul with 1D @ 2D broadcasting.
+ *
+ * @param x1 - Vector (..., M)
+ * @param x2 - Matrix (..., M, N)
+ * @returns Result vector (..., N)
+ *
+ * @example
+ * const v = await NDArray.fromArray([1, 2]);
+ * const A = await NDArray.fromArray([[1, 2], [3, 4]]);
+ * const result = await vecmat(v, A);
+ * // [7, 10] (1*1+2*3, 1*2+2*4)
+ */
+export async function vecmat(x1: NDArray, x2: NDArray): Promise<NDArray> {
+  if (x1.ndim < 1) {
+    throw new LinAlgError("vecmat: x1 must be at least 1-dimensional");
+  }
+  if (x2.ndim < 2) {
+    throw new LinAlgError("vecmat: x2 must be at least 2-dimensional");
+  }
+
+  // Check dimensions match
+  const M1 = x1.shape[x1.ndim - 1];
+  const M2 = x2.shape[x2.ndim - 2];
+  if (M1 !== M2) {
+    throw new LinAlgError(
+      `vecmat: x1.shape[-1]=${M1} does not match x2.shape[-2]=${M2}`
+    );
+  }
+
+  // Reshape x1 to row vector for matmul
+  const x1Row = x1.reshape([...x1.shape.slice(0, -1), 1, M1]);
+
+  // Use matmul
+  const result = await matmul(x1Row, x2);
+
+  // Remove the second-to-last dimension of 1
+  const newShape = [...result.shape.slice(0, -2), result.shape[result.ndim - 1]];
+  return result.reshape(newShape);
+}

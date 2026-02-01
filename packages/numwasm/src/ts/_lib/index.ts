@@ -15,6 +15,7 @@ export {
   vectorize,
   frompyfunc,
   piecewise,
+  iterable,
 } from "./functional.js";
 export type { VectorizeOptions, UfuncLike } from "./functional.js";
 

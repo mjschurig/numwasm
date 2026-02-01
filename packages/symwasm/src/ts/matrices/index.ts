@@ -8,6 +8,8 @@ import { getWasmModule } from '../wasm-loader.js';
 import {
   DenseMatrixObject,
   createDenseMatrix,
+  SparseMatrixObject,
+  createSparseMatrixWithSize,
   SymEngineVec,
   createBasic,
   checkException,
@@ -819,6 +821,40 @@ export class Matrix {
       throw e;
     }
   }
+
+  // ============================================================================
+  // Calculus
+  // ============================================================================
+
+  /**
+   * Compute the elementwise derivative of the matrix with respect to a symbol.
+   * Each element of the matrix is differentiated with respect to x.
+   *
+   * @param x The symbol to differentiate with respect to
+   * @returns New matrix with each element differentiated
+   *
+   * @example
+   * const x = new Symbol('x');
+   * const m = new Matrix([[x, pow(x, 2)], [sin(x), exp(x)]]);
+   * m.diff(x);  // Returns [[1, 2*x], [cos(x), exp(x)]]
+   */
+  diff(x: Expr): Matrix {
+    const wasm = getWasmModule();
+    const result = createDenseMatrix();
+
+    try {
+      const code = wasm._dense_matrix_diff(
+        result.getPtr(),
+        this._obj.getPtr(),
+        x.getWasmPtr()
+      );
+      checkException(code);
+      return Matrix._fromDenseMatrixObject(result);
+    } catch (e) {
+      result.free();
+      throw e;
+    }
+  }
 }
 
 // ============================================================================
@@ -930,5 +966,257 @@ export function diag(values: (Expr | number)[], k: number = 0): Matrix {
     throw e;
   } finally {
     vec.free();
+  }
+}
+
+/**
+ * Compute the Jacobian matrix of a vector of functions with respect to variables.
+ *
+ * The Jacobian is a matrix of partial derivatives where element (i,j) is
+ * the partial derivative of the i-th function with respect to the j-th variable.
+ *
+ * @param funcs Column matrix of functions (expressions)
+ * @param vars Column matrix of variables (symbols) to differentiate with respect to
+ * @returns The Jacobian matrix with shape (len(funcs), len(vars))
+ *
+ * @remarks
+ * If funcs = [f1, f2, ..., fm] and vars = [x1, x2, ..., xn], then the Jacobian is:
+ * ```
+ * | ∂f1/∂x1  ∂f1/∂x2  ...  ∂f1/∂xn |
+ * | ∂f2/∂x1  ∂f2/∂x2  ...  ∂f2/∂xn |
+ * |   ...      ...    ...    ...   |
+ * | ∂fm/∂x1  ∂fm/∂x2  ...  ∂fm/∂xn |
+ * ```
+ *
+ * @example
+ * ```typescript
+ * const x = new Symbol('x');
+ * const y = new Symbol('y');
+ *
+ * // Functions: [x^2 + y, x*y]
+ * const funcs = new Matrix([[pow(x, 2).add(y)], [mul(x, y)]]);
+ * const vars = new Matrix([[x], [y]]);
+ *
+ * jacobian(funcs, vars);
+ * // Returns: [[2*x, 1], [y, x]]
+ * ```
+ *
+ * @see {@link Matrix.diff} - Differentiate matrix elements
+ */
+export function jacobian(funcs: Matrix, vars: Matrix): Matrix {
+  const wasm = getWasmModule();
+  const result = createDenseMatrix();
+
+  try {
+    const code = wasm._dense_matrix_jacobian(
+      result.getPtr(),
+      funcs.getWasmPtr(),
+      vars.getWasmPtr()
+    );
+    checkException(code);
+    return Matrix._fromDenseMatrixObject(result);
+  } catch (e) {
+    result.free();
+    throw e;
+  }
+}
+
+// ============================================================================
+// Sparse Matrix
+// ============================================================================
+
+/**
+ * Symbolic sparse matrix in CSR (Compressed Sparse Row) format.
+ *
+ * Sparse matrices are efficient for storing matrices where most elements are zero.
+ * They use less memory and can perform operations faster on sparse data.
+ *
+ * @remarks
+ * SymEngine uses CSR format internally, which stores:
+ * - Non-zero values in a contiguous array
+ * - Column indices for each non-zero value
+ * - Row pointers indicating where each row starts
+ *
+ * Use SparseMatrix when:
+ * - Your matrix has many zero elements (>50% sparse)
+ * - You need memory-efficient storage for large matrices
+ * - You're working with structured sparsity patterns
+ *
+ * @example
+ * ```typescript
+ * // Create a 3x3 sparse matrix
+ * const s = new SparseMatrix(3, 3);
+ *
+ * // Set non-zero elements
+ * s.set(0, 0, 1);
+ * s.set(1, 1, 2);
+ * s.set(2, 2, 3);
+ *
+ * // Get elements
+ * s.get(0, 0);  // 1
+ * s.get(0, 1);  // 0 (default for unset elements)
+ * ```
+ */
+export class SparseMatrix {
+  /** @internal WASM pointer wrapper */
+  private _obj: SparseMatrixObject;
+  private _rows: number;
+  private _cols: number;
+
+  /**
+   * Create a sparse matrix with given dimensions.
+   * @param rows Number of rows
+   * @param cols Number of columns
+   *
+   * @example
+   * const s = new SparseMatrix(100, 100);  // 100x100 sparse matrix
+   */
+  constructor(rows: number, cols: number) {
+    if (rows <= 0 || cols <= 0) {
+      throw new Error('Matrix dimensions must be positive');
+    }
+    this._rows = rows;
+    this._cols = cols;
+    this._obj = createSparseMatrixWithSize(rows, cols);
+  }
+
+  /**
+   * @internal Create a SparseMatrix from an existing SparseMatrixObject
+   */
+  static _fromSparseMatrixObject(
+    obj: SparseMatrixObject,
+    rows: number,
+    cols: number
+  ): SparseMatrix {
+    const m = Object.create(SparseMatrix.prototype) as SparseMatrix;
+    m._obj = obj;
+    m._rows = rows;
+    m._cols = cols;
+    return m;
+  }
+
+  /**
+   * @internal Get the underlying WASM pointer
+   */
+  getWasmPtr(): number {
+    return this._obj.getPtr();
+  }
+
+  /**
+   * Number of rows in the matrix.
+   */
+  get rows(): number {
+    return this._rows;
+  }
+
+  /**
+   * Number of columns in the matrix.
+   */
+  get cols(): number {
+    return this._cols;
+  }
+
+  /**
+   * Shape of the matrix as [rows, cols] tuple.
+   */
+  get shape(): [number, number] {
+    return [this._rows, this._cols];
+  }
+
+  /**
+   * Get element at position (i, j).
+   * Returns 0 for elements that haven't been set.
+   * @param i Row index (0-based)
+   * @param j Column index (0-based)
+   * @returns The expression at the specified position
+   *
+   * @example
+   * const s = new SparseMatrix(3, 3);
+   * s.set(0, 0, 5);
+   * s.get(0, 0);  // Returns Integer(5)
+   * s.get(0, 1);  // Returns Integer(0)
+   */
+  get(i: number, j: number): Expr {
+    if (i < 0 || i >= this._rows || j < 0 || j >= this._cols) {
+      throw new RangeError(
+        `Index (${i}, ${j}) out of bounds for matrix of shape (${this._rows}, ${this._cols})`
+      );
+    }
+
+    const wasm = getWasmModule();
+    const result = createBasic();
+
+    try {
+      const code = wasm._sparse_matrix_get_basic(
+        result.getPtr(),
+        this._obj.getPtr(),
+        i,
+        j
+      );
+      checkException(code);
+      return exprFromWasm(result);
+    } catch (e) {
+      result.free();
+      throw e;
+    }
+  }
+
+  /**
+   * Set element at position (i, j).
+   * @param i Row index (0-based)
+   * @param j Column index (0-based)
+   * @param value The expression or number to set
+   *
+   * @example
+   * const s = new SparseMatrix(3, 3);
+   * s.set(0, 0, 5);
+   * s.set(1, 1, x);  // Can set symbolic values
+   */
+  set(i: number, j: number, value: Expr | number): void {
+    if (i < 0 || i >= this._rows || j < 0 || j >= this._cols) {
+      throw new RangeError(
+        `Index (${i}, ${j}) out of bounds for matrix of shape (${this._rows}, ${this._cols})`
+      );
+    }
+
+    const wasm = getWasmModule();
+    const expr = toExpr(value);
+    const code = wasm._sparse_matrix_set_basic(
+      this._obj.getPtr(),
+      i,
+      j,
+      expr.getWasmPtr()
+    );
+    checkException(code);
+  }
+
+  /**
+   * String representation of the sparse matrix.
+   */
+  toString(): string {
+    return this._obj.toString();
+  }
+
+  /**
+   * Check structural equality with another sparse matrix.
+   * Two sparse matrices are equal if they have the same dimensions and all elements are equal.
+   */
+  equals(other: SparseMatrix): boolean {
+    if (!(other instanceof SparseMatrix)) {
+      return false;
+    }
+    if (this._rows !== other._rows || this._cols !== other._cols) {
+      return false;
+    }
+    const wasm = getWasmModule();
+    return wasm._sparse_matrix_eq(this._obj.getPtr(), other._obj.getPtr()) !== 0;
+  }
+
+  /**
+   * Free the underlying WASM memory.
+   * After calling this, the matrix becomes invalid.
+   */
+  free(): void {
+    this._obj.free();
   }
 }

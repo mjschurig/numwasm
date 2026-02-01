@@ -73,3 +73,69 @@ export async function fromiter(
   const data: number[] = [...iter];
   return array(data, undefined, options);
 }
+
+/**
+ * Create a 1D array from text data in a string.
+ *
+ * A simple way to quickly create 1D arrays from raw text. The string
+ * is parsed using a separator character.
+ *
+ * @param string - String containing the data
+ * @param sep - Separator between data items. If empty string, treats the
+ *              string as binary data with each character representing a byte.
+ * @param count - Number of items to read. Default is -1 (read all).
+ * @param options - Optional configuration (dtype)
+ * @returns Promise resolving to 1D NDArray
+ *
+ * @example
+ * ```typescript
+ * // Read whitespace-separated numbers
+ * const a = await fromstring("1 2 3 4 5");
+ * // [1, 2, 3, 4, 5]
+ *
+ * // Read comma-separated numbers
+ * const b = await fromstring("1,2,3,4,5", ",");
+ * // [1, 2, 3, 4, 5]
+ *
+ * // Read with count limit
+ * const c = await fromstring("1 2 3 4 5", " ", 3);
+ * // [1, 2, 3]
+ *
+ * // Read binary data (character codes)
+ * const d = await fromstring("ABC", "");
+ * // [65, 66, 67]
+ * ```
+ */
+export async function fromstring(
+  string: string,
+  sep: string = " ",
+  count: number = -1,
+  options: NDArrayOptions = {},
+): Promise<NDArray> {
+  let data: number[];
+
+  if (sep === "") {
+    // Binary mode: each character is a byte
+    data = [];
+    for (let i = 0; i < string.length; i++) {
+      data.push(string.charCodeAt(i));
+    }
+  } else {
+    // Text mode: split by separator and parse as numbers
+    const parts = string.split(sep).filter((s) => s.trim() !== "");
+    data = parts.map((s) => {
+      const num = parseFloat(s.trim());
+      if (Number.isNaN(num)) {
+        throw new Error(`Could not convert string to float: '${s}'`);
+      }
+      return num;
+    });
+  }
+
+  // Apply count limit
+  if (count >= 0 && count < data.length) {
+    data = data.slice(0, count);
+  }
+
+  return array(data, undefined, options);
+}

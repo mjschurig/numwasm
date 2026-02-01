@@ -20,6 +20,9 @@ export function invert(x: NDArray): NDArray {
 /** Alias for invert. */
 export const bitwise_not = invert;
 
+/** NumPy 2.0 alias for invert. */
+export const bitwise_invert = invert;
+
 /* ============ Bitwise Operations (Binary) ============ */
 
 /** Compute the bit-wise AND of two arrays element-wise. */
@@ -50,12 +53,18 @@ export function left_shift(x1: NDArray, x2: NDArray): NDArray {
   );
 }
 
+/** NumPy 2.0 alias for left_shift. */
+export const bitwise_left_shift = left_shift;
+
 /** Shift the bits of an integer to the right. */
 export function right_shift(x1: NDArray, x2: NDArray): NDArray {
   return applyBinary(x1, x2, (p1, p2) =>
     getWasmModule()._ufunc_right_shift(p1, p2),
   );
 }
+
+/** NumPy 2.0 alias for right_shift. */
+export const bitwise_right_shift = right_shift;
 
 /**
  * Computes the number of 1-bits in the absolute value of x.

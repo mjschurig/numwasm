@@ -1129,3 +1129,209 @@ export async function select(
 
   return result;
 }
+
+/**
+ * Fill the main diagonal of the given array of any dimensionality.
+ *
+ * For an array a with a.ndim >= 2, the diagonal is the list of
+ * locations with indices a[i, i, ..., i] all identical. This function
+ * modifies the input array in-place, it does not return a value.
+ *
+ * @param a - Array to fill (modified in-place). Must be at least 2-D.
+ * @param val - Value to write on the diagonal
+ * @param wrap - For tall matrices, whether to "wrap" after filling the main diagonal
+ *
+ * @example
+ * ```typescript
+ * const a = await NDArray.zeros([3, 3]);
+ * await fill_diagonal(a, 5);
+ * // a is now [[5, 0, 0], [0, 5, 0], [0, 0, 5]]
+ * ```
+ */
+export async function fill_diagonal(
+  a: NDArray,
+  val: number,
+  wrap: boolean = false,
+): Promise<void> {
+  if (a.ndim < 2) {
+    throw new Error("array must be at least 2-d");
+  }
+
+  const shape = a.shape;
+
+  // For 2D arrays
+  if (a.ndim === 2) {
+    const [nrows, ncols] = shape;
+
+    if (wrap) {
+      // With wrapping: fill diagonal even for tall matrices
+      for (let i = 0; i < nrows; i++) {
+        const j = i % ncols;
+        a.set(val, i, j);
+      }
+    } else {
+      // Without wrapping: just fill the main diagonal
+      const end = Math.min(nrows, ncols);
+      for (let i = 0; i < end; i++) {
+        a.set(val, i, i);
+      }
+    }
+    return;
+  }
+
+  // For n-dimensional arrays, all dimensions must be equal
+  const dim0 = shape[0];
+  for (let d = 1; d < a.ndim; d++) {
+    if (shape[d] !== dim0) {
+      throw new Error(
+        "all dimensions of input must be of equal length for n-dimensional arrays",
+      );
+    }
+  }
+
+  // Fill diagonal for n-d array: a[i, i, ..., i] = val
+  for (let i = 0; i < dim0; i++) {
+    const indices = new Array(a.ndim).fill(i);
+    a.set(val, ...indices);
+  }
+}
+
+/**
+ * Return the indices to access the main diagonal of an array.
+ *
+ * This returns a tuple of arrays, one for each dimension of a,
+ * suitable for accessing the diagonal of an array.
+ *
+ * @param arr - Array of which to get diagonal indices
+ * @returns A tuple of index arrays
+ *
+ * @example
+ * ```typescript
+ * const a = await NDArray.zeros([3, 3]);
+ * const di = await diag_indices_from(a);
+ * // di = [array([0, 1, 2]), array([0, 1, 2])]
+ * ```
+ */
+export async function diag_indices_from(arr: NDArray): Promise<NDArray[]> {
+  if (arr.ndim < 2) {
+    throw new Error("input array must be at least 2-d");
+  }
+
+  const shape = arr.shape;
+  // All dimensions must be equal for diag_indices_from
+  const dim0 = shape[0];
+  for (let d = 1; d < arr.ndim; d++) {
+    if (shape[d] !== dim0) {
+      throw new Error("all dimensions of input must be of equal length");
+    }
+  }
+
+  return diag_indices(dim0, arr.ndim);
+}
+
+/**
+ * Return the indices for the lower-triangle of an (n, m) array.
+ *
+ * This is a specialized version that gets the shape from an input array.
+ *
+ * @param arr - Input array from which to get shape
+ * @param k - Diagonal offset (k=0 is main diagonal, k<0 is below, k>0 is above)
+ * @returns Tuple of index arrays (row_indices, col_indices)
+ *
+ * @example
+ * ```typescript
+ * const a = await NDArray.zeros([4, 4]);
+ * const [row, col] = await tril_indices_from(a);
+ * ```
+ */
+export async function tril_indices_from(
+  arr: NDArray,
+  k: number = 0,
+): Promise<[NDArray, NDArray]> {
+  if (arr.ndim !== 2) {
+    throw new Error("input array must be 2-d");
+  }
+
+  const [n, m] = arr.shape;
+  return tril_indices(n, k, m);
+}
+
+/**
+ * Return the indices for the upper-triangle of an (n, m) array.
+ *
+ * This is a specialized version that gets the shape from an input array.
+ *
+ * @param arr - Input array from which to get shape
+ * @param k - Diagonal offset (k=0 is main diagonal, k<0 is below, k>0 is above)
+ * @returns Tuple of index arrays (row_indices, col_indices)
+ *
+ * @example
+ * ```typescript
+ * const a = await NDArray.zeros([4, 4]);
+ * const [row, col] = await triu_indices_from(a);
+ * ```
+ */
+export async function triu_indices_from(
+  arr: NDArray,
+  k: number = 0,
+): Promise<[NDArray, NDArray]> {
+  if (arr.ndim !== 2) {
+    throw new Error("input array must be 2-d");
+  }
+
+  const [n, m] = arr.shape;
+  return triu_indices(n, k, m);
+}
+
+/**
+ * Return indices that are non-zero in the mask.
+ *
+ * Calling this function with a mask function that returns a 2-D array
+ * will return indices appropriate for accessing the elements that would
+ * be selected by the mask.
+ *
+ * @param func - A function whose call signature is similar to that of triu, tril.
+ *              That is, func(n, k) returns a boolean array of shape (n, n).
+ * @param n - Size of the array for which indices are needed
+ * @param k - Diagonal offset
+ * @returns Indices for accessing the elements of the mask
+ *
+ * @example
+ * ```typescript
+ * // Get indices for lower triangular
+ * const indices = await mask_indices(3, (n, k) => tril(ones([n, n]), k));
+ * ```
+ */
+export async function mask_indices(
+  n: number,
+  func: (n: number, k: number) => Promise<NDArray>,
+  k: number = 0,
+): Promise<[NDArray, NDArray]> {
+  const mask = await func(n, k);
+
+  if (mask.ndim !== 2 || mask.shape[0] !== n || mask.shape[1] !== n) {
+    throw new Error(
+      `mask function must return array of shape (${n}, ${n})`,
+    );
+  }
+
+  // Find indices where mask is non-zero
+  const rows: number[] = [];
+  const cols: number[] = [];
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if ((mask.get(i, j) as number) !== 0) {
+        rows.push(i);
+        cols.push(j);
+      }
+    }
+  }
+
+  mask.dispose();
+
+  const rowArr = await NDArray.fromArray(rows);
+  const colArr = await NDArray.fromArray(cols);
+
+  return [rowArr, colArr];
+}

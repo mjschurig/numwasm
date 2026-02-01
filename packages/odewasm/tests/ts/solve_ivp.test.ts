@@ -2,24 +2,30 @@
  * Tests for ODE solvers
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
-import { solve_ivp, loadODEModule, resetODEModule } from '../../src/index.js';
-import type { ODEFunction, JacobianFunction } from '../../src/types.js';
+import { describe, it, expect, beforeAll } from "vitest";
+import {
+  solve_ivp,
+  loadODEModule,
+  resetODEModule,
+  ExplicitMethod,
+  ImplicitMethod,
+} from "../../src/index.js";
+import type { ODEFunction, JacobianFunction } from "../../src/index.js";
 
 beforeAll(async () => {
   resetODEModule();
   await loadODEModule();
 });
 
-describe('solve_ivp', () => {
-  describe('RK45 (DOPRI5)', () => {
-    it('solves exponential decay: y\' = -y', async () => {
+describe("solve_ivp", () => {
+  describe("RK45 (DOPRI5)", () => {
+    it("solves exponential decay: y' = -y", async () => {
       // dy/dt = -y, y(0) = 1
       // Analytical solution: y(t) = e^(-t)
       const fun: ODEFunction = (_t, y) => [-y[0]];
 
       const result = await solve_ivp(fun, [0, 5], [1], {
-        method: 'RK45',
+        method: ExplicitMethod.RK45,
         rtol: 1e-6,
         atol: 1e-8,
       });
@@ -35,7 +41,7 @@ describe('solve_ivp', () => {
       expect(Math.abs(yFinal - expected)).toBeLessThan(1e-5);
     });
 
-    it('solves harmonic oscillator: y\'\' = -y', async () => {
+    it("solves harmonic oscillator: y'' = -y", async () => {
       // [y, v] where v = y'
       // dy/dt = v, dv/dt = -y
       // y(0) = 1, v(0) = 0
@@ -43,7 +49,7 @@ describe('solve_ivp', () => {
       const fun: ODEFunction = (_t, [y, v]) => [v, -y];
 
       const result = await solve_ivp(fun, [0, 2 * Math.PI], [1, 0], {
-        method: 'RK45',
+        method: ExplicitMethod.RK45,
         rtol: 1e-8,
         atol: 1e-10,
       });
@@ -58,10 +64,13 @@ describe('solve_ivp', () => {
       expect(Math.abs(vFinal - 0)).toBeLessThan(1e-5);
     });
 
-    it('solves Lotka-Volterra predator-prey system', async () => {
+    it("solves Lotka-Volterra predator-prey system", async () => {
       // dx/dt = alpha*x - beta*x*y (prey)
       // dy/dt = delta*x*y - gamma*y (predator)
-      const alpha = 1.5, beta = 1.0, delta = 1.0, gamma = 3.0;
+      const alpha = 1.5,
+        beta = 1.0,
+        delta = 1.0,
+        gamma = 3.0;
 
       const fun: ODEFunction = (_t, [x, y]) => [
         alpha * x - beta * x * y,
@@ -69,7 +78,7 @@ describe('solve_ivp', () => {
       ];
 
       const result = await solve_ivp(fun, [0, 15], [10, 5], {
-        method: 'RK45',
+        method: ExplicitMethod.RK45,
         rtol: 1e-6,
         atol: 1e-8,
       });
@@ -84,11 +93,11 @@ describe('solve_ivp', () => {
       }
     });
 
-    it('collects solution at multiple time points', async () => {
+    it("collects solution at multiple time points", async () => {
       const fun: ODEFunction = (_t, y) => [-y[0]];
 
       const result = await solve_ivp(fun, [0, 5], [1], {
-        method: 'RK45',
+        method: ExplicitMethod.RK45,
         rtol: 1e-6,
         atol: 1e-8,
         dense_output: true,
@@ -105,12 +114,70 @@ describe('solve_ivp', () => {
     });
   });
 
-  describe('DOP853', () => {
-    it('solves exponential decay with high accuracy', async () => {
+  describe("ODEX", () => {
+    it("solves exponential decay", async () => {
       const fun: ODEFunction = (_t, y) => [-y[0]];
 
       const result = await solve_ivp(fun, [0, 5], [1], {
-        method: 'DOP853',
+        method: ExplicitMethod.ODEX,
+        rtol: 1e-6,
+        atol: 1e-8,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.status).toBeGreaterThan(0);
+
+      const tFinal = result.t[result.t.length - 1];
+      const yFinal = result.y[0][result.y[0].length - 1];
+      const expected = Math.exp(-tFinal);
+
+      expect(Math.abs(yFinal - expected)).toBeLessThan(1e-5);
+    });
+
+    it("achieves high accuracy for smooth problems", async () => {
+      const fun: ODEFunction = (_t, y) => [-y[0]];
+
+      const result = await solve_ivp(fun, [0, 5], [1], {
+        method: ExplicitMethod.ODEX,
+        rtol: 1e-12,
+        atol: 1e-14,
+      });
+
+      expect(result.success).toBe(true);
+
+      const tFinal = result.t[result.t.length - 1];
+      const yFinal = result.y[0][result.y[0].length - 1];
+      const expected = Math.exp(-tFinal);
+
+      // ODEX should achieve very high accuracy
+      expect(Math.abs(yFinal - expected)).toBeLessThan(1e-10);
+    });
+
+    it("solves harmonic oscillator", async () => {
+      const fun: ODEFunction = (_t, [y, v]) => [v, -y];
+
+      const result = await solve_ivp(fun, [0, 2 * Math.PI], [1, 0], {
+        method: ExplicitMethod.ODEX,
+        rtol: 1e-8,
+        atol: 1e-10,
+      });
+
+      expect(result.success).toBe(true);
+
+      const yFinal = result.y[0][result.y[0].length - 1];
+      const vFinal = result.y[1][result.y[1].length - 1];
+
+      expect(Math.abs(yFinal - 1)).toBeLessThan(1e-6);
+      expect(Math.abs(vFinal - 0)).toBeLessThan(1e-6);
+    });
+  });
+
+  describe("DOP853", () => {
+    it("solves exponential decay with high accuracy", async () => {
+      const fun: ODEFunction = (_t, y) => [-y[0]];
+
+      const result = await solve_ivp(fun, [0, 5], [1], {
+        method: ExplicitMethod.DOP853,
         rtol: 1e-10,
         atol: 1e-12,
       });
@@ -125,18 +192,15 @@ describe('solve_ivp', () => {
       expect(Math.abs(yFinal - expected)).toBeLessThan(1e-9);
     });
 
-    it('solves stiff-ish problem (Van der Pol, mu=1)', async () => {
+    it("solves stiff-ish problem (Van der Pol, mu=1)", async () => {
       // y'' - mu*(1 - y^2)*y' + y = 0
       // With mu=1, not actually stiff but tests solver robustness
       const mu = 1.0;
 
-      const fun: ODEFunction = (_t, [y, v]) => [
-        v,
-        mu * (1 - y * y) * v - y,
-      ];
+      const fun: ODEFunction = (_t, [y, v]) => [v, mu * (1 - y * y) * v - y];
 
       const result = await solve_ivp(fun, [0, 20], [2, 0], {
-        method: 'DOP853',
+        method: ExplicitMethod.DOP853,
         rtol: 1e-6,
         atol: 1e-8,
       });
@@ -146,12 +210,12 @@ describe('solve_ivp', () => {
     });
   });
 
-  describe('Radau', () => {
-    it('solves exponential decay', async () => {
+  describe("Radau", () => {
+    it("solves exponential decay", async () => {
       const fun: ODEFunction = (_t, y) => [-y[0]];
 
       const result = await solve_ivp(fun, [0, 5], [1], {
-        method: 'Radau',
+        method: ImplicitMethod.Radau,
         rtol: 1e-6,
         atol: 1e-8,
       });
@@ -165,12 +229,12 @@ describe('solve_ivp', () => {
       expect(Math.abs(yFinal - expected)).toBeLessThan(1e-4);
     });
 
-    it('solves exponential decay with user-supplied Jacobian', async () => {
+    it("solves exponential decay with user-supplied Jacobian", async () => {
       const fun: ODEFunction = (_t, y) => [-y[0]];
       const jac: JacobianFunction = (_t, _y) => [[-1]];
 
       const result = await solve_ivp(fun, [0, 5], [1], {
-        method: 'Radau',
+        method: ImplicitMethod.Radau,
         rtol: 1e-6,
         atol: 1e-8,
         jac,
@@ -186,7 +250,7 @@ describe('solve_ivp', () => {
       expect(Math.abs(yFinal - expected)).toBeLessThan(1e-4);
     });
 
-    it('solves Robertson stiff chemical kinetics', async () => {
+    it("solves Robertson stiff chemical kinetics", async () => {
       // Robertson problem - classic stiff ODE test
       // dy1/dt = -0.04*y1 + 1e4*y2*y3
       // dy2/dt = 0.04*y1 - 1e4*y2*y3 - 3e7*y2^2
@@ -204,7 +268,7 @@ describe('solve_ivp', () => {
       ];
 
       const result = await solve_ivp(fun, [0, 1e5], [1, 0, 0], {
-        method: 'Radau',
+        method: ImplicitMethod.Radau,
         rtol: 1e-4,
         atol: [1e-8, 1e-14, 1e-6], // Different tolerances for each component
         jac,
@@ -221,14 +285,11 @@ describe('solve_ivp', () => {
       expect(Math.abs(sum - 1)).toBeLessThan(1e-4);
     });
 
-    it('solves Van der Pol oscillator (stiff, mu=1000)', async () => {
+    it("solves Van der Pol oscillator (stiff, mu=1000)", async () => {
       // Van der Pol with large mu is stiff
       const mu = 1000;
 
-      const fun: ODEFunction = (_t, [y, v]) => [
-        v,
-        mu * (1 - y * y) * v - y,
-      ];
+      const fun: ODEFunction = (_t, [y, v]) => [v, mu * (1 - y * y) * v - y];
 
       const jac: JacobianFunction = (_t, [y, v]) => [
         [0, 1],
@@ -237,7 +298,7 @@ describe('solve_ivp', () => {
 
       // Use short time span for stiff problem
       const result = await solve_ivp(fun, [0, 100], [2, 0], {
-        method: 'Radau',
+        method: ImplicitMethod.Radau,
         rtol: 1e-4,
         atol: 1e-6,
         jac,
@@ -249,16 +310,18 @@ describe('solve_ivp', () => {
     });
   });
 
-  describe('error handling', () => {
-    it('throws error for unknown method', async () => {
+  describe("error handling", () => {
+    it("throws error for unknown method", async () => {
       const fun: ODEFunction = (_t, y) => [-y[0]];
 
-      await expect(solve_ivp(fun, [0, 1], [1], {
-        method: 'Unknown' as 'RK45',
-      })).rejects.toThrow('Unknown method');
+      await expect(
+        solve_ivp(fun, [0, 1], [1], {
+          method: "Unknown" as ExplicitMethod.RK45,
+        }),
+      ).rejects.toThrow("Unknown method");
     });
 
-    it('returns failure status for inconsistent input', async () => {
+    it("returns failure status for inconsistent input", async () => {
       // This test checks that the solver properly reports errors
       // Creating a situation where the solver might fail
       const fun: ODEFunction = (_t, y) => {
@@ -267,7 +330,7 @@ describe('solve_ivp', () => {
       };
 
       const result = await solve_ivp(fun, [0, 1], [1], {
-        method: 'RK45',
+        method: ExplicitMethod.RK45,
         rtol: 1e-6,
         atol: 1e-8,
       });
@@ -277,12 +340,12 @@ describe('solve_ivp', () => {
     });
   });
 
-  describe('step control options', () => {
-    it('respects max_step option', async () => {
+  describe("step control options", () => {
+    it("respects max_step option", async () => {
       const fun: ODEFunction = (_t, y) => [-y[0]];
 
       const result = await solve_ivp(fun, [0, 10], [1], {
-        method: 'RK45',
+        method: ExplicitMethod.RK45,
         rtol: 1e-6,
         atol: 1e-8,
         max_step: 0.1,
@@ -295,11 +358,11 @@ describe('solve_ivp', () => {
       expect(result.t.length).toBeGreaterThanOrEqual(100);
     });
 
-    it('respects first_step option', async () => {
+    it("respects first_step option", async () => {
       const fun: ODEFunction = (_t, y) => [-y[0]];
 
       const result = await solve_ivp(fun, [0, 1], [1], {
-        method: 'RK45',
+        method: ExplicitMethod.RK45,
         rtol: 1e-6,
         atol: 1e-8,
         first_step: 0.001,
